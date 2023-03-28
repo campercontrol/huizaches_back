@@ -15,9 +15,9 @@ class Vaccines(Base):
         default=uuid.uuid4,
         index=True,
     )
-    name_vaccines = Column(String(), default='', anullable=False, docs='Nombre de vacuna')
+    name_vaccines = Column(String(), default='', nullable=False, doc='Nombre de vacuna')
     assigned = Column(SmallInteger(), default='0')
-    order = Column(Integer(), positive=True, default='1')
+    order = Column(Integer(), default='1')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),

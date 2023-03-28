@@ -17,7 +17,7 @@ class FoodRestrictions(Base):
     )
     name_food_restriction = Column(String(512), default='')
     assigned = Column(SmallInteger(), default='0')
-    order = Column(Integer(), positive=True, default='1')
+    order = Column(Integer(), default='1')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),

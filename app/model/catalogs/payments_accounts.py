@@ -17,8 +17,8 @@ class PaymentsAccounts(Base):
     )
     name_payments_accounts = Column(String(150), default='')
     bank = Column(String(30), default='')
-    account_number = Column(Integer(10), positive=True, default='')
-    clabe_number = Column(Integer(10), positive=True, default='')
+    account_number = Column(Integer(), default='')
+    clabe_number = Column(Integer(), default='')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),

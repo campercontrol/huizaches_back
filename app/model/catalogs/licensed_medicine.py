@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, SmallInteger
 from sqlalchemy.dialects.postgresql import UUID
 
 from utils.db import Base
@@ -17,7 +17,7 @@ class LicensedMedicine (Base):
     )
     name_licensed_medicine = Column(String(150), default='')
     assigned = Column(SmallInteger(), default='0')
-    order = Column(Integer(), positive=True, default='1')
+    order = Column(Integer(), default='1')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),

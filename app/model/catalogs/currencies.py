@@ -15,9 +15,9 @@ class Currencies(Base):
         default=uuid.uuid4,
         index=True,
     )
-    name_currency = Column(String(150), default='', anullable=False, docs='Nombre de la divisa')
-    symbol = Column(String(10), default='', anullable=False, docs='Simbolo de la divisa')
-    acronyms = Column(String(10), default='', anullable=False, docs='Siglas')
+    name_currency = Column(String(150), default='', nullable=False, doc='Nombre de la divisa')
+    symbol = Column(String(10), default='', nullable=False, doc='Simbolo de la divisa')
+    acronyms = Column(String(10), default='', nullable=False, doc='Siglas')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),

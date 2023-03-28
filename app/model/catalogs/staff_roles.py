@@ -15,9 +15,9 @@ class StaffRoles(Base):
         default=uuid.uuid4,
         index=True,
     )
-    name_staff_roles = Column(String(150), default='', nullable=False, docs='Nombre del Rol')
-    payment = Column(Float(), precision=2, default='0', docs='Pago por día')
-    color = Column(String(15), default='', nullable=False, docs='Color de rol')
+    name_staff_roles = Column(String(150), default='', nullable=False, doc='Nombre del Rol')
+    payment = Column(Float(precision=2), default='0', doc='Pago por día')
+    color = Column(String(15), default='', nullable=False, doc='Color de rol')
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         DateTime(timezone=True),
