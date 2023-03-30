@@ -8,9 +8,9 @@ from model.catalogs.constant import Constant
 
 from utils.db import Base
 
-class PathologicalBackground(Base):
-    __tablename__ = "catalogs_pathological_background"
-    #catalogs_pathological_background en cc2
+class FoodRestriction(Base):
+    __tablename__ = "catalogs_food_restriction"
+    #catalogs_foodrestrictions en cc2
 
     uid = Column(
         UUID(as_uuid=True),
@@ -18,7 +18,7 @@ class PathologicalBackground(Base):
         default=uuid.uuid4,
         index=True,
     )
-    id =Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True) 
+    id =Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True) #### Primary key
     name = Column("name", String(512), default='', nullable=False, doc='Nombre')
     assigned_id = Column("assigned", ForeignKey("catalogs_constant.id"), nullable=False, default=0, doc='mostrar a')
     order = Column("order", Integer(), default='1', nullable=False, doc='orden para mostrar')

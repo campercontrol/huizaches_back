@@ -8,9 +8,9 @@ from model.catalogs.constant import Constant
 
 from utils.db import Base
 
-class PathologicalBackground(Base):
-    __tablename__ = "catalogs_pathological_background"
-    #catalogs_pathological_background en cc2
+class Vaccine(Base):
+    __tablename__ = "catalogs_vaccine"
+    #catalogs_vaccines en cc2
 
     uid = Column(
         UUID(as_uuid=True),

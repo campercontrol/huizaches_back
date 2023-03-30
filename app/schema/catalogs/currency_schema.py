@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, datetime
 from typing import Optional
 from uuid import UUID
 from xmlrpc.client import boolean
@@ -6,38 +6,46 @@ from xmlrpc.client import boolean
 from pydantic import BaseModel, Field
 
 
-class CurrenciesCreate(BaseModel):
-    name_currency:str = Field(
-        default='',
+class CurrencyCreate(BaseModel):
+
+    id: Optional[int] = Field(
+        title="id"        
+    )
+    name:str = Field(
         title='Nombre de la divisa',
         max_length=150,
     )
     symbol:str= Field(
-        default='',
         title='Simbolo de la divisa',
         max_lenght=10,
     )
     acronyms:str= Field(
-        default='',
         title='Siglas',
         max_lenght= 10,
     )
+    created_at:datetime = Field(
+        default=datetime.now()
+    )
 
 
-class CurrenciesModify(BaseModel):
-    name_currency:str = Field(
-        default='',
+class CurrencyModify(BaseModel):
+    
+    id: Optional[int] = Field(
+        title="id"        
+    )
+    name:str = Field(
         title='Nombre de la divisa',
         max_length=150,
     )
     symbol:str= Field(
-        default='',
         title='Simbolo de la divisa',
         max_lenght=10,
     )
 
     acronyms:str= Field(
-        default='',
         title='Siglas',
         max_lenght= 10,
+    )
+    updated_at:datetime = Field(
+        default=datetime.now()
     )
