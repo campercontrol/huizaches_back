@@ -41,8 +41,8 @@ def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
     list_parent = create_new_parent(db, new_parent)
     return {"data": list_parent}
 
-@parent_routes.post("/parent/{parent_id}", tags=["Campers"])
-def create_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends(get_db)):
+@parent_routes.patch("/parent/{parent_id}", tags=["Campers"])
+def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends(get_db)):
 
     update_data = modify_parent.dict(exclude_unset=True)
     print(update_data)
