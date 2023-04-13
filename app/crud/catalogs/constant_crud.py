@@ -2,7 +2,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from model.catalogs import Constant
 from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case, and_
+from sqlalchemy import case, and_, or_
 
 
 def get_all_constant(db):
