@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field
 
 class PaymentAccountCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Valor a mostrar',
         max_length=150,
@@ -34,9 +37,12 @@ class PaymentAccountCreate(BaseModel):
 
 class PaymentAccountModify(BaseModel):
     
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Valor a mostrar',
         max_length=150,

@@ -120,8 +120,8 @@ def get_camper_by_id_complete(
         "vaccines": vaccines,
         "licensed_medicines": licensed_medicines,
         "food_restrictions": food_restrictions,
-        "pathological_backgrounds": pathological_backgrounds,
-        "pathological_backgrounds_family": pathological_backgrounds_family,
+        "pathological_background": pathological_backgrounds,
+        "pathological_background_fm": pathological_backgrounds_family,
         "genders": genders,
         "blood_types": blood_type,
         "school": schools,
@@ -232,10 +232,7 @@ def update_camper(
             is_active=pathological_back_fm["is_active"],
         ).dict(exclude_unset=True)
         update_camper_pathological_background_fm_by_ids(
-            db,
-            pathological_back_fm["id"],
-            camper_id,
-            camper_pathological_back
+            db, pathological_back_fm["id"], camper_id, camper_pathological_back
         )
 
     if camper_upcdate_result != 0:
@@ -258,10 +255,29 @@ def get_camperform(language: str, db: Session = Depends(get_db)):
     schools = get_active_school(db)
     grades = get_all_grade_id_name(db, language)
     vaccines = get_all_vaccine_id_name(db)
+    for x in range(0, len(vaccines)):
+        vaccines[x] = dict(vaccines[x])
+        vaccines[x]["is_active"] = False
+
     licensed_medicines = get_all_licensed_medicine_id_name(db)
+    for x in range(0, len(licensed_medicines)):
+        licensed_medicines[x] = dict(licensed_medicines[x])
+        licensed_medicines[x]["is_active"] = False
+
     food_restrictions = get_all_food_restriction_id_name(db)
+    for x in range(0, len(food_restrictions)):
+        food_restrictions[x] = dict(food_restrictions[x])
+        food_restrictions[x]["is_active"] = False
+
     pathological_backgrounds = get_all_pathological_background_id_name(db)
+    for x in range(0, len(pathological_backgrounds)):
+        pathological_backgrounds[x] = dict(pathological_backgrounds[x])
+        pathological_backgrounds[x]["is_active"] = False
+
     pathological_backgrounds_family = get_all_pathological_background_family_id_name(db)
+    for x in range(0, len(pathological_backgrounds_family)):
+        pathological_backgrounds_family[x] = dict(pathological_backgrounds_family[x])
+        pathological_backgrounds_family[x]["is_active"] = False
 
     data = {
         "camper": {
@@ -299,6 +315,8 @@ def get_camperform(language: str, db: Session = Depends(get_db)):
             "contact_relation": "string",
             "contact_homephone": "string",
             "contact_cellphone": "string",
+            "record_id": 1,
+            "parent_id": 1,
         },
         "genders": genders,
         "blood_types": blood_type,
@@ -307,7 +325,7 @@ def get_camperform(language: str, db: Session = Depends(get_db)):
         "vaccines": vaccines,
         "licensed_medicines": licensed_medicines,
         "food_restrictions": food_restrictions,
-        "pathological_backgrounds": pathological_backgrounds,
-        "pathological_backgrounds_family": pathological_backgrounds_family,
+        "pathological_background": pathological_backgrounds,
+        "pathological_background_fm": pathological_backgrounds_family,
     }
     return data

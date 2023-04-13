@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field
 
 class ConstantCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     value:str = Field(
         title='Valor a mostrar',
         max_length=512,
@@ -33,9 +36,12 @@ class ConstantCreate(BaseModel):
 
 class ConstantModify(BaseModel):
     
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     value:str = Field(
         title='Valor a mostrar',
         max_length=512,

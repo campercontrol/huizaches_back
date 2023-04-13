@@ -110,7 +110,7 @@ def get_pathological_background_by_camper(db: Session, camper_id: int):
         db.query(
             PathologicalBackground.id,
             PathologicalBackground.name,
-            CamperPathologicalBackground.id,
+            CamperPathologicalBackground.is_active,
         )
         .join(Camper, CamperPathologicalBackground.camper_id == Camper.id)
         .join(
@@ -129,7 +129,7 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
         db.query(
             PathologicalBackgroundFamily.id,
             PathologicalBackgroundFamily.name,
-            CamperPathologicalBackgroundFamily.id,
+            CamperPathologicalBackgroundFamily.is_active,
         )
         .join(Camper, CamperPathologicalBackgroundFamily.camper_id == Camper.id)
         .join(

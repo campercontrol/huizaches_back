@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field
 
 class LicensedMedicineCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Antecedentes patologicos del camper',
         max_length=150,

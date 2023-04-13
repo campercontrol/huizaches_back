@@ -7,9 +7,12 @@ from pydantic import BaseModel, Field
 
 class CamperPathologicalBackCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title = "id"
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     camper_id:int = Field(
         title='Camper id',
     )
@@ -25,9 +28,12 @@ class CamperPathologicalBackCreate(BaseModel):
 
 class CamperPathologicalBackModify(BaseModel):
     
-    id: Optional[int] = Field(
-        title = "id"
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     camper_id:int = Field(
         title='Camper id',
     )

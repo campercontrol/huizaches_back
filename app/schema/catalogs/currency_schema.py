@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field
 
 class CurrencyCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Nombre de la divisa',
         max_length=150,
@@ -30,9 +33,12 @@ class CurrencyCreate(BaseModel):
 
 class CurrencyModify(BaseModel):
     
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Nombre de la divisa',
         max_length=150,

@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field, condecimal
 
 class StaffRoleCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Nombre del rol',
         max_length=150,
@@ -29,9 +32,12 @@ class StaffRoleCreate(BaseModel):
 
 class StaffRoleModify(BaseModel):
     
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Nombre del rol',
         max_length=150,

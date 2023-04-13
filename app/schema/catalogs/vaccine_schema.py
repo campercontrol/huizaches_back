@@ -8,9 +8,12 @@ from pydantic import BaseModel, Field
 
 class VaccineCreate(BaseModel):
 
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     name:str = Field(
         title='Nombre de la vacuna',
         max_length=150,

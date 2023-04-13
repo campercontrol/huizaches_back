@@ -6,9 +6,12 @@ from xmlrpc.client import boolean
 from pydantic import BaseModel, Field
 
 class CamperVaccineCreate(BaseModel):
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     camper_id:int = Field(
         title='Camper id',
     )
@@ -23,9 +26,12 @@ class CamperVaccineCreate(BaseModel):
     )
 
 class CamperVaccineModify(BaseModel):
-    id: Optional[int] = Field(
-        title="id"        
-    )
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+     
     camper_id:int = Field(
         title='Camper id',
     )

@@ -7,8 +7,10 @@ from pydantic import BaseModel, Field
 
 class SchoolCreate(BaseModel):
    
-    id:int = Field(
+    id:Optional[int] = Field(
         title="Id",
+        default=None,
+        primary_key=True
     ) 
     name:str  = Field(
         title="Nombre",
@@ -75,14 +77,17 @@ class SchoolCreate(BaseModel):
     active:boolean  = Field(
         title="Activa"
     ) 
-    created_at:datetime = Field(
+    created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
 
+
 class SchoolModify(BaseModel):
     
-    id:int = Field(
+    id:Optional[int] = Field(
         title="Id",
+        default=None,
+        primary_key=True
     ) 
     name:str  = Field(
         title="Nombre",
@@ -149,6 +154,6 @@ class SchoolModify(BaseModel):
     active:boolean  = Field(
         title="Activa"
     )
-    updated_at:datetime = Field(
+    updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
