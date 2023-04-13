@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
 
 from crud.catalogs.constant_crud import (
-    get_all_blood_type,
+    get_all_blood_type_id_name,
     get_all_gender_id_name,
     get_all_grade_id_name,
 )
@@ -251,7 +251,7 @@ def get_vaccine_by_camper_id(camper_id: int, db: Session = Depends(get_db)):
 @camper_routes.get("/camper_form/{language}")
 def get_camperform(language: str, db: Session = Depends(get_db)):
     genders = get_all_gender_id_name(db, language)
-    blood_type = get_all_blood_type(db, language)
+    blood_type = get_all_blood_type_id_name(db, language)
     schools = get_active_school(db)
     grades = get_all_grade_id_name(db, language)
     vaccines = get_all_vaccine_id_name(db)
