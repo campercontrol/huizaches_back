@@ -84,7 +84,7 @@ def get_all_blood_type(db, language: str = "es"):
 def get_all_blood_type_id_name(db, language: str = "es"):
     rows = (
         db.query(Constant.id, Constant.value)
-        .filter(Constant.model_name == "blood_type", Constant.language == language)
+        .filter(Constant.model_name == "blood_type", or_(Constant.language == "bi", Constant.language == language))
         .all()
     )
     return db_mapping_rows_to_dict(rows)
@@ -129,7 +129,7 @@ def get_all_grade(db, language: str = "es"):
 def get_all_grade_id_name(db, language: str = "es"):
     rows = (
         db.query(Constant.id, Constant.value)
-        .filter(Constant.model_name == "grade", Constant.language == language)
+        .filter(Constant.model_name == "grade", Constant.language == "es")
         .all()
     )
     return db_mapping_rows_to_dict(rows)
