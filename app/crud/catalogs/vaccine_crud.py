@@ -1,15 +1,23 @@
+from sqlalchemy import case
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from utils.db import db_mapping_rows_to_dict
 
 from model.catalogs import Vaccine
-from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case
+from schema.catalogs.vaccine_schema import VaccineCreate, VaccineModify
 
 
-def get_all_vaccine(db):
+def get_all_vaccine(db: Session):
     rows = db.query(Vaccine).all()
     return rows
 
-def get_vaccine_by_uuid(db, vaccine_id):
+
+def get_all_vaccine_id_name(db: Session):
+    rows = db.query(Vaccine.id, Vaccine.name).all()
+    return db_mapping_rows_to_dict(rows)
+
+
+def get_vaccine_by_uuid(db: Session, vaccine_id: int):
     return (
         db.query(Vaccine)
         .filter_by(
@@ -19,7 +27,7 @@ def get_vaccine_by_uuid(db, vaccine_id):
     )
 
 
-def create_new_vaccine(db, new_vaccine):
+def create_new_vaccine(db: Session, new_vaccine: VaccineCreate):
     db_vaccine = None
     try:
         db_vaccine = Vaccine(
@@ -43,9 +51,11 @@ def create_new_vaccine(db, new_vaccine):
     return db_vaccine
 
 
-def update_vaccine_by_id(db, vaccine_id, modify_vaccine):
+def update_vaccine_by_id(db: Session, vaccine_id: int, modify_vaccine: VaccineModify):
     rows_updated = (
-        db.query(Vaccine).filter_by(id=vaccine_id).update(modify_vaccine, synchronize_session="fetch")
+        db.query(Vaccine)
+        .filter_by(id=vaccine_id)
+        .update(modify_vaccine, synchronize_session="fetch")
     )
     db.commit()
     return rows_updated

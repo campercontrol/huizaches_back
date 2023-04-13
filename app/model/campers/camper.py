@@ -1,59 +1,66 @@
-#import uuid
-#from datetime import datetime
-#
-#from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, SmallInteger, Float, Text, Date
-#from sqlalchemy.dialects.postgresql import UUID
-#
-#
-#
-#from utils.db import Base
-#
-#class Camper(Base):
-#    __tablename__ = 'campers_camper'
-#
-#    id = Column(Integer, primary_key=True, server_default=text("nextval('campers_camper_id_seq'::regclass)"))
-#    name = Column(String(512), nullable=False)
-#    lastname_father = Column(String(512), nullable=False)
-#    photo = Column(String(512))
-#    lastname_mother = Column(String(512), nullable=False)
-#    gender = Column(String(20), nullable=False)
-#    birthday = Column(Date, nullable=False)
-#    height = Column(Float(53))
-#    weight = Column(Float(53))
-#    grade = Column(Integer, nullable=False)
-#    school_other = Column(String(512))
-#    email = Column(String(75))
-#    can_swim = Column(String(10), nullable=False)
-#    affliction = Column(Text)
-#    blood_type = Column(String(512), nullable=False)
-#    heart_problems = Column(Text)
-#    psicology_treatments = Column(Text)
-#    prevent_activities = Column(Text)
-#    drug_allergies = Column(Text)
-#    other_allergies = Column(Text)
-#    nocturnal_disorders = Column(Text)
-#    phobias = Column(Text)
-#    drugs = Column(Text)
-#    doctor_precall = Column(Boolean, nullable=False)
-#    prohibited_foods = Column(Text)
-#    comments_admin = Column(Text)
-#    insurance = Column(Boolean, nullable=False)
-#    insurance_company = Column(String(512))
-#    insurance_number = Column(String(512))
-#    security_social_number = Column(String(512))
-#    contact_name = Column(String(512))
-#    contact_relation = Column(String(512))
-#    contact_homephone = Column(String(512))
-#    contact_cellphone = Column(String(512))
-#    parent_id = Column(Integer, index=True)
-#    record_id = Column(Integer, index=True)
-#    school_id = Column(Integer, index=True)
-#
-#    created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)
-#    updated_at = Column(
-#        "updated",
-#        DateTime(timezone=True),
-#        default=datetime.utcnow,
-#        onupdate=datetime.utcnow,
-#    )
-#
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, Integer, String, SmallInteger, Float, Text, Date, Table
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.dialects.postgresql import UUID
+
+from model.catalogs.constant import Constant
+from model.campers.parent import Parent
+from model.campers.school import School
+
+from utils.db import Base
+
+
+
+class Camper(Base):
+    __tablename__ = 'campers_camper'
+
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc='id del camper')
+    name = Column(String(512), nullable=False, doc='Nombre')
+    lastname_father = Column(String(512), nullable=False, doc='Primer apellido')
+    photo = Column(String(512), nullable=False, doc= 'URL de la foto guardada')
+    lastname_mother = Column(String(512), doc='Segundo apellido')
+    gender_id = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Genero')
+    birthday = Column(Date(), nullable=False, doc='Fecha de nacimiento')
+    height = Column(Float(53), nullable=False, doc='Altura')
+    weight = Column(Float(53), nullable=False, doc='Peso')
+    grade = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Grado escolar')
+    school_id = Column(ForeignKey('campers_school.id'), nullable=False, default=0, doc='Escuela')
+    school_other = Column(String(512), doc='Otra escuela')
+    email = Column(String(75), nullable=False, doc='Email')
+    can_swim = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Sabe nadar')
+    affliction = Column(Text, nullable=False,doc='Enfermedades')
+    blood_type = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Tipo de sangre')
+    #vaccines = relationship("Vaccine", secondary='campers_camper_vaccines', back_populates='campers_camper')
+    heart_problems = Column(Text, nullable= False, doc= 'Problemas cardiacos')
+    psicology_treatments = Column(Text, nullable= False, doc= 'Tratamientos psicologicos y psiquiatricos')
+    prevent_activities = Column(Text, nullable= False, doc='Cirugias, fracturas o esguinces que le impidan realizar actividades ')
+    drug_allergies = Column(Text, nullable= False, doc='Alergias a medicamentos')
+    other_allergies = Column(Text, nullable= False, doc= 'Otras alergias')
+    nocturnal_disorders = Column(Text, nullable= False, doc='Alteraciones nocturnas')
+    phobias = Column(Text, nullable=False, doc='Fobias o miedos')
+    drugs = Column(Text, nullable=False, doc='Medicamentos')
+    doctor_precall = Column(Boolean, nullable=False, doc='Llamada previa del doctor')
+    prohibited_foods = Column(Text, nullable= False, doc='Comida prohibida')
+    comments_admin = Column(Text, doc='Comentarios del admin')
+    insurance = Column(Boolean, doc= 'Cuenta con seguro médico')
+    insurance_company = Column(String(512), doc='Compañia de seguros')
+    insurance_number = Column(String(512), doc= 'Numero de seguro')
+    security_social_number = Column(String(512), doc='Numero de seguro social')
+    contact_name = Column(String(512), nullable=False,  doc='Nombre completo del contacto de emergencia')
+    contact_relation = Column(String(512), nullable=False,  doc='Relación del camper con el  contacto de emergencia')
+    contact_homephone = Column(String(512), nullable=False,  doc='Telefono de casa del contacto de emergencia')
+    contact_cellphone = Column(String(512), nullable=False,  doc='Celular del contacto de emergencia')
+    parent_id = Column(ForeignKey("campers_parent.id"), nullable=False, default=0, doc='Titular de la cuenta')
+    record_id = Column(Integer, index=True, doc='Record de campamentos')
+    
+
+    created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(
+        "updated",
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+

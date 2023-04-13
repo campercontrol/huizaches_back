@@ -1,13 +1,24 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from model.catalogs import LicensedMedicine
+from schema.catalogs.licensed_medicine_schema import (
+    LicensedMedicineCreate,
+    LicensedMedicineModify,
+)
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
+from sqlalchemy.orm import Session
 
 
-def get_all_licensed_medicine(db):
+def get_all_licensed_medicine(db: Session):
     rows = db.query(LicensedMedicine).all()
     return rows
+
+
+def get_all_licensed_medicine_id_name(db: Session):
+    rows = db.query(LicensedMedicine.id, LicensedMedicine.name).all()
+    return db_mapping_rows_to_dict(rows)
+
 
 def get_licensed_medicine_by_uuid(db, licensed_medicine_id):
     return (
@@ -19,7 +30,9 @@ def get_licensed_medicine_by_uuid(db, licensed_medicine_id):
     )
 
 
-def create_new_licensed_medicine(db, new_licensed_medicine):
+def create_new_licensed_medicine(
+    db: Session, new_licensed_medicine: LicensedMedicineCreate
+):
     db_licensed_medicine = None
     try:
         db_licensed_medicine = LicensedMedicine(
@@ -43,9 +56,15 @@ def create_new_licensed_medicine(db, new_licensed_medicine):
     return db_licensed_medicine
 
 
-def update_licensed_medicine_by_id(db, licensed_medicine_id, modify_licensed_medicine):
+def update_licensed_medicine_by_id(
+    db: Session,
+    licensed_medicine_id: int,
+    modify_licensed_medicine: LicensedMedicineModify,
+):
     rows_updated = (
-        db.query(LicensedMedicine).filter_by(id=licensed_medicine_id).update(modify_licensed_medicine, synchronize_session="fetch")
+        db.query(LicensedMedicine)
+        .filter_by(id=licensed_medicine_id)
+        .update(modify_licensed_medicine, synchronize_session="fetch")
     )
     db.commit()
     return rows_updated

@@ -1,15 +1,26 @@
+from sqlalchemy import case
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from utils.db import db_mapping_rows_to_dict
 
 from model.catalogs import FoodRestriction
-from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case
+from schema.catalogs.food_restriction_schema import (
+    FoodRestrictionCreate,
+    FoodRestrictionModify,
+)
 
 
-def get_all_food_restriction(db):
+def get_all_food_restriction(db: Session):
     rows = db.query(FoodRestriction).all()
     return rows
 
-def get_food_restriction_by_uuid(db, food_restriction_id):
+
+def get_all_food_restriction_id_name(db: Session):
+    rows = db.query(FoodRestriction.id, FoodRestriction.name).all()
+    return db_mapping_rows_to_dict(rows)
+
+
+def get_food_restriction_by_uuid(db: Session, food_restriction_id: int):
     return (
         db.query(FoodRestriction)
         .filter_by(
@@ -19,7 +30,9 @@ def get_food_restriction_by_uuid(db, food_restriction_id):
     )
 
 
-def create_new_food_restriction(db, new_food_restriction):
+def create_new_food_restriction(
+    db: Session, new_food_restriction: FoodRestrictionCreate
+):
     db_food_restriction = None
     try:
         db_food_restriction = FoodRestriction(
@@ -43,9 +56,15 @@ def create_new_food_restriction(db, new_food_restriction):
     return db_food_restriction
 
 
-def update_food_restriction_by_id(db, food_restriction_id, modify_food_restriction):
+def update_food_restriction_by_id(
+    db: Session,
+    food_restriction_id: int,
+    modify_food_restriction: FoodRestrictionModify,
+):
     rows_updated = (
-        db.query(FoodRestriction).filter_by(id=food_restriction_id).update(modify_food_restriction, synchronize_session="fetch")
+        db.query(FoodRestriction)
+        .filter_by(id=food_restriction_id)
+        .update(modify_food_restriction, synchronize_session="fetch")
     )
     db.commit()
     return rows_updated

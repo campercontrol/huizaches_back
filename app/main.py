@@ -11,6 +11,7 @@ from service.catalogs.payment_account_service  import payment_account_routes
 from service.catalogs.staff_role_service import staff_role_routes
 from service.campers.school_service import school_routes
 from service.campers.parent_service import parent_routes
+from service.campers.camper_service import camper_routes
 
 
 app = FastAPI()
@@ -27,6 +28,7 @@ app.include_router(payment_account_routes)
 app.include_router(staff_role_routes)
 app.include_router(school_routes)
 app.include_router(parent_routes)
+app.include_router(camper_routes)
 
 
 @app.post("/", )

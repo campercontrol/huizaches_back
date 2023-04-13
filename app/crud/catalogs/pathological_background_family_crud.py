@@ -1,15 +1,30 @@
+from sqlalchemy import case
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from utils.db import db_mapping_rows_to_dict
 
 from model.catalogs import PathologicalBackgroundFamily
-from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case
+from schema.catalogs.pathological_back_fm_schema import (
+    PathologicalBackgroundFamilyCreate,
+    PathologicalBackgroundFamilyModify,
+)
 
 
-def get_all_pathological_background_family(db):
+def get_all_pathological_background_family(db: Session):
     rows = db.query(PathologicalBackgroundFamily).all()
     return rows
 
-def get_pathological_background_family_by_uuid(db, pathological_background_family_id):
+
+def get_all_pathological_background_family_id_name(db: Session):
+    rows = db.query(
+        PathologicalBackgroundFamily.id, PathologicalBackgroundFamily.name
+    ).all()
+    return db_mapping_rows_to_dict(rows)
+
+
+def get_pathological_background_family_by_uuid(
+    db: Session, pathological_background_family_id: int
+):
     return (
         db.query(PathologicalBackgroundFamily)
         .filter_by(
@@ -19,7 +34,9 @@ def get_pathological_background_family_by_uuid(db, pathological_background_famil
     )
 
 
-def create_new_pathological_background_family(db, new_pathological_background_family):
+def create_new_pathological_background_family(
+    db: Session, new_pathological_background_family: PathologicalBackgroundFamilyCreate
+):
     db_pathological_background_family = None
     try:
         db_pathological_background_family = PathologicalBackgroundFamily(
@@ -43,9 +60,15 @@ def create_new_pathological_background_family(db, new_pathological_background_fa
     return db_pathological_background_family
 
 
-def update_pathological_background_family_by_id(db, pathological_background_family_id, modify_pathological_background_family):
+def update_pathological_background_family_by_id(
+    db: Session,
+    pathological_background_family_id: int,
+    modify_pathological_background_family: PathologicalBackgroundFamilyModify,
+):
     rows_updated = (
-        db.query(PathologicalBackgroundFamily).filter_by(id=pathological_background_family_id).update(modify_pathological_background_family, synchronize_session="fetch")
+        db.query(PathologicalBackgroundFamily)
+        .filter_by(id=pathological_background_family_id)
+        .update(modify_pathological_background_family, synchronize_session="fetch")
     )
     db.commit()
     return rows_updated

@@ -7,7 +7,17 @@ from crud.catalogs.constant_crud import (
     get_all_constant,
     get_constant_by_uuid,
     create_new_constant,
-    update_constant_by_id
+    update_constant_by_id,
+    get_all_answer,
+    get_all_assign_choice,
+    get_all_blood_type,
+    get_all_camp_status,
+    get_all_gender,
+    get_all_grade,
+    get_all_med_auth,
+    get_all_rol_colors,
+    get_all_triage,
+    get_all_user_group,
 )
 from schema.catalogs.constant_schema import(
     ConstantCreate,
@@ -55,4 +65,55 @@ def create_constant(constant_id:str,modify_constant:ConstantModify,db: Session =
         return {"mensaje": "Actualizado Correctamente", "data": exist_constant}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+
+@constant_routes.get("/get_all_answer/{language}", tags=["Constants"])
+def get_answer(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_answer(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_assign_chioce/{language}", tags=["Constants"])
+def get_assign_chioce(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_assign_choice(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_blood_type/{language}", tags=["Constants"])
+def get_blood_type(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_blood_type(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_camp_status/{language}", tags=["Constants"])
+def get_camp_status(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_camp_status(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_gender/{language}", tags=["Constants"])
+def get_gender(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_gender(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_grade/{language}", tags=["Constants"])
+def get_grade(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_grade(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_med_auth/{language}", tags=["Constants"])
+def get_med_auth(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_med_auth(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_rol_colors/{language}", tags=["Constants"])
+def get_rol_colors(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_rol_colors(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_triage/{language}", tags=["Constants"])
+def get_triage(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_triage(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get_all_user_group/{language}", tags=["Constants"])
+def get_user_group(language:str, db: Session=Depends(get_db)):
+    list_constant= get_all_user_group(db, language)
+    return {"data": list_constant} 
 

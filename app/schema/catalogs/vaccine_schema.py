@@ -20,7 +20,7 @@ class VaccineCreate(BaseModel):
     created_at:datetime = Field(
         default=datetime.now()
     )
-
+    
 class VaccineModify(BaseModel):
    
     name:str = Field(
@@ -33,3 +33,4 @@ class VaccineModify(BaseModel):
         default=datetime.now()
     )
     
+
