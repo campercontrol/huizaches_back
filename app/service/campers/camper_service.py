@@ -48,6 +48,7 @@ from crud.campers.camper_crud import (
     get_food_restriction_by_camper,
     get_pathological_background_by_camper,
     get_pathological_background_fm_by_camper,
+    get_campers_from_parent
 )
 from crud.campers.school_crud import get_active_school
 from schema.campers_catalogs.camper_vaccine_schema import (
@@ -329,3 +330,8 @@ def get_camperform(language: str, db: Session = Depends(get_db)):
         "pathological_background_fm": pathological_backgrounds_family,
     }
     return data
+
+@camper_routes.get("/campers_from_parent/{parent_id}", tags=["Campers"])
+def get_campers_by_parent_id(parent_id: int, db: Session = Depends(get_db)):
+    list_camper = get_campers_from_parent(db, parent_id)
+    return {"data": list_camper}

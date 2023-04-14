@@ -143,4 +143,6 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
     return db_mapping_rows_to_dict(rows)
 
 
-# def get_Campers_from_parent
+def get_campers_from_parent(db: Session, parent_id: int):
+    return db.query(Camper).filter_by(parent_id=parent_id).all()
+
