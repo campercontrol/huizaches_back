@@ -104,7 +104,7 @@ def get_camper_by_id_complete(
     camper_id: str, language: str, db: Session = Depends(get_db)
 ):
     genders = get_all_gender_id_name(db, language)
-    blood_type = get_all_blood_type(db, language)
+    blood_type = get_all_blood_type_id_name(db, language)
     schools = (get_active_school(db),)
     grades = get_all_grade_id_name(db, language)
     list_camper = get_camper_by_uuid(db, camper_id)
