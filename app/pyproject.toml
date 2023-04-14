@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "camping-control"
+version = "0.1.0"
+description = ""
+authors = ["Jorge"]
+readme = "README.md"
+packages = [{include = "camping_control"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.95.0"
+uvicorn = "^0.21.1"
+python-dotenv = "^1.0.0"
+alembic = "^1.10.2"
+sqlalchemy = "^2.0.8"
+psycopg2-binary = "^2.9.6"
+pydantic = {extras = ["email"], version = "^1.10.7"}
+python-multipart = "^0.0.6"
+pandas = "^2.0.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+openpyxl = "^3.1.2"
+reportlab = "3.6.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
