@@ -63,5 +63,5 @@ def update_school_by_id(db, school_id, modify_school):
     return rows_updated
 
 def get_active_school(db):
-    rows= db.query(School).with_entities(School.id, School.name).filter_by(active=True)
+    rows= db.query(School.id, School.name).filter_by(active=True).all()
     return rows
