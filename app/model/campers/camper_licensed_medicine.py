@@ -1,10 +1,14 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
+from sqlalchemy.schema import UniqueConstraint
 
 from utils.db import Base
 
 
 class CamperLicensedMedicine(Base):
     __tablename__ = "campers_camper_licensed_medicine"
+    __table_args__ = (
+        UniqueConstraint('licensed_medicine_id', 'camper_id'),
+    )
 
     id = Column(
         "id",

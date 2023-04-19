@@ -42,8 +42,8 @@ def create_school(new_school:SchoolCreate, db: Session =Depends(get_db)):
     list_school = create_new_school(db, new_school)
     return {"data": list_school}
 
-@school_routes.post("/school/{school_id}", tags=["Campers"])
-def create_school(school_id:str,modify_school:SchoolModify,db: Session = Depends(get_db)):
+@school_routes.patch("/school/{school_id}", tags=["Campers"])
+def update_school(school_id:str,modify_school:SchoolModify,db: Session = Depends(get_db)):
 
     update_data = modify_school.dict(exclude_unset=True)
     print(update_data)

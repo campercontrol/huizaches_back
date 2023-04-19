@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, String, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from utils.db import Base
 
@@ -8,10 +8,11 @@ from utils.db import Base
 class Role(Base):
     __tablename__ = "role"
     id = Column(
-        UUID(as_uuid=True), 
+        Integer,
         primary_key=True,
-        default=uuid.uuid4,
-        index=True,
+        nullable=False,
+        autoincrement=True,
+        doc="id del rol",
     )
     name = Column(String(30))
     is_active = Column(Boolean, default=True)

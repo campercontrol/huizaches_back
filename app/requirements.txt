@@ -11,4 +11,4 @@ pandas
 python-jose[cryptography]
 passlib[bcrypt]
 openpyxl
-
+requests

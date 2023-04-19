@@ -7,14 +7,18 @@ from crud.campers.parent_crud import (
     get_all_parent,
     get_parent_by_uuid,
     create_new_parent,
+    create_new_parent_user_id,
     update_parent_by_id,
 )    
 
 from schema.campers.parent_schema import(
     ParentCreate,
-    ParentModify
+    ParentModify,
+    ParentCompleteCreate
 
 )
+
+from crud.crud_user import create_new_user
 from utils.db import SessionLocal
 
 parent_routes = APIRouter()
@@ -40,6 +44,14 @@ def get_parent_by_id(parent_id:str, db: Session = Depends(get_db)):
 def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
     list_parent = create_new_parent(db, new_parent)
     return {"data": list_parent}
+
+@parent_routes.post("/parent_create/", tags=["Campers"])
+def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
+    user = create_new_user(db, new_parent_complete.user)
+    print("#######################################################################")
+    print(user.id)
+    parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
+    return {"data": parent}
 
 @parent_routes.patch("/parent/{parent_id}", tags=["Campers"])
 def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends(get_db)):

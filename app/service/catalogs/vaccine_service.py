@@ -43,8 +43,8 @@ def create_vaccine(new_prueba:VaccineCreate,db: Session = Depends(get_db)):
     list_vaccine = create_new_vaccine(db,new_prueba)
     return {"data": list_vaccine}
 
-@vaccine_routes.post("/vaccine/{vaccine_id}", tags=["Catalogs"])
-def create_vaccine(vaccine_id:str,modify_vaccine:VaccineModify,db: Session = Depends(get_db)):
+@vaccine_routes.patch("/vaccine/{vaccine_id}", tags=["Catalogs"])
+def update_vaccine(vaccine_id:str,modify_vaccine:VaccineModify,db: Session = Depends(get_db)):
 
     update_data = modify_vaccine.dict(exclude_unset=True)
     print(update_data)

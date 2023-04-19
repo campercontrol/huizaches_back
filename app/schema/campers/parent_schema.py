@@ -3,6 +3,8 @@ from typing import Optional
 from uuid import UUID
 from xmlrpc.client import boolean
 
+from schema.user import UserCreate
+
 from pydantic import BaseModel, Field
 
 class ParentCreate(BaseModel):
@@ -12,6 +14,7 @@ class ParentCreate(BaseModel):
         primary_key=True,
         gt=0
     ) 
+    user_id:Optional[int]
     tutor_name:str = Field(
         title="Nombre",
         max_lenght= 512
@@ -130,5 +133,11 @@ class ParentModify(BaseModel):
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+
+class ParentCompleteCreate(BaseModel):
+    
+    user: UserCreate
+    parent: ParentCreate
+
 
 ## Falta agregar max_lenght

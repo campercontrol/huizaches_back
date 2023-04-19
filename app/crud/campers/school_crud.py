@@ -64,4 +64,4 @@ def update_school_by_id(db, school_id, modify_school):
 
 def get_active_school(db):
     rows= db.query(School.id, School.name).filter_by(active=True).all()
-    return rows
+    return db_mapping_rows_to_dict(rows)

@@ -13,7 +13,7 @@ class UserCreate(BaseModel):
         title="Password",
         max_length=200,
     )
-    role_id: Optional[UUID] = Field(
+    role_id: Optional[int] = Field(
         title="Id role",
     )
     is_superuser: Optional[bool] = Field(
@@ -30,7 +30,7 @@ class UserModify(BaseModel):
         title="Password",
         max_length=200,
     )
-    role_id: Optional[UUID] = Field(
+    role_id: Optional[int] = Field(
         title="Id role",
     )
     is_active: Optional[bool] = Field(

@@ -12,6 +12,9 @@ from service.catalogs.staff_role_service import staff_role_routes
 from service.campers.school_service import school_routes
 from service.campers.parent_service import parent_routes
 from service.campers.camper_service import camper_routes
+from service.camps.location_service import location_routes
+from service.camps.season_service import season_routes
+from service.camps.camp_service import camp_router
 
 
 app = FastAPI()
@@ -29,7 +32,9 @@ app.include_router(staff_role_routes)
 app.include_router(school_routes)
 app.include_router(parent_routes)
 app.include_router(camper_routes)
-
+app.include_router(location_routes)
+app.include_router(season_routes)
+app.include_router(camp_router)
 
 from service.role import role_routes
 from service.user import user_routes

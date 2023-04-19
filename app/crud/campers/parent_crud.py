@@ -32,6 +32,24 @@ def create_new_parent(db, new_parent: ParentCreate):
         print(f"No se pudo guardar en la base de datos: {e}")
     return db_parent
 
+def create_new_parent_user_id(db, new_parent: ParentCreate, user_id:int):
+    db_parent = None
+    try:
+        new_parent.user_id = user_id
+        db_parent = Parent(**new_parent.dict())
+        db.add(db_parent)
+        db.commit()
+        db.refresh(db_parent)
+    except SQLAlchemyError as e:
+        print("#=================================#")
+        print(e)
+        print("#=================================#")
+        db_parent = None
+        return db_parent
+    except Exception as e:
+        print(f"No se pudo guardar en la base de datos: {e}")
+    return db_parent
+
 
 def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify):
     rows_updated = (
@@ -44,3 +62,4 @@ def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify
 
 
 # def get_campers_from_parent
+ 

@@ -32,6 +32,7 @@ class Camper(Base):
     can_swim = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Sabe nadar')
     affliction = Column(Text, nullable=False,doc='Enfermedades')
     blood_type = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Tipo de sangre')
+    temporal_blood_type = Column(String(15), doc="Tipo de sangre temporal para la migración")
     #vaccines = relationship("Vaccine", secondary='campers_camper_vaccines', back_populates='campers_camper')
     heart_problems = Column(Text, nullable= False, doc= 'Problemas cardiacos')
     psicology_treatments = Column(Text, nullable= False, doc= 'Tratamientos psicologicos y psiquiatricos')

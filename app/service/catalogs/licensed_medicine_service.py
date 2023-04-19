@@ -44,7 +44,7 @@ def create_licensed_medicine(new_prueba:LicensedMedicineCreate,db: Session = Dep
     return {"data": list_licensed_medicine}
 
 @licensed_medicine_routes.post("/licensed_medicine/{licensed_medicine_id}", tags=["Catalogs"])
-def create_licensed_medicine(licensed_medicine_id:str,modify_licensed_medicine:LicensedMedicineModify,db: Session = Depends(get_db)):
+def update_licensed_medicine(licensed_medicine_id:str,modify_licensed_medicine:LicensedMedicineModify,db: Session = Depends(get_db)):
 
     update_data = modify_licensed_medicine.dict(exclude_unset=True)
     print(update_data)

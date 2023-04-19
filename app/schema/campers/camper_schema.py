@@ -259,5 +259,4 @@ class CamperComplete(BaseModel):
     pathological_background_fm: Optional[list[CamperCatalog]]
 
 
-
 ## Falta agregar max_lenght
