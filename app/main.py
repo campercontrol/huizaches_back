@@ -31,6 +31,17 @@ app.include_router(parent_routes)
 app.include_router(camper_routes)
 
 
+from service.role import role_routes
+from service.user import user_routes
+from service.token import token_routes
+from service.image import image_routes
+
+app.include_router(role_routes) # Role
+app.include_router(user_routes) # User
+app.include_router(token_routes) # token
+app.include_router(image_routes) # Image
+
+
 @app.post("/", )
 def root_test():
     return "Cadena de prueba"
