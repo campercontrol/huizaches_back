@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from crud.camps.camp_crud import (
     get_all_camp,
     get_all_active_camp,
-    get_all_active_next_camp,
+    get_camp_for_camper,
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id   
@@ -45,9 +45,9 @@ def get__active_camp(db: Session = Depends(get_db)):
     list_camp = get_all_active_camp(db)
     return {"data": list_camp}
 
-@camp_router.get("/active_next_camp/", tags=["Camps"])
-def get__active_next_camp(db: Session = Depends(get_db)):
-    list_camp = get_all_active_next_camp(db)
+@camp_router.get("/get_camps_for_camper/{camper_id}/{school_id}", tags=["Camps"])
+def get_camps_for_camper(camper_id:int, school_id:int, db: Session = Depends(get_db)):
+    list_camp = get_camp_for_camper(db, camper_id, school_id)
     return {"data": list_camp}
 
 @camp_router.get("/camp/{camp_id}", tags=["Camps"])

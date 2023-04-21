@@ -15,8 +15,8 @@ def get_all_active_camp(db: Session):
     rows = db.query(Camp).filter_by(active=True).all()
     return rows
 
-def get_all_active_next_camp(db:Session):
-    rows = db.query(Camp).filter(and_(db.camps_camp.active==True, db.camps_camp.start>=date.today())).all()
+def get_camp_for_camper(db:Session, camper_id, school_id):
+    rows = db.query(Camp).filter(and_(Camp.school_id==school_id, Camp.active==True, Camp.start>=date.today())).all()
     return rows
 
 
