@@ -82,7 +82,7 @@ def get_licensed_medicine_by_camper(db: Session, camper_id: int):
             LicensedMedicine.id, LicensedMedicine.name, CamperLicensedMedicine.is_active
         )
         .join(Camper, CamperLicensedMedicine.camper_id == Camper.id)
-        .join(Vaccine, CamperLicensedMedicine.licensed_medicine_id == Vaccine.id)
+        .join(LicensedMedicine, CamperLicensedMedicine.licensed_medicine_id == LicensedMedicine.id)
         .filter(Camper.id == camper_id)
         .all()
     )
