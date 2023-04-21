@@ -12,7 +12,8 @@ from crud.camps.camp_crud import (
     update_camp_by_id   
 )
 from crud.camps.camper_in_camp_crud import (
-    create_new_camper_in_camp
+    create_new_camper_in_camp,
+    get_all_camper_in_camp
 )
 from schema.camps.camp_schema import(
     CampCreate,
@@ -77,3 +78,8 @@ def update_camp(camp_id:int, modify_camp:CampModify, db: Session = Depends(get_d
 def subscribe_camp(new_camper_in_camp:CamperInCampCreate, db: Session = Depends(get_db)):
     camper_in_camp = create_new_camper_in_camp(db, new_camper_in_camp)
     return {"data": camper_in_camp}
+
+@camp_router.get("/camperincamp/", tags=["Camps"])
+def get_camperincamp(db: Session = Depends(get_db)):
+    list_camp = get_all_camper_in_camp(db)
+    return {"data": list_camp}
