@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from service.prueba_service import prueba_routes
 from service.catalogs.currency_service import currency_routes
 from service.catalogs.vaccine_service import vaccine_routes
@@ -18,6 +19,16 @@ from service.camps.camp_service import camp_router
 
 
 app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(prueba_routes)  # Login
 app.include_router(currency_routes)

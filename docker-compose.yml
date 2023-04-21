@@ -26,15 +26,3 @@ services:
     command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
     #Solo instalacion
     #command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
-    
-  pgadmin:
-    depends_on:
-      - db
-    build:
-      dockerfile: Dockerfile
-      context: docker/pgadmin
-    env_file:
-      - docker/pgadmin/pgadmin.env
-    ports:
-      - 8484:80
-      
