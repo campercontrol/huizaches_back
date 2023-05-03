@@ -45,7 +45,7 @@ class CampCreate(BaseModel):
     special_message_admin: str = Field(
         title="Mensaje especial solo visible para administradores"
     )
-    public_price:  condecimal(decimal_places= 2)
+    public_price: condecimal(decimal_places= 2)
 
     show_payment_parent: bool = Field(
         title="Mostrar pago a titulares de la cuenta"
