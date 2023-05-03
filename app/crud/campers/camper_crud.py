@@ -1,10 +1,11 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import case
+from datetime import date, datetime
 
 from utils.db import db_mapping_rows_to_dict
 
-from model.campers import Camper
+from model.campers import Camper, School
 from model.catalogs import (
     Vaccine,
     FoodRestriction,
@@ -82,7 +83,10 @@ def get_licensed_medicine_by_camper(db: Session, camper_id: int):
             LicensedMedicine.id, LicensedMedicine.name, CamperLicensedMedicine.is_active
         )
         .join(Camper, CamperLicensedMedicine.camper_id == Camper.id)
-        .join(LicensedMedicine, CamperLicensedMedicine.licensed_medicine_id == LicensedMedicine.id)
+        .join(
+            LicensedMedicine,
+            CamperLicensedMedicine.licensed_medicine_id == LicensedMedicine.id,
+        )
         .filter(Camper.id == camper_id)
         .all()
     )
@@ -146,3 +150,20 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
 def get_campers_from_parent(db: Session, parent_id: int):
     return db.query(Camper).filter_by(parent_id=parent_id).all()
 
+
+def get_camper_band(db: Session, camper_id):
+    camper = (
+        db.query(
+            (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
+                "full_name"
+            ),
+            School.name.label("school"),
+            Camper.birthday.label("birthday")
+        )
+        .join(School, School.id == Camper.school_id)
+        .filter(Camper.id == camper_id)
+        .all()
+    )
+    print("#############################################################3")
+    print(date.today())
+    return db_mapping_rows_to_dict(camper)

@@ -1,9 +1,11 @@
-from sqlalchemy import case
+from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
+from datetime import date
 
-from model.camps import CamperInCamp
+from model.camps import CamperInCamp, Camp, Location
+from model.catalogs import Constant
 from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
     CamperInCampModify,
@@ -49,3 +51,82 @@ def update_camper_in_camp_by_id(
     print(rows_updated)
     db.commit()
     return rows_updated
+
+
+def get_subscribe_by_camper(db: Session, camper_id: int):
+    
+    rows = (
+        db.query(
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 36,
+                Camp.active == True,
+                Camp.start >= date.today(),
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+
+def get_cancelled_by_camper(db:Session, camper_id:int):
+    rows = (
+        db.query(
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 37,
+                Camp.active == True,
+                Camp.start >= date.today(),
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+
+def get_past_subscribe_by_camper(db:Session, camper_id:int):
+    rows = (
+        db.query(
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 36,
+                Camp.active == True,
+                Camp.start < date.today(),
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)

@@ -6,14 +6,20 @@ from sqlalchemy.orm import Session
 from crud.camps.camp_crud import (
     get_all_camp,
     get_all_active_camp,
-    get_camp_for_camper,
+    get_school_camp_for_camper,
+    get_summer_camp_for_camper,
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id   
 )
+from crud.campers.camper_crud import get_camper_band
+
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
-    get_all_camper_in_camp
+    get_all_camper_in_camp,
+    get_subscribe_by_camper,
+    get_cancelled_by_camper,
+    get_past_subscribe_by_camper
 )
 from schema.camps.camp_schema import(
     CampCreate,
@@ -48,7 +54,7 @@ def get__active_camp(db: Session = Depends(get_db)):
 
 @camp_router.get("/get_camps_for_camper/{camper_id}/{school_id}", tags=["Camps"])
 def get_camps_for_camper(camper_id:int, school_id:int, db: Session = Depends(get_db)):
-    list_camp = get_camp_for_camper(db, camper_id, school_id)
+    list_camp = get_school_camp_for_camper(db, camper_id, school_id)
     return {"data": list_camp}
 
 @camp_router.get("/camp/{camp_id}", tags=["Camps"])
