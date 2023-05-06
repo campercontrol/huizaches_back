@@ -6,3 +6,4 @@ from model.campers.camper_food_restriction import CamperFoodRestriction
 from model.campers.camper_licensed_medicine import CamperLicensedMedicine
 from model.campers.camper_pathological_background import CamperPathologicalBackground
 from model.campers.camper_pathological_background_fm import CamperPathologicalBackgroundFamily
+from model.campers.camper_extra_answer import CamperExtraAnswer
