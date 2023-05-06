@@ -21,6 +21,10 @@ from crud.camps.camper_in_camp_crud import (
     get_cancelled_by_camper,
     get_past_subscribe_by_camper
 )
+
+from crud.camps.camp_extra_charge_crud import get_extra_charge_by_camp
+from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
+
 from schema.camps.camp_schema import(
     CampCreate,
     CampModify
@@ -89,3 +93,13 @@ def subscribe_camp(new_camper_in_camp:CamperInCampCreate, db: Session = Depends(
 def get_camperincamp(db: Session = Depends(get_db)):
     list_camp = get_all_camper_in_camp(db)
     return {"data": list_camp}
+
+@camp_router.get("/camp_extras/{camp_id}", tags=["Camps"])
+def get_camp_extras(camp_id:int, db:Session = Depends(get_db)):
+    extra_charges = get_extra_charge_by_camp(camp_id)
+    extra_questions = get_extra_question_by_camp(camp_id)
+    data = {
+        "extra_charges" : extra_charges,
+        "extra_questions": extra_questions
+    }
+    return data

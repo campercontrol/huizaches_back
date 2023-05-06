@@ -24,3 +24,11 @@ async def open_image(file_name: str,tmp_file_name,w,h):
     image_resized.save(tmp_file_name)
 
     return tmp_file_name
+
+
+#Obtiene la imagen del path temporal y la guarda en la carpeta de photos con un nombre real
+async def rewrite_image(file_name: str, final_name: str):
+    image = Image.open(file_name)
+    image.save(final_name)
+
+    return final_name

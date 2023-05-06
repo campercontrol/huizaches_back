@@ -378,3 +378,19 @@ def get_camper_dashboard(camper_id: int, db:Session = Depends(get_db)):
         "passed_camps": camper_passed_camps
     }
     return data
+
+@camper_routes.get("/camper_profile/{camper_id}", tags=["Campers"])
+def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
+    camper_band =get_camper_band(camper_id)
+    camper_info = get_camper_by_id_complete(camper_id),
+    camper_subscribe_camps = get_subscribe_by_camper(db, camper_id),
+    camper_cancelled_camps = get_cancelled_by_camper(db, camper_id),
+    camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
+    data= {
+        "camper_band": camper_band,
+        "camper_info": camper_info,
+        "camper_subscribe_camps": camper_subscribe_camps,
+        "camper_cancelled_camps": camper_cancelled_camps,
+        "camper_passed_camps": camper_passed_camps
+    }
+    return data

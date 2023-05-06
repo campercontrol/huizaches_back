@@ -17,7 +17,7 @@ from service.camps.location_service import location_routes
 from service.camps.season_service import season_routes
 from service.camps.camp_service import camp_router
 from service.camps.camp_extra_charge_service import extra_charge_routes
-
+from service.campers.camper_extra_question_service import extra_answer_routes
 
 app = FastAPI()
 
@@ -48,6 +48,7 @@ app.include_router(location_routes)
 app.include_router(season_routes)
 app.include_router(camp_router)
 app.include_router(extra_charge_routes)
+app.include_router(extra_answer_routes)
 
 from service.role import role_routes
 from service.user import user_routes
