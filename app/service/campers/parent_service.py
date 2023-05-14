@@ -10,6 +10,13 @@ from crud.campers.parent_crud import (
     create_new_parent_user_id,
     update_parent_by_id,
 )    
+from crud.camps.camp_crud import (
+    get_camp_by_id
+)
+from crud.payments.payment_crud import (
+    get_payment_by_camper_camp
+)
+from crud.campers.camper_crud import get_campers_from_parent
 
 from schema.campers.parent_schema import(
     ParentCreate,
@@ -66,3 +73,16 @@ def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
     
+@parent_routes.get("/parent_dashboard/{parent_id}", tags=["Campers"])
+def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
+    list_campers= get_campers_from_parent(db, parent_id)
+    return{"data": list_campers}
+
+@parent_routes.get("/parent_camper_in_camp/{camper_id}/{camp_id}", tags=["Campers"])
+def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get_db)):
+    camp= get_camp_by_id(db, camp_id)
+    payments= get_payment_by_camper_camp(db, camper_id, camp_id)
+    if camp.show_payment_parent:
+        return{"camp": camp, "payments":payments}
+    else:
+        return{"camp": camp}

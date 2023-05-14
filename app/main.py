@@ -17,7 +17,14 @@ from service.camps.location_service import location_routes
 from service.camps.season_service import season_routes
 from service.camps.camp_service import camp_router
 from service.camps.camp_extra_charge_service import extra_charge_routes
+from service.camps.camp_extra_question_service import extra_question_routes
 from service.campers.camper_extra_question_service import extra_answer_routes
+from service.campers.camper_comment_service import camper_comment_router
+from service.camps.camp_checkpoint_service import camp_checkpoint_routes
+from service.campers.camper_checkpoint_service import camper_checkpoint_routes
+from service.payments.payment_service import payment_routes
+from service.payments.payment_method_service import payment_method_routes
+from service.payments.payment_transaction_type_service import payment_transaction_type_routes
 
 app = FastAPI()
 
@@ -48,7 +55,14 @@ app.include_router(location_routes)
 app.include_router(season_routes)
 app.include_router(camp_router)
 app.include_router(extra_charge_routes)
+app.include_router(extra_question_routes)
 app.include_router(extra_answer_routes)
+app.include_router(camper_comment_router)
+app.include_router(camp_checkpoint_routes)
+app.include_router(camper_checkpoint_routes)
+app.include_router(payment_routes)
+app.include_router(payment_method_routes)
+app.include_router(payment_transaction_type_routes)
 
 from service.role import role_routes
 from service.user import user_routes
