@@ -7,3 +7,5 @@ from model.campers.camper_licensed_medicine import CamperLicensedMedicine
 from model.campers.camper_pathological_background import CamperPathologicalBackground
 from model.campers.camper_pathological_background_fm import CamperPathologicalBackgroundFamily
 from model.campers.camper_extra_answer import CamperExtraAnswer
+from model.campers.camper_comment import CamperComment
+from model.campers.camper_checkpoint import CamperCheckpoint

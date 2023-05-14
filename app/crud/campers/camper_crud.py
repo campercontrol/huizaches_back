@@ -148,8 +148,19 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
 
 
 def get_campers_from_parent(db: Session, parent_id: int):
-    return db.query(Camper).filter_by(parent_id=parent_id).all()
-
+    rows= (
+        db.query(
+            (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
+                "full_name"
+            ),
+            School.name.label("school")
+        )
+        .join(School, School.id == Camper.school_id)
+        .filter(Camper.parent_id == parent_id)
+        .all()
+        )
+    
+    return db_mapping_rows_to_dict(rows)
 
 def get_camper_band(db: Session, camper_id):
     camper = (

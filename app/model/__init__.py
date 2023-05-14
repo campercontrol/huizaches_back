@@ -4,6 +4,8 @@ from model.catalogs import *
 from model.campers import *
 from model.camps import *
 #from model.prueba_libros import *
+from model.payments import *
 
 from model.role import *
 from model.user import *
+
