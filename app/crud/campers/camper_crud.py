@@ -169,6 +169,7 @@ def get_camper_band(db: Session, camper_id):
                 "full_name"
             ),
             School.name.label("school"),
+            Camper.photo.label("photo"),
             Camper.birthday.label("birthday")
         )
         .join(School, School.id == Camper.school_id)
