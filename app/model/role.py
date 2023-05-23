@@ -13,6 +13,7 @@ class Role(Base):
         nullable=False,
         autoincrement=True,
         doc="id del rol",
+        index=True
     )
     name = Column(String(30))
     is_active = Column(Boolean, default=True)

@@ -16,6 +16,15 @@ class UserCreate(BaseModel):
     role_id: Optional[int] = Field(
         title="Id role",
     )
+    is_coordinator: Optional[bool] = Field(
+        title="Is Coordinator",
+    )
+    is_admin: Optional[bool] = Field(
+        title="Is Admin",
+    )
+    is_employee: Optional[bool] = Field(
+        title="Is Employee",
+    )
     is_superuser: Optional[bool] = Field(
         title="Is superuser",
     )
@@ -33,11 +42,20 @@ class UserModify(BaseModel):
     role_id: Optional[int] = Field(
         title="Id role",
     )
-    is_active: Optional[bool] = Field(
-        title="Is active",
+    is_coordinator: Optional[bool] = Field(
+        title="Is Coordinator",
+    )
+    is_admin: Optional[bool] = Field(
+        title="Is Admin",
+    )
+    is_employee: Optional[bool] = Field(
+        title="Is Employee",
     )
     is_superuser: Optional[bool] = Field(
         title="Is superuser",
+    )
+    is_active: Optional[bool] = Field(
+        title="Is active",
     )
 
 

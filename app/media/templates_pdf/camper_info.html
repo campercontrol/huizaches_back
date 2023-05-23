@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style type="text/css"> 
+        BODY{ 
+            font-family: Times New Roman;
+            } 
+        @page {
+            size: 8.5in 11in;
+            margin: 0mm 0mm 0mm 0mm;
+            }
+        table { 
+            border-spacing: 6px 4px;
+            border-collapse: separate;
+            border: 0px solid;
+        }
+        td { 
+            background-color: #f5f5f5;
+            padding: 6px;
+        }
+        
+        th{
+            font-size: 10px;
+            font-weight: normal;
+            background-color: #919191;
+            text-align: left;
+            padding-left: 6px;
+        }
+
+        td.header_info{
+            padding: 7px;
+            background-color: #ffffff;
+        }
+        .img_aling_left{
+            float: left;
+        }
+        .img_aling_right{
+            float: right;
+        }
+        td.normal{
+            font-weight: normal;
+            font-size: 12px;
+            vertical-align: top;
+            text-align: left;
+        }
+
+    </style>
+    </head>
+
+    <body>
+
+        <table style="width: 100%; height: 100px;">
+            <tbody>
+                <tr style="height: 100px;" >
+                    <td style="width: 33%; height: 100px;" class="header_info"><img src="{{logo}}" alt="logo" height="100%" class="img_aling_left"></td>
+                    <td style="width: 33%; height: 100px; text-align: center; vertical-align:bottom" class="header_info"><p  style="font-size: 20px;">{{nombre_camping}}</p></td>
+                    <td style="width: 33%; height: 100px;" class="header_info"><img src="{{barcode}}" alt="Barcode" height="100%" class="img_aling_right"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table style="width: 100%; height: 36px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 30%; height: 18px;">NOMBRE(S)</th>
+                    <th style="width: 20%; height: 18px;">APELLIDO PATERNO</th>
+                    <th style="width: 20%; height: 18px;">APELLIDO MATERNO</th>
+                    <th style="width: 30%; height: 18px;">ESCUELA</th>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 30%; height: 18px;">{{nombre_camper}}</td>
+                    <td style="width: 20%; height: 18px;">{{apellido_paterno_camper}}</td>
+                    <td style="width: 20%; height: 18px;">{{apellido_materno_camper}}&nbsp;</td>
+                    <td style="width: 30%; height: 18px;">{{escuela_camper}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 36px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 34.4923%; height: 18px;">FECHA DE
+                        NACIMIENTO</th>
+                    <th style="width: 37.4724%; height: 18px;">CORREO</th>
+                    <th style="width: 13.521%; height: 18px;">GENERO</th>
+                    <th style="width: 14.5143%; height: 18px;">GRADO ESCOLAR</th>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 34.4923%; height: 18px;">{{fecha_nacimiento_camper}}</td>
+                    <td style="width: 37.4724%; height: 18px;">{{email_camper}}</td>
+                    <td style="width: 13.521%; height: 18px;">{{gender}}</td>
+                    <td style="width: 14.5143%; height: 18px;">{{grade}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 18px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 100%; text-align: center; height: 18px;">DATOS
+                        M&Eacute;DICOS</th>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 36px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 11.755%; height: 18px;">PESO</th>
+                    <th style="width: 10.872%; height: 18px;">ESTATURA</th>
+                    <th style="width: 16.2804%; height: 18px;">TIPO DE SANGRE</th>
+                    <th style="width: 61.0927%; height: 18px;">SEGURO MEDICO</th>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.755%; height: 18px;">{{weidth}}</td>
+                    <td style="width: 10.872%; height: 18px;">{{height}}</td>
+                    <td style="width: 16.2804%; height: 18px;">{{blood_type}}</td>
+                    <td style="width: 61.0927%; height: 18px;">{{insurance}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 112px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 33.3333%; height: 18px;">ENFERMEDADES</th>
+                    <th style="width: 33.3333%; height: 18px;">ALTERACIONES
+                        NOCTURNAS</th>
+                    <th style="width: 33.3333%; height: 18px;">FOBIAS O MIEDOS</th>
+                </tr>
+                <tr style="height: 94px;">
+                    <td style="width: 33.3333%; height: 94px;" class="normal">{{camper_diseases}}</td>
+                    <td style="width: 33.3333%; height: 94px;" class="normal">{{camper_nocturnal_disturbances}}</td>
+                    <td style="width: 33.3333%; height: 94px;" class="normal">{{camper_fear}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 110px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 33.3333%; height: 18px;">MEDICACI&Oacute;N</th>
+                    <th style="width: 33.3333%; height: 18px;">ALERGIAS A
+                        MEDICAMENTOS</th>
+                    <th style="width: 33.3333%; height: 18px;">OTRAS ALERGIAS</th>
+                </tr>
+                <tr style="height: 92px;">
+                    <td style="width: 33.3333%; height: 92px;" class="normal">{{camper_medication}}</td>
+                    <td style="width: 33.3333%; height: 92px;" class="normal">{{camper_alergies}}</td>
+                    <td style="width: 33.3333%; height: 92px;" class="normal">{{camper_other_alergies}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 99.9231%; height: 113px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 33.3333%; height: 18px;">COMIDA PROHIBIDA</th>
+                    <th style="width: 33.3333%; height: 18px;">ALIMENTACION
+                        ESPECIAL</th>
+                    <th style="width: 35.1657%; height: 18px;">VACUNAS</th>
+                </tr>
+                <tr style="height: 95px;">
+                    <td style="width: 33.3333%; height: 95px;" class="normal">{{camper_prohibed_foods}}</td>
+                    <td style="width: 33.3333%; height: 95px;" class="normal">{{camper_especial_alimentation}}</td>
+                    <td style="width: 35.1657%; height: 95px;" class="normal">{{camper_vaccines}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 50px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 33.3333%; height: 18px;">PREGUNTAS EXTRAS</th>
+                    <th style="width: 33.3333%; height: 18px;">CARGOS EXTRAS</th>
+                    <th style="width: 33.3333%; height: 18px;">COMENTARIOS</th>
+                </tr>
+                <tr style="height: 32px;">
+                    <td style="width: 33.3333%; height: 95px;" class="normal">{{camper_extra_questions}}</td>
+                    <td style="width: 33.3333%; height: 95px;" class="normal">{{camper_extra_charge}}</td>
+                    <td style="width: 33.3333%; height: 95px;" class="normal">{{camper_comments}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 18px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 100%; text-align: center; height: 18px;">DATOS
+                        DE CONTACTO</th>
+                </tr>
+            </tbody>
+        </table>
+        <table style=" width: 100%; height: 108px;">
+            <tbody>
+                <tr style="height: 18px;">
+                    <th style="width: 33.3335%; height: 18px;" colspan="2">TUTOR
+                        PRINCIPAL</th>
+                    <th style="width: 33.3334%; height: 18px;" colspan="2">TUTOR
+                        SECUNDARIO</th>
+                    <th style="width: 33.3334%; height: 18px;" colspan="2">CONTACTO
+                        DE EMERGENCIA</th>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.3799%; height: 18px;" class="normal">NOMBRE</td>
+                    <td style="width: 21.9536%; height: 18px;" class="normal">{{princ_name_tuto}}</td>
+                    <td style="width: 12.3922%; height: 18px;" class="normal">NOMBRE</td>
+                    <td style="width: 20.9412%; height: 18px;" class="normal">{{sec_name_tuto}}</td>
+                    <td style="width: 12.6172%; height: 18px;" class="normal">NOMBRE</td>
+                    <td style="width: 20.7162%; height: 18px;" class="normal">{{emer_name_tuto}}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.3799%; height: 18px;" class="normal">CORREO</td>
+                    <td style="width: 21.9536%; height: 18px;" class="normal">{{princ_email_tuto}}</td>
+                    <td style="width: 12.3922%; height: 18px;" class="normal">CORREO</td>
+                    <td style="width: 20.9412%; height: 18px;" class="normal">{{sec_email_tuto}}</td>
+                    <td style="width: 12.6172%; height: 18px;" class="normal">PARENTESCO</td>
+                    <td style="width: 20.7162%; height: 18px;" class="normal">{{emer_parent_tuto}}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.3799%; height: 18px;" class="normal">CELULAR</td>
+                    <td style="width: 21.9536%; height: 18px;" class="normal">{{princ_celular_tuto}}</td>
+                    <td style="width: 12.3922%; height: 18px;" class="normal">CELULAR</td>
+                    <td style="width: 20.9412%; height: 18px;" class="normal">{{sec_celular_tuto}}</td>
+                    <td style="width: 12.6172%; height: 18px;" class="normal">CELULAR</td>
+                    <td style="width: 20.7162%; height: 18px;" class="normal">{{emer_celular_tuto}}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.3799%; height: 18px;" class="normal">TEL. CASA</td>
+                    <td style="width: 21.9536%; height: 18px;" class="normal">{{princ_tel_casa_tuto}}</td>
+                    <td style="width: 12.3922%; height: 18px;" class="normal">TEL. CASA</td>
+                    <td style="width: 20.9412%; height: 18px;" class="normal">{{sec_tel_casa_tuto}}</td>
+                    <td style="width: 12.6172%; height: 18px;" class="normal">TEL. CASA</td>
+                    <td style="width: 20.7162%; height: 18px;" class="normal">{{emer_tel_casa_tuto}}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 11.3799%; height: 18px;" class="normal">TEL. OFICINA</td>
+                    <td style="width: 21.9536%; height: 18px;" class="normal">{{princ_tel_ofc_tuto}}</td>
+                    <td style="width: 12.3922%; height: 18px;" class="normal">TEL. OFICINA</td>
+                    <td style="width: 20.9412%; height: 18px;" class="normal">{{sec_tel_ofc_tuto}}</td>
+                    <td style="width: 12.6172%; height: 18px;" class="normal">&nbsp;</td>
+                    <td style="width: 20.7162%; height: 18px;" class="normal">&nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style="width: 100%; height: 100px;">
+            <tbody>
+                <tr>
+                    <td style="width: 50%;" class="header_info">
+                        <p>
+                            {{address}}<br>
+                            {{contact_email}}
+                        </p>
+                    </td>
+                    <td style="width: 50%;  vertical-align:bottom" class="header_info"></td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;" class="header_info"></td>
+                    <td style="width: 50%; text-align: right;" class="header_info"> <p>Fecha de creación: {{creation_date}}</p></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+
+    </body>

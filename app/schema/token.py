@@ -7,6 +7,12 @@ class Token(BaseModel):
     refresh_token: str
 
 
+class TokenCreate(BaseModel):
+    username: str
+    password: str
+    lang: str
+
+
 class TokenRefresh(BaseModel):
     access_token: str
     refresh_token: str

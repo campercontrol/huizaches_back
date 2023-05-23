@@ -188,3 +188,5 @@ def change_password(email:str,change_pass:UserChangePassword,response: Response,
             response.status_code = 401
             return {"mensaje": "Ocurrio un error inesperado, intente de nuevo", "data": ""}
 
+
+

@@ -7,7 +7,9 @@ from jose import jwt
 from sqlalchemy.orm import Session
 
 from crud.crud_user import get_user_by_email
-from schema.token import Token, TokenRefresh
+from crud.crud_role import get_role_by_uuid
+from crud.crud_permission import get_permissions_for_menu, get_permissions_by_lang
+from schema.token import Token, TokenRefresh, TokenCreate
 from utils.db import SessionLocal
 from utils.functions_jwt import validate_token,create_access_token,generate_new_tokens
 from utils.hash import verify_str_hash
@@ -39,26 +41,48 @@ def authenticate_user(db, username: str, password: str):
     return user
 
 
-# def get_permissions_menu(db, user):
-#     permissions_list = get_permissions_by_role_uuid_by_active(db, user.role_id, True)
-#     list_menu_permission = []
-#     for i in permissions_list:
-#         path_arr = i.description.split("/")
-#         try:
-#             path = f"/{path_arr[1]}"
-#             if path not in list_menu_permission:
-#                 list_menu_permission.append(path)
-#             else:
-#                 pass
-#         except Exception as ex:
-#             print(ex)
-#     return list_menu_permission
+def get_permissions_menu(db, user,lang):
+    #ADMIN
+    if user.is_admin == True and user.is_coordinator == True and user.is_employee == True:
+        permissions_list = get_permissions_by_lang(db, user.role_id,lang)
+    #COORDINADOR
+    elif user.is_admin == False and user.is_coordinator == True and user.is_employee == True:
+        permissions_list = get_permissions_for_menu(db, user.role_id, False,True,True,lang)
+    #STAFF EMPLEADO
+    elif user.is_admin == False and user.is_coordinator == False and user.is_employee == True:
+        permissions_list = get_permissions_for_menu(db, user.role_id, False,False,True,lang)
+    #STAFF PROSPECTO
+    elif user.is_admin == False and user.is_coordinator == False and user.is_employee == False:
+        permissions_list = get_permissions_for_menu(db, user.role_id, False,False,False,lang)
+
+    list_menu_permission = []
+
+    for i in permissions_list:
+        a = i.__dict__
+        a.pop("id")
+        a.pop("language")
+        a.pop("is_coordinator")
+        a.pop("is_admin")
+        a.pop("is_employee")
+        a.pop("target")
+        a.pop("role_id")
+        a.pop("is_active")
+        a.pop("created_at")
+        a.pop("updated_at")
+        a.pop("_sa_instance_state")
+
+        list_menu_permission.append(a)
+
+    print(list_menu_permission)
+    
+    return list_menu_permission
 
 
 @token_routes.post("/token", response_model=Token, tags=["Token"])
 async def login_for_access_token(
-    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    db: Session = Depends(get_db), form_data: TokenCreate = Depends()
 ):
+    print(form_data.username)
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -69,18 +93,32 @@ async def login_for_access_token(
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
-    #path_menu_permissions = get_permissions_menu(db, user)
+    role = get_role_by_uuid(db,user.role_id)
 
-    # print(">>>>>")
-    # print(path_menu_permissions)
-    # print(">>>>>")
+    menu = get_permissions_menu(db,user,form_data.lang)
 
     access_token = create_access_token(
-        data={"sub": user.email},
+        data={
+            "user_name": "",
+            "user_email": user.email,
+            "user_id":user.id,
+            "role_name":role.name,
+            "role_id":role.id,
+            "menu":menu,
+            "lang":form_data.lang,
+            },
         expires_delta=access_token_expires,
     )
     refresh_token = create_access_token(
-        data={"sub": user.email},
+        data={
+            "user_name": "",
+            "user_email": user.email,
+            "user_id":user.id,
+            "role_name":role.name,
+            "role_id":role.id,
+            "menu":menu,
+            "lang":form_data.lang,
+            },
         expires_delta=refresh_token_expires,
     )
 

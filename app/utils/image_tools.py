@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends,Response, BackgroundTasks,UploadFile
 import aiofiles
 from PIL import Image
+import base64
+
 
 #Guarda una imagen de forma asyncrona
 async def write_image(file_name: str, file: UploadFile):
@@ -32,3 +34,11 @@ async def rewrite_image(file_name: str, final_name: str):
     image.save(final_name)
 
     return final_name
+
+#Convertir una imagen en base 64 para adjuntar en pdf
+def img_to_base_64(path):
+    # Convert the image to base64 format
+    with open(path, "rb") as f:
+        encoded_image = base64.b64encode(f.read())
+    
+    return encoded_image

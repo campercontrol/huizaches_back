@@ -19,6 +19,7 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 RUN apt-get update 
+RUN apt-get install wkhtmltopdf -y
 RUN apt install 
 
 COPY ./app /app
