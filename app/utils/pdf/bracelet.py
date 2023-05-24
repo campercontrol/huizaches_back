@@ -40,7 +40,20 @@ def generar_pdf_bracelete():
     try:
         config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
         output_pdf = "media/bracelete.pdf" #Nombre y ubicacion del archivo ya en pdf
-        pdfkit.from_string(html_content, output_pdf, configuration=config)
+        pdfkit.from_string(
+            html_content, 
+            output_pdf, 
+            configuration=config,
+            options = {
+                'page-height': '11in',
+                'page-width': '1in',
+                'margin-top': '0',
+                'margin-right': '0',
+                'margin-bottom': '0',
+                'margin-left': '0',
+                'encoding': "UTF-8"
+                }
+            )
          
     except OSError:
     #not present in PATH
@@ -71,6 +84,11 @@ def generar_pdf_bracelete_multiple():
         "list_bracelet" : [
             context,
             context,
+            context,
+            context,
+            context,
+            context,
+            context,
             context
         ]
     }
@@ -91,7 +109,19 @@ def generar_pdf_bracelete_multiple():
     try:
         config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
         output_pdf = "media/bracelete_multiple.pdf" #Nombre y ubicacion del archivo ya en pdf
-        pdfkit.from_string(html_content, output_pdf, configuration=config)
+        pdfkit.from_string(
+            html_content, 
+            output_pdf, 
+            configuration=config,
+            options = {
+                'page-size': 'Letter',
+                'margin-top': '0',
+                'margin-right': '0',
+                'margin-bottom': '0',
+                'margin-left': '0',
+                'encoding': "UTF-8"
+                }
+            )
          
     except OSError:
     #not present in PATH

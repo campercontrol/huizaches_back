@@ -47,8 +47,20 @@ def generar_pdf_baucher():
     #Try para verificar paquete de libreria que permite usar la generacion de html a pdf 
     try:
         config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-        output_pdf = "media/baucher.pdf" #Nombre y ubicacion del archivo ya en pdf
-        pdfkit.from_string(html_content, output_pdf, configuration=config)
+        output_pdf = "media/baucher_letter.pdf" #Nombre y ubicacion del archivo ya en pdf
+        pdfkit.from_string(
+            html_content, 
+            output_pdf, 
+            configuration=config,
+            options = {
+                'page-size': 'Letter',
+                'margin-top': '0.25in',
+                'margin-right': '0.25in',
+                'margin-bottom': '0.25in',
+                'margin-left': '0.25in',
+                'encoding': "UTF-8"
+                }
+            )
          
     except OSError:
     #not present in PATH
