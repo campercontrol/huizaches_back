@@ -25,6 +25,7 @@ from service.campers.camper_checkpoint_service import camper_checkpoint_routes
 from service.payments.payment_service import payment_routes
 from service.payments.payment_method_service import payment_method_routes
 from service.payments.payment_transaction_type_service import payment_transaction_type_routes
+from service.payments.camper_extra_charge_service import camper_extra_charge_routes
 
 app = FastAPI()
 
@@ -63,16 +64,23 @@ app.include_router(camper_checkpoint_routes)
 app.include_router(payment_routes)
 app.include_router(payment_method_routes)
 app.include_router(payment_transaction_type_routes)
+app.include_router(camper_extra_charge_routes)
 
 from service.role import role_routes
 from service.user import user_routes
 from service.token import token_routes
 from service.image import image_routes
+from service.permission import permission_routes
+from service.generar_pdf import pdf_routes
+from fastapi.staticfiles import StaticFiles
 
 app.include_router(role_routes) # Role
 app.include_router(user_routes) # User
 app.include_router(token_routes) # token
 app.include_router(image_routes) # Image
+app.include_router(permission_routes) # Permission
+app.include_router(pdf_routes) #Pdf
+app.mount("/media",StaticFiles(directory="media"),name="media")
 
 
 @app.post("/", )

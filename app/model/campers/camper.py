@@ -5,10 +5,6 @@ from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, Integer, Str
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
-from model.catalogs.constant import Constant
-from model.campers.parent import Parent
-from model.campers.school import School
-
 from utils.db import Base
 
 
