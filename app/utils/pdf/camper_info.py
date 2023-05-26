@@ -178,11 +178,28 @@ def generar_pdf_info_camping_multiple():
     print("//////////")
     print(html_content)
 
+    list_html_contents = ""
+
+    for i in range(200):
+        list_html_contents += html_content + '<br>'
+
     #Try para verificar paquete de libreria que permite usar la generacion de html a pdf 
     try:
         config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-        output_pdf = "media/camping_info.pdf" #Nombre y ubicacion del archivo ya en pdf
-        pdfkit.from_string(html_content+html_content, output_pdf, configuration=config)
+        output_pdf = "media/camping_info_multiple.pdf" #Nombre y ubicacion del archivo ya en pdf
+        pdfkit.from_string(
+            list_html_contents, 
+            output_pdf, 
+            configuration=config,
+            options = {
+                'page-size': 'Letter',
+                'margin-top': '0',
+                'margin-right': '0',
+                'margin-bottom': '0',
+                'margin-left': '0',
+                'encoding': "UTF-8"
+                }
+            )
          
     except OSError:
     #not present in PATH
@@ -248,7 +265,12 @@ def generar_pdf_info_camping_multiple_merge_files():
         "creation_date":datetime.now().strftime('%Y/%m/%d')
         }
     
-    list_context = [context,context,context,context,context]
+    list_context = []
+
+    for i in range(200):
+        list_context.append(context)
+    
+    #list_context = [context,context,context,context,context]
 
     template_loader = jinja2.FileSystemLoader('media/templates_pdf/')
     template_env= jinja2.Environment(loader = template_loader)

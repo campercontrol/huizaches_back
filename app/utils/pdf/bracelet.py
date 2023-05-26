@@ -114,7 +114,8 @@ def generar_pdf_bracelete_multiple():
             output_pdf, 
             configuration=config,
             options = {
-                'page-size': 'Letter',
+                'page-height': '279.4mm',
+                'page-width': '215.9mm',
                 'margin-top': '0',
                 'margin-right': '0',
                 'margin-bottom': '0',
