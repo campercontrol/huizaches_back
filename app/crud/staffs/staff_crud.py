@@ -38,3 +38,8 @@ def create_new_prospect(db, new_prospect: ProspectCreate):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_prospect
 
+def accept_prospect(db, prospect_id:int):
+    prospect = db.query(Staff).filter_by(id=prospect_id).update({'employee':True})
+    db.commit()
+    return{"message: Prospecto aceptado como staff"}
+    
