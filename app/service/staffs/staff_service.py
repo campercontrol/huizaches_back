@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from crud.staffs.staff_crud import (
     get_all_prospect,
-    create_new_prospect
+    create_new_prospect,
+    accept_prospect
 )
 
 from schema.staffs.staff_schema import (
@@ -35,3 +36,8 @@ def create_prospect(
 ):
     list_prospect = create_new_prospect(db, new_prospect)
     return {"data": list_prospect}
+
+@staff_routes.patch("/accept_prospect/{prospect_id}", tags=["Prospect"])
+def accept_prospecto_to_staff(prospect_id:int, db: Session = Depends(get_db)):
+    status = accept_prospect(db, prospect_id)
+    return {"data": status}

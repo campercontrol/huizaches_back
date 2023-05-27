@@ -13,6 +13,9 @@ from crud.campers.parent_crud import (
 from crud.camps.camp_crud import (
     get_camp_by_id
 )
+from crud.camps.location_crud import (
+    get_location_by_uuid
+)
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
 )
@@ -81,8 +84,9 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
 @parent_routes.get("/parent_camper_in_camp/{camper_id}/{camp_id}", tags=["Campers"])
 def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get_db)):
     camp= get_camp_by_id(db, camp_id)
+    location = get_location_by_uuid(db, camp.location_id)
     payments= get_payment_by_camper_camp(db, camper_id, camp_id)
     if camp.show_payment_parent:
-        return{"camp": camp, "payments":payments}
+        return{"camp": camp, "location": location.name,  "payments":payments}
     else:
         return{"camp": camp}

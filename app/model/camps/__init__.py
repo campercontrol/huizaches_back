@@ -6,3 +6,4 @@ from model.camps.season import Season
 from model.camps.camp_extra_question import CampExtraQuestion
 from model.camps.camp_extra_charge import CampExtraCharge
 from model.camps.camp_checkpoint import CampCheckpoint
+from model.camps.staff_in_camp import StaffInCamp

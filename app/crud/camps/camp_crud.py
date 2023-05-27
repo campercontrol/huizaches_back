@@ -68,7 +68,6 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
 def get_camp_by_id(db: Session, camp_id: int):
     return db.query(Camp).filter_by(id=camp_id).first()
 
-
 def create_new_camp(db: Session, new_camp: CampCreate):
     db_camp = None
     try:

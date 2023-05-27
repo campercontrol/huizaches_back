@@ -25,6 +25,7 @@ from service.payments.payment_service import payment_routes
 from service.payments.payment_method_service import payment_method_routes
 from service.payments.payment_transaction_type_service import payment_transaction_type_routes
 from service.payments.camper_extra_charge_service import camper_extra_charge_routes
+from service.staffs.staff_service import staff_routes
 
 app = FastAPI()
 
@@ -54,6 +55,7 @@ app.include_router(payment_routes)
 app.include_router(payment_method_routes)
 app.include_router(payment_transaction_type_routes)
 app.include_router(camper_extra_charge_routes)
+app.include_router(staff_routes)
 
 from service.role import role_routes
 from service.user import user_routes
