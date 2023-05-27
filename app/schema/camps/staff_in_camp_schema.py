@@ -11,7 +11,7 @@ class StaffInCampCreate(BaseModel):
         default=None,
         primary_key=True
     ) 
-    confirmed_staff: bool = Field(
+    confirmed_staff: Optional[bool] = Field(
         title="Aceptado o apuntado en el camp"
     )
     assigned_role_id: Optional[int] = Field(
@@ -33,7 +33,7 @@ class StaffInCampModify(BaseModel):
         default=None,
         primary_key=True
     ) 
-    confirmed_staff: bool = Field(
+    confirmed_staff: Optional[bool] = Field(
         title="Aceptado o apuntado en el camp"
     )
     assigned_role_id: Optional[int] = Field(

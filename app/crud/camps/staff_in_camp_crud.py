@@ -34,3 +34,21 @@ def create_new_staff_in_camp(db: Session, new_staff_in_camp: StaffInCampCreate):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_staff_in_camp
 
+
+def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
+    db_staff_in_camp = None
+    try:
+        db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+        db_staff_in_camp.confirmed_staff= False
+        db.add(db_staff_in_camp)
+        db.commit()
+        db.refresh(db_staff_in_camp)
+    except SQLAlchemyError as e:
+        print("#=================")
+        print(e)
+        print("#=================")
+        db_staff_in_camp = None
+        return db_staff_in_camp
+    except Exception as ex:
+        print(f"No se pudo guardar en la base de datos: {ex}")
+    return db_staff_in_camp
