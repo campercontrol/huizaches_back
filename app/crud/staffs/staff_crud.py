@@ -20,9 +20,10 @@ def get_all_prospect(db):
     return rows
 
 
-def create_new_prospect(db, new_prospect: ProspectCreate):
+def create_new_prospect(db, new_prospect: ProspectCreate, user_id:int):
     db_prospect = None
     try:
+        new_prospect.login_id = user_id
         db_prospect = Staff(**new_prospect.dict())
         db_prospect.employee = False
         db.add(db_prospect)
@@ -43,3 +44,6 @@ def accept_prospect(db, prospect_id:int):
     db.commit()
     return{"message: Prospecto aceptado como staff"}
     
+#def dashboard_staff(db, staff_id:int):
+
+

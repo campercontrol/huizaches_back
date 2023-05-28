@@ -18,9 +18,9 @@ class StaffInCamp(Base):
     )
     id =Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True) 
     confirmed_staff = Column(Boolean, nullable=False)
-    assigned_role_id = Column(ForeignKey("catalogs_staff_role.id"), nullable=False, default=0, doc='Campamento')
+    assigned_role_id = Column(ForeignKey("catalogs_staff_role.id"), doc='Rol de staff')
     camp_id = Column(ForeignKey("camps_camp.id"), nullable=False, default=0, doc='Campamento')
-    staff_id = Column(ForeignKey("staff_staff.id"), nullable=False, default=0, doc='Campamento')
+    staff_id = Column(ForeignKey("staff_staff.id"), nullable=False, default=0, doc='Staff')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 
