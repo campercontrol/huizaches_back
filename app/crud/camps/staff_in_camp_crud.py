@@ -52,3 +52,5 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
     except Exception as ex:
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_staff_in_camp
+
+#def assign_staff(db: Session, staff_id:int, camp_id:int):

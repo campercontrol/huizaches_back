@@ -58,8 +58,6 @@ def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
 @parent_routes.post("/parent_create/", tags=["Campers"])
 def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
     user = create_new_user(db, new_parent_complete.user)
-    print("#######################################################################")
-    print(user.id)
     parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
     return {"data": parent}
 

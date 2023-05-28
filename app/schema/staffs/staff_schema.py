@@ -3,6 +3,8 @@ from typing import Optional
 from uuid import UUID
 from xmlrpc.client import boolean
 
+from schema.user import UserCreate
+
 from pydantic import BaseModel, Field, AnyUrl, condecimal
 
 class ProspectCreate(BaseModel):
@@ -11,6 +13,9 @@ class ProspectCreate(BaseModel):
         title="Id",
         default=None,
         primary_key=True
+    )
+    login_id: int = Field(
+        title= "Usuario"
     ) 
     name: str = Field(
         title= "Numero de transacción",
@@ -52,6 +57,11 @@ class ProspectCreate(BaseModel):
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+
+class ProspectCompleteCreate(BaseModel):
+    user: UserCreate
+    prospect : ProspectCreate
+
 
 
 class StaffCreate(BaseModel):

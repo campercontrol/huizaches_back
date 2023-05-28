@@ -10,8 +10,10 @@ from crud.staffs.staff_crud import (
 )
 
 from schema.staffs.staff_schema import (
-    ProspectCreate    
+    ProspectCompleteCreate    
 )
+
+from crud.crud_user import create_new_user
 from utils.db import SessionLocal
 
 staff_routes = APIRouter()
@@ -32,10 +34,11 @@ def get_prospects(db: Session = Depends(get_db)):
 
 @staff_routes.post("/prospect/", tags=["Prospect"])
 def create_prospect(
-    new_prospect: ProspectCreate, db: Session = Depends(get_db)
+    new_prospect: ProspectCompleteCreate, db: Session = Depends(get_db)
 ):
-    list_prospect = create_new_prospect(db, new_prospect)
-    return {"data": list_prospect}
+    user = create_new_user(db, new_prospect.user)
+    prospect = create_new_prospect(db, new_prospect.prospect, user.id)
+    return {"data": prospect}
 
 @staff_routes.patch("/accept_prospect/{prospect_id}", tags=["Prospect"])
 def accept_prospecto_to_staff(prospect_id:int, db: Session = Depends(get_db)):
