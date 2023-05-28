@@ -5,6 +5,7 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.camps import CamperInCamp, Camp, Location
+from model.campers import Camper
 from model.catalogs import Constant
 from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
@@ -57,6 +58,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
     
     rows = (
         db.query(
+            Camper.id.label("camper_id"),
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
@@ -65,6 +67,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             CamperInCamp.payment_balance.label("camper_payment_balance"),
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Camper, CamperInCamp.camper_id == Camper.id)
         .join(Constant, CamperInCamp.status == Constant.id)
         .join(Location, Camp.location_id == Location.id)
         .filter(

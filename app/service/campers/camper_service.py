@@ -360,7 +360,14 @@ def get_camperform(language: str, db: Session = Depends(get_db)):
 @camper_routes.get("/campers_from_parent/{parent_id}", tags=["Campers"])
 def get_campers_by_parent_id(parent_id: int, db: Session = Depends(get_db)):
     list_camper = get_campers_from_parent(db, parent_id)
-    return {"data": list_camper}
+    for camper in list_camper:
+        camps = get_subscribe_by_camper(db, camper.id)
+    data = {
+        "list_campers": list_camper,
+        "list_camps": camps
+    }
+    return data
+
 
 @camper_routes.get("/camper_band/{camper_id}", tags=["Campers"])
 def get_camper_info_band(camper_id: int, db: Session = Depends(get_db)):
