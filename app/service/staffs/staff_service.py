@@ -7,7 +7,8 @@ from crud.staffs.staff_crud import (
     get_all_prospect,
     create_new_prospect,
     accept_prospect,
-    delete_prospect
+    delete_prospect,
+    staff_dashboard
 )
 
 from schema.staffs.staff_schema import (
@@ -50,3 +51,8 @@ def accept_prospecto_to_staff(prospect_id:int, db: Session = Depends(get_db)):
 def delete_prospect_by_id(prospect_id:int, db:Session = Depends(get_db)):
     status = delete_prospect(db, prospect_id)
     return {"status" : status}
+
+@staff_routes.get("/staff_dashboard/{staff_id}", tags = ["Staff"])
+def get_staff_dashboard(staff_id:int, db:Session = Depends(get_db)):
+    staff_dashboard = staff_dashboard(db, staff_id)
+    return{"data": staff_dashboard}

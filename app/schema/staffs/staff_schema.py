@@ -14,7 +14,7 @@ class ProspectCreate(BaseModel):
         default=None,
         primary_key=True
     )
-    login_id: int = Field(
+    login_id: Optional[int] = Field(
         title= "Usuario"
     ) 
     name: str = Field(
@@ -53,6 +53,22 @@ class ProspectCreate(BaseModel):
     facebook: str = Field(
         title="Facebook",
         max_lenght=25
+    )
+    coordinator: Optional[bool] = Field(
+        title="Coordinador",
+        default=False
+    )
+    employee: bool = Field(
+        title="empleado",
+        default=False
+    )
+    employee_email_send: bool = Field( 
+        title="correo de activacion",
+        default=False
+    )
+    season_id: int = Field( 
+        title="temporada",
+        default=1   
     )
     created_at:Optional[datetime] = Field(
         default=datetime.now()
