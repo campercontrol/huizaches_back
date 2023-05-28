@@ -150,6 +150,7 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
 def get_campers_from_parent(db: Session, parent_id: int):
     rows= (
         db.query(
+            Camper.id,
             (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
                 "full_name"
             ),
