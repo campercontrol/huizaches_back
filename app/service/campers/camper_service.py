@@ -363,7 +363,8 @@ def get_campers_by_parent_id(parent_id: int, db: Session = Depends(get_db)):
     list_camper = get_campers_from_parent(db, parent_id)
     for camper in list_camper:
         camps = get_subscribe_by_camper(db, camper.id)
-        list_camps.append(camps)
+        if len(camps) != 0:
+            list_camps.append(camps)
     data = {
         "list_campers": list_camper,
         "list_camps": list_camps
