@@ -36,7 +36,7 @@ def create_staff_in_camp(new_staff_in_camp:StaffInCampCreate,db: Session = Depen
     staff_in_camp = create_new_staff_in_camp(db, new_staff_in_camp)
     return {"data": staff_in_camp}
 
-@staff_in_camp_routes.post("/staff_volunteer/", tags=["Camps"])
+@staff_in_camp_routes.post("/staff_volunteer/", tags=["StaffInCamp"])
 def create_staff_volunteer(new_staff_in_camp:StaffInCampCreate, db: Session = Depends(get_db)):
     staff_in_camp = volunteer_staff(db, new_staff_in_camp)
     return {"data": staff_in_camp}
