@@ -51,6 +51,9 @@ from crud.campers.camper_crud import (
     get_campers_from_parent,
     get_camper_band
 )
+from crud.campers.parent_crud import (
+    get_parent_by_uuid
+)
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_parent
 from crud.camps.camp_crud import(
     get_school_camp_for_camper,
@@ -384,6 +387,7 @@ def get_camper_dashboard(camper_id: int, db:Session = Depends(get_db)):
 def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
     camper_band =get_camper_band(db, camper_id)
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
+    parent = get_parent_by_uuid(db, camper_info["camper"].parent_id)
     camper_comments_parent = get_camper_comment_by_camper_for_parent(db, camper_id)
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
@@ -391,6 +395,7 @@ def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
     data= {
         "camper_band": camper_band,
         "camper_info": camper_info,
+        "parent": parent, 
         "camper_comments_parent" : camper_comments_parent,
         "camper_subscribe_camps": camper_subscribe_camps,
         "camper_cancelled_camps": camper_cancelled_camps,
