@@ -57,9 +57,9 @@ def get__active_camp(db: Session = Depends(get_db)):
     return {"data": list_camp}
 
 
-@camp_router.get("/get_camps_for_camper/{camper_id}/{school_id}", tags=["Camps"])
-def get_camps_for_camper(camper_id: int, school_id: int, db: Session = Depends(get_db)):
-    list_camp = get_school_camp_for_camper(db, camper_id, school_id)
+@camp_router.get("/get_camps_for_camper/{camper_id}", tags=["Camps"])
+def get_camps_for_camper(camper_id: int, db: Session = Depends(get_db)):
+    list_camp = get_school_camp_for_camper(db, camper_id)
     return {"data": list_camp}
 
 
