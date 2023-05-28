@@ -64,6 +64,9 @@ from crud.camps.camper_in_camp_crud import(
     get_cancelled_by_camper,
     get_past_subscribe_by_camper
 )
+from crud.crud_user import (
+    get_user_by_uuid
+)
 from crud.campers.school_crud import get_active_school
 from schema.campers_catalogs.camper_vaccine_schema import (
     CamperVaccineCreate,
@@ -88,7 +91,7 @@ from schema.campers_catalogs.camper_pathological_background_fm_schema import (
 
 from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
 from utils.db import SessionLocal
-from utils.image_tools import rewrite_image
+#from utils.image_tools import rewrite_image
 
 from utils.db import db_mapping_rows_to_dict
 
@@ -388,6 +391,7 @@ def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
     camper_band =get_camper_band(db, camper_id)
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     parent = get_parent_by_uuid(db, camper_info["camper"].parent_id)
+    user = get_user_by_uuid(db, parent.user_id)
     camper_comments_parent = get_camper_comment_by_camper_for_parent(db, camper_id)
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
@@ -395,7 +399,8 @@ def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
     data= {
         "camper_band": camper_band,
         "camper_info": camper_info,
-        "parent": parent, 
+        "parent": parent,
+        "user_email": user[0].email, 
         "camper_comments_parent" : camper_comments_parent,
         "camper_subscribe_camps": camper_subscribe_camps,
         "camper_cancelled_camps": camper_cancelled_camps,
