@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from crud.staffs.staff_crud import (
     get_all_prospect,
     create_new_prospect,
-    accept_prospect
+    accept_prospect,
+    delete_prospect
 )
 
 from schema.staffs.staff_schema import (
@@ -44,3 +45,8 @@ def create_prospect(
 def accept_prospecto_to_staff(prospect_id:int, db: Session = Depends(get_db)):
     status = accept_prospect(db, prospect_id)
     return {"data": status}
+
+@staff_routes.delete("/delete_prospect/{prospect_id}", tags=["Prospect"])
+def delete_prospect_by_id(prospect_id:int, db:Session = Depends(get_db)):
+    status = delete_prospect(db, prospect_id)
+    return {"status" : status}

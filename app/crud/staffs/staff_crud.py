@@ -5,6 +5,11 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.staffs import Staff
+from model.camps import (
+    StaffInCamp,
+    Camp,
+    Location
+)
 from model import User
 
 from schema.staffs.staff_schema import ProspectCreate
@@ -39,11 +44,20 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id:int):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_prospect
 
+
+def delete_prospect(db, prospect_id: int):
+    prospect = db.query(Staff).filter(Staff.id==prospect_id).first()
+    db.delete(prospect)
+    db.commit()
+    return {"ok": True}
+
 def accept_prospect(db, prospect_id:int):
     prospect = db.query(Staff).filter_by(id=prospect_id).update({'employee':True})
     db.commit()
     return{"message: Prospecto aceptado como staff"}
     
-#def dashboard_staff(db, staff_id:int):
+def dashboard_staff(db, staff_id:int):
+
+    available_camps= db.query(StaffInCamp)
 
 
