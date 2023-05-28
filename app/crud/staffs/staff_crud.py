@@ -56,54 +56,59 @@ def accept_prospect(db, prospect_id: int):
 
 def staff_dashboard(db, staff_id: int):
     available_camps = (
-        db.query(Camp.id, Camp.name, Camp.start, Camp.end, Location.name)
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end")
+        )
+        .join(StaffInCamp, StaffInCamp.camp_id == Camp.id )
+        .join(Location, Camp.location_id == Location.id)
         .filter(
             and_(
                 StaffInCamp.staff_id == staff_id,
                 StaffInCamp.confirmed_staff == False,
                 Camp.active == True,
-                Camp.end >= date.today(),
+                Camp.end >= date.today()
             )
         )
-        .join(Camp, Camp.id == StaffInCamp.camp_id)
-        .join(Location.id == Camp.location_id)
         .all()
     )
-    
+
     staff_camps = (
-        db.query(Camp.id, Camp.name, Camp.start, Camp.end, Location.name)
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end")
+        )
+        .join(StaffInCamp, StaffInCamp.camp_id == Camp.id )
+        .join(Location, Camp.location_id == Location.id)
         .filter(
             and_(
                 StaffInCamp.staff_id == staff_id,
                 StaffInCamp.confirmed_staff == True,
                 Camp.active == True,
-                Camp.end >= date.today(),
+                Camp.end >= date.today()
             )
         )
-        .join(Camp, Camp.id == StaffInCamp.camp_id)
-        .join(Location.id == Camp.location_id)
         .all()
     )
-
+    
     next_camps = (
         db.query(Camp.id, Camp.name, Camp.start, Camp.end, Location.name)
-        .outerjoin(
-            or_(
-                available_camps.id==Camp.id,
-                staff_camps.id==Camp.id
-            )
-        )
+        .join(Location, Location.id == Camp.location_id)
         .filter(
             and_(
                 Camp.active == True,
                 Camp.end >= date.today(),
             )
         )
-        .join(Location.id == Camp.location_id)
         .all()
     )
 
-
-
-
-    return {"available_camps": available_camps, "staff_camps": staff_camps, "next_camps":next_camps}
+    return {
+        "available_camps": available_camps,
+        "staff_camps": staff_camps,
+        "next_camps": next_camps,
+    }
