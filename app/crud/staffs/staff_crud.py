@@ -5,7 +5,7 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.staffs import Staff
-from model.camps import StaffInCamp, Camp, Location
+from model.camps import StaffInCamp, Camp, Location, Season
 from model import User
 
 from schema.staffs.staff_schema import ProspectCreate
@@ -13,12 +13,12 @@ from schema.staffs.staff_schema import ProspectCreate
 
 def get_all_prospect(db):
     rows = (
-        db.query(Staff)
+        db.query(Staff, User.email, Season.name.label("season_name"))
         .join(User, User.id == Staff.login_id)
-        .filter(and_(User.active == True, Staff.employee == False))
+        .join(Season, Staff.season_id == Season.id)        
         .all()
     )
-    return rows
+    return db_mapping_rows_to_dict(rows)
 
 
 def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
@@ -76,6 +76,8 @@ def staff_dashboard(db, staff_id: int):
         .all()
     )
 
+    available_camps = db_mapping_rows_to_dict(available_camps)
+
     staff_camps = (
         db.query(
             Camp.id.label("camp_id"),
@@ -97,6 +99,8 @@ def staff_dashboard(db, staff_id: int):
         .all()
     )
     
+    staff_camps = db_mapping_rows_to_dict(staff_camps)
+
     next_camps = (
         db.query(
             Camp.id.label("camp_id"),        
@@ -113,6 +117,8 @@ def staff_dashboard(db, staff_id: int):
         )
         .all()
     )
+
+    next_camps = db_mapping_rows_to_dict(next_camps)
 
     return {
         "available_camps": available_camps,
