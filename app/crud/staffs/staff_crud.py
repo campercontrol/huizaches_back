@@ -15,7 +15,8 @@ def get_all_prospect(db):
     rows = (
         db.query(Staff, User.email, Season.name.label("season_name"))
         .join(User, User.id == Staff.login_id)
-        .join(Season, Staff.season_id == Season.id)        
+        .join(Season, Staff.season_id == Season.id)
+        .filter(Staff.employee==False)        
         .all()
     )
     return db_mapping_rows_to_dict(rows)
