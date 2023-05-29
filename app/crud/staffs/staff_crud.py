@@ -59,6 +59,7 @@ def staff_dashboard(db, staff_id: int):
         db.query(
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
+            Location.name.label("location_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end")
         )
@@ -79,6 +80,7 @@ def staff_dashboard(db, staff_id: int):
         db.query(
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
+            Location.name.label("location_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end")
         )
@@ -96,7 +98,12 @@ def staff_dashboard(db, staff_id: int):
     )
     
     next_camps = (
-        db.query(Camp.id, Camp.name, Camp.start, Camp.end, Location.name)
+        db.query(
+            Camp.id.label("camp_id"),        
+            Camp.name.label("camp_name"),
+            Location.name.label("location_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"))
         .join(Location, Location.id == Camp.location_id)
         .filter(
             and_(
