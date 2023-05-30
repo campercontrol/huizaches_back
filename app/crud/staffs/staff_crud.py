@@ -11,6 +11,8 @@ from model import User
 from schema.staffs.staff_schema import ProspectCreate
 
 
+
+
 def get_all_prospect(db):
     rows = (
         db.query(Staff, User.email, Season.name.label("season_name"))
@@ -58,6 +60,7 @@ def accept_prospect(db, prospect_id: int):
 def staff_dashboard(db, staff_id: int):
     available_camps = (
         db.query(
+            StaffInCamp.id.label("staff_in_camp_id"),
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Location.name.label("location_name"),
@@ -81,6 +84,7 @@ def staff_dashboard(db, staff_id: int):
 
     staff_camps = (
         db.query(
+            StaffInCamp.id.label("staff_in_camp_id"),
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Location.name.label("location_name"),
