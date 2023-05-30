@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from crud.camps.staff_in_camp_crud import (
     get_all_staff_in_camp,
     create_new_staff_in_camp,
-    volunteer_staff
+    volunteer_staff,
+    unsubscribe_staff
 )
 from schema.camps.staff_in_camp_schema import(
     StaffInCampCreate,
@@ -41,3 +42,7 @@ def create_staff_volunteer(new_staff_in_camp:StaffInCampCreate, db: Session = De
     staff_in_camp = volunteer_staff(db, new_staff_in_camp)
     return {"data": staff_in_camp}
 
+@staff_in_camp_routes.delete("/staff_unsubscribe/{id_staff_in_camp}", tags=["StaffInCamp"])
+def unsubscribe_staff_to_camp(id_staff_in_camp:int , db: Session = Depends(get_db)):
+    staff_in_camp = unsubscribe_staff(db, id_staff_in_camp)
+    return {"data": staff_in_camp}

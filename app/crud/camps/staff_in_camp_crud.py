@@ -54,3 +54,8 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
     return db_staff_in_camp
 
 #def assign_staff(db: Session, staff_id:int, camp_id:int):
+
+def unsubscribe_staff(db:Session, id_staff_in_camp: int):
+    db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
+    db.commit()
+    return
