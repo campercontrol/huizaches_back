@@ -46,7 +46,7 @@ def update_camper_in_camp_by_id(
     print(type(modify_camper_in_camp))
     rows_updated = (
         db.query(CamperInCamp)
-        .filter_by(camp_id=camp_id, camper_id=camper_id)
+        .filter(and_(CamperInCamp.camp_id==camp_id, CamperInCamp.camper_id==camper_id))
         .update(modify_camper_in_camp, synchronize_session="fetch")
     )
     print(rows_updated)
@@ -55,9 +55,9 @@ def update_camper_in_camp_by_id(
 
 
 def get_subscribe_by_camper(db: Session, camper_id: int):
-    
     rows = (
         db.query(
+            Camp.id.label("camp_id"),
             Camper.id.label("camper_id"),
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
@@ -83,9 +83,10 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
     return db_mapping_rows_to_dict(rows)
 
 
-def get_cancelled_by_camper(db:Session, camper_id:int):
+def get_cancelled_by_camper(db: Session, camper_id: int):
     rows = (
         db.query(
+            Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
@@ -109,9 +110,10 @@ def get_cancelled_by_camper(db:Session, camper_id:int):
     return db_mapping_rows_to_dict(rows)
 
 
-def get_past_subscribe_by_camper(db:Session, camper_id:int):
+def get_past_subscribe_by_camper(db: Session, camper_id: int):
     rows = (
         db.query(
+            Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
@@ -133,3 +135,17 @@ def get_past_subscribe_by_camper(db:Session, camper_id:int):
         .all()
     )
     return db_mapping_rows_to_dict(rows)
+
+
+def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int):
+    camper_in_camp = db.query(CamperInCamp).filter(
+        and_(
+            CamperInCamp.camper_id == camper_id,
+            CamperInCamp.camp_id == camp_id,
+            CamperInCamp.status == 36,
+        )
+    ).first()
+    if camper_in_camp:
+        return camper_in_camp
+    else: 
+        return False

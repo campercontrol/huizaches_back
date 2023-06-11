@@ -49,24 +49,17 @@ from crud.campers.camper_crud import (
     get_pathological_background_by_camper,
     get_pathological_background_fm_by_camper,
     get_campers_from_parent,
-    get_camper_band
+    get_camper_band,
 )
-from crud.campers.parent_crud import (
-    get_parent_by_uuid
-)
+from crud.campers.parent_crud import get_parent_by_uuid
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_parent
-from crud.camps.camp_crud import(
-    get_school_camp_for_camper,
-    get_summer_camp_for_camper
-)
-from crud.camps.camper_in_camp_crud import(
+from crud.camps.camp_crud import get_school_camp_for_camper, get_summer_camp_for_camper
+from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
     get_cancelled_by_camper,
-    get_past_subscribe_by_camper
+    get_past_subscribe_by_camper,
 )
-from crud.crud_user import (
-    get_user_by_uuid
-)
+from crud.crud_user import get_user_by_uuid
 from crud.campers.school_crud import get_active_school
 from schema.campers_catalogs.camper_vaccine_schema import (
     CamperVaccineCreate,
@@ -91,7 +84,8 @@ from schema.campers_catalogs.camper_pathological_background_fm_schema import (
 
 from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
 from utils.db import SessionLocal
-#from utils.image_tools import rewrite_image
+
+# from utils.image_tools import rewrite_image
 
 from utils.db import db_mapping_rows_to_dict
 
@@ -154,12 +148,12 @@ def create_camper(camper_complete: CamperComplete, db: Session = Depends(get_db)
     new_camper = create_new_camper(db, camper_complete.camper)
     new_camper_id = getattr(new_camper, "id")
     tmp_path_photo = getattr(new_camper, "photo")
-    #final_path_photo = str(
+    # final_path_photo = str(
     #    getattr(new_camper, "id")
     #    + getattr(new_camper, "name")
     #    + getattr(new_camper, "lastname_father")
-    #)
-    #rewrite_image(tmp_path_photo, final_path_photo)
+    # )
+    # rewrite_image(tmp_path_photo, final_path_photo)
 
     for vaccine in camper_complete.vaccines:
         camper_vaccine = CamperVaccineCreate(
@@ -365,10 +359,7 @@ def get_campers_by_parent_id(parent_id: int, db: Session = Depends(get_db)):
         camps = get_subscribe_by_camper(db, camper.id)
         if len(camps) != 0:
             list_camps.append(camps)
-    data = {
-        "list_campers": list_camper,
-        "list_camps": list_camps
-    }
+    data = {"list_campers": list_camper, "list_camps": list_camps}
     return data
 
 
@@ -377,28 +368,45 @@ def get_camper_info_band(camper_id: int, db: Session = Depends(get_db)):
     camper_band = get_camper_band(db, camper_id)
     return {"data": camper_band}
 
+
 @camper_routes.get("/camper_dashboard/{camper_id}", tags=["Campers"])
-def get_camper_dashboard(camper_id: int, db:Session = Depends(get_db)):
+def get_camper_dashboard(camper_id: int, db: Session = Depends(get_db)):
     camper_band = get_camper_band(db, camper_id)
 
-    camper_school = get_school_camp_for_camper(db, camper_id)
-    camper_summer = get_summer_camp_for_camper(db, camper_id)
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
-    data= {
+
+    camp_ids = []
+    for camper_in_camp in camper_subscribe_camps:
+        camp_ids.append(camper_in_camp["camp_id"])
+
+    for camper_in_camp in camper_cancelled_camps:
+        camp_ids.append(camper_in_camp["camp_id"])
+
+    for camper_in_camp in camper_passed_camps:
+        camp_ids.append(camper_in_camp["camp_id"])
+
+    camper_school = get_school_camp_for_camper(db, camper_id)
+    camper_summer = get_summer_camp_for_camper(db, camper_id)
+
+    camper_school_final = [d for d in camper_school if d["camp_id"] not in camp_ids]
+    camper_summer_final = [d for d in camper_summer if d["camp_id"] not in camp_ids]
+
+    data = {
         "camper_band": camper_band,
-        "available_school_camps": camper_school,
-        "summer_school_camps": camper_summer,
+        "available_school_camps": camper_school_final,
+        "summer_school_camps": camper_summer_final,
         "subscribe_camps": camper_subscribe_camps,
         "cancelled_camps": camper_cancelled_camps,
-        "passed_camps": camper_passed_camps
+        "passed_camps": camper_passed_camps,
     }
     return data
 
+
 @camper_routes.get("/camper_profile/{camper_id}", tags=["Campers"])
-def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
-    camper_band =get_camper_band(db, camper_id)
+def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
+    camper_band = get_camper_band(db, camper_id)
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     parent = get_parent_by_uuid(db, camper_info["camper"].parent_id)
     user = get_user_by_uuid(db, parent.user_id)
@@ -406,14 +414,14 @@ def get_camper_profile(camper_id:int, db:Session = Depends(get_db)):
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
-    data= {
+    data = {
         "camper_band": camper_band,
         "camper_info": camper_info,
         "parent": parent,
-        "user_email": user[0].email, 
-        "camper_comments_parent" : camper_comments_parent,
+        "user_email": user[0].email,
+        "camper_comments_parent": camper_comments_parent,
         "camper_subscribe_camps": camper_subscribe_camps,
         "camper_cancelled_camps": camper_cancelled_camps,
-        "camper_passed_camps": camper_passed_camps
+        "camper_passed_camps": camper_passed_camps,
     }
     return data

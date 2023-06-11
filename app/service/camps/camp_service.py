@@ -24,6 +24,8 @@ from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
     get_cancelled_by_camper,
     get_past_subscribe_by_camper,
+    get_camper_in_camp_by_camper_camp,
+    update_camper_in_camp_by_id
 )
 
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_camp
@@ -32,6 +34,7 @@ from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from schema.camps.camp_schema import CampCreate, CampModify
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.payments.payment_schema import PaymentCreate
+
 from utils.db import SessionLocal
 
 camp_router = APIRouter()
@@ -109,6 +112,17 @@ def subscribe_camp(
     )
     return {"camper_in_camp": camper_in_camp, "payment": payment}
 
+@camp_router.post("/unsubscribe_camp/", tags=["Camps"])
+def unsubscribe_camp(camp_id:int, camper_id:int, db: Session = Depends(get_db)):
+    camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+    new_camper_in_camp = CamperInCampModify(
+        status = 37,
+        payment_balance = camper_in_camp.payment_balance,
+        camp_id = camp_id,
+        camper_id = camper_id
+    ).dict(exclude_unset=True)
+    modify_camper_in_camp = update_camper_in_camp_by_id(db, camp_id, camper_id, new_camper_in_camp)
+    return modify_camper_in_camp
 
 @camp_router.get("/camperincamp/", tags=["Camps"])
 def get_camperincamp(db: Session = Depends(get_db)):

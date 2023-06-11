@@ -16,6 +16,9 @@ from crud.camps.camp_crud import (
 from crud.camps.location_crud import (
     get_location_by_uuid
 )
+from crud.camps.camper_in_camp_crud import (
+    get_camper_in_camp_by_camper_camp
+)
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
 )
@@ -84,7 +87,14 @@ def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get
     camp= get_camp_by_id(db, camp_id)
     location = get_location_by_uuid(db, camp.location_id)
     payments= get_payment_by_camper_camp(db, camper_id, camp_id)
-    if camp.show_payment_parent:
-        return{"camp": camp, "location": location.name,  "payments":payments}
+    camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+    
+    if camper_in_camp:
+        camper_subscribe = True
     else:
-        return{"camp": camp}
+        camper_subscribe = False
+
+    if camp.show_payment_parent:
+        return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name,  "payments":payments}
+    else:
+        return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name}
