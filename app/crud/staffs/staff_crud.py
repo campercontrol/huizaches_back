@@ -58,6 +58,9 @@ def accept_prospect(db, prospect_id: int):
 
 
 def staff_dashboard(db, staff_id: int):
+
+    camps_id = []
+
     available_camps = (
         db.query(
             StaffInCamp.id.label("staff_in_camp_id"),
@@ -81,6 +84,11 @@ def staff_dashboard(db, staff_id: int):
     )
 
     available_camps = db_mapping_rows_to_dict(available_camps)
+
+    for staff_in_camp in available_camps: 
+        camps_id.append(staff_in_camp["camp_id"])
+
+
 
     staff_camps = (
         db.query(
@@ -106,6 +114,9 @@ def staff_dashboard(db, staff_id: int):
     
     staff_camps = db_mapping_rows_to_dict(staff_camps)
 
+    for staff_in_camp in staff_camps: 
+        camps_id.append(staff_in_camp["camp_id"])
+
     next_camps = (
         db.query(
             Camp.id.label("camp_id"),        
@@ -125,8 +136,11 @@ def staff_dashboard(db, staff_id: int):
 
     next_camps = db_mapping_rows_to_dict(next_camps)
 
+
+    next_camps_final  = [d for d in next_camps if d['camp_id'] not in  camps_id]
+
     return {
         "available_camps": available_camps,
         "staff_camps": staff_camps,
-        "next_camps": next_camps,
+        "next_camps": next_camps_final,
     }

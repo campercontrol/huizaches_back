@@ -33,9 +33,11 @@ def get_school_camp_for_camper(db: Session, camper_id: int):
         .join(Location, Location.id == Camp.location_id)
         .filter(
             and_(
+                Camp.general_camp == False,
                 Camp.school_id == school_id[0],
                 Camp.active == True,
                 Camp.start >= date.today(),
+                Camp.registration == True
             )
         )
         .all()
@@ -59,6 +61,7 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
                 Camp.general_camp == True,
                 Camp.active == True,
                 Camp.start >= date.today(),
+                Camp.registration == True
             )
         )
     )
