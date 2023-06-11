@@ -51,12 +51,19 @@ def get_users(
     return {"data": list_user}
 
 
-@user_routes.post("/usuario", tags=["Usuarios"])
+@user_routes.post("/usuario", tags=["Usuarios"],status_code=200)
 def create_user(
     user: UserCreate,
-    db: Session = Depends(get_db),
+    response: Response,
+    db: Session = Depends(get_db)
 ):
     NAME = "create_user"
+
+    revisar_correo = get_user_by_email(db,user.email)
+
+    if revisar_correo:
+        response.status_code = 401
+        return {"mensaje": "Correo ya existente", "data": []}
 
     resultado = create_new_user(db, user)
 
@@ -64,8 +71,10 @@ def create_user(
     print(resultado)
     print("#=================")
     if resultado is not None:
+        response.status_code = 200
         return {"mensaje": "Exitoso", "data": resultado}
     else:
+        response.status_code = 401
         return {"mensaje": "No se pudo guardar en la BD", "data": resultado}
 
 
