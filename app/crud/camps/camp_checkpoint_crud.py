@@ -5,7 +5,7 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.camps import CampCheckpoint
-from model.camps import Camp
+from model.camps import Camp, Location
 
 from schema.camps.camp_checkpoint_schema import (
     CampCheckpointCreate,
@@ -64,3 +64,25 @@ def get_camp_checkpoint_by_camp(db, camp_id: int):
         .all()
     )
     return rows
+
+
+def get_camps_with_checkpoint(db):
+    camps_id = []
+    camp_checkpoints = get_all_camp_checkpoint(db)
+    for camp_checkpoint in camp_checkpoints:
+        if getattr(camp_checkpoint, "camp_id") not in camps_id:
+            camps_id.append(getattr(camp_checkpoint, "camp_id"))
+             
+    rows = (
+        db.query(Camp.id, Camp.name, Camp.start, Camp.end, Location.name)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(Camp.id.in_(camps_id))
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+def delete_camp_checkpoint(db, camp_checkpoint_id:int):
+    camp_checkpoint = db.query(CampCheckpoint).filter(CampCheckpoint.id==camp_checkpoint_id).first()
+    db.delete(camp_checkpoint)
+    db.commit()
+    return {"status" : True}

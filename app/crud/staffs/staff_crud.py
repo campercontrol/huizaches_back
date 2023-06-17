@@ -144,3 +144,11 @@ def staff_dashboard(db, staff_id: int):
         "staff_camps": staff_camps,
         "next_camps": next_camps_final,
     }
+
+def get_staff_by_id(db, staff_id:int):
+    staff = (
+        db.query(Staff)
+        .filter_by(id=staff_id)
+        .first()
+    )
+    return staff

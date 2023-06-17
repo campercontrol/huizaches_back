@@ -1,6 +1,9 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from model.campers import CamperExtraAnswer
+from model.camps import CampExtraQuestion
+
+from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     CamperExtraAnswerModify,
@@ -46,3 +49,18 @@ def update_extra_answer_by_id(
     )
     db.commit()
     return rows_updated
+
+def get_extra_answer_by_camper_camp(db, camper_id:int, camp_id:int):
+    
+    extra_answers = []
+    extra_questions = get_extra_question_by_camp(db, camp_id)
+    for extra_question in extra_questions:
+        extra_answers.append(
+        db.query(CamperExtraAnswer.answer, CampExtraQuestion.question)
+        .join(CampExtraQuestion, CampExtraQuestion.id==CamperExtraAnswer.question_id)
+        .join(CamperExtraAnswer, CamperExtraAnswer.camper_id)
+        .filter(CampExtraQuestion.id == getattr(extra_question, "id"))
+        .all()
+        )
+        
+    return extra_answers

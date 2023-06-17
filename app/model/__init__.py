@@ -10,3 +10,4 @@ from model.staffs import *
 from model.role import *
 from model.user import *
 from model.permission import *
+from model.trainings import *

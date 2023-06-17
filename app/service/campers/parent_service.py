@@ -88,13 +88,13 @@ def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get
     location = get_location_by_uuid(db, camp.location_id)
     payments= get_payment_by_camper_camp(db, camper_id, camp_id)
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
-    
+
     if camper_in_camp:
         camper_subscribe = True
     else:
         camper_subscribe = False
 
     if camp.show_payment_parent:
-        return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name,  "payments":payments}
+        return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name,  "payments":payments, "payment_balance": camper_in_camp.payment_balance}
     else:
         return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name}

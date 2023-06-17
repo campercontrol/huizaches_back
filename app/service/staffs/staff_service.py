@@ -8,7 +8,8 @@ from crud.staffs.staff_crud import (
     create_new_prospect,
     accept_prospect,
     delete_prospect,
-    staff_dashboard
+    staff_dashboard,
+    get_staff_by_id
 )
 
 from schema.staffs.staff_schema import (
@@ -56,3 +57,8 @@ def delete_prospect_by_id(prospect_id:int, db:Session = Depends(get_db)):
 def get_staff_dashboard(staff_id:int, db:Session = Depends(get_db)):
     staff_dashboard_info = staff_dashboard(db, staff_id)
     return{"data": staff_dashboard_info}
+
+@staff_routes.get("/staff/{staff_id}", tags = ["Staff"])
+def get_staff_profile(staff_id:int, db:Session = Depends(get_db)):
+    staff = get_staff_by_id(db, staff_id)
+    return{"data": staff}
