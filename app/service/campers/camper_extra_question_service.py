@@ -72,3 +72,7 @@ def update_camper_extra_answer(
         }
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+#@extra_answer_routes.get("/extra_answers_camper/{camp_id}/{camper_id}")
+#def get_extra_answers_camper(camp_id:int, camper_id:int, db:Session=Depends(get_db)):
+#    get_extra_answer_by_camper_camp(db, camper_id, camp_id)

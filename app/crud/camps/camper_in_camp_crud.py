@@ -46,7 +46,9 @@ def update_camper_in_camp_by_id(
     print(type(modify_camper_in_camp))
     rows_updated = (
         db.query(CamperInCamp)
-        .filter(and_(CamperInCamp.camp_id==camp_id, CamperInCamp.camper_id==camper_id))
+        .filter(
+            and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)
+        )
         .update(modify_camper_in_camp, synchronize_session="fetch")
     )
     print(rows_updated)
@@ -138,14 +140,33 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
 
 
 def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int):
-    camper_in_camp = db.query(CamperInCamp).filter(
-        and_(
-            CamperInCamp.camper_id == camper_id,
-            CamperInCamp.camp_id == camp_id,
-            CamperInCamp.status == 36,
+    camper_in_camp = (
+        db.query(CamperInCamp)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.camp_id == camp_id,
+                CamperInCamp.status == 36,
+            )
         )
-    ).first()
+        .first()
+    )
     if camper_in_camp:
         return camper_in_camp
-    else: 
+    else:
         return False
+
+
+def get_campers_subscribe_to_camp(db: Session, camp_id: int):
+    campers = (
+        db.query(
+            Camper.id.label("camper_id"),
+            Camper.name.label("camper_name"),
+            Camper.lastname_father.label("camper_lastname_father"),
+            Camper.lastname_mother.label("camper_lastname_mother"),
+        )
+        .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .all()
+    )
+    return db_mapping_rows_to_dict(campers)

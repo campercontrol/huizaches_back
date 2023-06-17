@@ -6,7 +6,7 @@ from datetime import date
 
 from model.payments import Payment
 from model.campers import Camper
-from model.camps import Camp
+from model.camps import Camp, CamperInCamp
 
 
 from schema.payments.payment_schema import (

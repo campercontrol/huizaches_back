@@ -27,6 +27,9 @@ from service.payments.payment_transaction_type_service import payment_transactio
 from service.payments.camper_extra_charge_service import camper_extra_charge_routes
 from service.staffs.staff_service import staff_routes
 from service.camps.staff_in_camp_service import staff_in_camp_routes
+from service.training.training_service import training_router
+from service.training.training_event_service import training_event_router
+from service.training.staff_in_training_service import staff_in_training_router
 
 app = FastAPI()
 
@@ -58,6 +61,9 @@ app.include_router(payment_transaction_type_routes)
 app.include_router(camper_extra_charge_routes)
 app.include_router(staff_routes)
 app.include_router(staff_in_camp_routes)
+app.include_router(training_router)
+app.include_router(training_event_router)
+app.include_router(staff_in_training_router)
 
 from service.role import role_routes
 from service.user import user_routes
