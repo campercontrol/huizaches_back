@@ -17,7 +17,7 @@ class CamperLicensedMedicine(Base):
         nullable=False,
         autoincrement=True
     )
-    camper_id = Column("camper_id", ForeignKey("campers_camper.id"))
+    camper_id = Column("camper_id", ForeignKey("campers_camper.id", ondelete="cascade"))
     licensed_medicine_id = Column(
         "licensed_medicine_id", ForeignKey("catalogs_licensed_medicine.id")
     )

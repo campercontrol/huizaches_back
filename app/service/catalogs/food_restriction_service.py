@@ -7,7 +7,8 @@ from crud.catalogs.food_restriction_crud import (
     get_all_food_restriction,
     get_food_restriction_by_uuid,
     create_new_food_restriction,
-    update_food_restriction_by_id
+    update_food_restriction_by_id,
+    delete_food_restriction
 )
 from schema.catalogs.food_restriction_schema import(
     FoodRestrictionCreate,
@@ -44,7 +45,7 @@ def create_food_restriction(new_prueba:FoodRestrictionCreate,db: Session = Depen
     return {"data": list_food_restriction}
 
 @food_restriction_routes.post("/food_restriction/{food_restriction_id}", tags=["Catalogs"])
-def create_food_restriction(food_restriction_id:str,modify_food_restriction:FoodRestrictionModify,db: Session = Depends(get_db)):
+def update_food_restriction(food_restriction_id:str,modify_food_restriction:FoodRestrictionModify,db: Session = Depends(get_db)):
 
     update_data = modify_food_restriction.dict(exclude_unset=True)
     print(update_data)
@@ -56,3 +57,7 @@ def create_food_restriction(food_restriction_id:str,modify_food_restriction:Food
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@food_restriction_routes.delete("/delete_food_restriction/{food_restriction_id}", tags=["Catalogs"])
+def delete_food_restriction_by_id(food_restriction_id:int, db: Session = Depends(get_db)):
+    status = delete_food_restriction(db, food_restriction_id)
+    return{"status": status}

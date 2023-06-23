@@ -8,7 +8,8 @@ from crud.campers.school_crud import (
     get_school_by_uuid,
     create_new_school,
     update_school_by_id,
-    get_active_school
+    get_active_school,
+    delete_school
 )    
 
 from schema.campers.school_schema import(
@@ -59,3 +60,8 @@ def update_school(school_id:str,modify_school:SchoolModify,db: Session = Depends
 def get_all_active_school(db: Session = Depends(get_db)):
     list_school = get_active_school(db)
     return {"data": list_school}
+
+@school_routes.delete("/delete_school/{school_id}", tags=["Campers"])
+def delete_school_by_id(school_id:int, db: Session = Depends(get_db)):
+    status = delete_school(db, school_id)
+    return{"status": status}

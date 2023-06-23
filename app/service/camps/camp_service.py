@@ -12,6 +12,7 @@ from crud.camps.camp_crud import (
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id,
+    delete_camp
 )
 from crud.campers.camper_crud import (
     get_camper_band,
@@ -136,3 +137,8 @@ def get_camp_extras(camp_id: int, db: Session = Depends(get_db)):
     extra_questions = get_extra_question_by_camp(db, camp_id)
     data = {"extra_charges": extra_charges, "extra_questions": extra_questions}
     return data
+
+@camp_router.delete("/delete_camp/{camp_id}", tags=["Camps"])
+def delete_camp_by_id(camp_id:int, db: Session = Depends(get_db)):
+    status = delete_camp(db, camp_id)
+    return{"status": status}

@@ -8,7 +8,8 @@ from crud.camps.location_crud import (
     get_all_active_location_id_name,
     get_location_by_uuid,
     update_location_by_id,
-    create_new_location
+    create_new_location,
+    delete_location
 )
 from schema.camps.location_schema import(
     LocationCreate,
@@ -61,3 +62,8 @@ def update_location(location_id:str, modify_location:LocationModify, db: Session
 def get_all_active_location(db: Session = Depends(get_db)):
     list_location = get_all_active_location_id_name(db)
     return {"data": list_location}
+
+@location_routes.delete("/delete_location/{location_id}", tags=["Camps"])
+def delete_location_by_id(location_id:int, db: Session = Depends(get_db)):
+    status = delete_location(db, location_id)
+    return{"status": status}

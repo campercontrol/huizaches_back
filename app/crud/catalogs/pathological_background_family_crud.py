@@ -72,3 +72,9 @@ def update_pathological_background_family_by_id(
     )
     db.commit()
     return rows_updated
+
+def delete_pathological_back_fm(db: Session, pathological_back_fm_id:int):
+    pathological_back_fm = db.query(PathologicalBackgroundFamily).filter(PathologicalBackgroundFamily.id==pathological_back_fm_id).first()
+    db.delete(pathological_back_fm)
+    db.commit()
+    return {"status" : True}

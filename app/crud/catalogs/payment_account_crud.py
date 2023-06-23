@@ -1,4 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from model.catalogs import PaymentAccount
 from utils.db import db_mapping_rows_to_dict
@@ -49,3 +50,9 @@ def update_payment_account_by_id(db, payment_account_id, modify_payment_account)
     )
     db.commit()
     return rows_updated
+
+def delete_payment_account(db: Session, payment_account_id:int):
+    payment_account = db.query(PaymentAccount).filter(PaymentAccount.id==payment_account_id).first()
+    db.delete(payment_account)
+    db.commit()
+    return {"status" : True}

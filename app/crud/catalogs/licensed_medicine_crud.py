@@ -68,3 +68,9 @@ def update_licensed_medicine_by_id(
     )
     db.commit()
     return rows_updated
+
+def delete_licensed_medicine(db: Session, licensed_medicine_id:int):
+    licensed_medicine = db.query(LicensedMedicine).filter(LicensedMedicine.id==licensed_medicine_id).first()
+    db.delete(licensed_medicine)
+    db.commit()
+    return {"status" : True}

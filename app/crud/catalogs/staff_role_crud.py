@@ -1,4 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from model.catalogs import StaffRole
 from utils.db import db_mapping_rows_to_dict
@@ -50,3 +51,9 @@ def update_staff_role_by_id(db, staff_role_id, modify_staff_role):
     )
     db.commit()
     return rows_updated
+
+def delete_staff_role(db: Session, staff_role_id:int):
+    staff_role = db.query(StaffRole).filter(StaffRole.id==staff_role_id).first()
+    db.delete(staff_role)
+    db.commit()
+    return {"status" : True}

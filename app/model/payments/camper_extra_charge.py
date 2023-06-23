@@ -29,8 +29,6 @@ class CamperExtraCharge(Base):
     )
     id = Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True)
     is_selected = Column(Boolean, nullable=False)
-    created = Column(DateTime(True), nullable=False)
-    updated = Column(DateTime(True), nullable=False)
     camper_id = Column(
         ForeignKey("campers_camper.id"), 
         nullable=False, 
@@ -42,4 +40,11 @@ class CamperExtraCharge(Base):
         nullable=False,
         default=0,
         doc="Camp Extra Charge",
+    )
+    created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(
+        "updated",
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
     )

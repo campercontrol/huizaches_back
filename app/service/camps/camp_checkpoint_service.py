@@ -10,15 +10,14 @@ from crud.camps.camp_checkpoint_crud import (
     create_new_camp_checkpoint,
     update_camp_checkpoint_by_id,
     get_camps_with_checkpoint,
-    delete_camp_checkpoint
+    delete_camp_checkpoint,
 )
 
-from crud.camps.camper_in_camp_crud import (
-    get_campers_subscribe_to_camp
-)
+from crud.camps.camper_in_camp_crud import get_campers_subscribe_to_camp
 
 from crud.campers.camper_checkpoint_crud import (
-    get_camper_checkpoint_by_camper
+    get_camper_checkpoint_by_camper,
+    get_camper_checkpoint_by_camper_check_id,
 )
 
 from schema.camps.camp_checkpoint_schema import (
@@ -44,10 +43,10 @@ def get_camp_checkpoint(db: Session = Depends(get_db)):
     return {"data": list_camp_checkpoint}
 
 
-@camp_checkpoint_routes.get("/camp_checkpoint/{camp_checkpoint_id}", tags=["CampCheckpoint"])
-def get_camp_checkpoint_by_uid(
-    camp_checkpoint_id: str, db: Session = Depends(get_db)
-):
+@camp_checkpoint_routes.get(
+    "/camp_checkpoint/{camp_checkpoint_id}", tags=["CampCheckpoint"]
+)
+def get_camp_checkpoint_by_uid(camp_checkpoint_id: str, db: Session = Depends(get_db)):
     list_camp_checkpoint = get_camp_checkpoint_by_id(db, camp_checkpoint_id)
     return {"data": list_camp_checkpoint}
 
@@ -75,38 +74,71 @@ def update_camp_checkpoint(
     )
 
     if camp_checkpoint_update_result != 0:
-        exist_camp_checkpoint = get_camp_checkpoint_by_id(
-            db, camp_checkpoint_id
-        )
+        exist_camp_checkpoint = get_camp_checkpoint_by_id(db, camp_checkpoint_id)
         return {"mensaje": "Actualizado Correctamente", "data": exist_camp_checkpoint}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
-@camp_checkpoint_routes.get("/camp_checkpoint_by_camp/{camp_id}", tags=["CampCheckpoint"])
+
+@camp_checkpoint_routes.get(
+    "/camp_checkpoint_by_camp/{camp_id}", tags=["CampCheckpoint"]
+)
 def checkpoint_bycamp(camp_id, db: Session = Depends(get_db)):
     list_checkpoints = get_camp_checkpoint_by_camp(db, camp_id)
-    return{"data": list_checkpoints}
+    return {"data": list_checkpoints}
 
-@camp_checkpoint_routes.get("/camps_with_checkpoint/", tags= ["CampCheckpoint"])
+
+@camp_checkpoint_routes.get("/camps_with_checkpoint/", tags=["CampCheckpoint"])
 def camps_with_checkpoint(db: Session = Depends(get_db)):
     camps_checkpoint = get_camps_with_checkpoint(db)
-    return{"data": camps_checkpoint} 
+    return {"data": camps_checkpoint}
 
-@camp_checkpoint_routes.delete("/delete_camp_checkpoint/{camp_checkpoint_id}", tags=["CampCheckpoint"])
-def delete_checkpoint_by_id(camp_checkpoint_id:int, db: Session = Depends(get_db)):
+
+@camp_checkpoint_routes.delete(
+    "/delete_camp_checkpoint/{camp_checkpoint_id}", tags=["CampCheckpoint"]
+)
+def delete_checkpoint_by_id(camp_checkpoint_id: int, db: Session = Depends(get_db)):
     status = delete_camp_checkpoint(db, camp_checkpoint_id)
-    return{"status": status}
+    return {"status": status}
 
-@camp_checkpoint_routes.get("/camp_checkpoint_module/{camp_id}", tags=["CampCheckpoint"])
-def get_camp_checkpoint_module(camp_id:int, db: Session = Depends(get_db)):
 
-    campers_list= get_campers_subscribe_to_camp(db, camp_id)
-    camper_checks = []
+@camp_checkpoint_routes.get(
+    "/camp_checkpoint_module/{camp_id}", tags=["CampCheckpoint"]
+)
+def get_camp_checkpoint_module(camp_id: int, db: Session = Depends(get_db)):
+    data = []
+    campers_list = get_campers_subscribe_to_camp(db, camp_id)
     for camper in campers_list:
-        camper_checkpoint = get_camper_checkpoint_by_camper(db, camper.camper_id)
-        camper_checks.append(camper_checkpoint)
+        all_checks = []
+        camper_checks = []
+        camper_checkpoints = get_camper_checkpoint_by_camper(db, camper.camper_id)
+        for camper_check in camper_checkpoints:
+            camper_checks.append(getattr(camper_check, "checkpoint_id"))
+        camp_checks = get_camp_checkpoint_by_camp(db, camp_id)
 
-    return{
-        "campers": campers_list,
-        "campers_checkpoint": camper_checks
-    } 
+        for camp_check in camp_checks:
+            if getattr(camp_check, "id") in camper_checks:
+                camper_check_case = get_camper_checkpoint_by_camper_check_id(
+                    db, camper.camper_id, getattr(camp_check, "id")
+                )
+                all_checks.append(
+                    {
+                        "checkpoint_id": camp_check.id,
+                        "checkpoint_date": camper_check_case.checkin_date,
+                        "checkpoint_check": True,
+                    }
+                )
+            else:
+                all_checks.append(
+                    {
+                        "checkpoint_id": camp_check.id,
+                        "checkpoint_date": False,
+                        "checkpoint_check": False,
+                    }
+                )
+
+        data.append({"camper": camper, "checkpoints": all_checks})
+
+    return {
+        "data": data,
+    }

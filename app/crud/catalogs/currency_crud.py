@@ -1,4 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from model.catalogs import Currency
 from utils.db import db_mapping_rows_to_dict
@@ -49,3 +50,9 @@ def update_currency_by_id(db, currency_id, modify_currency):
     )
     db.commit()
     return rows_updated
+
+def delete_currency(db: Session, currency_id:int):
+    currency = db.query(Currency).filter(Currency.id==currency_id).first()
+    db.delete(currency)
+    db.commit()
+    return {"status" : True}

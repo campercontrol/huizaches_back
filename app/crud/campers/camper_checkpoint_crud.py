@@ -64,3 +64,13 @@ def get_camper_checkpoint_by_camper(db, camper_id: int):
         .all()
     )
     return rows
+
+
+def get_camper_checkpoint_by_camper_check_id(db, camper_id: int, checkpoint_id:int):
+    rows = (
+        db.query(CamperCheckpoint)
+        .join(Camper, Camper.id == camper_id)
+        .filter(and_(CamperCheckpoint.camper_id == camper_id, CamperCheckpoint.checkpoint_id == checkpoint_id))
+        .first()
+    )
+    return rows

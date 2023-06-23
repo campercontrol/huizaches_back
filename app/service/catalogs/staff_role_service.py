@@ -7,7 +7,8 @@ from crud.catalogs.staff_role_crud import (
     get_all_staff_role,
     get_staff_role_by_uuid,
     create_new_staff_role,
-    update_staff_role_by_id
+    update_staff_role_by_id,
+    delete_staff_role
 )
 from schema.catalogs.staff_role_schema import(
     StaffRoleCreate,
@@ -44,7 +45,7 @@ def create_staff_role(new_prueba:StaffRoleCreate,db: Session = Depends(get_db)):
     return {"data": list_staff_role}
 
 @staff_role_routes.post("/staff_role/{staff_role_id}", tags=["Catalogs"])
-def create_staff_role(staff_role_id:str,modify_staff_role:StaffRoleModify,db: Session = Depends(get_db)):
+def update_staff_role(staff_role_id:str,modify_staff_role:StaffRoleModify,db: Session = Depends(get_db)):
 
     update_data = modify_staff_role.dict(exclude_unset=True)
     print(update_data)
@@ -56,3 +57,7 @@ def create_staff_role(staff_role_id:str,modify_staff_role:StaffRoleModify,db: Se
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@staff_role_routes.delete("/delete_staff_role/{staff_role_id}", tags=["Catalogs"])
+def delete_staff_role_by_id(staff_role_id:int, db: Session = Depends(get_db)):
+    status = delete_staff_role(db, staff_role_id)
+    return{"status": status}

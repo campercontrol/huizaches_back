@@ -17,6 +17,6 @@ class CamperPathologicalBackground(Base):
         nullable=False,
         autoincrement=True
     )
-    camper_id = Column('camper_id', ForeignKey('campers_camper.id'))
+    camper_id = Column('camper_id', ForeignKey('campers_camper.id', ondelete="cascade"))
     pathological_background_id = Column('pathological_background_id', ForeignKey('catalogs_pathological_background.id'))
     is_active = Column('is_active', Boolean, doc='Seleccionada por el camper')
