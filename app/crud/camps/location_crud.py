@@ -53,3 +53,9 @@ def update_location_by_id(db: Session, location_id: int, modify_location: Locati
     )
     db.commit()
     return rows_updated
+
+def delete_location(db: Session, location_id:int):
+    location = db.query(Location).filter(Location.id==location_id).first()
+    db.delete(location)
+    db.commit()
+    return {"status" : True}

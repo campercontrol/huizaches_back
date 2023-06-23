@@ -59,3 +59,9 @@ def update_vaccine_by_id(db: Session, vaccine_id: int, modify_vaccine: VaccineMo
     )
     db.commit()
     return rows_updated
+
+def delete_vaccine(db: Session, vaccine_id:int):
+    vaccine = db.query(Vaccine).filter(Vaccine.id==vaccine_id).first()
+    db.delete(vaccine)
+    db.commit()
+    return {"status" : True}

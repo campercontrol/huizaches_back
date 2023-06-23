@@ -7,7 +7,8 @@ from crud.catalogs.currency_crud import (
     get_all_currency,
     get_currency_by_uuid,
     create_new_currency,
-    update_currency_by_id
+    update_currency_by_id,
+    delete_currency
 )
 from schema.catalogs.currency_schema import(
     CurrencyCreate,
@@ -44,7 +45,7 @@ def create_currency(new_prueba:CurrencyCreate,db: Session = Depends(get_db)):
     return {"data": list_currency}
 
 @currency_routes.post("/currency/{currency_id}", tags=["Catalogs"])
-def create_currency(currency_id:str,modify_currency:CurrencyModify,db: Session = Depends(get_db)):
+def modify_currency(currency_id:str,modify_currency:CurrencyModify,db: Session = Depends(get_db)):
 
     update_data = modify_currency.dict(exclude_unset=True)
     print(update_data)
@@ -56,3 +57,7 @@ def create_currency(currency_id:str,modify_currency:CurrencyModify,db: Session =
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@currency_routes.delete("/delete_currency/{currency_id}", tags=["Catalogs"])
+def delete_currency_by_id(currency_id:int, db: Session = Depends(get_db)):
+    status = delete_currency(db, currency_id)
+    return{"status": status}

@@ -63,3 +63,8 @@ def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify
 
 # def get_campers_from_parent
  
+def delete_parent(db: Session, parent_id:int):
+    parent = db.query(Parent).filter(Parent.id==parent_id).first()
+    db.delete(parent)
+    db.commit()
+    return {"status" : True}

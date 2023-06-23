@@ -68,3 +68,9 @@ def update_food_restriction_by_id(
     )
     db.commit()
     return rows_updated
+
+def delete_food_restriction(db: Session, food_restriction_id:int):
+    food_restriction = db.query(FoodRestriction).filter(FoodRestriction.id==food_restriction_id).first()
+    db.delete(food_restriction)
+    db.commit()
+    return {"status" : True}

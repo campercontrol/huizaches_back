@@ -23,7 +23,7 @@ class CamperInCamp(Base):
     status = Column(ForeignKey("catalogs_constant.id"), nullable=False, default=0, doc='Status de inscripción')
     payment_balance = Column(Float(53), nullable=False)
     camp_id = Column(ForeignKey("camps_camp.id"), nullable=False, default=0, doc='Campamento')
-    camper_id = Column(ForeignKey("campers_camper.id"), nullable=False, default=0, doc='Camper')
+    camper_id = Column(ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, default=0, doc='Camper')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 

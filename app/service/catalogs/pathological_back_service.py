@@ -7,7 +7,8 @@ from crud.catalogs.pathological_background_crud import (
     get_all_pathological_background,
     get_pathological_background_by_uuid,
     create_new_pathological_background,
-    update_pathological_background_by_id
+    update_pathological_background_by_id,
+    delete_pathological_back
 )
 from schema.catalogs.pathological_back_schema import(
     PathologicalBackgroundCreate,
@@ -44,7 +45,7 @@ def create_pathological_background(new_prueba:PathologicalBackgroundCreate,db: S
     return {"data": list_pathological_background}
 
 @pathological_background_routes.post("/pathological_background/{pathological_background_id}", tags=["Catalogs"])
-def create_pathological_background(pathological_background_id:str,modify_pathological_background:PathologicalBackgroundModify,db: Session = Depends(get_db)):
+def update_pathological_background(pathological_background_id:str,modify_pathological_background:PathologicalBackgroundModify,db: Session = Depends(get_db)):
 
     update_data = modify_pathological_background.dict(exclude_unset=True)
     print(update_data)
@@ -56,3 +57,7 @@ def create_pathological_background(pathological_background_id:str,modify_patholo
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@pathological_background_routes.delete("/delete_pathological_back/{pathological_back_id}", tags=["Catalogs"])
+def delete_pathological_back_by_id(pathological_back_id:int, db: Session = Depends(get_db)):
+    status = delete_pathological_back(db, pathological_back_id)
+    return{"status": status}

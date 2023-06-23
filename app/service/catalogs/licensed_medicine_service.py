@@ -7,7 +7,8 @@ from crud.catalogs.licensed_medicine_crud import (
     get_all_licensed_medicine,
     get_licensed_medicine_by_uuid,
     create_new_licensed_medicine,
-    update_licensed_medicine_by_id
+    update_licensed_medicine_by_id,
+    delete_licensed_medicine
 )
 from schema.catalogs.licensed_medicine_schema import(
     LicensedMedicineCreate,
@@ -56,3 +57,7 @@ def update_licensed_medicine(licensed_medicine_id:str,modify_licensed_medicine:L
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@licensed_medicine_routes.delete("/delete_licensed_medicine/{licensed_medicine_id}", tags=["Catalogs"])
+def delete_licensed_medicine_by_id(licensed_medicine_id:int, db: Session = Depends(get_db)):
+    status = delete_licensed_medicine(db, licensed_medicine_id)
+    return{"status": status}

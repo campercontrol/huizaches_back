@@ -1,4 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from model.campers import School
 from utils.db import db_mapping_rows_to_dict
@@ -65,3 +66,10 @@ def update_school_by_id(db, school_id, modify_school):
 def get_active_school(db):
     rows= db.query(School.id, School.name).filter_by(active=True).all()
     return db_mapping_rows_to_dict(rows)
+
+def delete_school(db: Session, school_id:int):
+    school = db.query(School).filter(School.id==school_id).first()
+    db.delete(school)
+    db.commit()
+    return {"status" : True}
+

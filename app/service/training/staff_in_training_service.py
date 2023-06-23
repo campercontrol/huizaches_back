@@ -7,7 +7,8 @@ from crud.training.staff_in_training_crud import (
     get_all_staff_in_training,
     create_new_staff_in_training,
     volunteer_staff,
-    unsubscribe_staff
+    unsubscribe_staff,
+    staff_training_dashboard
 )
 from schema.trainings.staff_in_training_schema import(
     StaffInTrainingCreate,
@@ -46,3 +47,8 @@ def create_staff_volunteer(new_staff_in_training:StaffInTrainingCreate, db: Sess
 def unsubscribe_staff_to_camp(id_staff_in_training:int , db: Session = Depends(get_db)):
     staff_in_training = unsubscribe_staff(db, id_staff_in_training)
     return {"data": staff_in_training}
+
+@staff_in_training_router.get("/staff/dashboard_trainig/{staff_id}", tags=["StaffInTraining"])
+def get_staff_dashboard_training(staff_id:int, db: Session = Depends(get_db)):
+    training_dashboard = staff_training_dashboard(db, staff_id)
+    return {"data": training_dashboard }

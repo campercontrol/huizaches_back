@@ -9,6 +9,7 @@ from crud.campers.parent_crud import (
     create_new_parent,
     create_new_parent_user_id,
     update_parent_by_id,
+    delete_parent
 )    
 from crud.camps.camp_crud import (
     get_camp_by_id
@@ -94,7 +95,13 @@ def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get
     else:
         camper_subscribe = False
 
-    if camp.show_payment_parent:
+    if camp.show_payment_parent and camper_subscribe:
         return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name,  "payments":payments, "payment_balance": camper_in_camp.payment_balance}
     else:
         return{"camper_subscribe": camper_subscribe, "camp": camp, "location": location.name}
+
+@parent_routes.delete("/delete_parent/{parent_id}", tags=["Campers"])
+def delete_parent_by_id(parent_id:int, db: Session = Depends(get_db)):
+    status = delete_parent(db, parent_id)
+    return{"status": status}
+

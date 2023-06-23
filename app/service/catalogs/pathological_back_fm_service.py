@@ -7,7 +7,8 @@ from crud.catalogs.pathological_background_family_crud import (
     get_all_pathological_background_family,
     get_pathological_background_family_by_uuid,
     create_new_pathological_background_family,
-    update_pathological_background_family_by_id
+    update_pathological_background_family_by_id,
+    delete_pathological_back_fm
 )
 from schema.catalogs.pathological_back_fm_schema import(
     PathologicalBackgroundFamilyCreate,
@@ -44,7 +45,7 @@ def create_pathological_background_family(new_prueba:PathologicalBackgroundFamil
     return {"data": list_pathological_background_family}
 
 @pathological_background_family_routes.post("/pathological_background_family/{pathological_background_family_id}", tags=["Catalogs"])
-def create_pathological_background_family(pathological_background_family_id:str,modify_pathological_background_family:PathologicalBackgroundFamilyModify,db: Session = Depends(get_db)):
+def update_pathological_background_family(pathological_background_family_id:str,modify_pathological_background_family:PathologicalBackgroundFamilyModify,db: Session = Depends(get_db)):
 
     update_data = modify_pathological_background_family.dict(exclude_unset=True)
     print(update_data)
@@ -56,3 +57,8 @@ def create_pathological_background_family(pathological_background_family_id:str,
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+
+@pathological_background_family_routes.delete("/delete_pathological_back_fm/{pathological_back_fm_id}", tags=["Catalogs"])
+def delete_pathological_back_fm_by_id(pathological_back_fm_id:int, db: Session = Depends(get_db)):
+    status = delete_pathological_back_fm(db, pathological_back_fm_id)
+    return{"status": status}

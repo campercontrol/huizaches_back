@@ -98,3 +98,8 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
     db.commit()
     return rows_updated
 
+def delete_camp(db: Session, camp_id:int):
+    camp = db.query(Camp).filter(Camp.id==camp_id).first()
+    db.delete(camp)
+    db.commit()
+    return {"status" : True}

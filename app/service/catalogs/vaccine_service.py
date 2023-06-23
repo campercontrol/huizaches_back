@@ -7,7 +7,8 @@ from crud.catalogs.vaccine_crud import (
     get_all_vaccine,
     get_vaccine_by_uuid,
     create_new_vaccine,
-    update_vaccine_by_id
+    update_vaccine_by_id,
+    delete_vaccine
 )
 from schema.catalogs.vaccine_schema import(
     VaccineCreate,
@@ -56,3 +57,7 @@ def update_vaccine(vaccine_id:str,modify_vaccine:VaccineModify,db: Session = Dep
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
+@vaccine_routes.delete("/delete_vaccine/{vaccine_id}", tags=["Catalogs"])
+def delete_vaccine_by_id(vaccine_id:int, db: Session = Depends(get_db)):
+    status = delete_vaccine(db, vaccine_id)
+    return{"status": status}

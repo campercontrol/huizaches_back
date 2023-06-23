@@ -17,8 +17,9 @@ class CamperFoodRestriction(Base):
         nullable=False,
         autoincrement=True,
     )
-    camper_id = Column("camper_id", ForeignKey("campers_camper.id"))
+    camper_id = Column("camper_id", ForeignKey("campers_camper.id", ondelete="cascade"))
     food_restriction_id = Column(
         "food_restriction_id", ForeignKey("catalogs_food_restriction.id")
     )
     is_active = Column("is_active", Boolean, doc="Seleccionada por el camper")
+

@@ -17,6 +17,6 @@ class CamperVaccine(Base):
         autoincrement=True,
         doc='id del camper',
     )
-    camper_id = Column('camper_id', ForeignKey('campers_camper.id'))
+    camper_id = Column('camper_id', ForeignKey('campers_camper.id', ondelete="cascade"))
     vaccine_id = Column('vaccine_id', ForeignKey('catalogs_vaccine.id'))
     is_active = Column('is_active', Boolean, doc='Seleccionada por el camper')
