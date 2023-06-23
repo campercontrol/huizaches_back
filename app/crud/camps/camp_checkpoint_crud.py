@@ -60,7 +60,7 @@ def get_camp_checkpoint_by_camp(db, camp_id: int):
     rows = (
         db.query(CampCheckpoint)
         .join(Camp, Camp.id == camp_id)
-        .filter_by(id = camp_id)
+        .filter_by(camp_id = camp_id)
         .all()
     )
     return rows
