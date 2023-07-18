@@ -49,7 +49,7 @@ class Camper(Base):
     contact_homephone = Column(String(512), nullable=False,  doc='Telefono de casa del contacto de emergencia')
     contact_cellphone = Column(String(512), nullable=False,  doc='Celular del contacto de emergencia')
     parent_id = Column(ForeignKey("campers_parent.id"), nullable=False, default=0, doc='Titular de la cuenta')
-    record_id = Column(Integer, index=True, doc='Record de campamentos')
+    record_id = Column(ForeignKey("campers_camperrecords.id"), nullable=False, default=0, doc='Titular de la cuenta')
     
 
     created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)
