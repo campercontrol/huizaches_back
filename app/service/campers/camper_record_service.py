@@ -50,7 +50,7 @@ def create_camper_record(
     return {"data": list_camper_record}
 
 
-@update_camper_record_by_id.patch(
+@camper_record_routes.patch(
     "/camper_record/{camper_record_id}", tags=["CamperRecord"]
 )
 def update_camper_record(
