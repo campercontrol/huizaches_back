@@ -9,3 +9,4 @@ from model.campers.camper_pathological_background_fm import CamperPathologicalBa
 from model.campers.camper_extra_answer import CamperExtraAnswer
 from model.campers.camper_comment import CamperComment
 from model.campers.camper_checkpoint import CamperCheckpoint
+from model.campers.camper_record import CamperRecord

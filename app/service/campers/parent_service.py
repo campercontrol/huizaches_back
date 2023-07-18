@@ -19,7 +19,8 @@ from crud.camps.location_crud import (
     get_location_by_uuid
 )
 from crud.camps.camper_in_camp_crud import (
-    get_camper_in_camp_by_camper_camp
+    get_camper_in_camp_by_camper_camp,
+    get_camps_name_amount_camper
 )
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
@@ -78,11 +79,29 @@ def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends
         return {"mensaje": "Actualizado Correctamente", "data": exist_parent}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
-    
+        
 @parent_routes.get("/parent_dashboard/{parent_id}", tags=["Campers"])
 def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
+    info = []
+    parent_total_amount = 0
     list_campers= get_campers_from_parent(db, parent_id)
-    return{"data": list_campers}
+    for camper in list_campers:
+        total_amount = 0
+        camps_info = get_camps_name_amount_camper(db, camper.get('id'))
+        for camp in camps_info:
+            total_amount = total_amount + camp.get('camper_payment_balance')
+        info.append(
+            {
+                "camper": camper,
+                "camper_balance": total_amount,
+                "camps": camps_info
+            }
+        )
+        parent_total_amount = parent_total_amount + total_amount
+    return{
+            "parent_total_amount": parent_total_amount,
+            "campers": info            
+        }
 
 @parent_routes.get("/parent_camper_in_camp/{camper_id}/{camp_id}", tags=["Campers"])
 def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get_db)):

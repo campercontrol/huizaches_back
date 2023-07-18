@@ -111,6 +111,31 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
     )
     return db_mapping_rows_to_dict(rows)
 
+def get_all_cancelled_by_camper(db: Session, camper_id: int):
+    rows = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 37,
+                Camp.active == True,
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
 
 def get_past_subscribe_by_camper(db: Session, camper_id: int):
     rows = (
@@ -170,3 +195,34 @@ def get_campers_subscribe_to_camp(db: Session, camp_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(campers)
+
+def get_camps_name_amount_camper(db: Session, camper_id: int):
+    data = []
+    camps = get_subscribe_by_camper(db, camper_id)
+    print("###################################################")
+    print(camps)
+    print(camper_id)
+    cancelled_camps = get_all_cancelled_by_camper(db, camper_id)
+    
+    for camp in camps:
+        data.append(
+            {
+                "camp_id": getattr(camp, "camp_id"),
+                "camp_name": getattr(camp, "camp_name"),
+                "camper_payment_balance": getattr(camp, "camper_payment_balance"),
+            }
+        )
+
+    for camp in cancelled_camps:
+        if getattr(camp, "camper_payment_balance") > 0:
+            data.append(
+                {
+                    "camp_id": getattr(camp, "camp_id"),
+                    "camp_name": getattr(camp, "camp_name"),
+                    "camper_payment_balance": getattr(camp, "camper_payment_balance"),
+                }
+            )
+
+
+
+    return data

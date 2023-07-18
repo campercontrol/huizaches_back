@@ -151,6 +151,7 @@ def get_campers_from_parent(db: Session, parent_id: int):
     rows= (
         db.query(
             Camper.id,
+            Camper.photo,
             (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
                 "full_name"
             ),
