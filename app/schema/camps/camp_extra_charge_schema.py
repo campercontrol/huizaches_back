@@ -20,7 +20,7 @@ class CampExtraChargeCreate(BaseModel):
     currency_id: int = Field(
         title="Divisa"
     )
-    camp_id : int = Field(
+    camp_id : Optional[int] = Field(
         title="Campamento"
     )
     created_at:Optional[datetime] = Field(

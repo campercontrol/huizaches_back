@@ -12,12 +12,9 @@ from crud.camps.camp_crud import (
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id,
-    delete_camp
+    delete_camp,
 )
-from crud.campers.camper_crud import (
-    get_camper_band,
-    get_camper_by_uuid
-)
+from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
 
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
@@ -26,15 +23,23 @@ from crud.camps.camper_in_camp_crud import (
     get_cancelled_by_camper,
     get_past_subscribe_by_camper,
     get_camper_in_camp_by_camper_camp,
-    update_camper_in_camp_by_id
+    update_camper_in_camp_by_id,
 )
 
-from crud.camps.camp_extra_charge_crud import get_extra_charge_by_camp
-from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
+from crud.camps.camp_extra_charge_crud import (
+    get_extra_charge_by_camp,
+    create_new_extra_charge,
+)
+from crud.camps.camp_extra_question_crud import (
+    get_extra_question_by_camp,
+    create_new_extra_question,
+)
 
-from schema.camps.camp_schema import CampCreate, CampModify
+from schema.camps.camp_schema import CampCreate, CampModify, CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.payments.payment_schema import PaymentCreate
+from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
+from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 
 from utils.db import SessionLocal
 
@@ -74,8 +79,22 @@ def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
 
 
 @camp_router.post("/camp/", tags=["Camps"])
-def create_camp(new_camp: CampCreate, db: Session = Depends(get_db)):
-    camp = create_new_camp(db, new_camp)
+def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
+    camp = create_new_camp(db, new_camp.camp)
+    new_camp_id = getattr(camp, "id")
+
+    for question in new_camp.extra_question:
+        new_question = CampExtraQuestionCreate(
+            question = question.question, is_required = question.is_required, camp_id = new_camp_id
+        )
+        create_new_extra_question(db, new_question)
+    
+    for charge in new_camp.extra_charges:
+        new_charge = CampExtraChargeCreate(
+            name = charge.name, price = charge.price, currency_id = charge.currency_id, camp_id = new_camp_id
+        )
+        create_new_extra_charge(db, new_charge)
+        
     return {"data": camp}
 
 
@@ -102,8 +121,8 @@ def subscribe_camp(
     payment = PaymentCreate(
         paid=False,
         payment_amount=new_camper_in_camp.payment_balance,
-        payment_date= date.today(),
-        txn_number= "Cargo por campamento",
+        payment_date=date.today(),
+        txn_number="Cargo por campamento",
         camp_id=new_camper_in_camp.camp_id,
         camper_id=new_camper_in_camp.camper_id,
         currency_id=camp.currency_id,
@@ -113,17 +132,21 @@ def subscribe_camp(
     )
     return {"camper_in_camp": camper_in_camp, "payment": payment}
 
+
 @camp_router.post("/unsubscribe_camp/", tags=["Camps"])
-def unsubscribe_camp(camp_id:int, camper_id:int, db: Session = Depends(get_db)):
+def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)):
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
     new_camper_in_camp = CamperInCampModify(
-        status = 37,
-        payment_balance = camper_in_camp.payment_balance,
-        camp_id = camp_id,
-        camper_id = camper_id
+        status=37,
+        payment_balance=camper_in_camp.payment_balance,
+        camp_id=camp_id,
+        camper_id=camper_id,
     ).dict(exclude_unset=True)
-    modify_camper_in_camp = update_camper_in_camp_by_id(db, camp_id, camper_id, new_camper_in_camp)
+    modify_camper_in_camp = update_camper_in_camp_by_id(
+        db, camp_id, camper_id, new_camper_in_camp
+    )
     return modify_camper_in_camp
+
 
 @camp_router.get("/camperincamp/", tags=["Camps"])
 def get_camperincamp(db: Session = Depends(get_db)):
@@ -138,7 +161,8 @@ def get_camp_extras(camp_id: int, db: Session = Depends(get_db)):
     data = {"extra_charges": extra_charges, "extra_questions": extra_questions}
     return data
 
+
 @camp_router.delete("/delete_camp/{camp_id}", tags=["Camps"])
-def delete_camp_by_id(camp_id:int, db: Session = Depends(get_db)):
+def delete_camp_by_id(camp_id: int, db: Session = Depends(get_db)):
     status = delete_camp(db, camp_id)
-    return{"status": status}
+    return {"status": status}

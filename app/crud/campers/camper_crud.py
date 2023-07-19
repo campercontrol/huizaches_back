@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from utils.db import db_mapping_rows_to_dict
 
-from model.campers import Camper, School
+from model.campers import Camper, School, CamperRecord
 from model.catalogs import (
     Vaccine,
     FoodRestriction,
@@ -172,9 +172,12 @@ def get_camper_band(db: Session, camper_id):
             ),
             School.name.label("school"),
             Camper.photo.label("photo"),
-            Camper.birthday.label("birthday")
+            Camper.birthday.label("birthday"),
+            CamperRecord.attend.label("future_camps"),
+            CamperRecord.attended.label("past_camps")
         )
         .join(School, School.id == Camper.school_id)
+        .join(CamperRecord, CamperRecord.id == Camper.record_id)
         .filter(Camper.id == camper_id)
         .all()
     )
