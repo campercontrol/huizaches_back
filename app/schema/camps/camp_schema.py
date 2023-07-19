@@ -5,6 +5,10 @@ from xmlrpc.client import boolean
 
 from pydantic import BaseModel, Field, AnyUrl, condecimal
 
+from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
+from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
+
+
 class CampCreate(BaseModel):
    
     id:Optional[int] = Field(
@@ -224,3 +228,12 @@ class PaymentAccount(BaseModel):
 class CampPaymentAccountCreate(BaseModel):
     camp : CampCreate
     payment_accounts: Optional[list[PaymentAccount]]
+
+
+class CampComplete(BaseModel):
+    camp: CampCreate
+    payment_accounts: Optional[list[PaymentAccount]]
+    extra_charges: Optional[list[CampExtraChargeCreate]]
+    extra_question: Optional[list[CampExtraQuestionCreate]]
+
+

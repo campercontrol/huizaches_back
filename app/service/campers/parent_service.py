@@ -2,6 +2,8 @@ from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi.responses import FileResponse
+
 
 from crud.campers.parent_crud import (
     get_all_parent,
@@ -25,8 +27,10 @@ from crud.camps.camper_in_camp_crud import (
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
 )
-from crud.campers.camper_crud import get_campers_from_parent
-
+from crud.campers.camper_crud import (
+    get_campers_from_parent,
+    get_camper_by_uuid
+)
 from schema.campers.parent_schema import(
     ParentCreate,
     ParentModify,
@@ -36,6 +40,8 @@ from schema.campers.parent_schema import(
 
 from crud.crud_user import create_new_user
 from utils.db import SessionLocal
+from utils.image_tools import img_to_base_64
+from utils.pdf.baucher_pago import generar_pdf_baucher
 
 parent_routes = APIRouter()
 
@@ -129,3 +135,36 @@ def delete_parent_by_id(parent_id:int, db: Session = Depends(get_db)):
 def get_search_parent(search:str, db: Session = Depends(get_db)):
     possible_parents  = search_parent_by_name(db, search)
     return { "data": possible_parents }
+
+@parent_routes.get("/payment_boucher/{camper_id}/{camp_id}", response_class=FileResponse, tags=["Campers"])
+def get_payment_boucher(camper_id:int, camp_id:int, db:Session= Depends(get_db)):
+    camp = get_camp_by_id(db, camp_id)
+    camper = get_camper_by_uuid(db, camper_id)
+    camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
+    context = {
+    "name_camping": getattr(camper, "name") + " " + getattr(camper, "lastname_father"),
+    "camping_name":  getattr(camp, "name"),
+    "amount_total": "$" + str(getattr(camp, "public_price")),
+    "logo":logo_64,
+    "information_accounts":[
+        {
+        "bank":"BBVA",
+        "name_reference":"Angela Patricia Avila Rojas",
+        "account_number":"0199909435",
+        "clabe":"012180001999094351",
+        },
+         {
+        "bank":"BBVA",
+        "name_reference":"Angela Patricia Avila Rojas",
+        "account_number":"0199909435",
+        "clabe":"012180001999094351",
+        }
+    ],
+    "pay_reference": str(getattr(camper_in_camp, "id")).zfill(6),
+    "more_info": getattr(camp,"url"),
+    "email":"pagos@kincamp.com"
+    }   
+    
+    path = generar_pdf_baucher(context)
+    return FileResponse(path)

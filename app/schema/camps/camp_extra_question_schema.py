@@ -19,7 +19,7 @@ class CampExtraQuestionCreate(BaseModel):
     is_required: bool = Field(
         title="Obligatoria"
     )
-    camp_id : int = Field(
+    camp_id : Optional[int] = Field(
         title="Campamento"
     )
     created_at:Optional[datetime] = Field(
