@@ -66,7 +66,7 @@ def get_extra_answer_by_camper_camp(db, camper_id:int, camp_id:int):
             extra_answers.append( db_mapping_rows_to_dict(row))
         else:
             question = {
-                "id:": extra_question.id,
+                "id": extra_question.id,
                 "question": extra_question.question,
                 "answer": ""
             }
