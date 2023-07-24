@@ -17,6 +17,7 @@ class Staff(Base):
     name = Column(String(512), nullable=False)
     lastname_father = Column(String(512), nullable=False)
     lastname_mother = Column(String(512))
+    gender_id = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Genero')
     photo = Column(String(512))
     curp = Column(String(100), nullable=False)
     rfc = Column(String(100))

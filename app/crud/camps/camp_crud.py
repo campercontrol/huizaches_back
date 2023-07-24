@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
-from model.camps import Camp, Location
+from model.camps import Camp, Location, CamperInCamp, StaffInCamp
 from model.campers import Camper
 from schema.camps.camp_schema import CampCreate, CampModify
 
+from crud.camps.camper_in_camp_crud import get_campers_subscribe_to_camp
+from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 
 def get_all_camp(db: Session):
     rows = db.query(Camp).all()
@@ -103,3 +105,16 @@ def delete_camp(db: Session, camp_id:int):
     db.delete(camp)
     db.commit()
     return {"status" : True}
+
+def get_records_for_camp(db: Session, camp_id:int):
+    
+    campers_record = len(get_campers_subscribe_to_camp(db, camp_id))
+    staff_available_record = get_staff_volunteer_in_camp(db, camp_id).count()
+    staff_record = get_staff_in_camp(db, camp_id).count()
+
+
+    return {
+        "campers_recod": campers_record, 
+        "staff_available_record": staff_available_record, 
+        "staff_record":staff_record
+        }
