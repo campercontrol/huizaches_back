@@ -29,6 +29,9 @@ class ProspectCreate(BaseModel):
         title= "Numero de transacción",
         max_lenght= 50       
     )
+    gender_id: int = Field(
+        title="Genero"
+    )
     birthday: date = Field(
         title="Fecha de nacimiento"
     )

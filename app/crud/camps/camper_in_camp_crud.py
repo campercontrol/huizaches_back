@@ -222,7 +222,6 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                     "camper_payment_balance": getattr(camp, "camper_payment_balance"),
                 }
             )
-
-
-
     return data
+
+

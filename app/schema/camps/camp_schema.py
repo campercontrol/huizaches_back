@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import UUID
 from xmlrpc.client import boolean
 
-from pydantic import BaseModel, Field, AnyUrl, condecimal
+from pydantic import BaseModel, Field, condecimal
 
 from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
@@ -39,7 +39,7 @@ class CampCreate(BaseModel):
     registration: bool = Field(
         title="Registro abierto"
     )
-    url: AnyUrl = Field(
+    url: str = Field(
         title="Pagina web para mas información",
         max_lenght= 150
     )
@@ -60,9 +60,6 @@ class CampCreate(BaseModel):
     show_paypal_button: bool = Field(
         title="Activar boton de paypal para este campamento"
     )
-    paypal_button: str = Field(
-        title=""
-    )
     show_payment_order: bool = Field(
         title="Mostrar orden de pago a titulares de la cuenta"
     )
@@ -78,7 +75,7 @@ class CampCreate(BaseModel):
         title="Punto de reunión",
         max_lenght= 150
     )
-    photo_url: AnyUrl = Field(
+    photo_url: str = Field(
         title="Url para la galeria de fotos"
     )
     photo_password: str = Field(
@@ -143,7 +140,7 @@ class CampModify(BaseModel):
     registration: bool = Field(
         title="Registro abierto"
     )
-    url: AnyUrl = Field(
+    url: str = Field(
         title="Pagina web para mas información",
         max_lenght= 150
     )
@@ -164,9 +161,6 @@ class CampModify(BaseModel):
     show_paypal_button: bool = Field(
         title="Activar boton de paypal para este campamento"
     )
-    paypal_button: str = Field(
-        title=""
-    )
     show_payment_order: bool = Field(
         title="Mostrar orden de pago a titulares de la cuenta"
     )
@@ -182,7 +176,7 @@ class CampModify(BaseModel):
         title="Punto de reunión",
         max_lenght= 150
     )
-    photo_url: AnyUrl = Field(
+    photo_url: str = Field(
         title="Url para la galeria de fotos"
     )
     photo_password: str = Field(

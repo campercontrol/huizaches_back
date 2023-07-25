@@ -9,6 +9,7 @@ from model.camps import StaffInCamp, Camp, Location, Season
 from model import User
 
 from schema.staffs.staff_schema import ProspectCreate
+from crud.camps.camp_crud import get_records_for_camp
 
 
 
@@ -60,13 +61,13 @@ def accept_prospect(db, prospect_id: int):
 def staff_dashboard(db, staff_id: int):
 
     camps_id = []
-
     available_camps = (
         db.query(
             StaffInCamp.id.label("staff_in_camp_id"),
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Location.name.label("location_name"),
+            Camp.public_price.label ("public_price") ,
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end")
         )
@@ -82,13 +83,15 @@ def staff_dashboard(db, staff_id: int):
         )
         .all()
     )
-
     available_camps = db_mapping_rows_to_dict(available_camps)
+    available_camps_final = []
 
     for staff_in_camp in available_camps: 
         camps_id.append(staff_in_camp["camp_id"])
-
-
+        records = get_records_for_camp(db, staff_in_camp['camp_id'])
+        staff_in_camp = dict(staff_in_camp)
+        staff_in_camp['records'] = records
+        available_camps_final.append(staff_in_camp)
 
     staff_camps = (
         db.query(
@@ -96,6 +99,7 @@ def staff_dashboard(db, staff_id: int):
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Location.name.label("location_name"),
+            Camp.public_price.label ("public_price") ,
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end")
         )
@@ -113,15 +117,21 @@ def staff_dashboard(db, staff_id: int):
     )
     
     staff_camps = db_mapping_rows_to_dict(staff_camps)
+    staff_camps_final = []
 
     for staff_in_camp in staff_camps: 
         camps_id.append(staff_in_camp["camp_id"])
+        records = get_records_for_camp(db, staff_in_camp['camp_id'])
+        staff_in_camp = dict(staff_in_camp)
+        staff_in_camp['records'] = records
+        staff_camps_final.append(staff_in_camp)
 
     next_camps = (
         db.query(
             Camp.id.label("camp_id"),        
             Camp.name.label("camp_name"),
             Location.name.label("location_name"),
+            Camp.public_price.label ("public_price") ,
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"))
         .join(Location, Location.id == Camp.location_id)
@@ -135,13 +145,18 @@ def staff_dashboard(db, staff_id: int):
     )
 
     next_camps = db_mapping_rows_to_dict(next_camps)
-
-
-    next_camps_final  = [d for d in next_camps if d['camp_id'] not in  camps_id]
+    next_camps_filter  = [d for d in next_camps if d['camp_id'] not in  camps_id]
+    next_camps_final = []
+    
+    for camp in next_camps_filter:
+        records = get_records_for_camp(db, camp['camp_id'])
+        camp = dict(camp)
+        camp['records'] = records
+        next_camps_final.append(camp)
 
     return {
-        "available_camps": available_camps,
-        "staff_camps": staff_camps,
+        "available_camps": available_camps_final,
+        "staff_camps": staff_camps_final,
         "next_camps": next_camps_final,
     }
 

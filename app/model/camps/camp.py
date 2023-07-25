@@ -29,7 +29,6 @@ class Camp(Base):
     show_payment_parent = Column(Boolean, nullable=False)
     show_rebate_parent = Column(Boolean, nullable=False)
     show_paypal_button = Column(Boolean, nullable=False)
-    paypal_button = Column(Text)
     show_payment_order = Column(Boolean, nullable=False)
     reminder_camp_days = Column(Integer, nullable=False)
     reminder_discount_days = Column(Integer, nullable=False)
