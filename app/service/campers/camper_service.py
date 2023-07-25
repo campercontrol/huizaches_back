@@ -197,7 +197,7 @@ def create_camper(camper_complete: CamperComplete, db: Session = Depends(get_db)
             db, camper_pathological_background_fm
         )
 
-    return camper_complete
+    return new_camper
 
 
 @camper_routes.patch("/camper/{camper_id}", tags=["Campers"])
