@@ -9,6 +9,7 @@ from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 
 
+
 class CampCreate(BaseModel):
    
     id:Optional[int] = Field(
@@ -218,6 +219,25 @@ class PaymentAccount(BaseModel):
         title = "Nombre de la cuenta de banco"
     )
 
+class CampDiscountCreate(BaseModel):
+    id: int = Field(
+        title = "Id del descuento"
+    )
+    name : str = Field(
+        title = "Nombre del descunto"
+    )
+    amount: condecimal(decimal_places= 2)
+    
+    camp_id: int = Field(
+        title = "Id del campamento"
+    )
+    date_start:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+    date_end:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
 
 class CampPaymentAccountCreate(BaseModel):
     camp : CampCreate
@@ -229,5 +249,6 @@ class CampComplete(BaseModel):
     payment_accounts: Optional[list[PaymentAccount]]
     extra_charges: Optional[list[CampExtraChargeCreate]]
     extra_question: Optional[list[CampExtraQuestionCreate]]
+    extra_discounts: Optional[list[CampDiscountCreate]]
 
 
