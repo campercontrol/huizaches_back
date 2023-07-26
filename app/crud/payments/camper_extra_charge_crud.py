@@ -10,6 +10,7 @@ from model.camps import CampExtraCharge
 from schema.payments.camper_extra_charge_schema import (
     CamperExtraChargeCreate,
     CamperExtraChargeModify,
+    CamperExtraChargeListCreate
 )
 
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_camp
@@ -98,3 +99,31 @@ def get_extra_charge_by_camper_camp(db, camper_id: int, camp_id: int):
         )
 
     return extra_charges
+
+def create_update_extra_charges(db, extra_charges: CamperExtraChargeListCreate):
+    for extra_charge in extra_charges.extra_charges:
+
+        row = (
+            db.query(CamperExtraCharge)
+            .join(CampExtraCharge, CampExtraCharge.id == CamperExtraCharge.extra_charge_id)
+            .filter(CamperExtraCharge.extra_charge_id== getattr(extra_charge, "extra_charge_id"))
+            .first()
+        )
+        
+        if row:
+            camper_schema = CamperExtraChargeModify(
+                id= getattr(row, "id"),
+                is_selected=getattr(extra_charge, "extra_selected"),
+                camper_id=getattr(row, "camper_id"),
+                extra_charge_id=getattr(row, "extra_charge_id"),
+            )
+            extra_c = update_camper_extra_charge_by_id(db, getattr(row, "id"), camper_schema.dict())
+        else:
+            camper_schema = CamperExtraChargeCreate(
+                is_selected=getattr(extra_charge, "extra_selected"),
+                camper_id=getattr(extra_charge, "camper_id"),
+                extra_charge_id=getattr(extra_charge, "extra_charge_id"),
+            )
+            extra_c = create_new_camper_extra_charge(db, camper_schema)
+
+    return extra_c

@@ -8,12 +8,14 @@ from crud.payments.camper_extra_charge_crud import (
     get_camper_extra_charge_by_id,
     update_camper_extra_charge_by_id,
     create_new_camper_extra_charge,
-    get_extra_charge_by_camper_camp
+    get_extra_charge_by_camper_camp,
+    create_update_extra_charges
     
 )
 from schema.payments.camper_extra_charge_schema import(
     CamperExtraChargeCreate,
-    CamperExtraChargeModify
+    CamperExtraChargeModify,
+    CamperExtraChargeListCreate
 )
 from utils.db import SessionLocal
 
@@ -60,3 +62,8 @@ def update_camper_extra_charge(payment_id:str,modify_camper_extra_charge:CamperE
 def get_camper_extra_charge_camp(camper_id:int, camp_id:int, db: Session = Depends(get_db)):
     extras = get_extra_charge_by_camper_camp(db, camper_id, camp_id)
     return {"data": extras}
+
+@camper_extra_charge_routes.post("/camper/extra_charges/", tags=["Payments"])
+def set_extra_charges_camper(camper_extras: CamperExtraChargeListCreate, db: Session= Depends(get_db)):    
+    extras = create_update_extra_charges(db, camper_extras)
+    return {"data":"ok"}

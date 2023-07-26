@@ -45,3 +45,24 @@ class CamperExtraChargeModify(BaseModel):
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+
+class ExtraChargeListCreate(BaseModel):
+    extra_charge_id:int = Field(
+        title="Cargo Extra Id"
+    )
+    extra_charge_name: str = Field(
+        title="Nombre del cargo extra"
+    )
+    extra_charge_price: int = Field(
+        title= "Precio del cargo extra"
+    )
+    extra_selected:bool = Field(
+        title= "Nombre del metodo de pago"
+    )
+    camper_id:int = Field(
+        title="Camper"
+    )
+    
+
+class CamperExtraChargeListCreate(BaseModel):
+    extra_charges: list[ExtraChargeListCreate]
