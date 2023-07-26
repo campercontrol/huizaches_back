@@ -8,11 +8,13 @@ from crud.campers.camper_extra_answer_crud import (
     get_extra_answer_by_uuid,
     create_new_extra_answer,
     update_extra_answer_by_id,
-    get_extra_answer_by_camper_camp
+    get_extra_answer_by_camper_camp,
+    create_update_extra_answers
 )
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     CamperExtraAnswerModify,
+    CamperExtraAnswerListCreate
 )
 from utils.db import SessionLocal
 
@@ -78,3 +80,9 @@ def update_camper_extra_answer(
 def get_extra_answers_camper(camp_id:int, camper_id:int, db:Session=Depends(get_db)):
     extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
     return {"data": extra_answers}
+
+
+@extra_answer_routes.post("/camper/extra_answers/",  tags=["Campers"])
+def set_extra_answers_camper( extra_answers:CamperExtraAnswerListCreate, db:Session=Depends(get_db)):
+    extra = create_update_extra_answers(db, extra_answers)
+    return {"data": "ok"} 

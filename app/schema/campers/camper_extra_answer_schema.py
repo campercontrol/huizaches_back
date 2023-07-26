@@ -45,3 +45,23 @@ class CamperExtraAnswerModify(BaseModel):
         default=datetime.now()
     )
 
+class ExtraAnswerListCreate(BaseModel):
+  
+    id:str = Field(
+        title="Respuesta"
+    )
+    question: str = Field(
+        title="Pregunta"
+    )
+    is_required: bool = Field(
+        title="Pregunta obligatoria"
+    )
+    camper_id: int = Field(
+        title= "Id del camper"
+    )
+    answer: str = Field(
+        title="Respuesta del camper"
+    )
+
+class CamperExtraAnswerListCreate(BaseModel):
+    extra_answers: List[ExtraAnswerListCreate]
