@@ -1,0 +1,14 @@
+{
+    "Servers": {
+      "1": {
+        "Name": "dev_camping",
+        "Group": "Servers",
+        "Host": "db",
+        "Port": "5432",
+        "MaintenanceDB": "passcamping",
+        "Username": "usrcamping",
+        "SSLMode": "prefer",
+        "PassFile": "/pgpassfile"
+      }
+    }
+  }
