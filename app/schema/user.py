@@ -28,6 +28,9 @@ class UserCreate(BaseModel):
     is_superuser: Optional[bool] = Field(
         title="Is superuser",
     )
+    is_active: Optional[bool] = Field(
+        title="Is active"
+    )
 
 
 class UserModify(BaseModel):

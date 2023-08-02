@@ -22,9 +22,7 @@ class StaffFoodRestrictionCreate(BaseModel):
     is_active: bool = Field(
         title='ACtivo en el staff'
     )
-    created_at:Optional[datetime] = Field(
-        default=datetime.now()
-    )
+
 
 class StaffFoodRestrictionModify(BaseModel):
     
@@ -42,7 +40,4 @@ class StaffFoodRestrictionModify(BaseModel):
     )
     is_active: bool = Field(
         title='ACtivo en el staff'
-    )
-    updated_at:Optional[datetime] = Field(
-        default=datetime.now()
     )

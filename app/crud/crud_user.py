@@ -2,6 +2,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from model.role import Role
 from model.user import User
+from model.campers import Parent
+from model.staffs import Staff
 from utils.hash import hash_str
 from utils.db import db_mapping_rows_to_dict
 
@@ -35,7 +37,7 @@ def create_new_user(db, new_user):
             email=new_user.email,
             hashed_pass=hash_str(new_user.passw),
             role_id=new_user.role_id,
-            is_superuser=new_user.is_superuser,
+            is_superuser=new_user.is_superuser                
         )
         db.add(db_user)
         db.commit()
@@ -50,6 +52,36 @@ def create_new_user(db, new_user):
         db_user = None
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_user
+
+
+def create_new_prospect_user(db, new_user):
+    db_user = None
+    try:
+        db_user = User(
+            email=new_user.email,
+            hashed_pass=hash_str(new_user.passw),
+            role_id= 2,
+            is_active= False,
+            is_coordinator = False,
+            is_admin = False,
+            is_employee = False,
+            is_superuser = False           
+                 
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    except SQLAlchemyError as e:
+        print("#=================")
+        print(e)
+        print("#=================")
+        db_user = None
+        return db_user
+    except Exception as ex:
+        db_user = None
+        print(f"No se pudo guardar en la base de datos: {ex}")
+    return db_user
+
 
 
 def get_user_by_uuid(db, user_id):
@@ -113,3 +145,28 @@ def crud_update_user_by_email(db, email, update_data):
 # ==========Login
 def get_user_by_email(db, email):
     return db.query(User).filter_by(email=email).first()
+
+def get_profile_id_by_user_id(db, user_id:int ):
+
+    user = (
+        db.query(User.role_id)
+        .filter_by(id = user_id)
+        .first()
+    )
+
+    if user[0] == 1:
+        profile_id = (
+            db.query(Parent.id)
+            .join(User, User.id == Parent.user_id)
+            .filter( Parent.user_id == user_id)
+            .first()
+        )
+
+    if user[0] == 2:
+        profile_id = (
+            db.query(Staff.id)
+            .join(User, User.id == Staff.login_id)
+            .filter( Staff.login_id == user_id)
+            .first()
+        )
+    return profile_id[0]

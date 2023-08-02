@@ -30,15 +30,20 @@ def get_staff_vaccine_by_uuid(db: Session, staff_vaccine_id: int):
     )
 
 
+def get_staff_vaccine_by_vaccine(db: Session, vaccine_id: int):
+    return (
+        db.query(StaffVaccine)
+        .filter_by(
+            vaccine_id=vaccine_id,
+        )
+        .first()
+    )
+
+
 def create_new_staff_vaccine(db: Session, new_staff_vaccine: StaffVaccineCreate):
     db_staff_vaccine = None
     try:
-        db_staff_vaccine = StaffVaccine(
-            id=new_staff_vaccine.id,
-            staff_id=new_staff_vaccine.staff_id,
-            vaccine_id=new_staff_vaccine.vaccine_id,
-            is_active=new_staff_vaccine.is_active,
-        )
+        db_staff_vaccine = StaffVaccine(**new_staff_vaccine.dict())
         db.add(db_staff_vaccine)
         db.commit()
         db.refresh(db_staff_vaccine)
@@ -53,7 +58,7 @@ def create_new_staff_vaccine(db: Session, new_staff_vaccine: StaffVaccineCreate)
     return db_staff_vaccine
 
 
-def update_staff_vaccine_by_ids(
+def update_staff_vaccine_by_id(
     db: Session,
     staff_vaccine_id: int,
     staff_id: int,

@@ -21,9 +21,6 @@ class StaffVaccineCreate(BaseModel):
     is_active: bool = Field(
         title='ACtivo en el staff'
     )
-    created_at:Optional[datetime] = Field(
-        default=datetime.now()
-    )
 
 class StaffVaccineModify(BaseModel):
     id:Optional[int] = Field(
@@ -40,7 +37,4 @@ class StaffVaccineModify(BaseModel):
     )
     is_active: bool = Field(
         title='ACtivo en el staff'
-    )
-    updated_at:Optional[datetime] = Field(
-        default=datetime.now()
     )
