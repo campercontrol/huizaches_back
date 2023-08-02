@@ -94,7 +94,7 @@ class CamperCreate(BaseModel):
     insurance:Optional[boolean] = Field(
         title="Seguro medico"
     )
-    insurance_company:boolean = Field(
+    insurance_company:Optional[str] = Field(
         title="Compañia de seguro"
     )
     insurance_number:Optional[str] = Field(
@@ -213,7 +213,7 @@ class CamperModify(BaseModel):
     insurance:Optional[str] = Field(
         title="Seguro medico"
     )
-    insurance_company:boolean = Field(
+    insurance_company:Optional[str] = Field(
         title="Compañia de seguro"
     )
     insurance_number:Optional[str] = Field(

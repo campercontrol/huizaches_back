@@ -59,19 +59,20 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
     for extra_question in extra_questions:
         row = (
             db.query(
-                CampExtraQuestion.id,
-                CampExtraQuestion.question,
-                CampExtraQuestion.is_required,
-                CamperExtraAnswer.answer,
+                CampExtraQuestion.id.label("id"),
+                CampExtraQuestion.question.label("question"),
+                CampExtraQuestion.is_required.label("is_required"),
+                CamperExtraAnswer.answer.label("answer"),
             )
             .join(
-                CampExtraQuestion, CampExtraQuestion.id == CamperExtraAnswer.question_id
+                CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id
             )
-            .filter(CamperExtraAnswer.question_id == getattr(extra_question, "id"))
+            .filter_by(question_id=getattr(extra_question, "id"))
             .all()
         )
+
         if row:
-            extra_answers.append(db_mapping_rows_to_dict(row))
+            extra_answers.append(db_mapping_rows_to_dict(row)[0])
         else:
             question = {
                 "id": extra_question.id,
@@ -86,7 +87,6 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
 
 def create_update_extra_answers(db, extra_answers: CamperExtraAnswerListCreate):
     for extra_answer in extra_answers.extra_answers:
-        
         row = (
             db.query(CamperExtraAnswer)
             .join(
@@ -98,12 +98,14 @@ def create_update_extra_answers(db, extra_answers: CamperExtraAnswerListCreate):
 
         if row:
             camper_schema = CamperExtraAnswerModify(
-                id= getattr(row, "id"),
+                id=getattr(row, "id"),
                 answer=getattr(extra_answer, "answer"),
                 camper_id=getattr(row, "camper_id"),
                 question_id=getattr(row, "question_id"),
             )
-            answer = update_extra_answer_by_id(db, getattr(row, "id"), camper_schema.dict())
+            answer = update_extra_answer_by_id(
+                db, getattr(row, "id"), camper_schema.dict()
+            )
         else:
             camper_schema = CamperExtraAnswerCreate(
                 answer=getattr(extra_answer, "answer"),

@@ -19,7 +19,7 @@ class User(Base):
     is_coordinator = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=True)
     is_employee = Column(Boolean, default=True)
-
+    
     is_superuser = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)

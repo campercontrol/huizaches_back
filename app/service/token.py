@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 from sqlalchemy.orm import Session
 
-from crud.crud_user import get_user_by_email
+from crud.crud_user import get_user_by_email, get_profile_id_by_user_id
 from crud.crud_role import get_role_by_uuid
 from crud.crud_permission import get_permissions_for_menu, get_permissions_by_lang
 from schema.token import Token, TokenRefresh, TokenCreate
@@ -97,6 +97,8 @@ async def login_for_access_token(
 
     menu = get_permissions_menu(db,user,form_data.lang)
 
+    profile_id = get_profile_id_by_user_id(db, user.id)
+
     access_token = create_access_token(
         data={
             "user_name": "",
@@ -104,8 +106,11 @@ async def login_for_access_token(
             "user_id":user.id,
             "role_name":role.name,
             "role_id":role.id,
+            "profile_id": profile_id,
             "menu":menu,
             "lang":form_data.lang,
+            "access_token_expires": str(access_token_expires),
+            "refresh_token_expires": str(refresh_token_expires)
             },
         expires_delta=access_token_expires,
     )
@@ -116,8 +121,11 @@ async def login_for_access_token(
             "user_id":user.id,
             "role_name":role.name,
             "role_id":role.id,
+            "profile_id": profile_id,
             "menu":menu,
             "lang":form_data.lang,
+            "access_token_expires": str(access_token_expires),
+            "refresh_token_expires": str(refresh_token_expires)
             },
         expires_delta=refresh_token_expires,
     )
