@@ -64,3 +64,9 @@ def get_extra_question_by_camp(db, camp_id: int):
         .all()
     )
     return rows
+
+def delete_extra_question(db: Session, extra_question_id:int):
+    extra_question = db.query(CampExtraQuestion).filter(CampExtraQuestion.id==extra_question_id).first()
+    db.delete(extra_question)
+    db.commit()
+    return {"status" : True}

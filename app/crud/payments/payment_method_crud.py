@@ -57,3 +57,9 @@ def update_payment_method_by_id(db, payment_method_id: int, modify_payment_metho
     db.commit()
     return rows_updated
 
+def delete_payment_method(db: Session, payment_method_id:int):
+    payment_method = db.query(PaymentMethod).filter(PaymentMethod.id==payment_method_id).first()
+    db.delete(payment_method)
+    db.commit()
+    return {"status" : True}
+

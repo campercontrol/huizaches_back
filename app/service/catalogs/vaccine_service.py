@@ -10,6 +10,8 @@ from crud.catalogs.vaccine_crud import (
     update_vaccine_by_id,
     delete_vaccine
 )
+
+from crud.catalogs.catalogs_crud import update_order_catalogs
 from schema.catalogs.vaccine_schema import(
     VaccineCreate,
     VaccineModify
@@ -61,3 +63,8 @@ def update_vaccine(vaccine_id:str,modify_vaccine:VaccineModify,db: Session = Dep
 def delete_vaccine_by_id(vaccine_id:int, db: Session = Depends(get_db)):
     status = delete_vaccine(db, vaccine_id)
     return{"status": status}
+
+@vaccine_routes.post("/update/order/catalogs", tags=["Catalogs"])
+def update_catalogs_order(list:list, catalog_type:int, db: Session = Depends(get_db)):
+    status = update_order_catalogs(db, list, catalog_type)
+    return {"status": status}

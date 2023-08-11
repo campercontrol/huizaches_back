@@ -8,7 +8,8 @@ from crud.payments.payment_crud import (
     get_payment_by_id,
     update_payment_by_id,
     create_new_payment,
-    get_payment_by_camper_camp
+    get_payment_by_camper_camp,
+    get_payment_page_camper_in_camp
 )
 from schema.payments.payment_schema import(
     PaymentCreate,
@@ -55,9 +56,14 @@ def update_payment(payment_id:str,modify_payment:PaymentModify,db: Session = Dep
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
-@payment_routes.get("/payment_camper_camp/{camper_id}/{camp_id}")    
+@payment_routes.get("/payment_camper_camp/{camper_id}/{camp_id}", tags=["Payments"])    
 def get_payment_camper_camp(camper_id: int, camp_id: int, db: Session= Depends(get_db)):
 
-    list_payment = get_payment_by_camper_camp(camper_id, camp_id, db)    
+    list_payment = get_payment_by_camper_camp(db, camper_id, camp_id)    
     return {"data": list_payment}
 
+
+@payment_routes.get("/payment/page/camper/{camper_id}/{camp_id}/{camper_in_camp_id}", tags=["Payments"])
+def get_payment_page_camper_camp(camper_id:int, camp_id:int, camper_in_camp_id:int, db: Session = Depends(get_db)):
+    data = get_payment_page_camper_in_camp(db, camper_id, camp_id, camper_in_camp_id)
+    return data

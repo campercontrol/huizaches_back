@@ -7,7 +7,8 @@ from crud.camps.season_crud import (
     get_all_season,
     get_season_by_id,
     update_season_by_id,
-    create_new_season
+    create_new_season,
+    delete_season
 )
 from schema.camps.season_schema import(
     SeasonCreate,
@@ -53,4 +54,9 @@ def update_season(season_id:str,modify_season:SeasonModify,db: Session = Depends
         return {"mensaje": "Actualizado Correctamente", "data": exist_season}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+@season_routes.delete("/delete/season/{season_id}", tags=["Camps"])
+def delete_season_by_id(season_id:int, db: Session = Depends(get_db)):
+    status = delete_season(db, season_id)
+    return{"status": status}
 

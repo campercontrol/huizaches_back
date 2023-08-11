@@ -44,7 +44,7 @@ def create_currency(new_prueba:CurrencyCreate,db: Session = Depends(get_db)):
     list_currency = create_new_currency(db,new_prueba)
     return {"data": list_currency}
 
-@currency_routes.post("/currency/{currency_id}", tags=["Catalogs"])
+@currency_routes.patch("/currency/{currency_id}", tags=["Catalogs"])
 def modify_currency(currency_id:str,modify_currency:CurrencyModify,db: Session = Depends(get_db)):
 
     update_data = modify_currency.dict(exclude_unset=True)

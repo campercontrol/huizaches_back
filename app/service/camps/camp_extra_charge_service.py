@@ -9,6 +9,7 @@ from crud.camps.camp_extra_charge_crud import (
     get_extra_charge_by_camp,
     create_new_extra_charge,
     update_extra_charge_by_id,
+    delete_extra_charge_camp
 )
 
 from schema.camps.camp_extra_charge_schema import (
@@ -76,3 +77,8 @@ def update_camp_extra_charge(
 def extra_charge_bycamp(camp_id, db: Session = Depends(get_db)):
     list_extra_charges = get_extra_charge_by_camp(db, camp_id)
     return{"data": list_extra_charges}
+
+@extra_charge_routes.delete("/delete/camp_extra_charge/{camp_extra_charge_id}", tags=["CampsExtraCharge"])
+def delete_extra_charge(camp_extra_charge_id, db: Session = Depends(get_db)):
+    status = delete_extra_charge_camp(db, camp_extra_charge_id)
+    return {"status": status} 
