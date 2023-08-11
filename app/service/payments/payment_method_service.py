@@ -8,7 +8,7 @@ from crud.payments.payment_method_crud import (
     get_payment_method_by_id,
     update_payment_method_by_id,
     create_new_payment_method,
-    
+    delete_payment_method
 )
 from schema.payments.payment_method_schema import(
     PaymentMethodCreate,
@@ -54,4 +54,9 @@ def update_payment_method(payment_id:str,modify_payment_method:PaymentMethodModi
         return {"mensaje": "Actualizado Correctamente", "data": exist_payment_method}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+@payment_method_routes.delete("/delete/payment_method/{payment_method_id}", tags=["Payments"])
+def delete_payment_method_by_id(payment_method_id:int, db: Session = Depends(get_db)):
+    status = delete_payment_method(db, payment_method_id)
+    return{"status": status}
 

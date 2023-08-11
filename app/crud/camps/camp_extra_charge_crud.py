@@ -64,3 +64,9 @@ def get_extra_charge_by_camp(db, camp_id: int):
         .all()
     )
     return rows
+
+def delete_extra_charge_camp(db, extra_charge_id:int):
+    extra_charge_camp = db.query(CampExtraCharge).filter(CampExtraCharge.id==extra_charge_id).first()
+    db.delete(extra_charge_camp)
+    db.commit()
+    return {"status": True}

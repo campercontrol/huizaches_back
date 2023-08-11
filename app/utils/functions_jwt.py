@@ -48,7 +48,7 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub", "")
+        username: str = payload.get("user_email", "")
         print(f"username:{username}")
         if username is None:
             raise credentials_exception
@@ -90,7 +90,7 @@ def validate_token(token_data):
     )
     try:
         payload = jwt.decode(token_data, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub", "")
+        username: str = payload.get("user_email", "")
         # print(f"validate_token-username:{username}")
         if username is None:
             raise credentials_exception
@@ -152,11 +152,11 @@ def generate_new_tokens(db, user):
     #path_menu_permissions = get_permissions_menu(db, user_obj)
 
     access_token = create_access_token(
-        data={"sub": user},
+        data={"user_email": user},
         expires_delta=access_token_expires,
     )
     refresh_token = create_access_token(
-        data={"sub": user},
+        data={"user_email": user},
         expires_delta=refresh_token_expires,
     )
 
