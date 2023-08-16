@@ -24,6 +24,16 @@ def get_all_prospect(db):
     )
     return db_mapping_rows_to_dict(rows)
 
+def get_all_staff(db):
+    rows = (
+        db.query(Staff, User.email, Season.name.label("season_name"))
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .filter(Staff.employee==True)        
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
 
 def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     db_prospect = None

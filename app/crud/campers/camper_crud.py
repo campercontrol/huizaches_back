@@ -181,8 +181,6 @@ def get_camper_band(db: Session, camper_id):
         .filter(Camper.id == camper_id)
         .all()
     )
-    print("#############################################################3")
-    print(date.today())
     return db_mapping_rows_to_dict(camper)
 
 def delete_camper(db, camper_id:int):

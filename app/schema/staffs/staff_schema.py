@@ -76,6 +76,10 @@ class ProspectCreate(BaseModel):
         title="temporada",
         default=1   
     )
+    record_id: Optional[int] = Field(
+        title="record",
+        default=1
+    )
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )

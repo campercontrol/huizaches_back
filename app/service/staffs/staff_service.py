@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from crud.staffs.staff_crud import (
     get_all_prospect,
+    get_all_staff,
     create_new_prospect,
     accept_prospect,
     delete_prospect,
@@ -64,6 +65,10 @@ def get_prospects(db: Session = Depends(get_db)):
     list_prospect = get_all_prospect(db)
     return {"data": list_prospect}
 
+@staff_routes.get("/staff/", tags=["Staff"])
+def get_staff(db: Session = Depends(get_db)):
+    list_staff = get_all_staff(db)
+    return {"data": list_staff}
 
 @staff_routes.post("/prospect/", tags=["Prospect"])
 def create_prospect(
