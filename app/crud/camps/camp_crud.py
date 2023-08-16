@@ -8,7 +8,7 @@ from model.camps import Camp, Location, CamperInCamp, StaffInCamp
 from model.campers import Camper
 from schema.camps.camp_schema import CampCreate, CampModify
 
-from crud.camps.camper_in_camp_crud import get_campers_subscribe_to_camp
+from crud.camps.camper_in_camp_crud import get_campers_for_module
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 
 def get_all_camp(db: Session):
@@ -108,7 +108,7 @@ def delete_camp(db: Session, camp_id:int):
 
 def get_records_for_camp(db: Session, camp_id:int):
     
-    campers_record = len(get_campers_subscribe_to_camp(db, camp_id))
+    campers_record = len(get_campers_for_module(db, camp_id))
     staff_available_record = get_staff_volunteer_in_camp(db, camp_id).count()
     staff_record = get_staff_in_camp(db, camp_id).count()
 

@@ -5,8 +5,9 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.camps import CamperInCamp, Camp, Location
-from model.campers import Camper
+from model.campers import Camper, CamperRecord, Parent
 from model.catalogs import Constant
+from model.user import User
 from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
     CamperInCampModify,
@@ -111,6 +112,7 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
     )
     return db_mapping_rows_to_dict(rows)
 
+
 def get_all_cancelled_by_camper(db: Session, camper_id: int):
     rows = (
         db.query(
@@ -182,7 +184,7 @@ def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int)
         return False
 
 
-def get_campers_subscribe_to_camp(db: Session, camp_id: int):
+def get_campers_for_module(db: Session, camp_id: int):
     campers = (
         db.query(
             Camper.id.label("camper_id"),
@@ -196,14 +198,12 @@ def get_campers_subscribe_to_camp(db: Session, camp_id: int):
     )
     return db_mapping_rows_to_dict(campers)
 
+
 def get_camps_name_amount_camper(db: Session, camper_id: int):
     data = []
     camps = get_subscribe_by_camper(db, camper_id)
-    print("###################################################")
-    print(camps)
-    print(camper_id)
     cancelled_camps = get_all_cancelled_by_camper(db, camper_id)
-    
+
     for camp in camps:
         data.append(
             {
@@ -225,3 +225,48 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
     return data
 
 
+def get_campers_for_camp(db: Session, camp_id: int):
+    campers = (
+        db.query(
+            CamperInCamp.id.label("camper_in_camp_id"),
+            Camper.record_id.label("camper_record_id"),
+            CamperRecord.id.label("record_id"),
+            Camper.id.label("camper_id"),
+            Camper.photo.label("camper_photo"),
+            (
+                Camper.name
+                + " "
+                + Camper.lastname_father
+                + " "
+                + Camper.lastname_mother
+            ).label("camper_full_name"),
+            CamperRecord.attend.label("camper_attend"),
+            CamperRecord.attended.label("camper_attended"),
+            CamperRecord.total.label("camper_total"),
+            CamperInCamp.payment_balance.label("camper_total_balance"),
+            Camper.birthday.label("camper_birthday"),
+            (
+                Parent.tutor_name
+                + " "
+                + Parent.tutor_lastname_father
+                + " "
+                + Parent.tutor_lastname_mother
+            ).label("tutor_full_name"),
+            User.email.label("tutor_email"),
+            (
+                Parent.contact_name
+                + " "
+                + Parent.contact_lastname_father
+                + " "
+                + Parent.contact_lastname_mother
+            ).label("second_tutor_full_name"),
+            Parent.contact_email.label("second_tutor_email"),
+        )
+        .join(Camper, CamperInCamp.camper_id == Camper.id)
+        .join(Parent, Camper.parent_id == Parent.id)
+        .join(CamperRecord, Camper.record_id == CamperRecord.id)
+        .join(User, Parent.user_id == User.id)
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .all()
+    )
+    return db_mapping_rows_to_dict(campers)

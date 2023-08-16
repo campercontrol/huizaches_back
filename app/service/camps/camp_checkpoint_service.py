@@ -13,7 +13,7 @@ from crud.camps.camp_checkpoint_crud import (
     delete_camp_checkpoint,
 )
 
-from crud.camps.camper_in_camp_crud import get_campers_subscribe_to_camp
+from crud.camps.camper_in_camp_crud import get_campers_for_module
 
 from crud.campers.camper_checkpoint_crud import (
     get_camper_checkpoint_by_camper,
@@ -107,7 +107,7 @@ def delete_checkpoint_by_id(camp_checkpoint_id: int, db: Session = Depends(get_d
 )
 def get_camp_checkpoint_module(camp_id: int, db: Session = Depends(get_db)):
     data = []
-    campers_list = get_campers_subscribe_to_camp(db, camp_id)
+    campers_list = get_campers_for_module(db, camp_id)
     for camper in campers_list:
         all_checks = []
         camper_checks = []

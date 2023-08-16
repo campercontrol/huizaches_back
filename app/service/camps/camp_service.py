@@ -24,6 +24,7 @@ from crud.camps.camper_in_camp_crud import (
     get_past_subscribe_by_camper,
     get_camper_in_camp_by_camper_camp,
     update_camper_in_camp_by_id,
+    get_campers_for_camp,
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -34,6 +35,8 @@ from crud.camps.camp_extra_question_crud import (
     get_extra_question_by_camp,
     create_new_extra_question,
 )
+from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
+from crud.camps.location_crud import get_location_by_uuid
 
 from schema.camps.camp_schema import CampCreate, CampModify, CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
@@ -92,16 +95,21 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
 
     for question in new_camp.extra_question:
         new_question = CampExtraQuestionCreate(
-            question = question.question, is_required = question.is_required, camp_id = new_camp_id
+            question=question.question,
+            is_required=question.is_required,
+            camp_id=new_camp_id,
         )
         create_new_extra_question(db, new_question)
-    
+
     for charge in new_camp.extra_charges:
         new_charge = CampExtraChargeCreate(
-            name = charge.name, price = charge.price, currency_id = charge.currency_id, camp_id = new_camp_id
+            name=charge.name,
+            price=charge.price,
+            currency_id=charge.currency_id,
+            camp_id=new_camp_id,
         )
         create_new_extra_charge(db, new_charge)
-        
+
     return {"data": camp}
 
 
@@ -173,3 +181,14 @@ def get_camp_extras(camp_id: int, db: Session = Depends(get_db)):
 def delete_camp_by_id(camp_id: int, db: Session = Depends(get_db)):
     status = delete_camp(db, camp_id)
     return {"status": status}
+
+
+@camp_router.get("/staff/camp/{camp_id}", tags=["Camps"])
+def get_staff_camp(camp_id: int, db: Session = Depends(get_db)):
+    camp_info = get_camp_by_id(db, camp_id)
+    campers = get_campers_for_camp(db, camp_id)
+    staff_volunteer = get_staff_volunteer_in_camp(db, camp_id)
+    staff = get_staff_in_camp(db, camp_id)
+    location = get_location_by_uuid(db, camp_info.location_id)
+    return {"camp": camp_info, "location": location.name,  "campers": campers, "staff_volunteer": staff_volunteer, "staff_confirmed": staff}
+

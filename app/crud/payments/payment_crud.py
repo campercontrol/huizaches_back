@@ -123,10 +123,6 @@ def get_payment_page_camper_in_camp(
         .filter(Camper.id == camper_id)
         .first()
     )
-
-    print("###############################################3")
-    print(camper)
-
     payment_methods = get_all_payment_method(db)
     transaction_type = get_all_payment_transaction_type(db)
 
