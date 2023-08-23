@@ -12,7 +12,7 @@ from crud.campers.parent_crud import (
     create_new_parent_user_id,
     update_parent_by_id,
     delete_parent, 
-    search_parent_by_name
+    search_parent_by_name_user
 )    
 from crud.camps.camp_crud import (
     get_camp_by_id
@@ -131,9 +131,9 @@ def delete_parent_by_id(parent_id:int, db: Session = Depends(get_db)):
     status = delete_parent(db, parent_id)
     return{"status": status}
 
-@parent_routes.get("/search_parent/{search}", tags=["Campers"])
+@parent_routes.get("/search/parent/{search}", tags=["Campers"])
 def get_search_parent(search:str, db: Session = Depends(get_db)):
-    possible_parents  = search_parent_by_name(db, search)
+    possible_parents  = search_parent_by_name_user(db, search)
     return { "data": possible_parents }
 
 @parent_routes.get("/payment_boucher/{camper_id}/{camp_id}", response_class=FileResponse, tags=["Campers"])

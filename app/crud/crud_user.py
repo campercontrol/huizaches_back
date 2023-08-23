@@ -1,5 +1,6 @@
+from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy.orm import Session, joinedload
 from model.role import Role
 from model.user import User
 from model.campers import Parent
@@ -170,3 +171,25 @@ def get_profile_id_by_user_id(db, user_id:int ):
             .first()
         )
     return profile_id[0]
+
+def search_user_by_email(db: Session, search: str):
+    users = (
+        db.query(
+            User.id.label("user_id"),
+            User.email.label("tutor_email"),
+            User.is_active.label("user_active"),
+            User.is_superuser.label("user_superuser"),
+            User.is_employee.label("user_employee"),
+            User.is_coordinator.label("user_coordinator"),
+            User.is_admin.label("user_admin"),
+            User.created_at.label("user_created")
+        )        
+        .filter(
+            User.email.ilike(r"%{}%".format(search))
+        )
+        .all()
+    )
+    if users:
+        return db_mapping_rows_to_dict(users)
+    else:
+        return "Data not found"

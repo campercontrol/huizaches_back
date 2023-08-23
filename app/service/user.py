@@ -10,6 +10,7 @@ from crud.crud_user import (
     crud_update_user_by_uuid,
     get_user_by_email,
     crud_update_user_by_email,
+    search_user_by_email
 )
 from model.user import User
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword
@@ -198,3 +199,7 @@ def change_password(
                 "mensaje": "Ocurrio un error inesperado, intente de nuevo",
                 "data": "",
             }
+@user_routes.get("/search/user/{search}", tags=["Usuarios"])
+def get_search_user(search:str, db: Session = Depends(get_db)):
+    possible_users  = search_user_by_email(db, search)
+    return { "data": possible_users }
