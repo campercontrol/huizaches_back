@@ -1,11 +1,12 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import case
+from sqlalchemy import case, or_
 from datetime import date, datetime
 
 from utils.db import db_mapping_rows_to_dict
 
-from model.campers import Camper, School, CamperRecord
+from model.campers import Camper, School, CamperRecord, Parent
+from model.user import User
 from model.catalogs import (
     Vaccine,
     FoodRestriction,
@@ -25,8 +26,6 @@ from schema.campers.camper_schema import CamperCreate, CamperModify, CamperCompl
 
 def get_all_camper(db: Session) -> any:
     rows = db.query(Camper).all()
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    print(rows)
     return rows
 
 
@@ -188,3 +187,43 @@ def delete_camper(db, camper_id:int):
     db.delete(camper)
     db.commit()
     return {"status": True}
+
+def search_camper_by_name_user(db: Session, search: str):
+    campers = (
+        db.query(
+            Camper.id.label("camper_id"),
+            Camper.name.label("camper_name"),
+            Camper.lastname_father.label("camper_lastname_father"),
+            Camper.lastname_mother.label("camper_lastname_mother"),
+            School.name.label("school"),
+            Camper.updated_at.label("updated"),
+            Parent.id.label("tutor_id"),
+            (
+            Parent.tutor_name + " " + 
+            Parent.tutor_lastname_father + " " + 
+            Parent.tutor_lastname_mother 
+            ).label("tutor_fullname"),
+            User.id.label("user_id"),
+            User.email.label("tutor_email"),
+        )
+        .join(Parent, Parent.id == Camper.parent_id)
+        .join(User, User.id == Parent.user_id)
+        .join(School, School.id == Camper.school_id)
+        .filter(
+            or_(
+                Camper.name.ilike(r"%{}%".format(search)),
+                Camper.lastname_father.ilike(r"%{}%".format(search)),
+                Camper.lastname_mother.ilike(r"%{}%".format(search)),
+                School.name.ilike(r"%{}%".format(search)),
+                Parent.tutor_name.ilike(r"%{}%".format(search)),
+                Parent.tutor_lastname_father.ilike(r"%{}%".format(search)),
+                Parent.tutor_lastname_mother.ilike(r"%{}%".format(search)),
+                User.email.ilike(r"%{}%".format(search))
+            )
+        )
+        .all()
+    )
+    if campers:
+        return db_mapping_rows_to_dict(campers)
+    else:
+        return "Data not found"

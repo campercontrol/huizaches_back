@@ -51,6 +51,7 @@ from crud.campers.camper_crud import (
     get_pathological_background_fm_by_camper,
     get_campers_from_parent,
     get_camper_band,
+    search_camper_by_name_user,
     delete_camper
 )
 from crud.campers.parent_crud import get_parent_by_uuid
@@ -432,3 +433,8 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
 def delete_camper_by_id(camper_id:int, db: Session = Depends(get_db)):
     status = delete_camper(db, camper_id)
     return{"status": status}
+
+@camper_routes.get("/search/camper/{search}", tags=["Campers"])
+def get_search_camper(search:str, db: Session = Depends(get_db)):
+    possible_campers  = search_camper_by_name_user(db, search)
+    return { "data": possible_campers }
