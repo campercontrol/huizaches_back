@@ -12,7 +12,8 @@ from crud.campers.parent_crud import (
     create_new_parent_user_id,
     update_parent_by_id,
     delete_parent, 
-    search_parent_by_name_user
+    search_parent_by_name_user,
+    get_parent_for_admin_by_id
 )    
 from crud.camps.camp_crud import (
     get_camp_by_id
@@ -168,3 +169,8 @@ def get_payment_boucher(camper_id:int, camp_id:int, db:Session= Depends(get_db))
     
     path = generar_pdf_baucher(context)
     return FileResponse(path)
+
+@parent_routes.get("/admin/parent/{parent_id}", tags=["Campers"])
+def get_parent_for_admin(parent_id:str, db: Session = Depends(get_db)):
+    parent = get_parent_for_admin_by_id(db, parent_id)
+    return {"data": parent}

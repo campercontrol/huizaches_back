@@ -17,6 +17,33 @@ def get_all_parent(db: Session):
 def get_parent_by_uuid(db: Session, parent_id: int):
     return db.query(Parent).filter_by(id=parent_id).first()
 
+def get_parent_for_admin_by_id(db: Session, parent_id: int):
+    parent = (
+        db.query(
+            User.id.label("user_id"),
+            User.email.label("user_email"), 
+            Parent.id.label("tutor_id"),
+            Parent.tutor_name.label("tutor_name"),
+            Parent.tutor_lastname_father.label("tutor_lastname_father"),
+            Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+            Parent.tutor_cellphone.label("tutor_cellphone"),
+            Parent.tutor_home_phone.label("tutor_home_phone"),
+            Parent.tutor_work_phone.label("tutor_work_phone"),
+            Parent.contact_name.label("contact_name"),
+            Parent.contact_lastname_father.label("contact_lastname_father"),
+            Parent.contact_lastname_mother.label("contact_lastname_mother"),
+            Parent.contact_cellphone.label("contact_cellphone"),
+            Parent.contact_home_phone.label("contact_home_phone"),
+            Parent.contact_work_phone.label("contact_work_phone"),
+            Parent.contact_email.label("contact_email"),
+        )
+        .outerjoin(User, User.id == Parent.user_id)
+        .filter_by(id=parent_id).all()
+        )
+    if parent:
+        return db_mapping_rows_to_dict(parent)[0]
+    else: 
+        return "Parent doesn't exist"
 
 def create_new_parent(db, new_parent: ParentCreate):
     db_parent = None

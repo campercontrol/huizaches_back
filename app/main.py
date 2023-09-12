@@ -33,6 +33,7 @@ from service.training.staff_in_training_service import staff_in_training_router
 from service.file import files_routes
 from service.campers.camper_record_service import camper_record_routes
 from service.staffs.staff_record_service import staff_record_routes
+from service.staffs.staff_comment_service import staff_comment_routes
 
 app = FastAPI()
 
@@ -70,6 +71,7 @@ app.include_router(staff_in_training_router)
 app.include_router(files_routes)
 app.include_router(camper_record_routes)
 app.include_router(staff_record_routes)
+app.include_router(staff_comment_routes)
 
 from service.role import role_routes
 from service.user import user_routes

@@ -92,9 +92,6 @@ def staff_dashboard(db, staff_id: int):
             .first()            
             )
     
-    print("#############################")
-    print(user)
-
     if user[0] and user[1] and user[2]:
 
 
