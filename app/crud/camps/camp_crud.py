@@ -109,8 +109,8 @@ def delete_camp(db: Session, camp_id:int):
 def get_records_for_camp(db: Session, camp_id:int):
     
     campers_record = len(get_campers_for_module(db, camp_id))
-    staff_available_record = get_staff_volunteer_in_camp(db, camp_id).count()
-    staff_record = get_staff_in_camp(db, camp_id).count()
+    staff_available_record = len(get_staff_volunteer_in_camp(db, camp_id))
+    staff_record = len(get_staff_in_camp(db, camp_id))
 
 
     return {
