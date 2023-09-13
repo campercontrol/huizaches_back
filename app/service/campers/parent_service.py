@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 
 from crud.campers.parent_crud import (
     get_all_parent,
+    get_all_parent_admin,
     get_parent_by_uuid,
     create_new_parent,
     create_new_parent_user_id,
@@ -174,3 +175,8 @@ def get_payment_boucher(camper_id:int, camp_id:int, db:Session= Depends(get_db))
 def get_parent_for_admin(parent_id:str, db: Session = Depends(get_db)):
     parent = get_parent_for_admin_by_id(db, parent_id)
     return {"data": parent}
+
+@parent_routes.get("/admin/parent/", tags=["Campers"])
+def get_parent_admin(db: Session = Depends(get_db)):
+    list_parent = get_all_parent_admin(db)
+    return {"data": list_parent}
