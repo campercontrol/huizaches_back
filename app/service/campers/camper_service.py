@@ -41,6 +41,7 @@ from crud.campers_catalogs.camper_pathological_background_fm_crud import (
 )
 from crud.campers.camper_crud import (
     get_all_camper,
+    get_all_camper_admin,
     get_camper_by_uuid,
     create_new_camper,
     update_camper_by_id,
@@ -438,3 +439,8 @@ def delete_camper_by_id(camper_id:int, db: Session = Depends(get_db)):
 def get_search_camper(search:str, db: Session = Depends(get_db)):
     possible_campers  = search_camper_by_name_user(db, search)
     return { "data": possible_campers }
+
+@camper_routes.get("/admin/camper/", tags=["Campers"])
+def get_admin_camper(db: Session = Depends(get_db)):
+    campers = get_all_camper_admin(db)
+    return { "data": campers }

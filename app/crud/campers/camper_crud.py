@@ -227,3 +227,32 @@ def search_camper_by_name_user(db: Session, search: str):
         return db_mapping_rows_to_dict(campers)
     else:
         return "Data not found"
+    
+
+def get_all_camper_admin(db: Session):
+    campers = (
+        db.query(
+            Camper.id.label("camper_id"),
+            Camper.name.label("camper_name"),
+            Camper.lastname_father.label("camper_lastname_father"),
+            Camper.lastname_mother.label("camper_lastname_mother"),
+            School.name.label("school"),
+            Camper.updated_at.label("updated"),
+            Parent.id.label("tutor_id"),
+            (
+            Parent.tutor_name + " " + 
+            Parent.tutor_lastname_father + " " + 
+            Parent.tutor_lastname_mother 
+            ).label("tutor_fullname"),
+            User.id.label("user_id"),
+            User.email.label("tutor_email"),
+        )
+        .join(Parent, Parent.id == Camper.parent_id)
+        .join(User, User.id == Parent.user_id)
+        .join(School, School.id == Camper.school_id)
+        .all()
+    )
+    if campers:
+        return db_mapping_rows_to_dict(campers)
+    else:
+        return "Data not found"

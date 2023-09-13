@@ -1,6 +1,7 @@
 from model.campers import Parent
 from model.user import User
 from model.campers import Camper
+from helper.parent_helpers import append_campers_for_parent_admin
 from schema.campers.parent_schema import ParentCreate, ParentModify
 from crud.campers.camper_crud import get_campers_from_parent
 from sqlalchemy import case, or_
@@ -129,25 +130,34 @@ def search_parent_by_name_user(db: Session, search: str):
     )
 
     if parents:
-        possible_parents= []
-        parents = db_mapping_rows_to_dict(parents)
-        for parent in parents:
-            campers = get_campers_from_parent(db, parent.tutor_id)
-            parent_modify= {
-                "user_id": parent.user_id,
-                "tutor_id": parent.tutor_id,
-                "tutor_name": parent.tutor_name,
-                "tutor_lastname_father": parent.tutor_lastname_father,
-                "tutor_lastname_mother": parent.tutor_lastname_mother,
-                "tutor_home_phone": parent.tutor_home_phone,
-                "tutor_work_phone": parent.tutor_work_phone,
-                "tutor_cellphone": parent.tutor_cellphone,
-                "tutor_email": parent.tutor_email,
-                "second_tutor_email": parent.second_tutor_email,
-                "campers": campers
-            }
-            
-            possible_parents.append(parent_modify)
+        possible_parents = append_campers_for_parent_admin(parents)
+    else:
+        possible_parents = "Data not found"
+
+    return possible_parents
+
+
+def get_all_parent_admin(db: Session):
+
+    parents = (
+        db.query(
+            User.id.label("user_id"),
+            Parent.id.label("tutor_id"),
+            Parent.tutor_name.label("tutor_name"),
+            Parent.tutor_lastname_father.label("tutor_lastname_father"),
+            Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+            Parent.tutor_home_phone.label("tutor_home_phone"),
+            Parent.tutor_work_phone.label("tutor_work_phone"),
+            Parent.tutor_cellphone.label("tutor_cellphone"),
+            User.email.label("tutor_email"),
+            Parent.contact_email.label("second_tutor_email")
+        )
+        .join(User, User.id == Parent.user_id)
+        .all()
+    )
+
+    if parents:
+        possible_parents = append_campers_for_parent_admin(parents)
     else:
         possible_parents = "Data not found"
 
