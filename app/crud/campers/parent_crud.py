@@ -117,7 +117,7 @@ def search_parent_by_name_user(db: Session, search: str):
             User.email.label("tutor_email"),
             Parent.contact_email.label("second_tutor_email")
         )
-        .join(User, User.id == Parent.user_id)
+        .outerjoin(User, User.id == Parent.user_id)
         .filter(
             or_(
                 Parent.tutor_name.ilike(r"%{}%".format(search)),
@@ -130,7 +130,7 @@ def search_parent_by_name_user(db: Session, search: str):
     )
 
     if parents:
-        possible_parents = append_campers_for_parent_admin(parents)
+        possible_parents = append_campers_for_parent_admin(db, parents)
     else:
         possible_parents = "Data not found"
 
@@ -152,12 +152,12 @@ def get_all_parent_admin(db: Session):
             User.email.label("tutor_email"),
             Parent.contact_email.label("second_tutor_email")
         )
-        .join(User, User.id == Parent.user_id)
+        .outerjoin(User, User.id == Parent.user_id)
         .all()
     )
 
     if parents:
-        possible_parents = append_campers_for_parent_admin(parents)
+        possible_parents = append_campers_for_parent_admin(db, parents)
     else:
         possible_parents = "Data not found"
 

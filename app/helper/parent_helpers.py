@@ -17,6 +17,8 @@ def append_campers_for_parent_admin(db, parents):
     possible_parents= []
     parents = db_mapping_rows_to_dict(parents)
     for parent in parents:
+        print("#############################")
+        print(parent)
         campers = get_campers_from_parent(db, parent.tutor_id)
         parent_modify= {
             "user_id": parent.user_id,
@@ -32,6 +34,6 @@ def append_campers_for_parent_admin(db, parents):
             "campers": campers
         }
             
-    possible_parents.append(parent_modify)
+        possible_parents.append(parent_modify)
     
     return possible_parents
