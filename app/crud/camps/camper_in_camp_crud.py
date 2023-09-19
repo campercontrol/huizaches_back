@@ -22,7 +22,14 @@ def get_all_camper_in_camp(db: Session):
 def create_new_camper_in_camp(db: Session, new_camper_in_camp: CamperInCampCreate):
     db_camper_in_camp = None
     try:
-        db_camper_in_camp = CamperInCamp(**new_camper_in_camp.dict())
+        
+        camp_price = db.query(Camp.public_price).filter_by(id=new_camper_in_camp.camp_id).first()
+        db_camper_in_camp = CamperInCamp(
+            camp_id = new_camper_in_camp.camp_id,
+            status = new_camper_in_camp.status,
+            payment_balance = getattr(camp_price, "public_price"),
+            camper_id = new_camper_in_camp.camper_id,
+        )        
         db.add(db_camper_in_camp)
         db.commit()
         db.refresh(db_camper_in_camp)
