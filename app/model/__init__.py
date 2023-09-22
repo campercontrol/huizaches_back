@@ -6,8 +6,10 @@ from model.camps import *
 #from model.prueba_libros import *
 from model.payments import *
 from model.staffs import *
+from model.mailings import *
 
 from model.role import *
 from model.user import *
 from model.permission import *
 from model.trainings import *
+

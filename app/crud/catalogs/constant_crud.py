@@ -169,3 +169,19 @@ def get_all_user_group(db, language: str = "es"):
         .all()
     )
     return rows
+
+def get_all_email_template(db, language: str = "es"):
+    rows = (
+        db.query(Constant)
+        .filter(Constant.model_name == "email_template", Constant.language == language)
+        .all()
+    )
+    return rows
+
+def get_all_email_send_type(db, language: str = "es"):
+    rows = (
+        db.query(Constant)
+        .filter(Constant.model_name == "send_type", Constant.language == language)
+        .all()
+    )
+    return rows
