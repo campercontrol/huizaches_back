@@ -18,6 +18,8 @@ from crud.catalogs.constant_crud import (
     get_all_rol_colors,
     get_all_triage,
     get_all_user_group,
+    get_all_email_template,
+    get_all_email_send_type
 )
 from schema.catalogs.constant_schema import(
     ConstantCreate,
@@ -53,11 +55,10 @@ def create_constant(new_constant:ConstantCreate,db: Session = Depends(get_db)):
     list_constant = create_new_constant(db,new_constant)
     return {"data": list_constant}
 
-@constant_routes.post("/constant/{constant_id}", tags=["Constants"])
-def create_constant(constant_id:str,modify_constant:ConstantModify,db: Session = Depends(get_db)):
+@constant_routes.patch("/constant/{constant_id}", tags=["Constants"])
+def modify_constant(constant_id:str,modify_constant:ConstantModify,db: Session = Depends(get_db)):
 
     update_data = modify_constant.dict(exclude_unset=True)
-    print(update_data)
     constant_upcdate_result = update_constant_by_id(db,constant_id,update_data)
 
     if constant_upcdate_result != 0:
@@ -117,3 +118,12 @@ def get_user_group(language:str, db: Session=Depends(get_db)):
     list_constant= get_all_user_group(db, language)
     return {"data": list_constant} 
 
+@constant_routes.get("/get/mailing/template/{language}", tags=["Constants"])
+def get_email_template(language:str ="es", db: Session=Depends(get_db)):
+    list_constant= get_all_email_template(db, language)
+    return {"data": list_constant} 
+
+@constant_routes.get("/get/mailing/type/{language}", tags=["Constants"])
+def get_email_type(language:str ="es", db: Session=Depends(get_db)):
+    list_constant= get_all_email_send_type(db, language)
+    return {"data": list_constant} 
