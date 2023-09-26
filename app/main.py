@@ -38,6 +38,7 @@ from service.staffs.staff_comment_service import staff_comment_routes
 from service.mailings.email_template_service import email_template_routes
 from service.mailings.campaign_service import campaign_routes
 from service.mailings.mailing_service import mailing_routes
+from service.camps.report_service import report_routes
 
 app = FastAPI()
 
@@ -89,6 +90,7 @@ app.include_router(staff_comment_routes)
 app.include_router(email_template_routes)
 app.include_router(campaign_routes)
 app.include_router(mailing_routes)
+app.include_router(report_routes)
 
 from service.role import role_routes
 from service.user import user_routes

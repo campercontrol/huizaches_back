@@ -5,7 +5,7 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.camps import CamperInCamp, Camp, Location
-from model.campers import Camper, CamperRecord, Parent
+from model.campers import Camper, CamperRecord, Parent, School
 from model.catalogs import Constant
 from model.user import User
 from schema.camps.camper_in_camp_schema import (
@@ -22,14 +22,15 @@ def get_all_camper_in_camp(db: Session):
 def create_new_camper_in_camp(db: Session, new_camper_in_camp: CamperInCampCreate):
     db_camper_in_camp = None
     try:
-        
-        camp_price = db.query(Camp.public_price).filter_by(id=new_camper_in_camp.camp_id).first()
+        camp_price = (
+            db.query(Camp.public_price).filter_by(id=new_camper_in_camp.camp_id).first()
+        )
         db_camper_in_camp = CamperInCamp(
-            camp_id = new_camper_in_camp.camp_id,
-            status = new_camper_in_camp.status,
-            payment_balance = getattr(camp_price, "public_price"),
-            camper_id = new_camper_in_camp.camper_id,
-        )        
+            camp_id=new_camper_in_camp.camp_id,
+            status=new_camper_in_camp.status,
+            payment_balance=getattr(camp_price, "public_price"),
+            camper_id=new_camper_in_camp.camper_id,
+        )
         db.add(db_camper_in_camp)
         db.commit()
         db.refresh(db_camper_in_camp)
@@ -277,3 +278,30 @@ def get_campers_for_camp(db: Session, camp_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(campers)
+
+
+def get_campers_for_bracelets(db, camp_id):
+    list_campers = (
+        db.query(
+            Camper.id.label("camper_id"),
+            (
+                Camper.name
+                + " "
+                + Camper.lastname_father
+                + " "
+                + Camper.lastname_mother
+            ).label("name"),
+            School.name.label("school"),
+            Constant.value.label("blood_type"),
+            Camper.drug_allergies.label("alergies"),
+            Camper.other_allergies.label("other_alergies"),
+            Camper.prohibited_foods.label("prohibed_foo")
+        )
+        .select_from(CamperInCamp)
+        .join(Camper, Camper.id == CamperInCamp.camper_id)
+        .join(School, School.id == Camper.school_id)
+        .join(Constant, Constant.id == Camper.blood_type)
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .all()        
+        )
+    return db_mapping_rows_to_dict(list_campers)
