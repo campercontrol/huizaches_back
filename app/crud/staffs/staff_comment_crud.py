@@ -61,3 +61,16 @@ def get_staff_comment_by_staff_for_staff(db, staff_id: int):
         .all()
     )
     return rows
+
+def get_staff_comment_by_staff_for_admin(db, staff_id: int):
+    rows = (
+        db.query(StaffComment)
+        .filter(
+            and_(
+                StaffComment.staff_id == staff_id,
+                StaffComment.is_public == True
+            )
+        )
+        .all()
+    )
+    return rows

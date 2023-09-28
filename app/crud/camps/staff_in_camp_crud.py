@@ -1,6 +1,7 @@
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy import cast, Date
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
@@ -156,3 +157,51 @@ def assign_role_staff(db: Session, camp_id:int, staffs_id: list[int], role_id:in
         )
         db.commit()
     return "Success"
+
+def get_past_camp_confirmed_by_staff(db: Session, staff_id:int):
+
+    camps = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Location.name.label("location"),
+            Camp.start.cast(Date).label("camp_start"),
+            Camp.end.cast(Date).label("camp_end"),
+            Camp.url.label("camp_url"),
+        )
+        .select_from(StaffInCamp)
+        .join(Camp, Camp.id == StaffInCamp.camp_id)
+        .join(Location, Location.id == Camp.location_id)
+        .filter(
+            StaffInCamp.staff_id == staff_id, 
+            StaffInCamp.confirmed_staff == True, 
+            Camp.start <= date.today()
+        )
+        .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
+
+def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
+
+    camps = (
+    db.query(
+        Camp.id.label("camp_id"),
+        Camp.name.label("camp_name"),
+        Location.name.label("location"),
+        Camp.start.cast(Date).label("camp_start"),
+        Camp.end.cast(Date).label("camp_end"),
+        Camp.url.label("camp_url"),
+    )
+    .select_from(StaffInCamp)
+    .join(Camp, Camp.id == StaffInCamp.camp_id)
+    .join(Location, Location.id == Camp.location_id)
+    .filter(
+        StaffInCamp.staff_id == staff_id, 
+        StaffInCamp.confirmed_staff == True, 
+        Camp.start > date.today()
+    )
+    .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
