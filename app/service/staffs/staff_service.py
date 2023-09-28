@@ -12,6 +12,7 @@ from crud.staffs.staff_crud import (
     staff_dashboard,
     get_staff_by_id,
     update_staff_by_id,
+    get_staff_band
 )
 
 from crud.catalogs.constant_crud import (
@@ -46,6 +47,14 @@ from crud.staff_catalogs.staff_food_restriction_crud import (
     update_staff_food_restriction_by_id
 )
 
+from crud.camps.staff_in_camp_crud import (
+    get_past_camp_confirmed_by_staff,
+    get_future_camp_confirmed_by_staff
+)
+
+from crud.staffs.staff_comment_crud import (
+    get_staff_comment_by_staff_for_admin
+)
 
 from utils.db import SessionLocal
 
@@ -234,4 +243,22 @@ def get_staff_complete(staff_id: int, language: str, db: Session = Depends(get_d
         "blood_types": blood_type,
         "vaccines": vaccines_data,
         "food_restrictions": food_restrictions_data,
+    }
+
+
+@staff_routes.get("/staff/profile/{staff_id}/{language}", tags=["Staff"])
+def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db)):
+    
+    staff_past_camps = get_past_camp_confirmed_by_staff(db, staff_id)
+    staff_upcoming_camps = get_future_camp_confirmed_by_staff(db, staff_id)
+    staff_band = get_staff_band(db, staff_id)
+    staff_profile = get_staff_by_id(db, staff_id)
+    staff_comments = get_staff_comment_by_staff_for_admin(db, staff_id)
+    return{
+       "staff_band": staff_band[0],
+        "staff_profile": staff_profile,
+        "staff_past_camps": staff_past_camps,
+        "staff_upcoming_camps": staff_upcoming_camps,
+        "staff_comments": staff_comments,
+        "staff_trophies": "a"
     }
