@@ -19,6 +19,7 @@ print(f"port {port}")
 print(f"db {db}")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
+print(SQLALCHEMY_DATABASE_URL)
 #SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
