@@ -12,4 +12,5 @@ from model.role import *
 from model.user import *
 from model.permission import *
 from model.trainings import *
+from model.trophies import *
 

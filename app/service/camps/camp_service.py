@@ -25,6 +25,7 @@ from crud.camps.camper_in_camp_crud import (
     get_camper_in_camp_by_camper_camp,
     update_camper_in_camp_by_id,
     get_campers_for_camp,
+    subscribe_camper_to_camps
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -192,3 +193,16 @@ def get_staff_camp(camp_id: int, db: Session = Depends(get_db)):
     location = get_location_by_uuid(db, camp_info.location_id)
     return {"camp": camp_info, "location": location.name,  "campers": campers, "staff_volunteer": staff_volunteer, "staff_confirmed": staff}
 
+
+@camp_router.post("/camper/subscribe/camps/", tags=["Camps"])
+def subscrible_camper_to_multiple_camps (camps_id: list[int], camper_id: int ,db: Session = Depends(get_db)):
+    data = subscribe_camper_to_camps(db, camps_id, camper_id)
+    if data['status'] == "ok":
+        return {"status": data['status']}
+    else:
+        return {
+            "status": data['status'],
+            "extra_charges": data['extra_charges'],
+            "extra_questions": data['extra_questions']
+
+        }
