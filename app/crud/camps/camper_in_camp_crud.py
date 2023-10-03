@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
-from model.camps import CamperInCamp, Camp, Location
-from model.campers import Camper, CamperRecord, Parent, School
+from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
+from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
+from model.payments import CamperExtraCharge
 from model.catalogs import Constant
 from model.user import User
 from schema.camps.camper_in_camp_schema import (
@@ -295,13 +296,91 @@ def get_campers_for_bracelets(db, camp_id):
             Constant.value.label("blood_type"),
             Camper.drug_allergies.label("alergies"),
             Camper.other_allergies.label("other_alergies"),
-            Camper.prohibited_foods.label("prohibed_foo")
+            Camper.prohibited_foods.label("prohibed_foo"),
         )
         .select_from(CamperInCamp)
         .join(Camper, Camper.id == CamperInCamp.camper_id)
         .join(School, School.id == Camper.school_id)
         .join(Constant, Constant.id == Camper.blood_type)
         .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
-        .all()        
-        )
+        .all()
+    )
     return db_mapping_rows_to_dict(list_campers)
+
+
+def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
+    extra_charges = []
+    extra_questions = []
+
+    for camp_id in camps_id:
+        camper_in_camp = (
+            db.query(CamperInCamp)
+            .filter(
+                and_(
+                    CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
+                )
+            )
+            .first()
+        )
+        camp = db.query(Camp).filter(Camp.id == camp_id).first()
+
+        camp_extra_charges = (
+            db.query(
+                CampExtraCharge.id.label("camp_extra_charge_id"),
+                CampExtraCharge.name.label("camp_extra_charge_name"),
+                CampExtraCharge.price.label("camp_extra_charge_price"),
+                CamperExtraCharge.id.label("camper_extra_charge_id"),
+                CamperExtraCharge.is_selected.label("camp_extra_charge_is_selected"),
+            )
+            .outerjoin(
+                CamperExtraCharge,
+                CamperExtraCharge.extra_charge_id == CampExtraCharge.id,
+            )
+            .filter(CampExtraCharge.camp_id == camp_id)
+            .all()
+        )
+        for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
+            extra_charges.append(camp_extra_charge)
+
+        camp_extra_questions = (
+            db.query(
+                CampExtraQuestion.id.label("camp_extra_question_id"),
+                CampExtraQuestion.question.label("camp_extra_question_question"),
+                CampExtraQuestion.is_required.label("camp_extra_question_required") ,
+                CamperExtraAnswer.id.label("camper_extra_answer_id"),
+                CamperExtraAnswer.answer.label("camp_extra_answer_answer"),
+            )
+            .outerjoin(
+                CamperExtraAnswer,
+                CamperExtraAnswer.question_id == CampExtraQuestion.id,
+            )
+            .filter(CampExtraQuestion.camp_id == camp_id)
+            .all()
+        )
+        for camp_extra_question in db_mapping_rows_to_dict(camp_extra_questions):
+            extra_questions.append(camp_extra_question)
+
+        if camper_in_camp and getattr(camper_in_camp, "status") != 36:
+            db.query(CamperInCamp).filter(
+                and_(
+                    CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
+                )
+            ).update({"status": 36})
+            db.commit()
+        elif not camper_in_camp:
+            new_camper_in_camp = CamperInCampCreate(
+                camper_id=camper_id,
+                camp_id=camp_id,
+                status=36,
+                payment_balance=getattr(camp, "public_price"),
+            )
+            create_new_camper_in_camp(db, new_camper_in_camp)
+
+    if extra_charges or extra_questions:
+        return {
+            "status": "pend",
+            "extra_charges": extra_charges,
+            "extra_questions": extra_questions,
+        }
+    else:
+        return {"status": "ok"}
