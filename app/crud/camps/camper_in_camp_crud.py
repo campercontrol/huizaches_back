@@ -326,6 +326,8 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
 
         camp_extra_charges = (
             db.query(
+                Camp.id.label("camp_id"),
+                Camp.name.label("camp_name"),
                 CampExtraCharge.id.label("camp_extra_charge_id"),
                 CampExtraCharge.name.label("camp_extra_charge_name"),
                 CampExtraCharge.price.label("camp_extra_charge_price"),
@@ -336,6 +338,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 CamperExtraCharge,
                 CamperExtraCharge.extra_charge_id == CampExtraCharge.id,
             )
+            .join(Camp, Camp.id == CampExtraCharge.camp_id)
             .filter(CampExtraCharge.camp_id == camp_id)
             .all()
         )
@@ -344,6 +347,8 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
 
         camp_extra_questions = (
             db.query(
+                Camp.id.label("camp_id"),
+                Camp.name.label("camp_name"),
                 CampExtraQuestion.id.label("camp_extra_question_id"),
                 CampExtraQuestion.question.label("camp_extra_question_question"),
                 CampExtraQuestion.is_required.label("camp_extra_question_required") ,
@@ -354,6 +359,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 CamperExtraAnswer,
                 CamperExtraAnswer.question_id == CampExtraQuestion.id,
             )
+            .join(Camp, Camp.id == CampExtraQuestion.camp_id)
             .filter(CampExtraQuestion.camp_id == camp_id)
             .all()
         )
@@ -378,9 +384,10 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
 
     if extra_charges or extra_questions:
         return {
-            "status": "pend",
+            "status": 2,
             "extra_charges": extra_charges,
             "extra_questions": extra_questions,
         }
     else:
-        return {"status": "ok"}
+        return {"status": 1}
+    
