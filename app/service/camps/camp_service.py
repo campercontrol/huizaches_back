@@ -200,7 +200,7 @@ def get_staff_camp(camp_id: int, db: Session = Depends(get_db)):
 @camp_router.post("/camper/subscribe/camps/", tags=["Camps"])
 def subscrible_camper_to_multiple_camps (camps_id: list[int], camper_id: int ,db: Session = Depends(get_db)):
     data = subscribe_camper_to_camps(db, camps_id, camper_id)
-    if data['status'] == "ok":
+    if data['status'] == 1:
         return {"status": data['status']}
     else:
         return {
