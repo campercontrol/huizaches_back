@@ -13,7 +13,22 @@ from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
     CamperInCampModify,
 )
+from schema.campers.camper_extra_answer_schema import (
+    CamperExtraAnswerCreate,
+    ExtraAnswerMultiple
+)
 
+from schema.payments.camper_extra_charge_schema import (
+    ExtraChargeMultiple,
+    CamperExtraChargeCreate
+)
+
+from crud.campers.camper_extra_answer_crud import (
+    create_new_extra_answer
+)
+from crud.payments.camper_extra_charge_crud import (
+    create_new_camper_extra_charge
+)
 
 def get_all_camper_in_camp(db: Session):
     rows = db.query(CamperInCamp).all()
@@ -391,3 +406,63 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     else:
         return {"status": 1}
     
+
+def create_update_camper_extras_camp(db, camper_id: int, 
+        extra_answers: list[ExtraAnswerMultiple], 
+        extra_charges: list[ExtraChargeMultiple]):
+
+    for extra_answer in extra_answers:
+        if (db.query(CamperExtraAnswer)
+            .filter(
+                and_(
+                    CamperExtraAnswer.question_id == extra_answer.question_id, 
+                    CamperExtraAnswer.camper_id == camper_id))
+            .update(
+            {"answer": getattr(extra_answer, "answer")}
+            )):
+            db.commit()
+        else: 
+            extra_answer_new = CamperExtraAnswerCreate(
+                answer = extra_answer.answer,
+                camper_id = camper_id,
+                question_id = extra_answer.question_id,
+            )
+            status = create_new_extra_answer(db, extra_answer_new)
+    
+    for extra_charge in extra_charges:
+        if (db.query(CamperExtraCharge)
+            .filter(
+                and_(
+                    CamperExtraCharge.extra_charge_id == extra_charge.extra_charge_id, 
+                    CamperExtraCharge.camper_id == camper_id))
+            .update(
+            {"is_selected": getattr(extra_charge, "is_selected")}
+            )):
+            db.commit()
+        else: 
+            extra_charge_new = CamperExtraChargeCreate(
+                is_selected = extra_charge.is_selected,
+                camper_id = camper_id,
+                extra_charge_id = extra_charge.extra_charge_id,
+            )
+            status = create_new_camper_extra_charge(db, extra_charge_new)   
+    
+    return 1
+
+
+
+"""
+Camper extra charges
+{
+    is_selected = 
+    extra_charge_id =
+}
+
+Camper extra questions
+{
+    answer =
+    question_id = 
+}
+
+
+"""

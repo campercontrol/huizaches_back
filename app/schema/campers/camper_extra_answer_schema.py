@@ -65,3 +65,14 @@ class ExtraAnswerListCreate(BaseModel):
 
 class CamperExtraAnswerListCreate(BaseModel):
     extra_answers: List[ExtraAnswerListCreate]
+
+
+class ExtraAnswerMultiple(BaseModel):
+    
+    answer:str = Field(
+        title="Respuesta"
+    )
+
+    question_id:int = Field(
+        title = "Pregunta"
+    )

@@ -73,11 +73,11 @@ def get_all_massive_template(db: Session):
     )
 
 def get_all_system_template(db: Session):
-    return (
+    return db_mapping_rows_to_dict((
         db.query(EmailTemplate.id.label("id"), Constant.value.label("title"))
         .join(Constant, EmailTemplate.template_type == Constant.id)
         .filter(EmailTemplate.template_type <= 79)
         .filter(EmailTemplate.template_type >= 42)        
         .all()
-    )
+    ))
 
