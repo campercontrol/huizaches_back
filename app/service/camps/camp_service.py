@@ -25,7 +25,8 @@ from crud.camps.camper_in_camp_crud import (
     get_camper_in_camp_by_camper_camp,
     update_camper_in_camp_by_id,
     get_campers_for_camp,
-    subscribe_camper_to_camps
+    subscribe_camper_to_camps,
+    create_update_camper_extras_camp
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -44,6 +45,8 @@ from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampM
 from schema.payments.payment_schema import PaymentCreate
 from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
+from schema.campers.camper_extra_answer_schema import ExtraAnswerMultiple
+from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
 
 from utils.db import SessionLocal
 
@@ -206,3 +209,8 @@ def subscrible_camper_to_multiple_camps (camps_id: list[int], camper_id: int ,db
             "extra_questions": data['extra_questions']
 
         }
+    
+@camp_router.post("/camper/extras/camp/", tags=["Camps"])
+def post_extras_camp_for_camper(camper_id: int, extra_answers: list[ExtraAnswerMultiple], extra_charges:list[ExtraChargeMultiple], db: Session = Depends(get_db)):
+    status= create_update_camper_extras_camp(db, camper_id, extra_answers, extra_charges)
+    return {"status": status}
