@@ -66,11 +66,11 @@ def delete_email_template(db: Session, email_template_id: int):
 
 
 def get_all_massive_template(db: Session):
-    return (
+    return db_mapping_rows_to_dict ((
         db.query(EmailTemplate.id, EmailTemplate.title)
         .filter(EmailTemplate.template_type == 41)
         .all()
-    )
+    ))
 
 def get_all_system_template(db: Session):
     return db_mapping_rows_to_dict((
