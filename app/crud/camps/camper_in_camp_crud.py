@@ -415,17 +415,17 @@ def create_update_camper_extras_camp(db, camper_id: int,
         if (db.query(CamperExtraAnswer)
             .filter(
                 and_(
-                    CamperExtraAnswer.question_id == extra_answer.question_id, 
+                    CamperExtraAnswer.question_id == extra_answer.camp_extra_question_id, 
                     CamperExtraAnswer.camper_id == camper_id))
             .update(
-            {"answer": getattr(extra_answer, "answer")}
+            {"answer": getattr(extra_answer, "camp_extra_answer_answer")}
             )):
             db.commit()
         else: 
             extra_answer_new = CamperExtraAnswerCreate(
-                answer = extra_answer.answer,
+                answer = extra_answer.camp_extra_answer_answer,
                 camper_id = camper_id,
-                question_id = extra_answer.question_id,
+                question_id = extra_answer.camp_extra_question_id,
             )
             status = create_new_extra_answer(db, extra_answer_new)
     
@@ -433,17 +433,17 @@ def create_update_camper_extras_camp(db, camper_id: int,
         if (db.query(CamperExtraCharge)
             .filter(
                 and_(
-                    CamperExtraCharge.extra_charge_id == extra_charge.extra_charge_id, 
+                    CamperExtraCharge.extra_charge_id == extra_charge.camp_extra_charge_id, 
                     CamperExtraCharge.camper_id == camper_id))
             .update(
-            {"is_selected": getattr(extra_charge, "is_selected")}
+            {"is_selected": getattr(extra_charge, "camp_extra_charge_is_selected")}
             )):
             db.commit()
         else: 
             extra_charge_new = CamperExtraChargeCreate(
-                is_selected = extra_charge.is_selected,
+                is_selected = extra_charge.camp_extra_charge_is_selected,
                 camper_id = camper_id,
-                extra_charge_id = extra_charge.extra_charge_id,
+                extra_charge_id = extra_charge.camp_extra_charge_id,
             )
             status = create_new_camper_extra_charge(db, extra_charge_new)   
     
