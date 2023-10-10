@@ -5,11 +5,23 @@ from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
 from model.trainings import StaffInTraining, Training, TrainingEvent
+from model.staffs import Staff
+from model.user import User
 from schema.trainings.staff_in_training_schema import (
     StaffInTrainingCreate,
     StaffInTrainingModify,
 )
 
+
+def get_all_staff_in_training_event(db: Session, training_event_id: int):
+    staffs = (
+        db.query(Staff.name, User.email)
+        .join(User, User.id == Staff.login_id)
+        .join(Staff, Staff.id == StaffInTraining.staff_id)
+        .filter(StaffInTraining.training_event_id == training_event_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(staffs)
 
 def get_all_staff_in_training(db: Session):
     rows = db.query(StaffInTraining).all()
@@ -40,17 +52,17 @@ def volunteer_staff(db: Session, new_staff_in_training: StaffInTrainingCreate):
     db_staff_in_training = None
     try:
         db_staff_in_training = StaffInTraining(**new_staff_in_training.dict())
-        
-        training_event = db.query(
-            TrainingEvent
-        ).filter(TrainingEvent.id == db_staff_in_training.training_event_id).first()
+
+        training_event = (
+            db.query(TrainingEvent)
+            .filter(TrainingEvent.id == db_staff_in_training.training_event_id)
+            .first()
+        )
 
         if training_event.open_enrollment == True:
-            
             db_staff_in_training.confirmed_staff = True
-        else:    
+        else:
             db_staff_in_training.confirmed_staff = False
-            
 
         db.add(db_staff_in_training)
         db.commit()
@@ -77,10 +89,12 @@ def staff_training_dashboard(db, staff_id: int):
     trainings_events_id = []
 
     confirmed_trainings = (
-        db.query(Training.name.label("training_name"), 
-                 TrainingEvent.location.label("training_event_location"), 
-                 Training.id.label("training_id"), 
-                 TrainingEvent.id.label("training_event_id"))
+        db.query(
+            Training.name.label("training_name"),
+            TrainingEvent.location.label("training_event_location"),
+            Training.id.label("training_id"),
+            TrainingEvent.id.label("training_event_id"),
+        )
         .join(Training, TrainingEvent.training_id == Training.id)
         .join(StaffInTraining, StaffInTraining.training_event_id == TrainingEvent.id)
         .filter(
@@ -91,7 +105,8 @@ def staff_training_dashboard(db, staff_id: int):
                 TrainingEvent.start >= date.today(),
                 Training.active == True,
             )
-        ).all()
+        )
+        .all()
     )
 
     confirmed_trainings = db_mapping_rows_to_dict(confirmed_trainings)
@@ -105,10 +120,12 @@ def staff_training_dashboard(db, staff_id: int):
             trainings_events_id.append(confimed_training["training_event_id"])
 
     available_trainings = (
-        db.query(Training.name.label("training_name"), 
-                 TrainingEvent.location.label("training_event_location"), 
-                 Training.id.label("training_id"), 
-                 TrainingEvent.id.label("training_event_id"))
+        db.query(
+            Training.name.label("training_name"),
+            TrainingEvent.location.label("training_event_location"),
+            Training.id.label("training_id"),
+            TrainingEvent.id.label("training_event_id"),
+        )
         .join(Training, TrainingEvent.training_id == Training.id)
         .join(StaffInTraining, StaffInTraining.training_event_id == TrainingEvent.id)
         .filter(
@@ -119,7 +136,8 @@ def staff_training_dashboard(db, staff_id: int):
                 TrainingEvent.start >= date.today(),
                 Training.active == True,
             )
-        ).all()
+        )
+        .all()
     )
 
     available_trainings = db_mapping_rows_to_dict(available_trainings)
@@ -138,8 +156,8 @@ def staff_training_dashboard(db, staff_id: int):
             TrainingEvent.start.label("training_event_start"),
             TrainingEvent.end.label("training_event_end"),
             TrainingEvent.location.label("training_event_location"),
-            Training.id.label("training_id"), 
-            TrainingEvent.id.label("training_event_id")
+            Training.id.label("training_id"),
+            TrainingEvent.id.label("training_event_id"),
         )
         .join(Training, TrainingEvent.training_id == Training.id)
         .filter(
@@ -147,7 +165,6 @@ def staff_training_dashboard(db, staff_id: int):
             TrainingEvent.active == True,
             TrainingEvent.start >= date.today(),
             Training.active == True,
-
         )
     )
 
@@ -157,25 +174,17 @@ def staff_training_dashboard(db, staff_id: int):
         if nex_training["training_id"] not in trainings_id:
             trainings_id.append(nex_training["training_id"])
 
-    trainings = (
-        db.query(
-            Training.name.label("training_name"),
-            Training.description.label("training_description"),
-            Training.id.label("training_id")
-        )
-        .filter(
-            Training.active == True,
-            Training.id.not_in(trainings_id)
-        )
-
-    )
+    trainings = db.query(
+        Training.name.label("training_name"),
+        Training.description.label("training_description"),
+        Training.id.label("training_id"),
+    ).filter(Training.active == True, Training.id.not_in(trainings_id))
 
     trainings = db_mapping_rows_to_dict(trainings)
-
 
     return {
         "confirmed_trainings": confirmed_trainings,
         "available_trainings": available_trainings,
         "next_trainings": next_trainings,
-        "trainings": trainings
+        "trainings": trainings,
     }

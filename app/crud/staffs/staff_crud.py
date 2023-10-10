@@ -23,6 +23,22 @@ def get_all_prospect(db):
     return db_mapping_rows_to_dict(rows)
 
 
+def get_all_prospect_by_season(db, season_id: int):
+    rows = (
+        db.query(
+            (
+                Staff.name + " " + Staff.lastname_father + " " + Staff.lastname_mother
+            ).label("staff_fullname"),
+            User.email.label("staff_email")
+        )
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .filter(Staff.employee == False, Staff.season_id == season_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+
 def get_all_staff(db):
     rows = (
         db.query(Staff, User.email, Season.name.label("season_name"))
@@ -206,18 +222,18 @@ def get_staff_by_id(db, staff_id: int):
 
 
 def get_staff_band(db, staff_id: int):
-    staff_band =( db.query(
-        (Staff.name + " " + Staff.lastname_father + " " + Staff.lastname_mother).label(
-            "staff_full_name"
-        ),
-        Staff.birthday.label("staff_birthday"),
-        Staff.photo.label("staff_photo"),
-        StaffRecord.attended.label("camp_attended"),
-        StaffRecord.attend.label("camp_attend")
-    
-    )
-    .outerjoin(StaffRecord, StaffRecord.id == Staff.record_id)
-    .filter(Staff.id == staff_id)
-    .all()
+    staff_band = (
+        db.query(
+            (
+                Staff.name + " " + Staff.lastname_father + " " + Staff.lastname_mother
+            ).label("staff_full_name"),
+            Staff.birthday.label("staff_birthday"),
+            Staff.photo.label("staff_photo"),
+            StaffRecord.attended.label("camp_attended"),
+            StaffRecord.attend.label("camp_attend"),
+        )
+        .outerjoin(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.id == staff_id)
+        .all()
     )
     return db_mapping_rows_to_dict(staff_band)
