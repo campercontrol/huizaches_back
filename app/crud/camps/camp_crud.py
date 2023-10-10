@@ -11,6 +11,7 @@ from schema.camps.camp_schema import CampCreate, CampModify
 from crud.camps.camper_in_camp_crud import get_campers_for_module
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 
+
 def get_all_camp(db: Session):
     rows = db.query(Camp).all()
     return rows
@@ -39,7 +40,7 @@ def get_school_camp_for_camper(db: Session, camper_id: int):
                 Camp.school_id == school_id[0],
                 Camp.active == True,
                 Camp.start >= date.today(),
-                Camp.registration == True
+                Camp.registration == True,
             )
         )
         .all()
@@ -63,7 +64,7 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
                 Camp.general_camp == True,
                 Camp.active == True,
                 Camp.start >= date.today(),
-                Camp.registration == True
+                Camp.registration == True,
             )
         )
     )
@@ -72,6 +73,7 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
 
 def get_camp_by_id(db: Session, camp_id: int):
     return db.query(Camp).filter_by(id=camp_id).first()
+
 
 def create_new_camp(db: Session, new_camp: CampCreate):
     db_camp = None
@@ -100,21 +102,34 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
     db.commit()
     return rows_updated
 
-def delete_camp(db: Session, camp_id:int):
-    camp = db.query(Camp).filter(Camp.id==camp_id).first()
+
+def delete_camp(db: Session, camp_id: int):
+    camp = db.query(Camp).filter(Camp.id == camp_id).first()
     db.delete(camp)
     db.commit()
-    return {"status" : True}
+    return {"status": True}
 
-def get_records_for_camp(db: Session, camp_id:int):
-    
+
+def get_records_for_camp(db: Session, camp_id: int):
     campers_record = len(get_campers_for_module(db, camp_id))
     staff_available_record = len(get_staff_volunteer_in_camp(db, camp_id))
     staff_record = len(get_staff_in_camp(db, camp_id))
 
-
     return {
-        "campers_recod": campers_record, 
-        "staff_available_record": staff_available_record, 
-        "staff_record":staff_record
-        }
+        "campers_recod": campers_record,
+        "staff_available_record": staff_available_record,
+        "staff_record": staff_record,
+    }
+
+
+def get_camp_by_search(db: Session, search: str):
+    camps = (
+        db.query(Camp.id.label("camp_id"), Camp.name.label("camp_name"))
+        .filter(Camp.name.ilike(r"%{}%".format(search)))
+        .all()
+    )
+
+    if not camps:
+        return "Data not found"
+
+    return camps
