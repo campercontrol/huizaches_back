@@ -13,20 +13,12 @@ from crud.mailings.mailing_crud import (
     get_sent_camp,
     get_sent_camps,
     get_sent_training,
-    get_sent_candidates
+    get_sent_candidates,
 )
-from crud.camps.camper_in_camp_crud import (
-    get_campers_for_camp
-)
-from crud.camps.staff_in_camp_crud import (
-    get_staff_in_camp
-)
-from crud.training.staff_in_training_crud import (
-    get_all_staff_in_training_event
-)
-from crud.staffs.staff_crud import (
-    get_all_prospect_by_season
-)
+from crud.camps.camper_in_camp_crud import get_campers_for_camp
+from crud.camps.staff_in_camp_crud import get_staff_in_camp
+from crud.training.staff_in_training_crud import get_all_staff_in_training_event
+from crud.staffs.staff_crud import get_all_prospect_by_season
 from model.mailings import (
     CamperCampaign,
     StaffCampaign,
@@ -35,6 +27,8 @@ from model.mailings import (
     EmailTemplate,
 )
 from model.catalogs import Constant
+
+from helper.mailing_helpers import send_mail_template
 
 from utils.db import SessionLocal
 
@@ -66,6 +60,7 @@ def get_campaign(db: Session = Depends(get_db)):
     list_campaign = get_all_campaign(db)
     return {"data": list_campaign}
 
+
 @mailing_routes.get("/mailing/campaign/{campaign_id}/", tags=["Mailing"])
 def get_campaign_by_id(campaign_id: int, db: Session = Depends(get_db)):
     """
@@ -80,137 +75,154 @@ def get_campaign_by_id(campaign_id: int, db: Session = Depends(get_db)):
     Si tiene un id: 83 significa un correo enviado a candidatos de alguna temporada
     """
     campaign_type = (
-        db.query(Campaign.send_type_id)
-        .filter(Campaign.id == campaign_id)        
-        .first()
+        db.query(Campaign.send_type_id).filter(Campaign.id == campaign_id).first()
     )
     send_type = campaign_type[0]
     if send_type == 80:
         data = get_sent_camp(db, campaign_id)
-    elif send_type == 81: 
+    elif send_type == 81:
         data = get_sent_training(db, campaign_id)
     elif send_type == 82:
         data = get_sent_camps(db, campaign_id)
     elif send_type == 83:
         data = get_sent_candidates(db, campaign_id)
-    
+
     return data
 
 
 @mailing_routes.get("/mailing/send/campaign/camp/", tags=["Mailing"])
-def get_inf_campaign_camp(camp_id: int, campers: bool, staffs: bool, school: bool, db: Session = Depends(get_db)):
+def get_inf_campaign_camp(
+    camp_id: int,
+    campers: bool,
+    staffs: bool,
+    school: bool,
+    db: Session = Depends(get_db),
+):
     """
-    Significa traer la info necesaria para un correo que se enviará a 
+    Significa traer la info necesaria para un correo que se enviará a
     participantes de un campamento
     """
-    
+
     templates = get_all_massive_template(db)
     campers_info = []
     staffs_info = []
-    if campers:    
+    if campers:
         campers_complete = get_campers_for_camp(db, camp_id)
         for camper_c in campers_complete:
             campers_info.append(
                 {
-                    "camper_full_name":getattr(camper_c, "camper_full_name"),
-                    "tutor_full_name":getattr(camper_c, "tutor_full_name"),
-                    "tutor_email":getattr(camper_c, "tutor_email"),
-                    "second_tutor_full_name":getattr(camper_c, "second_tutor_full_name"),
-                    "second_tutor_email":getattr(camper_c, "second_tutor_email"),
+                    "camper_full_name": getattr(camper_c, "camper_full_name"),
+                    "tutor_full_name": getattr(camper_c, "tutor_full_name"),
+                    "tutor_email": getattr(camper_c, "tutor_email"),
+                    "second_tutor_full_name": getattr(
+                        camper_c, "second_tutor_full_name"
+                    ),
+                    "second_tutor_email": getattr(camper_c, "second_tutor_email"),
                 }
-            )        
-    if staffs: 
+            )
+    if staffs:
         staffs_complete = get_staff_in_camp(db, camp_id)
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
-                    "staff_full_name":getattr(staff_c,"staff_full_name"),
-                    "staff_email":getattr(staff_c,"staff_email")
+                    "staff_full_name": getattr(staff_c, "staff_full_name"),
+                    "staff_email": getattr(staff_c, "staff_email"),
                 }
             )
     if school:
-        school_info = {
-                        "school":"Escuela 1",
-                        "school_email": "escuela@correo.com"
-                      }
+        school_info = {"school": "Escuela 1", "school_email": "escuela@correo.com"}
 
     return {
         "massive_templates": templates,
         "campers": campers_info,
         "staffs": staffs_info,
-        "school": school_info
+        "school": school_info,
     }
 
 
 @mailing_routes.get("/mailing/send/campaign/camps/", tags=["Mailing"])
-def get_inf_campaign_camps(camps_id: list[int], campers: bool, staffs: bool, school: bool, db: Session = Depends(get_db)):
+def get_inf_campaign_camps(
+    camps_id: list[int],
+    campers: bool,
+    staffs: bool,
+    school: bool,
+    db: Session = Depends(get_db),
+):
     """
     Significa traer la info necesaria para un correo que se enviará a diferentes
     participantes de varios campamento
     """
-    
+
     templates = get_all_massive_template(db)
     campers_info = []
     staffs_info = []
-    if campers:    
+    if campers:
         campers_complete = get_campers_for_camp(db, camps_id[0])
         for camper_c in campers_complete:
             campers_info.append(
                 {
-                    "camper_full_name":getattr(camper_c, "camper_full_name"),
-                    "tutor_full_name":getattr(camper_c, "tutor_full_name"),
-                    "tutor_email":getattr(camper_c, "tutor_email"),
-                    "second_tutor_full_name":getattr(camper_c, "second_tutor_full_name"),
-                    "second_tutor_email":getattr(camper_c, "second_tutor_email"),
+                    "camper_full_name": getattr(camper_c, "camper_full_name"),
+                    "tutor_full_name": getattr(camper_c, "tutor_full_name"),
+                    "tutor_email": getattr(camper_c, "tutor_email"),
+                    "second_tutor_full_name": getattr(
+                        camper_c, "second_tutor_full_name"
+                    ),
+                    "second_tutor_email": getattr(camper_c, "second_tutor_email"),
                 }
-            )        
-    if staffs: 
+            )
+    if staffs:
         staffs_complete = get_staff_in_camp(db, camps_id[0])
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
-                    "staff_full_name":getattr(staff_c,"staff_full_name"),
-                    "staff_email":getattr(staff_c,"staff_email")
+                    "staff_full_name": getattr(staff_c, "staff_full_name"),
+                    "staff_email": getattr(staff_c, "staff_email"),
                 }
             )
     if school:
-        school_info = {
-                        "school":"Escuela 1",
-                        "school_email": "escuela@correo.com"
-                      }
+        school_info = {"school": "Escuela 1", "school_email": "escuela@correo.com"}
 
     return {
         "massive_templates": templates,
         "campers": campers_info,
         "staffs": staffs_info,
-        "school": school_info
+        "school": school_info,
     }
 
 
 @mailing_routes.get("/mailing/send/campaign/training/", tags=["Mailing"])
-def get_inf_campaign_training(training_id:int,  db: Session = Depends(get_db)):
+def get_inf_campaign_training(training_id: int, db: Session = Depends(get_db)):
     """
     Significa traer la info necesaria para un correo que se enviará a diferentes
     participantes de una capacitación
     """
     templates = get_all_massive_template(db)
     staffs_complete = get_all_staff_in_training_event(db, training_id)
-    
+
     return {
         "massive_templates": templates,
         "staffs": staffs_complete,
     }
 
+
 @mailing_routes.get("/mailing/send/campaign/candidates/", tags=["Mailing"])
-def get_inf_campaign_candidates(season_id:int,  db: Session = Depends(get_db)):
+def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
     """
     Significa traer la info necesaria para un correo que se enviará a diferentes
     candidatos a ser staff de una temporada
     """
     templates = get_all_massive_template(db)
     staffs_complete = get_all_prospect_by_season(db, season_id)
-    
+
     return {
         "massive_templates": templates,
         "staffs": staffs_complete,
     }
+
+
+@mailing_routes.get("/mailing/send/email/", tags=["Mailings"])
+def get_hola(template_id: int, db: Session = Depends(get_db)):
+    send_to = ["pavel.trejo@gmail.com"]
+    parent_id = 1
+    html_content = send_mail_template(db, send_to, template_id, parent_id, parent_id)
+    return html_content

@@ -8,6 +8,7 @@ from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
+from helper.mailing_helpers import send_mail_template
 
 
 def get_all_parent(db: Session):
@@ -72,6 +73,8 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db.add(db_parent)
         db.commit()
         db.refresh(db_parent)
+        user = db.query(User.email).filter(User.id == user_id).first()
+        send_mail_template(db, [user[0]], 2, None, db_parent.id)
     except SQLAlchemyError as e:
         print("#=================================#")
         print(e)

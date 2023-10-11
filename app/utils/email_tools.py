@@ -1,3 +1,4 @@
+import jinja2
 import requests
 import json
 
@@ -43,16 +44,29 @@ def send_simple_message(from_user:str,to_users:list,email_subject:str,text_messa
 
     Estas opciones son requeridas para el rastreo de mensaje en los webhooks 
     habilitar 
-
+    {{content}}
+    {{title}}
 
     """
+    context = {
+        "content":text_message,
+        "title":email_subject
+    }
+    template_loader = jinja2.FileSystemLoader('media/')
+    template_env= jinja2.Environment(loader = template_loader)
+
+    html_info_camper = 'email.html' #Nombre del template que se usa el html 
+
+    template = template_env.get_template(html_info_camper)
+ 
+    html_content = template.render(context)
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
         auth=("api", mailgun_api_key),
         data={"from": from_user_email,
               "to": to_users,
               "subject": email_subject,
-              "text": text_message,
+              "html": html_content,
               "o:tracking":True,
               "o:tracking-clicks":True,
               "o:tracking-opens":True,

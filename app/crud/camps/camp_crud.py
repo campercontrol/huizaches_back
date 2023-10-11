@@ -121,7 +121,7 @@ def get_records_for_camp(db: Session, camp_id: int):
         "staff_record": staff_record,
     }
 
-
+2
 def get_camp_by_search(db: Session, search: str):
     camps = (
         db.query(Camp.id.label("camp_id"), Camp.name.label("camp_name"))
@@ -132,4 +132,4 @@ def get_camp_by_search(db: Session, search: str):
     if not camps:
         return "Data not found"
 
-    return camps
+    return db_mapping_rows_to_dict(camps)

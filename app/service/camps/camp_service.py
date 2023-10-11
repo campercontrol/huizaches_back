@@ -13,6 +13,7 @@ from crud.camps.camp_crud import (
     create_new_camp,
     update_camp_by_id,
     delete_camp,
+    get_camp_by_search
 )
 from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
 
@@ -214,3 +215,9 @@ def subscrible_camper_to_multiple_camps (camps_id: list[int], camper_id: int ,db
 def post_extras_camp_for_camper(camper_id: int, extra_answers: list[ExtraAnswerMultiple], extra_charges:list[ExtraChargeMultiple], db: Session = Depends(get_db)):
     status= create_update_camper_extras_camp(db, camper_id, extra_answers, extra_charges)
     return {"status": status}
+
+
+@camp_router.get("/search/camp/{search}", tags=["Camps"])
+def get_search_camp(search:str, db: Session = Depends(get_db)):
+    possible_camps  = get_camp_by_search(db, search)
+    return { "data": possible_camps }

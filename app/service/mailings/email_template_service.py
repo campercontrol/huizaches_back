@@ -11,7 +11,7 @@ from crud.mailings.email_template_crud import (
     delete_email_template
 )
 from crud.catalogs.constant_crud import (
-    get_all_email_template
+    get_all_email_template_type
 )
 from schema.mailings.email_template_schema import(
     EmailTemplateCreate,
@@ -43,7 +43,7 @@ def get_massive_template_by_id(email_template_id:str,db: Session = Depends(get_d
 
 @email_template_routes.get("/email/system/template/{email_template_id}", tags=["Mailing"])
 def get_system_template_by_id(email_template_id:str,db: Session = Depends(get_db)):
-    list_email_type = get_all_email_template(db, "es")
+    list_email_type = get_all_email_template_type(db, "es")
     templates = get_email_template_by_uuid(db,email_template_id)
     return {
         "template_type": list_email_type,
