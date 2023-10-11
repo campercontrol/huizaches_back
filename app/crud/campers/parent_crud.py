@@ -72,9 +72,10 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db_parent = Parent(**new_parent.dict())
         db.add(db_parent)
         db.commit()
-        db.refresh(db_parent)
         user = db.query(User.email).filter(User.id == user_id).first()
         send_mail_template(db, [user[0]], 2, None, db_parent.id)
+        db.refresh(db_parent)
+        
     except SQLAlchemyError as e:
         print("#=================================#")
         print(e)
