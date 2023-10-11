@@ -2,7 +2,7 @@ import requests
 import json
 
 domain_name = "campercontrol.com"
-mailgun_api_key = ""
+mailgun_api_key = "key-de3828f749bc30729dad5eadf0620a24"
 from_user_email = "CamperControl <dev@campercontrol.com>"
 to_user_email = ""
 
