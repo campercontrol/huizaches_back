@@ -18,7 +18,7 @@ from crud.catalogs.constant_crud import (
     get_all_rol_colors,
     get_all_triage,
     get_all_user_group,
-    get_all_email_template,
+    get_all_email_template_type,
     get_all_email_send_type
 )
 from schema.catalogs.constant_schema import(
@@ -120,7 +120,7 @@ def get_user_group(language:str, db: Session=Depends(get_db)):
 
 @constant_routes.get("/get/mailing/template/{language}", tags=["Constants"])
 def get_email_template(language:str ="es", db: Session=Depends(get_db)):
-    list_constant= get_all_email_template(db, language)
+    list_constant= get_all_email_template_type(db, language)
     return {"data": list_constant} 
 
 @constant_routes.get("/get/mailing/type/{language}", tags=["Constants"])
