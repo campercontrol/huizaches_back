@@ -8,8 +8,9 @@ from crud.training.training_event_crud import (
     get_all_training_event,
     get_all_active_training_event,
     get_training_event_by_id,
-     create_new_training_event,
+    create_new_training_event,
     update_training_event_by_id,
+    get_training_event_for_mailing
 )
 
 from schema.trainings.training_event_schema import TrainingEventCreate, TrainingEventModify
@@ -56,3 +57,8 @@ def update_training_event(training_event_id: int, modify_training_event: Trainin
         return {"mensaje": "Actualizado Correctamente", "data": exist_training_event}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+@training_event_router.get("/mailing/training/event/", tags = ["Trainings"])
+def get_training_event_mailing(db: Session = Depends(get_db)):
+    tratining_events = get_training_event_for_mailing(db)
+    return {"data": tratining_events}

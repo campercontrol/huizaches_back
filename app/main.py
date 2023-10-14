@@ -94,6 +94,7 @@ from service.image import image_routes
 from service.permission import permission_routes
 from service.generar_pdf import pdf_routes
 from service.email import email_routes
+from service.toku_payment import toku_routes
 from fastapi.staticfiles import StaticFiles
 
 app.include_router(role_routes) # Role
@@ -104,6 +105,7 @@ app.include_router(permission_routes) # Permission
 app.include_router(pdf_routes) #Pdf
 app.include_router(email_routes) #email
 app.mount("/media",StaticFiles(directory="media"),name="media")
+app.include_router(toku_routes)
 
 
 @app.post("/", )

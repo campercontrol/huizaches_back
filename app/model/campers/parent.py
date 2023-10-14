@@ -17,6 +17,7 @@ class Parent(Base):
     )
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id del titular de la cuenta")
     user_id= Column(ForeignKey('user.id'), nullable=False, default=0, doc='usuario')
+    toku_id = Column(String(512), doc="Id de toku")
     tutor_name = Column(String(512), nullable=False, doc="Nombre")
     tutor_lastname_father = Column(String(512), nullable=False, doc="Primer apellido")
     tutor_lastname_mother = Column(String(512), doc="Segundo apellido")

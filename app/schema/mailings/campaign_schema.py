@@ -142,4 +142,24 @@ class MailingTypeSelect(BaseModel):
         title = "Temporada"
     )
 
-    
+
+class CampaignSend(BaseModel):
+
+    campaign : CampaignCreate = Field(
+        title = "Campaña"
+    )
+    campers_id : List[int] = Field(
+        title = "Campers"
+    )
+    staffs_id : List[int] = Field(
+        title = "Staffs"
+    )
+    schools_id : List[int] = Field(
+        title = "Schools"
+    )
+    template_title: str = Field(
+        title = "Asunto del correo"
+    )
+    template_body: str = Field(
+        title = "Cuerpo del correo"
+    )

@@ -27,6 +27,7 @@ from model.mailings import (
     EmailTemplate,
 )
 from model.catalogs import Constant
+from schema.mailings.campaign_schema import CampaignSend
 
 from helper.mailing_helpers import send_mail_template
 
@@ -220,9 +221,9 @@ def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
     }
 
 
-@mailing_routes.get("/mailing/send/email/", tags=["Mailings"])
-def get_hola(template_id: int, db: Session = Depends(get_db)):
-    send_to = ["pavel.trejo@gmail.com"]
-    parent_id = 1
-    html_content = send_mail_template(db, send_to, template_id, parent_id, parent_id)
-    return html_content
+@mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
+def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
+
+    return 1
+
+
