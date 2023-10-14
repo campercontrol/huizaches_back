@@ -17,10 +17,12 @@ from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     ExtraAnswerMultiple
 )
-
 from schema.payments.camper_extra_charge_schema import (
     ExtraChargeMultiple,
     CamperExtraChargeCreate
+)
+from schema.payments.payment_schema import (
+    PaymentCreate
 )
 
 from crud.campers.camper_extra_answer_crud import (
@@ -395,7 +397,19 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 status=36,
                 payment_balance=getattr(camp, "public_price"),
             )
-            create_new_camper_in_camp(db, new_camper_in_camp)
+            camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
+            print("3333333333333333333##################################3333333")
+            print(camper_in_camp_nw)
+            print("con punto")
+            print(camp.id)
+            print("con corchetes")
+            print(camp['id'])
+            print("con getattr")
+            print(getattr(camp, "id"))
+            #new_payment = PaymentCreate(
+            #    paid= True,
+            #    payment_amount=
+            #)
 
     if extra_charges or extra_questions:
         return {

@@ -39,8 +39,9 @@ def create_new_payment(db, new_payment: PaymentCreate):
     db_payment = None
     try:
         db_payment = Payment(**new_payment.dict())
-        if db_payment.txn_type_id in (3, 4, 6):
+        if db_payment.txn_type_id in (2, 3, 5):
             db_payment.payment_amount = abs(db_payment.payment_amount) * -1
+            
         else:
             db_payment.payment_amount = abs(db_payment.payment_amount)
         db.add(db_payment)

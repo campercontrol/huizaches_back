@@ -18,8 +18,28 @@ def get_all_camp(db: Session):
 
 
 def get_all_active_camp(db: Session):
-    rows = db.query(Camp).filter_by(active=True).all()
-    return rows
+    camps = []
+    rows = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.public_price.label("camp_public_price"),
+            Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Location.name.label("location_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end")
+        )
+        .join(Location, Location.id == Camp.location_id)
+        .filter(Camp.active==True)
+        .all()
+    )
+    for row in db_mapping_rows_to_dict(rows):
+        records = get_records_for_camp(db, row.camp_id)
+        row = dict(row)
+        row["records"] = records
+        camps.append(row)
+
+    return camps
 
 
 def get_school_camp_for_camper(db: Session, camper_id: int):
@@ -121,7 +141,10 @@ def get_records_for_camp(db: Session, camp_id: int):
         "staff_record": staff_record,
     }
 
+
 2
+
+
 def get_camp_by_search(db: Session, search: str):
     camps = (
         db.query(Camp.id.label("camp_id"), Camp.name.label("camp_name"))
