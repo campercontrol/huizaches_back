@@ -104,13 +104,6 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
     camp = create_new_camp(db, new_camp.camp)
     new_camp_id = getattr(camp, "id")
 
-    print("###############################")
-    print(new_camp.extra_question)
-    print(getattr(new_camp, "extra_question"))
-    print("###############################")
-    print(new_camp.extra_charges)
-    print(getattr(new_camp, "extra_charges"))
-
     if new_camp.extra_question:
         for question in new_camp.extra_question:
             new_question = CampExtraQuestionCreate(
