@@ -13,7 +13,7 @@ from crud.camps.camp_crud import (
     create_new_camp,
     update_camp_by_id,
     delete_camp,
-    get_camp_by_search
+    get_camp_by_search,
 )
 from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
 
@@ -27,7 +27,7 @@ from crud.camps.camper_in_camp_crud import (
     update_camper_in_camp_by_id,
     get_campers_for_camp,
     subscribe_camper_to_camps,
-    create_update_camper_extras_camp
+    create_update_camper_extras_camp,
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -38,6 +38,7 @@ from crud.camps.camp_extra_question_crud import (
     get_extra_question_by_camp,
     create_new_extra_question,
 )
+from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
 
@@ -83,7 +84,16 @@ def get_camps_for_camper(camper_id: int, db: Session = Depends(get_db)):
 @camp_router.get("/camp/{camp_id}", tags=["Camps"])
 def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
     camp = get_camp_by_id(db, camp_id)
-    return {"data": camp}
+    extra_charges = get_extra_charge_by_camp(db, camp_id)
+    extra_questions = get_extra_question_by_camp(db, camp_id)
+    extra_discounts = get_camp_discount_by_camp(db, camp_id)
+
+    return {
+        "camp": camp,
+        "extra_charges": extra_charges,
+        "extra_questions": extra_questions,
+        "extra_discounts": extra_discounts,
+    }
 
 
 @camp_router.post("/camp/", tags=["Camps"])
@@ -195,29 +205,44 @@ def get_staff_camp(camp_id: int, db: Session = Depends(get_db)):
     staff_volunteer = get_staff_volunteer_in_camp(db, camp_id)
     staff = get_staff_in_camp(db, camp_id)
     location = get_location_by_uuid(db, camp_info.location_id)
-    return {"camp": camp_info, "location": location.name,  "campers": campers, "staff_volunteer": staff_volunteer, "staff_confirmed": staff}
+    return {
+        "camp": camp_info,
+        "location": location.name,
+        "campers": campers,
+        "staff_volunteer": staff_volunteer,
+        "staff_confirmed": staff,
+    }
 
 
 @camp_router.post("/camper/subscribe/camps/", tags=["Camps"])
-def subscrible_camper_to_multiple_camps (camps_id: list[int], camper_id: int ,db: Session = Depends(get_db)):
+def subscrible_camper_to_multiple_camps(
+    camps_id: list[int], camper_id: int, db: Session = Depends(get_db)
+):
     data = subscribe_camper_to_camps(db, camps_id, camper_id)
-    if data['status'] == 1:
-        return {"status": data['status']}
+    if data["status"] == 1:
+        return {"status": data["status"]}
     else:
         return {
-            "status": data['status'],
-            "extra_charges": data['extra_charges'],
-            "extra_questions": data['extra_questions']
-
+            "status": data["status"],
+            "extra_charges": data["extra_charges"],
+            "extra_questions": data["extra_questions"],
         }
-    
+
+
 @camp_router.post("/camper/extras/camp/", tags=["Camps"])
-def post_extras_camp_for_camper(camper_id: int, extra_answers: list[ExtraAnswerMultiple], extra_charges:list[ExtraChargeMultiple], db: Session = Depends(get_db)):
-    status= create_update_camper_extras_camp(db, camper_id, extra_answers, extra_charges)
+def post_extras_camp_for_camper(
+    camper_id: int,
+    extra_answers: list[ExtraAnswerMultiple],
+    extra_charges: list[ExtraChargeMultiple],
+    db: Session = Depends(get_db),
+):
+    status = create_update_camper_extras_camp(
+        db, camper_id, extra_answers, extra_charges
+    )
     return {"status": status}
 
 
 @camp_router.get("/search/camp/{search}", tags=["Camps"])
-def get_search_camp(search:str, db: Session = Depends(get_db)):
-    possible_camps  = get_camp_by_search(db, search)
-    return { "data": possible_camps }
+def get_search_camp(search: str, db: Session = Depends(get_db)):
+    possible_camps = get_camp_by_search(db, search)
+    return {"data": possible_camps}
