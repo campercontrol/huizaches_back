@@ -107,6 +107,7 @@ def get_inf_campaign_camp(
     templates = get_all_massive_template(db)
     campers_info = []
     staffs_info = []
+    school_info = None
     if campers:
         campers_complete = get_campers_for_camp(db, camp_id)
         for camper_c in campers_complete:
@@ -157,6 +158,7 @@ def get_inf_campaign_camps(
     templates = get_all_massive_template(db)
     campers_info = []
     staffs_info = []
+    school_info = None
     if campers:
         campers_complete = get_campers_for_camp(db, camps_id[0])
         for camper_c in campers_complete:
