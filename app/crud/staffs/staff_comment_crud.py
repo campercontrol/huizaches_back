@@ -1,6 +1,8 @@
 from sqlalchemy.exc import SQLAlchemyError
 
-from model.staffs import StaffComment
+from model.staffs import StaffComment, Staff
+from model.user import User
+from model.catalogs import Constant
 from schema.staffs.staff_comment_schema import (
     StaffCommentCreate,
     StaffCommentModify,
@@ -62,15 +64,22 @@ def get_staff_comment_by_staff_for_staff(db, staff_id: int):
     )
     return rows
 
+
 def get_staff_comment_by_staff_for_admin(db, staff_id: int):
     rows = (
-        db.query(StaffComment)
-        .filter(
-            and_(
-                StaffComment.staff_id == staff_id,
-                StaffComment.is_public == True
-            )
+        db.query(
+            StaffComment,
+            Constant.value.label("show_to"),
+            Staff.name.label("writter_name"),
+            User.is_employee.label("writter_staff"),
+            User.is_coordinator.label("writter_coordinator"),
+            User.is_admin.label("writter_admin"),
         )
+        .select_from(StaffComment)
+        .join(User, User.id == StaffComment.user_id)
+        .outerjoin(Staff, Staff.login_id == User.id)
+        .join(Constant, Constant.id == StaffComment.show_to)
+        .filter(and_(StaffComment.staff_id == staff_id, StaffComment.is_public == True))
         .all()
     )
-    return rows
+    return db_mapping_rows_to_dict(rows)

@@ -35,9 +35,9 @@ def get_db():
 def authenticate_user(db, username: str, password: str):
     user = get_user_by_email(db, username)
     if not user:
-        return False
+        return 2
     if not verify_str_hash(password, user.hashed_pass):
-        return False
+        return 3
     return user
 
 
@@ -82,12 +82,24 @@ def get_permissions_menu(db, user,lang):
 async def login_for_access_token(
     db: Session = Depends(get_db), form_data: TokenCreate = Depends()
 ):
+    """
+        Status de login:
+            - Si el detail es 1 el login fue exitoso, el usuario y contraseña son
+              correctos.
+            - Si el detail es 2 el login fue incorrecto, el usuario no existe
+            - Si el detail es 3 el login fue incorrecto, la contraseña es inco-
+              rrecta.
+    """
     print(form_data.username)
     user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+    if user == 2 or 3:
+        if user == 2:
+            detail = 2
+        elif user == 3:
+            detail = 3
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            status_code=500,
+            detail=detail,
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -134,6 +146,7 @@ async def login_for_access_token(
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+        "detail": 1
     }
 
 
