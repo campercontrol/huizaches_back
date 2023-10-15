@@ -16,6 +16,7 @@ from crud.camps.camp_crud import (
     get_camp_by_search,
 )
 from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
+from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
 
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
@@ -87,9 +88,11 @@ def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
     extra_charges = get_extra_charge_by_camp(db, camp_id)
     extra_questions = get_extra_question_by_camp(db, camp_id)
     extra_discounts = get_camp_discount_by_camp(db, camp_id)
+    payment_accounts = get_payment_account_for_camp(db, camp_id)
 
     return {
         "camp": camp,
+        "payment_accounts": payment_accounts,
         "extra_charges": extra_charges,
         "extra_questions": extra_questions,
         "extra_discounts": extra_discounts,
@@ -108,29 +111,31 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
     print(new_camp.extra_charges)
     print(getattr(new_camp, "extra_charges"))
 
-    for question in new_camp.extra_question:
-        new_question = CampExtraQuestionCreate(
-            question=question.question,
-            is_required=question.is_required,
-            camp_id=new_camp_id,
-        )
-        create_new_extra_question(db, new_question)
+    if new_camp.extra_question:
+        for question in new_camp.extra_question:
+            new_question = CampExtraQuestionCreate(
+                question=question.question,
+                is_required=question.is_required,
+                camp_id=new_camp_id,
+            )
+            create_new_extra_question(db, new_question)
 
-    for charge in new_camp.extra_charges:
-        new_charge = CampExtraChargeCreate(
-            name=charge.name,
-            price=charge.price,
-            currency_id=charge.currency_id,
-            camp_id=new_camp_id,
-        )
-        create_new_extra_charge(db, new_charge)
+    if new_camp.extra_charges:
+        for charge in new_camp.extra_charges:
+            new_charge = CampExtraChargeCreate(
+                name=charge.name,
+                price=charge.price,
+                currency_id=charge.currency_id,
+                camp_id=new_camp_id,
+            )
+            create_new_extra_charge(db, new_charge)
 
     return {"data": camp}
 
 
 @camp_router.patch("/camp/{camp_id}", tags=["Camps"])
-def update_camp(camp_id: int, modify_camp: CampModify, db: Session = Depends(get_db)):
-    update_data = modify_camp.dict(exclude_unset=True)
+def update_camp(camp_id: int, modify_camp: CampComplete, db: Session = Depends(get_db)):
+    update_data = modify_camp.camp.dict(exclude_unset=True)
     camp_update_result = update_camp_by_id(db, camp_id, update_data)
 
     if camp_update_result != 0:
