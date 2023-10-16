@@ -112,7 +112,8 @@ def get_inf_campaign_camp(
         campers_complete = get_campers_for_camp(db, camp_id)
         for camper_c in campers_complete:
             campers_info.append(
-                {
+                {   
+                    "camper_id": getattr(camper_c, "camper_id"),
                     "camper_full_name": getattr(camper_c, "camper_full_name"),
                     "tutor_full_name": getattr(camper_c, "tutor_full_name"),
                     "tutor_email": getattr(camper_c, "tutor_email"),
@@ -127,6 +128,7 @@ def get_inf_campaign_camp(
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
+                    "staff_id": getattr(staff_c, "staff_id"),
                     "staff_full_name": getattr(staff_c, "staff_full_name"),
                     "staff_email": getattr(staff_c, "staff_email"),
                 }
@@ -142,7 +144,7 @@ def get_inf_campaign_camp(
     }
 
 
-@mailing_routes.get("/mailing/send/campaign/camps/", tags=["Mailing"])
+@mailing_routes.post("/mailing/send/campaign/camps/", tags=["Mailing"])
 def get_inf_campaign_camps(
     camps_id: list[int],
     campers: bool,
@@ -164,6 +166,7 @@ def get_inf_campaign_camps(
         for camper_c in campers_complete:
             campers_info.append(
                 {
+                    "camper_id": getattr(camper_c, "camper_id"),
                     "camper_full_name": getattr(camper_c, "camper_full_name"),
                     "tutor_full_name": getattr(camper_c, "tutor_full_name"),
                     "tutor_email": getattr(camper_c, "tutor_email"),
@@ -178,6 +181,7 @@ def get_inf_campaign_camps(
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
+                    "staff_id": getattr(staff_c, "staff_id"),
                     "staff_full_name": getattr(staff_c, "staff_full_name"),
                     "staff_email": getattr(staff_c, "staff_email"),
                 }
