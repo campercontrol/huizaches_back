@@ -210,6 +210,7 @@ def get_sent_candidates(db, campaign_id:int):
 
     staffs = (
         db.query(
+            Staff.id, 
             (
                 Staff.name + " " + Staff.lastname_father + " " + Staff.lastname_mother
             ).label("staff_fullname")
