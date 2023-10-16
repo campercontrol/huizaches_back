@@ -11,7 +11,7 @@ from crud.crud_role import get_role_by_uuid
 from crud.crud_permission import get_permissions_for_menu, get_permissions_by_lang
 from schema.token import Token, TokenRefresh, TokenCreate
 from utils.db import SessionLocal
-from utils.functions_jwt import validate_token,create_access_token,generate_new_tokens
+from utils.functions_jwt import validate_token, create_access_token, generate_new_tokens
 from utils.hash import verify_str_hash
 
 SECRET_KEY = "39d87423287d550c71e16d02fa7c4a522752a20bed9c505740b13aceeab5bf8a"
@@ -41,19 +41,41 @@ def authenticate_user(db, username: str, password: str):
     return user
 
 
-def get_permissions_menu(db, user,lang):
-    #ADMIN
-    if user.is_admin == True and user.is_coordinator == True and user.is_employee == True:
-        permissions_list = get_permissions_by_lang(db, user.role_id,lang)
-    #COORDINADOR
-    elif user.is_admin == False and user.is_coordinator == True and user.is_employee == True:
-        permissions_list = get_permissions_for_menu(db, user.role_id, False,True,True,lang)
-    #STAFF EMPLEADO
-    elif user.is_admin == False and user.is_coordinator == False and user.is_employee == True:
-        permissions_list = get_permissions_for_menu(db, user.role_id, False,False,True,lang)
-    #STAFF PROSPECTO
-    elif user.is_admin == False and user.is_coordinator == False and user.is_employee == False:
-        permissions_list = get_permissions_for_menu(db, user.role_id, False,False,False,lang)
+def get_permissions_menu(db, user, lang):
+    # ADMIN
+    if (
+        user.is_admin == True
+        and user.is_coordinator == True
+        and user.is_employee == True
+    ):
+        permissions_list = get_permissions_by_lang(db, user.role_id, lang)
+    # COORDINADOR
+    elif (
+        user.is_admin == False
+        and user.is_coordinator == True
+        and user.is_employee == True
+    ):
+        permissions_list = get_permissions_for_menu(
+            db, user.role_id, False, True, True, lang
+        )
+    # STAFF EMPLEADO
+    elif (
+        user.is_admin == False
+        and user.is_coordinator == False
+        and user.is_employee == True
+    ):
+        permissions_list = get_permissions_for_menu(
+            db, user.role_id, False, False, True, lang
+        )
+    # STAFF PROSPECTO
+    elif (
+        user.is_admin == False
+        and user.is_coordinator == False
+        and user.is_employee == False
+    ):
+        permissions_list = get_permissions_for_menu(
+            db, user.role_id, False, False, False, lang
+        )
 
     list_menu_permission = []
 
@@ -74,7 +96,7 @@ def get_permissions_menu(db, user,lang):
         list_menu_permission.append(a)
 
     print(list_menu_permission)
-    
+
     return list_menu_permission
 
 
@@ -83,31 +105,38 @@ async def login_for_access_token(
     db: Session = Depends(get_db), form_data: TokenCreate = Depends()
 ):
     """
-        Status de login:
-            - Si el detail es 1 el login fue exitoso, el usuario y contraseña son
-              correctos.
-            - Si el detail es 2 el login fue incorrecto, el usuario no existe
-            - Si el detail es 3 el login fue incorrecto, la contraseña es inco-
-              rrecta.
+    Status de login:
+        - Si el detail es 1 el login fue exitoso, el usuario y contraseña son
+          correctos.
+        - Si el detail es 2 el login fue incorrecto, el usuario no existe
+        - Si el detail es 3 el login fue incorrecto, la contraseña es inco-
+          rrecta.
     """
     print(form_data.username)
     user = authenticate_user(db, form_data.username, form_data.password)
-    if user == 2 or 3:
-        if user == 2:
-            detail = 2
-        elif user == 3:
-            detail = 3
+    print(user)
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    if user == 2:
+        detail = 2
         raise HTTPException(
             status_code=500,
             detail=detail,
             headers={"WWW-Authenticate": "Bearer"},
         )
+    elif user == 3:
+        detail = 3
+        raise HTTPException(
+            status_code=500,
+            detail=detail,
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
-    role = get_role_by_uuid(db,user.role_id)
+    role = get_role_by_uuid(db, user.role_id)
 
-    menu = get_permissions_menu(db,user,form_data.lang)
+    menu = get_permissions_menu(db, user, form_data.lang)
 
     profile_id = get_profile_id_by_user_id(db, user.id)
 
@@ -115,30 +144,30 @@ async def login_for_access_token(
         data={
             "user_name": "",
             "user_email": user.email,
-            "user_id":user.id,
-            "role_name":role.name,
-            "role_id":role.id,
+            "user_id": user.id,
+            "role_name": role.name,
+            "role_id": role.id,
             "profile_id": profile_id,
-            "menu":menu,
-            "lang":form_data.lang,
+            "menu": menu,
+            "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
-            "refresh_token_expires": str(refresh_token_expires)
-            },
+            "refresh_token_expires": str(refresh_token_expires),
+        },
         expires_delta=access_token_expires,
     )
     refresh_token = create_access_token(
         data={
             "user_name": "",
             "user_email": user.email,
-            "user_id":user.id,
-            "role_name":role.name,
-            "role_id":role.id,
+            "user_id": user.id,
+            "role_name": role.name,
+            "role_id": role.id,
             "profile_id": profile_id,
-            "menu":menu,
-            "lang":form_data.lang,
+            "menu": menu,
+            "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
-            "refresh_token_expires": str(refresh_token_expires)
-            },
+            "refresh_token_expires": str(refresh_token_expires),
+        },
         expires_delta=refresh_token_expires,
     )
 
@@ -146,7 +175,7 @@ async def login_for_access_token(
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "detail": 1
+        "detail": 1,
     }
 
 
