@@ -26,6 +26,7 @@ def get_all_prospect(db):
 def get_all_prospect_by_season(db, season_id: int):
     rows = (
         db.query(
+            Staff.id,
             (
                 Staff.name + " " + Staff.lastname_father + " " + Staff.lastname_mother
             ).label("staff_fullname"),

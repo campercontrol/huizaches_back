@@ -15,9 +15,10 @@ from schema.trainings.staff_in_training_schema import (
 
 def get_all_staff_in_training_event(db: Session, training_event_id: int):
     staffs = (
-        db.query(Staff.name, User.email)
-        .join(User, User.id == Staff.login_id)
+        db.query(Staff.id, Staff.name, User.email)
+        .select_from(StaffInTraining)
         .join(Staff, Staff.id == StaffInTraining.staff_id)
+        .join(User, User.id == Staff.login_id)        
         .filter(StaffInTraining.training_event_id == training_event_id)
         .all()
     )
