@@ -20,6 +20,7 @@ from sqlalchemy import case
 def get_public_for_campaign(db, campaign_id: int):
     campers = (
         db.query(
+            Camper.id,
             (
                 Camper.name
                 + " "
