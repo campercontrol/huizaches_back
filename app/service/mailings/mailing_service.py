@@ -134,7 +134,7 @@ def get_inf_campaign_camp(
                 }
             )
     if school:
-        school_info = {"school": "Escuela 1", "school_email": "escuela@correo.com"}
+        school_info = {"school_id": 1, "school": "Escuela 1", "school_email": "escuela@correo.com"}
 
     return {
         "massive_templates": templates,
@@ -187,7 +187,7 @@ def get_inf_campaign_camps(
                 }
             )
     if school:
-        school_info = {"school": "Escuela 1", "school_email": "escuela@correo.com"}
+        school_info = {"school_id": 1, "school": "Escuela 1", "school_email": "escuela@correo.com"}
 
     return {
         "massive_templates": templates,
