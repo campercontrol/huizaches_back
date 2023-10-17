@@ -68,6 +68,7 @@ def delete_payment_account(db: Session, payment_account_id: int):
 def get_payment_account_for_camp(db: Session, camp_id: int):
     payment_accounts = (
         db.query(PaymentAccount)
+        .select_from(CampPaymentAccount)
         .join(PaymentAccount, PaymentAccount.id == CampPaymentAccount.paymentaccount_id)
         .filter(CampPaymentAccount.camp_id == camp_id)
         .all()
