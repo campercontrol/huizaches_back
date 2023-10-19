@@ -38,15 +38,13 @@ def get_camper_by_uuid(db: Session, camper_id: int) -> any:
 def create_new_camper(db: Session, new_camper: CamperCreate) -> any:
     db_camper = None
     try:
-        db_camper = Camper(**new_camper.dict())
-        db.add(db_camper)
-        db.commit()
         new_camper_record = CamperRecordCreate(attend=0, attended=0, total=0)
         camper_record = create_new_camper_record(db, new_camper_record)
-        db.query(Camper).filter(Camper.id == db_camper.id).update(
-            {"record_id": camper_record}
-        )
-        db.commit()
+        new_camper = new_camper.dict()
+        new_camper["record_id"] = camper_record.id
+        db_camper = Camper(**new_camper)
+        db.add(db_camper)
+        db.commit()        
         db.refresh(db_camper)
     except SQLAlchemyError as e:
         print("#=================================#")
@@ -57,7 +55,6 @@ def create_new_camper(db: Session, new_camper: CamperCreate) -> any:
     except Exception as e:
         print(f"No se pudo guardar en la base de datos: {e}")
     return db_camper
-
 
 def update_camper_by_id(
     db: Session, camper_id: int, modify_camper: CamperModify
