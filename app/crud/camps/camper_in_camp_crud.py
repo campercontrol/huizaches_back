@@ -15,24 +15,19 @@ from schema.camps.camper_in_camp_schema import (
 )
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
-    ExtraAnswerMultiple
+    ExtraAnswerMultiple,
 )
 from schema.payments.camper_extra_charge_schema import (
     ExtraChargeMultiple,
-    CamperExtraChargeCreate
+    CamperExtraChargeCreate,
 )
-from schema.payments.payment_schema import (
-    PaymentCreate
-)
+from schema.payments.payment_schema import PaymentCreate
 
-from crud.campers.camper_extra_answer_crud import (
-    create_new_extra_answer
-)
-from crud.payments.camper_extra_charge_crud import (
-    create_new_camper_extra_charge
-)
+from crud.campers.camper_extra_answer_crud import create_new_extra_answer
+from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge
 
 from helper.camper_helpers import update_record_campers
+
 
 def get_all_camper_in_camp(db: Session):
     rows = db.query(CamperInCamp).all()
@@ -358,7 +353,12 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 CamperExtraCharge.extra_charge_id == CampExtraCharge.id,
             )
             .join(Camp, Camp.id == CampExtraCharge.camp_id)
-            .filter(CampExtraCharge.camp_id == camp_id)
+            .filter(
+                and_(
+                    CampExtraCharge.camp_id == camp_id,
+                    CamperExtraCharge.camper_id == camper_id,
+                )
+            )
             .all()
         )
         for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
@@ -370,7 +370,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 Camp.name.label("camp_name"),
                 CampExtraQuestion.id.label("camp_extra_question_id"),
                 CampExtraQuestion.question.label("camp_extra_question_question"),
-                CampExtraQuestion.is_required.label("camp_extra_question_required") ,
+                CampExtraQuestion.is_required.label("camp_extra_question_required"),
                 CamperExtraAnswer.id.label("camper_extra_answer_id"),
                 CamperExtraAnswer.answer.label("camp_extra_answer_answer"),
             )
@@ -379,7 +379,12 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 CamperExtraAnswer.question_id == CampExtraQuestion.id,
             )
             .join(Camp, Camp.id == CampExtraQuestion.camp_id)
-            .filter(CampExtraQuestion.camp_id == camp_id)
+            .filter(
+                and_(
+                    CampExtraQuestion.camp_id == camp_id,
+                    CamperExtraAnswer.camper_id == camper_id,
+                )
+            )
             .all()
         )
         for camp_extra_question in db_mapping_rows_to_dict(camp_extra_questions):
@@ -400,19 +405,19 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 payment_balance=getattr(camp, "public_price"),
             )
             camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
-            
-            #print("3333333333333333333##################################3333333")
-            #print(camper_in_camp_nw)
-            #print("con punto")
-            #print(camp.id)
-            #print("con corchetes")
-            #print(camp['id'])
-            #print("con getattr")
-            #print(getattr(camp, "id"))
-            #new_payment = PaymentCreate(
+
+            # print("3333333333333333333##################################3333333")
+            # print(camper_in_camp_nw)
+            # print("con punto")
+            # print(camp.id)
+            # print("con corchetes")
+            # print(camp['id'])
+            # print("con getattr")
+            # print(getattr(camp, "id"))
+            # new_payment = PaymentCreate(
             #    paid= True,
             #    payment_amount=
-            #)
+            # )
     update_record_campers(db, camper_id)
 
     if extra_charges or extra_questions:
@@ -423,50 +428,59 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
         }
     else:
         return {"status": 1}
-    
 
-def create_update_camper_extras_camp(db, camper_id: int, 
-        extra_answers: list[ExtraAnswerMultiple], 
-        extra_charges: list[ExtraChargeMultiple]):
 
+def create_update_camper_extras_camp(
+    db,
+    camper_id: int,
+    extra_answers: list[ExtraAnswerMultiple],
+    extra_charges: list[ExtraChargeMultiple],
+):
     for extra_answer in extra_answers:
-        if (db.query(CamperExtraAnswer)
+        if (
+            db.query(CamperExtraAnswer)
             .filter(
                 and_(
-                    CamperExtraAnswer.question_id == extra_answer.camp_extra_question_id, 
-                    CamperExtraAnswer.camper_id == camper_id))
-            .update(
-            {"answer": getattr(extra_answer, "camp_extra_answer_answer")}
-            )):
+                    CamperExtraAnswer.question_id
+                    == extra_answer.camp_extra_question_id,
+                    CamperExtraAnswer.camper_id == camper_id,
+                )
+            )
+            .update({"answer": getattr(extra_answer, "camp_extra_answer_answer")})
+        ):
             db.commit()
-        else: 
+        else:
             extra_answer_new = CamperExtraAnswerCreate(
-                answer = extra_answer.camp_extra_answer_answer,
-                camper_id = camper_id,
-                question_id = extra_answer.camp_extra_question_id,
+                answer=extra_answer.camp_extra_answer_answer,
+                camper_id=camper_id,
+                question_id=extra_answer.camp_extra_question_id,
             )
             status = create_new_extra_answer(db, extra_answer_new)
-    
+
     for extra_charge in extra_charges:
-        if (db.query(CamperExtraCharge)
+        if (
+            db.query(CamperExtraCharge)
             .filter(
                 and_(
-                    CamperExtraCharge.extra_charge_id == extra_charge.camp_extra_charge_id, 
-                    CamperExtraCharge.camper_id == camper_id))
-            .update(
-            {"is_selected": getattr(extra_charge, "camp_extra_charge_is_selected")}
-            )):
-            db.commit()
-        else: 
-            extra_charge_new = CamperExtraChargeCreate(
-                is_selected = extra_charge.camp_extra_charge_is_selected,
-                camper_id = camper_id,
-                extra_charge_id = extra_charge.camp_extra_charge_id,
+                    CamperExtraCharge.extra_charge_id
+                    == extra_charge.camp_extra_charge_id,
+                    CamperExtraCharge.camper_id == camper_id,
+                )
             )
-            status = create_new_camper_extra_charge(db, extra_charge_new)   
-    
-    return 1
+            .update(
+                {"is_selected": getattr(extra_charge, "camp_extra_charge_is_selected")}
+            )
+        ):
+            db.commit()
+        else:
+            extra_charge_new = CamperExtraChargeCreate(
+                is_selected=extra_charge.camp_extra_charge_is_selected,
+                camper_id=camper_id,
+                extra_charge_id=extra_charge.camp_extra_charge_id,
+            )
+            status = create_new_camper_extra_charge(db, extra_charge_new)
 
+    return 1
 
 
 """
