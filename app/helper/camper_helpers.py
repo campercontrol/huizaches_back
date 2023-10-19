@@ -17,12 +17,9 @@ def update_record_campers(db, camper_id):
         .first()
     )[0]
     camper_record_md = {
-        #attend= len(future_camps),
-        #attended= len(past_camps),
-        #total= len(future_camps) + len(past_camps)
-        "attend": 1,
-        "attended": 1,
-        "total": 1
+        "attend" : len(future_camps),
+        "attended" : len(past_camps),
+        "total" : len(future_camps) + len(past_camps)
     }
     print("#####################################################")
     print(camper_record_md)
