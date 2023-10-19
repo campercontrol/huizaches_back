@@ -32,6 +32,8 @@ from crud.payments.camper_extra_charge_crud import (
     create_new_camper_extra_charge
 )
 
+from helper.camper_helpers import update_record_campers
+
 def get_all_camper_in_camp(db: Session):
     rows = db.query(CamperInCamp).all()
     return rows
@@ -398,18 +400,20 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 payment_balance=getattr(camp, "public_price"),
             )
             camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
-            print("3333333333333333333##################################3333333")
-            print(camper_in_camp_nw)
-            print("con punto")
-            print(camp.id)
-            print("con corchetes")
-            print(camp['id'])
-            print("con getattr")
-            print(getattr(camp, "id"))
+            
+            #print("3333333333333333333##################################3333333")
+            #print(camper_in_camp_nw)
+            #print("con punto")
+            #print(camp.id)
+            #print("con corchetes")
+            #print(camp['id'])
+            #print("con getattr")
+            #print(getattr(camp, "id"))
             #new_payment = PaymentCreate(
             #    paid= True,
             #    payment_amount=
             #)
+    update_record_campers(db, camper_id)
 
     if extra_charges or extra_questions:
         return {

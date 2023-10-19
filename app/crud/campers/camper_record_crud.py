@@ -48,7 +48,7 @@ def create_new_camper_record(db, new_camper_record: CamperRecordCreate):
 def update_camper_record_by_id(db, camper_record_id: int, modify_camper_record: CamperRecordModify):
     rows_updated = (
         db.query(CamperRecord)
-        .filter_by(id=camper_record_id)
+        .filter(CamperRecord.id==camper_record_id)
         .update(modify_camper_record, synchronize_session="fetch")
     )
     db.commit()
