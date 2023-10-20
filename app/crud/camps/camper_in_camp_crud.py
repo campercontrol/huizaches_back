@@ -94,8 +94,8 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Currency.symbol.label("currency_symbol"),
             Currency.acronyms.label("currency_acronyms")
         )
-        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Camper, CamperInCamp.camper_id == Camper.id)
         .join(Constant, CamperInCamp.status == Constant.id)
         .join(Location, Camp.location_id == Location.id)
