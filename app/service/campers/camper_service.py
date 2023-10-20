@@ -62,6 +62,7 @@ from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
     get_cancelled_by_camper,
     get_past_subscribe_by_camper,
+    get_camps_name_amount_camper
 )
 from crud.crud_user import get_user_by_uuid
 from crud.campers.school_crud import get_active_school
@@ -423,9 +424,17 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
+    total_amount = 0
+    
+    for camp in camper_subscribe_camps:
+        total_amount = total_amount + camp.get('camper_payment_balance')
+
+    for camp in camper_passed_camps:
+        total_amount = total_amount + camp.get('camper_payment_balance') 
     data = {
         "camper_band": camper_band,
         "camper_info": camper_info,
+        "camper_total_amount": total_amount,
         "parent": parent,
         "user_email": user[0].email,
         "camper_comments_parent": camper_comments_parent,
