@@ -7,7 +7,7 @@ from datetime import date
 from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
 from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
 from model.payments import CamperExtraCharge
-from model.catalogs import Constant
+from model.catalogs import Constant, Currency
 from model.user import User
 from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
@@ -91,7 +91,10 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label("currency_acronyms")
         )
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Camp, CamperInCamp.camp_id == Camp.id)
         .join(Camper, CamperInCamp.camper_id == Camper.id)
         .join(Constant, CamperInCamp.status == Constant.id)
@@ -225,7 +228,7 @@ def get_campers_for_module(db: Session, camp_id: int):
 def get_camps_name_amount_camper(db: Session, camper_id: int):
     data = []
     camps = get_subscribe_by_camper(db, camper_id)
-    cancelled_camps = get_all_cancelled_by_camper(db, camper_id)
+    # cancelled_camps = get_all_cancelled_by_camper(db, camper_id)
 
     for camp in camps:
         data.append(
@@ -235,7 +238,7 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                 "camper_payment_balance": getattr(camp, "camper_payment_balance"),
             }
         )
-
+    """
     for camp in cancelled_camps:
         if getattr(camp, "camper_payment_balance") > 0:
             data.append(
@@ -245,6 +248,7 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                     "camper_payment_balance": getattr(camp, "camper_payment_balance"),
                 }
             )
+    """
     return data
 
 
