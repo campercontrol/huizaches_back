@@ -72,3 +72,10 @@ class UserChangePassword(BaseModel):
     access_token: str
     password: str
     password_confirm: str
+
+
+
+class UserChangeEmail(BaseModel):
+    access_token: str
+    email: str
+    email_confirm: str
