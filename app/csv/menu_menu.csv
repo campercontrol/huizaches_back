@@ -1,0 +1,65 @@
+id"name"url"icon"language"is_coordinator"is_admin"target"order"created"updated"group_id
+1"Mis hij@s registrados"/parents/"fa fa-id-card"es"f"f"f"0"2018-04-24"2018-04-24"1
+2"Mi perfil"/parents/profile/"fa fa-user"es"f"f"f"1"2018-04-24"2018-04-24"1
+3"Frecuentes"http://kincamp.com/faq/"fa fa-question"es"f"f"t"2"2018-04-24"2018-04-24"1
+4"Contacto"http://kincamp.com/contacto/"fa fa-phone"es"f"f"t"3"2018-04-24"2018-04-24"1
+5"Reglamento"http://kincamp.com/reglamento/"fa fa-legal"es"f"f"t"4"2018-04-24"2018-04-24"1
+6"Acuerdo de Participación"http://kincamp.com/condiciones/"fa fa-book"es"f"f"t"5"2018-04-24"2018-04-24"1
+7"Aviso de Privacidad"http://kincamp.com/aviso-de-privacidad/"fa fa-lock"es"f"f"t"6"2018-04-24"2018-04-24"1
+14"Prox Campamentos"/school/"icon-check"es"f"f"f"0"2018-04-24"2018-04-24"3
+15"Campamentos Anteriores"/school/last"icon-check-sign"es"f"f"f"1"2018-04-24"2018-04-24"3
+16"Perfil"/school/profile/"fa fa-user"es"f"f"f"2"2018-04-24"2018-04-24"3
+17"Campistas"/school/campers/"fa fa-group"es"f"f"f"3"2018-04-24"2018-04-24"3
+18"Frecuentes"http://kincamp.com/faq/"fa fa-question"es"f"f"t"4"2018-04-24"2018-04-24"3
+19"Contacto"http://kincamp.com/contacto/"fa fa-phone"es"f"f"t"5"2018-04-24"2018-04-24"3
+20"Reglamento"http://kincamp.com/reglamento/"fa fa-legal"es"f"f"t"6"2018-04-24"2018-04-24"3
+21"Acuerdo de Participación"http://kincamp.com/condiciones/"fa fa-book"es"f"f"t"7"2018-04-24"2018-04-24"3
+22"Aviso de Privacidad"http://kincamp.com/aviso-de-privacidad/"fa fa-lock"es"f"f"t"8"2018-04-24"2018-04-24"3
+23"My registered campers"/parents/"fa fa-id-card"en"f"f"f"0"2018-04-24"2018-04-24"1
+24"Profile"/parents/profile/"fa fa-user"en"f"f"f"1"2018-04-24"2018-04-24"1
+25"FAQ"http://kincamp.com/faq/"fa fa-question"en"f"f"t"2"2018-04-24"2018-04-24"1
+26"Contact"http://kincamp.com/contacto/"fa fa-phone"en"f"f"t"3"2018-04-24"2018-04-24"1
+27"Rules and Regulations"http://kincamp.com/reglamento/"fa fa-legal"en"f"f"t"4"2018-04-24"2018-04-24"1
+28"Participation Agreement"http://kincamp.com/condiciones/"fa fa-book"en"f"f"t"5"2018-04-24"2018-04-24"1
+29"Privacy Notice"http://kincamp.com/aviso-de-privacidad/"fa fa-lock"en"f"f"t"6"2018-04-24"2018-04-24"1
+36"Next Camps"/school/"icon-check"en"f"f"f"0"2018-04-24"2018-04-24"3
+37"Last Camps"/school/last"icon-check-sign"en"f"f"f"1"2018-04-24"2018-04-24"3
+38"Profile"/school/profile/"fa fa-user"en"f"f"f"2"2018-04-24"2018-04-24"3
+39"Campers"/school/campers/"fa fa-group"en"f"f"f"3"2018-04-24"2018-04-24"3
+40"FAQ"http://kincamp.com/faq/"fa fa-question"en"f"f"t"4"2018-04-24"2018-04-24"3
+41"Contact"http://kincamp.com/contacto/"fa fa-phone"en"f"f"t"5"2018-04-24"2018-04-24"3
+42"Rules and Regulations"http://kincamp.com/reglamento/"fa fa-legal"en"f"f"t"6"2018-04-24"2018-04-24"3
+43"Participation Agreement"http://kincamp.com/condiciones/"fa fa-book"en"f"f"t"7"2018-04-24"2018-04-24"3
+44"Privacy Notice"http://kincamp.com/aviso-de-privacidad/"fa fa-lock"en"f"f"t"8"2018-04-24"2018-04-24"3
+57"Campamentos"/doctor/"fa fa-list"es"f"f"f"22"2020-06-26"2020-06-26"5
+58"Camps"/doctor/"fa fa-list"en"f"f"f"23"2020-06-26"2020-06-26"5
+55"Ingresos"/payments"fa fa-bar-chart"es"f"t"f"13"2018-06-21"2022-09-19"2
+63"Trainings"/staff/trainings/"fa fa-list"en"f"t"f"7"2020-12-10"2022-09-19"2
+31"Camps"/staff/camps/"fa fa-list"en"t"f"f"3"2018-04-24"2020-12-10"2
+62"My trainings"/staff/training_dashboard/"fa fa-map"en"f"f"f"5"2020-12-10"2022-09-19"2
+50"Agrupaciones"/grouping/"fa fa fa-tags"en"t"f"f"23"2018-06-13"2022-09-19"2
+11"Staff"/staff/employees/"fa fa-group"es"t"f"f"24"2018-04-24"2022-09-19"2
+9"Campamentos"/staff/camps/"fa fa-list"es"t"f"f"2"2018-04-24"2020-12-10"2
+60"Mailing"/mailing/"fa fa-envelope"en"f"t"f"14"2020-12-10"2022-09-19"2
+30"My Camps"/staff/"fa fa-dashboard"en"f"f"f"1"2018-04-24"2022-09-19"2
+12"Campistas"/staff/campers/"fa fa-group"es"t"f"f"25"2018-04-24"2022-09-19"2
+49"Agrupaciones"/grouping/"fa fa fa-tags"es"t"f"f"26"2018-06-13"2022-09-19"2
+45"Mi Perfil"/staff/profile/view/"fa fa-user"es"f"f"f"27"2018-04-24"2022-09-19"2
+48"Applicants"/staff/applicants/"fa fa fa fa-group"en"f"t"f"9"2018-06-13"2022-09-19"2
+47"Prospectos"/staff/applicants/"fa fa fa fa-group"es"t"t"f"8"2018-06-13"2022-09-19"2
+8"Mis campamentos"/staff/"fa fa-dashboard"es"f"f"f"0"2018-04-24"2022-09-19"2
+59"Mailing"/mailing/"fa fa-envelope"es"f"t"f"15"2020-10-08"2022-09-19"2
+52"Trophy"/trophy/"fa fa-trophy"en"f"t"f"10"2018-06-13"2022-09-19"2
+66"Payment ref"/payments/search"fa fa-search"en"f"t"f"16"2022-09-19"2022-09-19"2
+35"Admin"/admin/"fa fa-lock"en"f"t"f"29"2018-04-24"2022-09-19"2
+65"Referencia pago"/payments/search"fa fa-search"es"f"t"f"17"2022-09-19"2022-09-19"2
+13"Admin"/admin/"fa fa-lock"es"f"t"f"28"2018-04-24"2022-09-19"2
+61"Mis capacitaciones"/staff/training_dashboard/"fa fa-map"es"f"f"f"4"2020-12-10"2022-09-19"2
+32"Check points"/checkpoint/"glyphicon glyphicon-barcode"en"t"f"f"18"2018-04-24"2022-09-19"2
+33"Staff"/staff/employees/"fa fa-group"en"t"f"f"19"2018-04-24"2022-09-19"2
+34"Campers"/staff/campers/"fa fa-group"en"t"f"f"20"2018-04-24"2022-09-19"2
+46"Profile"/staff/profile/view/"fa fa-user"en"f"f"f"21"2018-04-24"2022-09-19"2
+51"Trofeos"/trophy/"fa fa-trophy"es"f"t"f"11"2018-06-13"2022-09-19"2
+10"Puntos de control"/checkpoint/"glyphicon glyphicon-barcode"es"t"f"f"22"2018-04-24"2022-09-19"2
+64"Capacitaciones"/staff/trainings/"fa fa-list"es"f"t"f"6"2020-12-10"2022-09-19"2
+56"Payments"/payments"fa fa-bar-chart"en"f"t"f"12"2018-06-21"2022-09-19"2

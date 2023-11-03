@@ -1,0 +1,894 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.439090+00:00",
+      "value": "Hombre",
+      "uid": "eb27f78d-454d-4a18-9dbf-82ebee19ed4e",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 2,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.462151+00:00",
+      "value": "Mujer",
+      "uid": "e3f06fdc-5f07-4822-8b8b-013d1d65c3af",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 3,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.475940+00:00",
+      "value": "No Binario",
+      "uid": "d9b6a508-cdaf-4f00-9135-911c401be375",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 4,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.496859+00:00",
+      "value": "Prefiero no decir",
+      "uid": "41c21dc0-ccfc-4325-8467-9ef1f541f720",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 5,
+      "language": "en",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.510820+00:00",
+      "value": "Male",
+      "uid": "b93c8122-0533-41e0-abeb-878be397612e",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 6,
+      "language": "en",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.531065+00:00",
+      "value": "Female",
+      "uid": "6ffc7b48-b4b4-480c-a281-5c9a9eabc4c9",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 7,
+      "language": "en",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.554756+00:00",
+      "value": "Non Binary",
+      "uid": "cbffc50a-0772-4e27-b76b-1ab8721a50cc",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 8,
+      "language": "en",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.567614+00:00",
+      "value": "I prefer not to say",
+      "uid": "0dbb82fa-ac14-4673-92b9-a9392c348d12",
+      "num_id": 1,
+      "model_name": "gender"
+    },
+    {
+      "id": 9,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.582309+00:00",
+      "value": "A+",
+      "uid": "15134c8e-e111-4aec-91d0-16ac5999bd26",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 10,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.596555+00:00",
+      "value": "A-",
+      "uid": "ef0f96b2-b29c-4396-a7ca-0ac49476cdd0",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 11,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.609068+00:00",
+      "value": "B+",
+      "uid": "99d06a5e-a1ae-4deb-b93b-6e38783fe5d3",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 12,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.631555+00:00",
+      "value": "B-",
+      "uid": "c05d5b9d-2cf2-48ec-ba95-5774f9c9db3a",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 13,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.645010+00:00",
+      "value": "AB+",
+      "uid": "beb061f5-12b5-4dfe-ada3-9bad8d00aaff",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 14,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.662500+00:00",
+      "value": "AB-",
+      "uid": "19444c75-016c-4d19-9f20-dbcc62c0ec78",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 15,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.677116+00:00",
+      "value": "O+",
+      "uid": "11c4affd-3026-495d-9c16-cf9398f3d2f2",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 16,
+      "language": "bi",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.698240+00:00",
+      "value": "O-",
+      "uid": "544101b7-0f0b-4ada-98f2-8dbd79a3446f",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 17,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.712474+00:00",
+      "value": "No lo sé",
+      "uid": "0d6229a0-0270-4e05-86b4-fd0f42f716d4",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 18,
+      "language": "en",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.731399+00:00",
+      "value": "I dont remember",
+      "uid": "c3ee3c4b-3193-4201-b9aa-52e594bf93e4",
+      "num_id": 1,
+      "model_name": "blood_type"
+    },
+    {
+      "id": 19,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.745144+00:00",
+      "value": "PK3",
+      "uid": "c21b661a-8beb-4467-8da5-8c351187e14c",
+      "num_id": 14,
+      "model_name": "grade"
+    },
+    {
+      "id": 20,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.764149+00:00",
+      "value": "PK4",
+      "uid": "9d78bf62-7413-43c3-bf33-8c9a7f96e708",
+      "num_id": 15,
+      "model_name": "grade"
+    },
+    {
+      "id": 21,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.786922+00:00",
+      "value": "Kinder",
+      "uid": "2e6c6be0-df52-4024-9a38-39eee6337f19",
+      "num_id": 1,
+      "model_name": "grade"
+    },
+    {
+      "id": 22,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.801904+00:00",
+      "value": "1º de primaria | 1st",
+      "uid": "bdd92cac-d89a-4615-af38-b66fc9bd062b",
+      "num_id": 2,
+      "model_name": "grade"
+    },
+    {
+      "id": 23,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.824604+00:00",
+      "value": "2º de primaria | 2nd",
+      "uid": "53cdbc5d-9079-46c9-8d73-44dc841723b0",
+      "num_id": 3,
+      "model_name": "grade"
+    },
+    {
+      "id": 24,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.836597+00:00",
+      "value": "3º de primaria | 3rd",
+      "uid": "d7cd743d-6cd6-4e8e-9a43-5b54309c977d",
+      "num_id": 4,
+      "model_name": "grade"
+    },
+    {
+      "id": 25,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.858679+00:00",
+      "value": "4º de primaria | 4th",
+      "uid": "b086f170-65bd-4a64-b654-500b63eb1342",
+      "num_id": 5,
+      "model_name": "grade"
+    },
+    {
+      "id": 26,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.874058+00:00",
+      "value": "5º de primaria | 5th",
+      "uid": "59d8f107-a90d-4ff3-a730-fd1ea0f185d8",
+      "num_id": 6,
+      "model_name": "grade"
+    },
+    {
+      "id": 27,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.895081+00:00",
+      "value": "6º de primaria | 6th",
+      "uid": "78904d78-bea0-4775-8589-17942c17ef9b",
+      "num_id": 7,
+      "model_name": "grade"
+    },
+    {
+      "id": 28,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.908319+00:00",
+      "value": "1º de secundaria | 7th",
+      "uid": "5ccb00d9-063d-45f5-89ed-eaa256819ae3",
+      "num_id": 8,
+      "model_name": "grade"
+    },
+    {
+      "id": 29,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.924692+00:00",
+      "value": "2º de secundaria | 8th",
+      "uid": "2837de5c-854e-40ba-84e6-f8975edb9004",
+      "num_id": 9,
+      "model_name": "grade"
+    },
+    {
+      "id": 30,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.935061+00:00",
+      "value": "3º de secundaria | 9th",
+      "uid": "0d919dfe-4882-4b9e-9876-a0d6be0118a6",
+      "num_id": 10,
+      "model_name": "grade"
+    },
+    {
+      "id": 31,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.962396+00:00",
+      "value": "1º de preparatoria | 10th",
+      "uid": "97dce934-4b44-4acb-a91b-baa2da2fad34",
+      "num_id": 11,
+      "model_name": "grade"
+    },
+    {
+      "id": 32,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:57.985289+00:00",
+      "value": "2º de preparatoria | 11th",
+      "uid": "592da962-639f-4335-a09b-09aaf665c9e4",
+      "num_id": 12,
+      "model_name": "grade"
+    },
+    {
+      "id": 33,
+      "language": "es",
+      "created_at": "2023-04-19T21:17:12.872341+00:00",
+      "updated_at": "2023-08-16T06:38:58.000187+00:00",
+      "value": "3º de preparatoria | 12th",
+      "uid": "5c722f19-ab91-4095-be43-585723f042b5",
+      "num_id": 13,
+      "model_name": "grade"
+    },
+    {
+      "id": 34,
+      "language": "es",
+      "created_at": "2023-04-21T05:55:34.689576+00:00",
+      "updated_at": "2023-08-16T06:38:58.020440+00:00",
+      "value": "sin status",
+      "uid": "779fe171-6cf9-4d70-abdf-c0ff947f3e6d",
+      "num_id": 0,
+      "model_name": "camp_status"
+    },
+    {
+      "id": 35,
+      "language": "es",
+      "created_at": "2023-04-21T05:55:34.689576+00:00",
+      "updated_at": "2023-08-16T06:38:58.031611+00:00",
+      "value": "En lista de espera",
+      "uid": "460306e1-7f16-4739-8796-4edbd841971b",
+      "num_id": 1,
+      "model_name": "camp_status"
+    },
+    {
+      "id": 36,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-08-16T06:38:58.054154+00:00",
+      "value": "Inscrito",
+      "uid": "1458988d-130f-4488-8460-f88c577274bd",
+      "num_id": 2,
+      "model_name": "camp_status"
+    },
+    {
+      "id": 37,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-08-16T06:38:59.122138+00:00",
+      "value": "Cancelado",
+      "uid": "1c6dd1d9-a164-48fb-b2ed-aada288581c4",
+      "num_id": 3,
+      "model_name": "camp_status"
+    },
+    {
+      "id": 38,
+      "language": "bi",
+      "created_at": "2023-08-29T21:09:12.453070+00:00",
+      "updated_at": "2023-08-29T21:20:55.231810+00:00",
+      "value": "kin",
+      "uid": "21a74c76-443c-4aa5-a344-1eda3a87ad74",
+      "num_id": 1,
+      "model_name": "show_to_staff"
+    },
+    {
+      "id": 39,
+      "language": "bi",
+      "created_at": "2023-08-29T21:09:12.453070+00:00",
+      "updated_at": "2023-08-29T21:21:19.971216+00:00",
+      "value": "coordinador",
+      "uid": "4ea92198-17dc-4362-8372-6cd864348166",
+      "num_id": 1,
+      "model_name": "show_to_staff"
+    },
+    {
+      "id": 40,
+      "language": "bi",
+      "created_at": "2023-08-29T21:09:12.453070+00:00",
+      "updated_at": "2023-08-29T21:21:31.056092+00:00",
+      "value": "administrador",
+      "uid": "c7157453-e092-4d82-ae96-90520903c435",
+      "num_id": 1,
+      "model_name": "show_to_staff"
+    },
+    {
+      "id": 41,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.657706+00:00",
+      "value": "Envios de Correos Masivos",
+      "uid": "7418dcf1-5cb4-4ce0-a5cd-5e33bb7be297",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 42,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.689647+00:00",
+      "value": "[Camper] Bienvenida a padres (Usuario)",
+      "uid": "6f474ee4-9e63-4c79-a73a-48164fb3b2a8",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 43,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.723133+00:00",
+      "value": "[Camper] Bienvenida a padres (Admin)",
+      "uid": "f3024edf-c698-464e-b80a-3a2ae27f0d72",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 44,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.744531+00:00",
+      "value": "[Camper] Se apunta en Camp (Usuario)",
+      "uid": "3ac3fa88-80a6-4d02-9912-8bb84c80945b",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 45,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.779357+00:00",
+      "value": "[Camper] Se apunta en Camp (Admin)",
+      "uid": "f76d9139-8f61-489b-9a85-c95942709596",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 46,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.823764+00:00",
+      "value": "[Camper] Cancela asistencia a Camp (Usuario)",
+      "uid": "3b72c9f5-3f14-4599-85e6-ad73358f76c1",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 47,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.845206+00:00",
+      "value": "[Camper] Cancela asistencia a Camp (Admin)",
+      "uid": "556c31d8-707d-4f69-9d4b-c95d57e08ff3",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 48,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.877198+00:00",
+      "value": "[Camper] Confirmación pago (Usuario)",
+      "uid": "34d78af4-c961-47ee-a03c-0992c2ca6ef6",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 49,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.899728+00:00",
+      "value": "[Camper] Confirmación pago (Admin)",
+      "uid": "e6cb16bc-29c0-4f5c-ac70-fd5bf6a785e4",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 50,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.920596+00:00",
+      "value": "[Camper] Pago completado (Admin)",
+      "uid": "9d62635a-8e4d-400a-8ccc-90929225da4c",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 51,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.953023+00:00",
+      "value": "[Camper] Pago completado (Usuario)",
+      "uid": "23324040-12fd-4bb9-b14e-f22d48e5ce31",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 52,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.978762+00:00",
+      "value": "[Camper] Recordatorio de pago (Admin)",
+      "uid": "5568e2ff-3b09-4df7-87b4-a66957d34908",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 53,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:09.993572+00:00",
+      "value": "[Camper] Recordatorio de pago (Usuario)",
+      "uid": "dd9a39d5-ad6a-40e0-9dfa-3c921ddfb8cb",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 54,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.027528+00:00",
+      "value": "[Camper] Cumpleaños ha asistido a camp (Admin)",
+      "uid": "25ea37a9-e6f2-45ca-8891-696ac3e67c97",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 55,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.050546+00:00",
+      "value": "[Camper] Cumpleaños ha asistido a camp (Usuario)",
+      "uid": "50e5f2ce-88ba-4552-9a25-0499bcd4efcb",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 56,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.080583+00:00",
+      "value": "[Camper] Cumpleaños está en camp (Admin)",
+      "uid": "5540bf84-e8cf-4b87-8645-a1b3d54c186a",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 57,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.106945+00:00",
+      "value": "[Camper] Cumpleaños está en camp (Usuario)",
+      "uid": "2e24f87c-83df-4cb0-95ba-6cce5b894878",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 58,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.130456+00:00",
+      "value": "[Camper] Cumpleaños asistirá a camp (Admin)",
+      "uid": "2751a47e-05cf-446d-a87b-8f8a90f64509",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 59,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.163122+00:00",
+      "value": "[Camper] Cumpleaños asistirá a camp (Usuario)",
+      "uid": "219069a9-c969-423d-8c90-9ced8261eb72",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 60,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.180882+00:00",
+      "value": "[Camper] Consultas medicas en un camp (Usuario)",
+      "uid": "38d66f20-cc5f-496a-b040-a43c80458d43",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 61,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.207913+00:00",
+      "value": "[Camper] Consultas medicas en un camp (Admin)",
+      "uid": "8e0f4154-61fd-4eda-aefa-ff4026412ac4",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 62,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.233538+00:00",
+      "value": "[Staff] Cumpleaños un miembro del staff (Admin)",
+      "uid": "fd2ae77c-dc31-4828-8bf0-c83a82e8884a",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 63,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.247769+00:00",
+      "value": "[Staff] Cumpleaños staff no ha ido de camp (Usuario)",
+      "uid": "75172f1b-0419-41a5-9b91-c9c33dc6dc3f",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 64,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.282115+00:00",
+      "value": "[Staff] Cumpleaños staff en camp (Usuario)",
+      "uid": "92c1c743-6782-4ad2-ac70-ef92901b0623",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 65,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.317880+00:00",
+      "value": "[Staff] Cumpleaños staff que fue/asistirá a un camp (Usuario)",
+      "uid": "65301352-3d69-4c62-afef-5d81a6f9678a",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 66,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.353488+00:00",
+      "value": "[Staff] Nuevo Prospecto registrado (Usuario)",
+      "uid": "8cb7b8dd-7548-417c-840d-9bb1e42da874",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 67,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.369529+00:00",
+      "value": "[Staff] Nuevo Prospecto registrado (Admin)",
+      "uid": "01212b94-09aa-4986-a8d5-6deff5ece90b",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 68,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.401162+00:00",
+      "value": "[Staff] Prospecto a empleado (Usuario)",
+      "uid": "77191cc4-00b6-444c-9b36-fd2926be0ca9",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 69,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.424057+00:00",
+      "value": "[Staff] Prospecto a empleado (Admin)",
+      "uid": "cb9b5c08-fa25-4dc8-93b1-61f7141966b2",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 70,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.457835+00:00",
+      "value": "[Staff] Se apunta a Camp (Usuario)",
+      "uid": "477240e8-54ee-4511-ac99-c67374bd04ed",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 71,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.481058+00:00",
+      "value": "[Staff] Se apunta a Camp (Admin)",
+      "uid": "269b228d-387c-4c21-82bd-7afe2a6efb8a",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 72,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.511250+00:00",
+      "value": "[Staff] Aceptar en Camp (Usuario)",
+      "uid": "a6f1be9b-c49b-4393-afaf-a4365f24bd85",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 73,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.548503+00:00",
+      "value": "[Staff] Aceptar en Camp (Admin)",
+      "uid": "789e0a63-e6bd-4b3d-be0f-c4b681789ad2",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 74,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.577387+00:00",
+      "value": "[Staff apuntado] Cancela asistencia a Camp (Usuario)",
+      "uid": "649998cb-cfe3-4f52-ad0c-923b0628d68d",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 75,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.602081+00:00",
+      "value": "[Staff apuntado] Cancela asistencia a Camp (Admin)",
+      "uid": "8b18df1d-83b4-4292-aed8-a445996655a2",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 76,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.617594+00:00",
+      "value": "[Staff] Nuevos campamentos esta semana (Usuario)",
+      "uid": "6b0cacff-b4f3-419b-b6ef-10d6de93e178",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 77,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.640235+00:00",
+      "value": "[Staff Confirmado] Cancela asistencia a Camp (Usuario)",
+      "uid": "4d8e6156-e887-4457-8be8-d94e102d91d9",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 78,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.663934+00:00",
+      "value": "[Staff Confirmado] Cancela asistencia a Camp (Admin)",
+      "uid": "868cbc4d-d875-4dde-80d0-fcbab32e70db",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 79,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T01:45:10.689245+00:00",
+      "value": "Recuperar contraseña (Usuario)",
+      "uid": "21c2dc3e-5966-4dff-a332-a30e11cc6a90",
+      "num_id": 3,
+      "model_name": "email_template"
+    },
+    {
+      "id": 80,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T02:00:17.889999+00:00",
+      "value": "Participantes de un campamento",
+      "uid": "42e8d67c-64b3-4d23-b9d1-cb7b45ff7715",
+      "num_id": 1,
+      "model_name": "send_type"
+    },
+    {
+      "id": 81,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T02:00:17.889999+00:00",
+      "value": "Participantes de una capacitación",
+      "uid": "9d68b547-6588-4839-8968-f9841cb17b6f",
+      "num_id": 1,
+      "model_name": "send_type"
+    },
+    {
+      "id": 82,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T02:00:17.889999+00:00",
+      "value": "Participantes de varios campamentos",
+      "uid": "cbc1e950-3aca-409b-bf5a-fdf3a40b9d9e",
+      "num_id": 1,
+      "model_name": "send_type"
+    },
+    {
+      "id": 83,
+      "language": "es",
+      "created_at": "2023-04-21T21:11:47.535086+00:00",
+      "updated_at": "2023-09-21T02:00:17.889999+00:00",
+      "value": "Candidatos de una temporada",
+      "uid": "4bc5b133-6810-49e5-b8b5-74f77dfc9183",
+      "num_id": 1,
+      "model_name": "send_type"
+    },
+    {
+      "id": 84,
+      "language": "es",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:28.811151+00:00",
+      "value": "Reconocimiento",
+      "uid": "80f592b2-5d8d-4183-993a-b23131b4f05c",
+      "num_id": 1,
+      "model_name": "trophy_type"
+    },
+    {
+      "id": 85,
+      "language": "es",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:52.127453+00:00",
+      "value": "Certificación",
+      "uid": "54f7df60-dea1-42af-b5c6-b7a891e9da03",
+      "num_id": 1,
+      "model_name": "trophy_type"
+    },
+    {
+      "id": 86,
+      "language": "es",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:52.127453+00:00",
+      "value": "si",
+      "uid": "09427359-d7cd-41d3-b40a-32e47a351479",
+      "num_id": 1,
+      "model_name": "can_swim"
+    },
+    {
+      "id": 87,
+      "language": "es",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:52.127453+00:00",
+      "value": "no",
+      "uid": "127e1740-6cd9-4a70-91d4-24be1488fd68",
+      "num_id": 2,
+      "model_name": "can_swim"
+    },
+    {
+      "id": 88,
+      "language": "en",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:52.127453+00:00",
+      "value": "yes",
+      "uid": "cf7de98f-6bf6-4ed7-9dae-66b8e24109af",
+      "num_id": 1,
+      "model_name": "can_swim"
+    },
+    {
+      "id": 89,
+      "language": "en",
+      "created_at": "2023-10-01T17:30:24.112435+00:00",
+      "updated_at": "2023-10-01T17:34:52.127453+00:00",
+      "value": "no",
+      "uid": "dee18652-6dfa-409e-bad2-658ae73ed0af",
+      "num_id": 2,
+      "model_name": "can_swim"
+    }
+  ]
+}

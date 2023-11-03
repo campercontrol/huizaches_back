@@ -1,0 +1,4 @@
+id"created"modified"name"callable"enabled"queue"job_id"scheduled_time"interval"interval_unit"repeat"timeout"result_ttl
+2"2019-05-09 00:33:51.132212-05"2019-05-09 17:01:14.216118-05"muestra fecha (log)"scheduler_jobs.fechador.fechador"t"tasks"addc6a58-23e7-460a-9b21-8491f3443c46"2019-05-09 00:00:00-05"5"minutes"\N"\N"\N
+1"2019-05-09 00:15:53.428894-05"2019-05-10 09:30:47.379768-05"correo de cumpleaños"scheduler_jobs.birthday_remember_job.birthday_remember_job"t"tasks"bc3ebf89-83c3-487c-a7f8-3e87b7352b17"2019-05-10 09:31:00-05"1"days"\N"\N"\N
+3"2023-02-22 22:39:46.453096-06"2023-02-22 22:39:46.462528-06"Consultas medicas"scheduler_jobs.medical_send_job.medical_send_job"t"tasks"899aaeae-89fd-40b9-a318-94acf864b6e8"2023-02-22 23:59:00-06"1"days"\N"\N"\N
