@@ -28,3 +28,8 @@ class User(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"{self.id} - {self.email} - {self.hashed_pass} - {self.role_id} - {self.is_coordinator} - {self.is_admin} - {self.is_employee} - {self.is_superuser} - {self.is_active} - {self.created_at} - {self.updated_at}"
+
+

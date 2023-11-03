@@ -1,0 +1,208 @@
+id"name"content_type_id"codename
+1"Can add permission"1"add_permission
+2"Can change permission"1"change_permission
+3"Can delete permission"1"delete_permission
+4"Can add group"2"add_group
+5"Can change group"2"change_group
+6"Can delete group"2"delete_group
+10"Can add content type"4"add_contenttype
+11"Can change content type"4"change_contenttype
+12"Can delete content type"4"delete_contenttype
+13"Can add session"5"add_session
+14"Can change session"5"change_session
+15"Can delete session"5"delete_session
+16"Can add log entry"6"add_logentry
+17"Can change log entry"6"change_logentry
+18"Can delete log entry"6"delete_logentry
+19"Can add migration history"7"add_migrationhistory
+20"Can change migration history"7"change_migrationhistory
+21"Can delete migration history"7"delete_migrationhistory
+22"Can add kv store"8"add_kvstore
+23"Can change kv store"8"change_kvstore
+24"Can delete kv store"8"delete_kvstore
+25"Can add Habilidad"9"add_skill
+26"Can change Habilidad"9"change_skill
+27"Can delete Habilidad"9"delete_skill
+28"Can add Staff"10"add_staff
+29"Can change Staff"10"change_staff
+30"Can delete Staff"10"delete_staff
+31"Can add Escuela"11"add_school
+32"Can change Escuela"11"change_school
+33"Can delete Escuela"11"delete_school
+34"Can add Padre o tutor"12"add_parent
+35"Can change Padre o tutor"12"change_parent
+36"Can delete Padre o tutor"12"delete_parent
+37"Can add Camper"13"add_camper
+38"Can change Camper"13"change_camper
+39"Can delete Camper"13"delete_camper
+40"Can add Sede"14"add_location
+41"Can change Sede"14"change_location
+42"Can delete Sede"14"delete_location
+43"Can add Temporada"15"add_season
+44"Can change Temporada"15"change_season
+45"Can delete Temporada"15"delete_season
+46"Can add Campamento"16"add_camp
+47"Can change Campamento"16"change_camp
+48"Can delete Campamento"16"delete_camp
+49"Can add Template"17"add_emailtemplate
+50"Can change Template"17"change_emailtemplate
+51"Can delete Template"17"delete_emailtemplate
+52"Can add Envio de correos"18"add_campaign
+53"Can change Envio de correos"18"change_campaign
+54"Can delete Envio de correos"18"delete_campaign
+55"Can add Pago"19"add_payment
+56"Can change Pago"19"change_payment
+57"Can delete Pago"19"delete_payment
+58"Can add Respuestas"20"add_extraanswers
+59"Can change Respuestas"20"change_extraanswers
+60"Can delete Respuestas"20"delete_extraanswers
+61"Can add extra question"21"add_extraquestion
+62"Can change extra question"21"change_extraquestion
+63"Can delete extra question"21"delete_extraquestion
+64"Can add staff in camp"22"add_staffincamp
+65"Can change staff in camp"22"change_staffincamp
+66"Can delete staff in camp"22"delete_staffincamp
+67"Can add Tribu"23"add_tribe
+68"Can change Tribu"23"change_tribe
+69"Can delete Tribu"23"delete_tribe
+70"Can add Tribu por campamento"24"add_tribecamp
+71"Can change Tribu por campamento"24"change_tribecamp
+72"Can delete Tribu por campamento"24"delete_tribecamp
+73"Can add Camper por tribu"25"add_tribecamper
+74"Can change Camper por tribu"25"change_tribecamper
+75"Can delete Camper por tribu"25"delete_tribecamper
+76"Can add Punto de Control"26"add_checkpoint
+77"Can change Punto de Control"26"change_checkpoint
+78"Can delete Punto de Control"26"delete_checkpoint
+79"Can add Puntos de Control por Camper"27"add_checkpointcamper
+80"Can change Puntos de Control por Camper"27"change_checkpointcamper
+81"Can delete Puntos de Control por Camper"27"delete_checkpointcamper
+82"Can add Usuario"28"add_kincampuser
+83"Can change Usuario"28"change_kincampuser
+84"Can delete Usuario"28"delete_kincampuser
+85"Can add Descuento"29"add_campdiscount
+86"Can change Descuento"29"change_campdiscount
+87"Can delete Descuento"29"delete_campdiscount
+88"Can add Movimiento"30"add_paymenttransactiontype
+89"Can change Movimiento"30"change_paymenttransactiontype
+90"Can delete Movimiento"30"delete_paymenttransactiontype
+91"Can add Método de pago"31"add_paymentmethod
+92"Can change Método de pago"31"change_paymentmethod
+93"Can delete Método de pago"31"delete_paymentmethod
+94"Can add Pago"32"add_storepayment
+95"Can change Pago"32"change_storepayment
+96"Can delete Pago"32"delete_storepayment
+97"Can add Movimiento"33"add_storetransactiontype
+98"Can change Movimiento"33"change_storetransactiontype
+99"Can delete Movimiento"33"delete_storetransactiontype
+100"Can add Restriccion alimenticia"34"add_foodrestrictions
+101"Can change Restriccion alimenticia"34"change_foodrestrictions
+102"Can delete Restriccion alimenticia"34"delete_foodrestrictions
+103"Can add Vacuna"35"add_vaccines
+104"Can change Vacuna"35"change_vaccines
+105"Can delete Vacuna"35"delete_vaccines
+106"Can add Menu"36"add_menu
+107"Can change Menu"36"change_menu
+108"Can delete Menu"36"delete_menu
+109"Can add trophy"37"add_trophy
+110"Can change trophy"37"change_trophy
+111"Can delete trophy"37"delete_trophy
+112"Can add trophy_ staff"38"add_trophy_staff
+113"Can change trophy_ staff"38"change_trophy_staff
+114"Can delete trophy_ staff"38"delete_trophy_staff
+115"Can add trophy staff"38"add_trophystaff
+116"Can change trophy staff"38"change_trophystaff
+117"Can delete trophy staff"38"delete_trophystaff
+118"Can add Agrupación"39"add_grouping
+119"Can change Agrupación"39"change_grouping
+120"Can delete Agrupación"39"delete_grouping
+121"Can add Agrupacion por campamento"40"add_groupingcamp
+122"Can change Agrupacion por campamento"40"change_groupingcamp
+123"Can delete Agrupacion por campamento"40"delete_groupingcamp
+124"Can add Tipo de agrupación"41"add_groupingtype
+125"Can change Tipo de agrupación"41"change_groupingtype
+126"Can delete Tipo de agrupación"41"delete_groupingtype
+127"Can add Camper por agrupación"42"add_groupingcamper
+128"Can change Camper por agrupación"42"change_groupingcamper
+129"Can delete Camper por agrupación"42"delete_groupingcamper
+130"Can add camper in camp"43"add_camperincamp
+131"Can change camper in camp"43"change_camperincamp
+132"Can delete camper in camp"43"delete_camperincamp
+133"Can add camp extra charge"44"add_campextracharge
+134"Can change camp extra charge"44"change_campextracharge
+135"Can delete camp extra charge"44"delete_campextracharge
+136"Can add Cargo extra por Camper"45"add_camperextracharge
+137"Can change Cargo extra por Camper"45"change_camperextracharge
+138"Can delete Cargo extra por Camper"45"delete_camperextracharge
+139"Can add Usuario"28"add_campercontroluser
+140"Can change Usuario"28"change_campercontroluser
+141"Can delete Usuario"28"delete_campercontroluser
+142"Can add camper comment"46"add_campercomment
+143"Can change camper comment"46"change_campercomment
+144"Can delete camper comment"46"delete_campercomment
+145"Can add Repeatable Job"47"add_repeatablejob
+146"Can change Repeatable Job"47"change_repeatablejob
+147"Can delete Repeatable Job"47"delete_repeatablejob
+148"Can add Cron Job"48"add_cronjob
+149"Can change Cron Job"48"change_cronjob
+150"Can delete Cron Job"48"delete_cronjob
+151"Can add Scheduled Job"49"add_scheduledjob
+152"Can change Scheduled Job"49"change_scheduledjob
+153"Can delete Scheduled Job"49"delete_scheduledjob
+154"Can add Antecedente patologico"50"add_pathological_background
+155"Can change Antecedente patologico"50"change_pathological_background
+156"Can delete Antecedente patologico"50"delete_pathological_background
+157"Can add staff comment"51"add_staffcomment
+158"Can change staff comment"51"change_staffcomment
+159"Can delete staff comment"51"delete_staffcomment
+160"Can add Antecedente patologico de la familia"52"add_pathological_background_family
+161"Can change Antecedente patologico de la familia"52"change_pathological_background_family
+162"Can delete Antecedente patologico de la familia"52"delete_pathological_background_family
+163"Can add staff sender camp"53"add_staffsendercamp
+164"Can change staff sender camp"53"change_staffsendercamp
+165"Can delete staff sender camp"53"delete_staffsendercamp
+166"Can add Vacuna"54"add_staffroles
+167"Can change Vacuna"54"change_staffroles
+168"Can delete Vacuna"54"delete_staffroles
+169"Can add (u'Consulta medica del camper',)"55"add_campermedicalvisit
+170"Can change (u'Consulta medica del camper',)"55"change_campermedicalvisit
+171"Can delete (u'Consulta medica del camper',)"55"delete_campermedicalvisit
+172"Can add Maestra"56"add_teacher
+173"Can change Maestra"56"change_teacher
+174"Can delete Maestra"56"delete_teacher
+175"Can add Medicina preautorizada"57"add_licensedmedicine
+176"Can change Medicina preautorizada"57"change_licensedmedicine
+177"Can delete Medicina preautorizada"57"delete_licensedmedicine
+178"Can add Doctor"58"add_doctor
+179"Can change Doctor"58"change_doctor
+180"Can delete Doctor"58"delete_doctor
+181"Can add Consulta medica del staff"59"add_staffmedicalvisit
+182"Can change Consulta medica del staff"59"change_staffmedicalvisit
+183"Can delete Consulta medica del staff"59"delete_staffmedicalvisit
+184"Can add staff in training"60"add_staffintraining
+185"Can change staff in training"60"change_staffintraining
+186"Can delete staff in training"60"delete_staffintraining
+187"Can add Evento de Capacitación"61"add_trainingevent
+188"Can change Evento de Capacitación"61"change_trainingevent
+189"Can delete Evento de Capacitación"61"delete_trainingevent
+190"Can add Capacitación"62"add_training
+191"Can change Capacitación"62"change_training
+192"Can delete Capacitación"62"delete_training
+193"Can add camper records"63"add_camperrecords
+194"Can change camper records"63"change_camperrecords
+195"Can delete camper records"63"delete_camperrecords
+196"Can add user records"64"add_userrecords
+197"Can change user records"64"change_userrecords
+198"Can delete user records"64"delete_userrecords
+199"Can add Divisa"65"add_currencies
+200"Can change Divisa"65"change_currencies
+201"Can delete Divisa"65"delete_currencies
+202"Can add Archivo del camper"66"add_extrafile
+203"Can change Archivo del camper"66"change_extrafile
+204"Can delete Archivo del camper"66"delete_extrafile
+205"Can add Archivo solicitado en el campamento"67"add_campfile
+206"Can change Archivo solicitado en el campamento"67"change_campfile
+207"Can delete Archivo solicitado en el campamento"67"delete_campfile
+208"Can add Cuenta bancaria"68"add_paymentaccounts
+209"Can change Cuenta bancaria"68"change_paymentaccounts
+210"Can delete Cuenta bancaria"68"delete_paymentaccounts

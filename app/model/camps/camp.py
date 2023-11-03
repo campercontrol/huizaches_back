@@ -40,10 +40,10 @@ class Camp(Base):
     occupancy_camp = Column(Integer)
     active = Column(Boolean, nullable=False)
     general_camp = Column(Boolean, nullable=False)
-    currency_id = Column(ForeignKey("catalogs_currency.id"), nullable=False, default=0, doc='Titular de la cuenta')
-    location_id = Column(ForeignKey("camps_location.id"), nullable=False, default=0, doc='Titular de la cuenta')
-    school_id = Column(ForeignKey("campers_school.id"), nullable=False, default=0, doc='Titular de la cuenta')
-    season_id = Column(ForeignKey("camps_season.id"), nullable=False, default=0, doc='Titular de la cuenta')
+    currency_id = Column(ForeignKey("catalogs_currency.id"), nullable=True,  doc='Titular de la cuenta')
+    location_id = Column(ForeignKey("camps_location.id"), nullable=True, doc='Titular de la cuenta')
+    school_id = Column(ForeignKey("campers_school.id"), nullable=True, doc='Titular de la cuenta')
+    season_id = Column(ForeignKey("camps_season.id"), nullable=True,  doc='Titular de la cuenta')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 
