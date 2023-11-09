@@ -27,3 +27,6 @@ class Currency(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"{self.id} - {self.name} - {self.symbol} - {self.acronyms} - {self.created_at} - {self.updated_at}"
