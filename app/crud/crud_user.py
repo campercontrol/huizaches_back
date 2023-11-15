@@ -94,8 +94,7 @@ def get_user_by_uuid(db, user_id):
             User.role_id.label('role_id'),
             Role.name.label('role_name'),
             User.is_superuser.label('is_superuser'),
-            User.is_active.label('is_active'),
-            User.hashed_pass.label('password')
+            User.is_active.label('is_active')
 
         )
         .join(
@@ -201,7 +200,7 @@ def update_password_all_users(db, hashed_pass:str):
             User
         )
         .all()
-        .update({"answer": hashed_pass})
+        .update({"hashed_pass": hashed_pass})
     )
     db.commit()
 
