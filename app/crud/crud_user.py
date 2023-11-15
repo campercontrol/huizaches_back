@@ -95,6 +95,7 @@ def get_user_by_uuid(db, user_id):
             Role.name.label('role_name'),
             User.is_superuser.label('is_superuser'),
             User.is_active.label('is_active'),
+            User.hashed_pass.label('password')
 
         )
         .join(
@@ -193,3 +194,15 @@ def search_user_by_email(db: Session, search: str):
         return db_mapping_rows_to_dict(users)
     else:
         return "Data not found"
+
+def update_password_all_users(db, hashed_pass:str):
+    users= (
+        db.query(
+            User
+        )
+        .all()
+        .update({"answer": hashed_pass})
+    )
+    db.commit()
+
+    return 1
