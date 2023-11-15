@@ -209,9 +209,6 @@ def change_email(
 ):
     status_code, resp_token = validate_token_general(change_pass.access_token)
 
-    print("###############################################################")
-    print(resp_token)
-
     # Valida token
     if status_code == 403:
         response.status_code = 403
