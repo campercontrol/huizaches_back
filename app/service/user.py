@@ -272,7 +272,7 @@ def get_search_user(search:str, db: Session = Depends(get_db)):
     return { "data": possible_users }
 
 
-@user_routes.patch("/update/all/password/{hash_pass}", tags=["Usuaros"])
+@user_routes.post("/update/all/password/", tags=["Usuaros"])
 def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
     result = update_password_all_users(db, hash_pass)
     return {"data": result}
