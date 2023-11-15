@@ -200,8 +200,11 @@ def update_password_all_users(db, hashed_pass:str):
             User
         )
         .all()
-        .update({"hashed_pass": hashed_pass})
     )
+    for user in users:
+        user.hashed_pass = hashed_pass
+
     db.commit()
 
+    # "$2b$12$9QchmEH2rcRnHlfBnGe7ZunGbonntZc/RX2NHgClT7YSiakHRy.Pm"
     return 1
