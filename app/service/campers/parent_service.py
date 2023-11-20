@@ -181,6 +181,6 @@ def get_parent_for_admin(parent_id:str, db: Session = Depends(get_db)):
     return {"data": parent}
 
 @parent_routes.get("/admin/parent/", tags=["Campers"])
-def get_parent_admin(db: Session = Depends(get_db)):
+async def get_parent_admin(db: Session = Depends(get_db)):
     list_parent = get_all_parent_admin(db)
     return {"data": list_parent}

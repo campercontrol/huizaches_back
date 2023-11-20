@@ -92,7 +92,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
             Currency.symbol.label("currency_symbol"),
-            Currency.acronyms.label("currency_acronyms")
+            Currency.acronyms.label("currency_acronyms"),
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
         .outerjoin(Currency, Currency.id == Camp.currency_id)
@@ -237,7 +237,7 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                 "camp_name": getattr(camp, "camp_name"),
                 "camper_payment_balance": getattr(camp, "camper_payment_balance"),
                 "currency_symbol": getattr(camp, "currency_symbol"),
-                "currency_acronyms": getattr(camp, "currency_acronyms")
+                "currency_acronyms": getattr(camp, "currency_acronyms"),
             }
         )
     """
@@ -332,6 +332,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     extra_charges = []
     extra_questions = []
 
+    prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
     for camp_id in camps_id:
         camper_in_camp = (
             db.query(CamperInCamp)
@@ -426,14 +427,21 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             # )
     update_record_campers(db, camper_id)
 
+    # Aqui vamos a poner si ya tuvo un campamento previo o no.
+    
+    if prev_camper_in_camp:
+        status_prev_sub = 1
+    else:
+        status_prev_sub = 0
     if extra_charges or extra_questions:
         return {
             "status": 2,
+            "prev_camps" : status_prev_sub,
             "extra_charges": extra_charges,
             "extra_questions": extra_questions,
         }
     else:
-        return {"status": 1}
+        return {"status": 1, "prev_camps" : status_prev_sub}
 
 
 def create_update_camper_extras_camp(
@@ -488,6 +496,10 @@ def create_update_camper_extras_camp(
 
     return 1
 
+
+def get_camper_in_camp_by_camper(db, camper_id: int):
+    data = db.query(CamperInCamp).filter(CamperInCamp.camper_id == camper_id).all()
+    return data
 
 """
 Camper extra charges

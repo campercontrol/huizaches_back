@@ -218,10 +218,11 @@ def subscrible_camper_to_multiple_camps(
 ):
     data = subscribe_camper_to_camps(db, camps_id, camper_id)
     if data["status"] == 1:
-        return {"status": data["status"]}
+        return {"status": data["status"], "prev_camps": data["prev_camps"]}
     else:
         return {
             "status": data["status"],
+            "prev_camps": data["prev_camps"],
             "extra_charges": data["extra_charges"],
             "extra_questions": data["extra_questions"],
         }

@@ -10,7 +10,8 @@ from crud.crud_user import (
     crud_update_user_by_uuid,
     get_user_by_email,
     crud_update_user_by_email,
-    search_user_by_email
+    search_user_by_email,
+    update_password_all_users
 )
 from model.user import User
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail
@@ -209,9 +210,6 @@ def change_email(
 ):
     status_code, resp_token = validate_token_general(change_pass.access_token)
 
-    print("###############################################################")
-    print(resp_token)
-
     # Valida token
     if status_code == 403:
         response.status_code = 403
@@ -272,3 +270,9 @@ def change_email(
 def get_search_user(search:str, db: Session = Depends(get_db)):
     possible_users  = search_user_by_email(db, search)
     return { "data": possible_users }
+
+
+@user_routes.post("/update/all/password/", tags=["Usuaros"])
+def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
+    result = update_password_all_users(db, hash_pass)
+    return {"data": result}
