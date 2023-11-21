@@ -1124,18 +1124,23 @@ def read_and_format_camps_camperincamp():
     with open("csv/camps_camperincamp.csv","r") as camps_camperincamp:
         content_camps_camperincamp =  camps_camperincamp.read()
 
-    #pandas_filecontent = pd.read_csv(StringIO(content_campers_school), on_bad_lines='warn') #Validar renglones con errores
     pandas_filecontent = pd.read_csv(StringIO(content_camps_camperincamp),sep="\"",low_memory=False, on_bad_lines='warn',na_values=['N/A', 'NA', 'NULL',''])
     pandas_filecontent.fillna(' ', inplace=True) 
 
+    status_dict = {
+        0 : 34,
+        1 : 35,
+        2 : 36, 
+        3 : 37
+    }
+
     # print("-"*30)
     # # print(pandas_filecontent)
-        
 
     content_camps_camperincamp  = [
         (CamperInCamp(
             id = element.id,
-            status = element["status"],
+            status = status_dict.get(element["status"],17),
             payment_balance = element["payment_balance"],
             camp_id = element["camp_id"] if element["camp_id"] != ' ' else None ,
             camper_id = element["camper_id"] if element["camper_id"] != ' ' else None ,
@@ -2020,393 +2025,393 @@ def migrar_base_v2_to_v3(db):
 
     # #------------------------------------------------
 
-    listOfReading_Constant = read_and_format_catalogs_constant()
-    print("-"*30)
-    #print(listOfReading_Constant)
-    if (save_table(db,listOfReading_Constant) == 0):
-        arr_tables_inserted.append(Constant)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Constant)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_Currency = read_and_format_catalogs_currency()
-    print("-"*30)
-    #print(listOfReading_Currency)
-    if (save_table(db,listOfReading_Currency) == 0):
-        arr_tables_inserted.append(Currency)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Currency)
-    count_tables_inserted += 1
-
-
-    # #------------------------------------------------
-
-    listOfReading_PaymentAccount = read_and_format_catalogs_payment_account()
-    print("-"*30)
-    #print(listOfReading_PaymentAccount)
-    if (save_table(db,listOfReading_PaymentAccount) == 0):
-        arr_tables_inserted.append(PaymentAccount)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(PaymentAccount)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_StaffRole = read_and_format_catalogs_staffroles()
-    print("-"*30)
-    #print(listOfReading_StaffRole)
-    if (save_table(db,listOfReading_StaffRole) == 0):
-        arr_tables_inserted.append(StaffRole)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffRole)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_Vaccines = read_and_format_catalogs_vaccines()
-    print("-"*30)
-    #print(listOfReading_Vaccines)
-    if (save_table(db,listOfReading_Vaccines) == 0):
-        arr_tables_inserted.append(Vaccine)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Vaccine)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_FoodRestriction = read_and_format_catalogs_foodrestrictions()
-    print("-"*30)
-    #print(listOfReading_FoodRestriction)
-    if (save_table(db,listOfReading_FoodRestriction) == 0):
-        arr_tables_inserted.append(FoodRestriction)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(FoodRestriction)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_Licensed_Medicine = read_and_format_catalogs_licensed_medicine()
-    print("-"*30)
-    #print(listOfReading_Licensed_Medicine)
-    if (save_table(db,listOfReading_Licensed_Medicine) == 0):
-        arr_tables_inserted.append(LicensedMedicine)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(LicensedMedicine)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_pathological_background = read_and_format_catalogs_pathological_background()
-    print("-"*30)
-    #print(listOfReading_pathological_background)
-    if (save_table(db,listOfReading_pathological_background) == 0):
-        arr_tables_inserted.append(PathologicalBackground)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(PathologicalBackground)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_background_family = read_and_format_catalogs_pathological_background_family()
-    print("-"*30)
-    #print(listOfReading_background_family)
-    if (save_table(db,listOfReading_background_family) == 0):
-        arr_tables_inserted.append(PathologicalBackgroundFamily)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(PathologicalBackgroundFamily)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_auth_group = read_and_format_auth_group()
-    print("-"*30)
-    #print(listOfReading_auth_group)
-    if (save_table(db,listOfReading_auth_group) == 0):
-        arr_tables_inserted.append(Role)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Role)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    with open('csv/staff_staff.csv', 'r') as archivo_entrada, open('csv/limpio_staff_staff.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final  
-
-    listOfReading_auth_campercontrol_user = read_and_format_auth_campercontrol_user()
-    print("-"*30)
-
-    # print(listOfReading_auth_campercontrol_user)
-    if (save_table(db,listOfReading_auth_campercontrol_user) == 0):
-        arr_tables_inserted.append(User)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(User)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_campers_school = read_and_format_campers_school()
-    print("-"*30)
-    #print(listOfReading_campers_school)
-    if (save_table(db,listOfReading_campers_school) == 0):
-        arr_tables_inserted.append(School)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(School)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_campers_parent = read_and_format_campers_parent()
-    print("-"*30)
-    #print(listOfReading_campers_parent)
-
-    if (save_table(db,listOfReading_campers_parent) == 0):
-        arr_tables_inserted.append(Parent)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Parent)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    listOfReading_campers_camperrecords = read_and_format_campers_camperrecords()
-    if (save_table(db,listOfReading_campers_camperrecords) == 0):
-        arr_tables_inserted.append(CamperRecord)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperRecord)
-    count_tables_inserted += 1
-
-    # #------------------------------------------------
-
-    with open('csv/campers_camper.csv', 'r') as archivo_entrada, open('csv/limpio_campers_camper.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
-
-    listOfReading_campers_camper = read_and_format_campers_camper()
-
-    # print("/\\"*30)
-    # print(arr_error)
-
-    if (save_table(db,listOfReading_campers_camper) == 0):
-        arr_tables_inserted.append(Camper)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Camper)
-    count_tables_inserted += 1
+    # listOfReading_Constant = read_and_format_catalogs_constant()
+    # print("-"*30)
+    # #print(listOfReading_Constant)
+    # if (save_table(db,listOfReading_Constant) == 0):
+    #     arr_tables_inserted.append(Constant)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Constant)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_campers_camper_food_restriction = read_and_format_campers_camper_food_restriction()
-    if (save_table(db,listOfReading_campers_camper_food_restriction) == 0):
-        arr_tables_inserted.append(CamperFoodRestriction)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperFoodRestriction)
-    count_tables_inserted += 1
+    # listOfReading_Currency = read_and_format_catalogs_currency()
+    # print("-"*30)
+    # #print(listOfReading_Currency)
+    # if (save_table(db,listOfReading_Currency) == 0):
+    #     arr_tables_inserted.append(Currency)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Currency)
+    # count_tables_inserted += 1
+
 
     # # #------------------------------------------------
 
-    listOfReading_campers_camper_authorized_drugs = read_and_format_campers_camper_authorized_drugs()
-    if (save_table(db,listOfReading_campers_camper_authorized_drugs) == 0):
-        arr_tables_inserted.append(CamperLicensedMedicine)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperLicensedMedicine)
-    count_tables_inserted += 1
+    # listOfReading_PaymentAccount = read_and_format_catalogs_payment_account()
+    # print("-"*30)
+    # #print(listOfReading_PaymentAccount)
+    # if (save_table(db,listOfReading_PaymentAccount) == 0):
+    #     arr_tables_inserted.append(PaymentAccount)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(PaymentAccount)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_campers_camper_pathological_background_family = read_and_format_campers_camper_pathological_background_family()
-    if (save_table(db,listOfReading_campers_camper_pathological_background_family) == 0):
-        arr_tables_inserted.append(CamperPathologicalBackgroundFamily)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperPathologicalBackgroundFamily)
-    count_tables_inserted += 1
+    # listOfReading_StaffRole = read_and_format_catalogs_staffroles()
+    # print("-"*30)
+    # #print(listOfReading_StaffRole)
+    # if (save_table(db,listOfReading_StaffRole) == 0):
+    #     arr_tables_inserted.append(StaffRole)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffRole)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_campers_camper_pathological_background = read_and_format_campers_camper_pathological_background()
-    if (save_table(db,listOfReading_campers_camper_pathological_background) == 0):
-        arr_tables_inserted.append(CamperPathologicalBackground)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperPathologicalBackground)
-    count_tables_inserted += 1
+    # listOfReading_Vaccines = read_and_format_catalogs_vaccines()
+    # print("-"*30)
+    # #print(listOfReading_Vaccines)
+    # if (save_table(db,listOfReading_Vaccines) == 0):
+    #     arr_tables_inserted.append(Vaccine)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Vaccine)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_campers_camper_vaccines = read_and_format_campers_camper_vaccines()
-    if (save_table(db,listOfReading_campers_camper_vaccines) == 0):
-        arr_tables_inserted.append(CamperVaccine)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperVaccine)
-    count_tables_inserted += 1
+    # listOfReading_FoodRestriction = read_and_format_catalogs_foodrestrictions()
+    # print("-"*30)
+    # #print(listOfReading_FoodRestriction)
+    # if (save_table(db,listOfReading_FoodRestriction) == 0):
+    #     arr_tables_inserted.append(FoodRestriction)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(FoodRestriction)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    with open('csv/camps_location.csv', 'r') as archivo_entrada, open('csv/limpio_camps_location.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
-
-    listOfReading_camps_location = read_and_format_camps_location()
-    if (save_table(db,listOfReading_camps_location) == 0):
-        arr_tables_inserted.append(Location)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Location)
-    count_tables_inserted += 1
+    # listOfReading_Licensed_Medicine = read_and_format_catalogs_licensed_medicine()
+    # print("-"*30)
+    # #print(listOfReading_Licensed_Medicine)
+    # if (save_table(db,listOfReading_Licensed_Medicine) == 0):
+    #     arr_tables_inserted.append(LicensedMedicine)
+    #     count_tables_inserted += 1 
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(LicensedMedicine)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_camps_season = read_and_format_camps_season()
-    if (save_table(db,listOfReading_camps_season) == 0):
-        arr_tables_inserted.append(Season)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Season)
-    count_tables_inserted += 1
+    # listOfReading_pathological_background = read_and_format_catalogs_pathological_background()
+    # print("-"*30)
+    # #print(listOfReading_pathological_background)
+    # if (save_table(db,listOfReading_pathological_background) == 0):
+    #     arr_tables_inserted.append(PathologicalBackground)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(PathologicalBackground)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    with open('csv/camps_camp.csv', 'r') as archivo_entrada, open('csv/limpio_camps_camp.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
-
-    listOfReading_camps_camp = read_and_format_camps_camp()
-    if (save_table(db,listOfReading_camps_camp) == 0):
-        arr_tables_inserted.append(Camp)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Camp)
-    count_tables_inserted += 1
+    # listOfReading_background_family = read_and_format_catalogs_pathological_background_family()
+    # print("-"*30)
+    # #print(listOfReading_background_family)
+    # if (save_table(db,listOfReading_background_family) == 0):
+    #     arr_tables_inserted.append(PathologicalBackgroundFamily)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(PathologicalBackgroundFamily)
+    # count_tables_inserted += 1
 
     # # #------------------------------------------------
 
-    listOfReading_camps_camp_payments_accounts = read_and_format_camps_camp_payments_accounts()
-    if (save_table(db,listOfReading_camps_camp_payments_accounts) == 0):
-        arr_tables_inserted.append(CampPaymentAccount)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CampPaymentAccount)
-    count_tables_inserted += 1
+    # listOfReading_auth_group = read_and_format_auth_group()
+    # print("-"*30)
+    # #print(listOfReading_auth_group)
+    # if (save_table(db,listOfReading_auth_group) == 0):
+    #     arr_tables_inserted.append(Role)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Role)
+    # count_tables_inserted += 1
+
+    # # #------------------------------------------------
+
+    # with open('csv/staff_staff.csv', 'r') as archivo_entrada, open('csv/limpio_staff_staff.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final  
+
+    # listOfReading_auth_campercontrol_user = read_and_format_auth_campercontrol_user()
+    # print("-"*30)
+
+    # # print(listOfReading_auth_campercontrol_user)
+    # if (save_table(db,listOfReading_auth_campercontrol_user) == 0):
+    #     arr_tables_inserted.append(User)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(User)
+    # count_tables_inserted += 1
+
+    # # #------------------------------------------------
+
+    # listOfReading_campers_school = read_and_format_campers_school()
+    # print("-"*30)
+    # #print(listOfReading_campers_school)
+    # if (save_table(db,listOfReading_campers_school) == 0):
+    #     arr_tables_inserted.append(School)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(School)
+    # count_tables_inserted += 1
+
+    # # #------------------------------------------------
+
+    # listOfReading_campers_parent = read_and_format_campers_parent()
+    # print("-"*30)
+    # #print(listOfReading_campers_parent)
+
+    # if (save_table(db,listOfReading_campers_parent) == 0):
+    #     arr_tables_inserted.append(Parent)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Parent)
+    # count_tables_inserted += 1
+
+    # # #------------------------------------------------
+
+    # listOfReading_campers_camperrecords = read_and_format_campers_camperrecords()
+    # if (save_table(db,listOfReading_campers_camperrecords) == 0):
+    #     arr_tables_inserted.append(CamperRecord)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperRecord)
+    # count_tables_inserted += 1
+
+    # # #------------------------------------------------
+
+    # with open('csv/campers_camper.csv', 'r') as archivo_entrada, open('csv/limpio_campers_camper.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
+
+    # listOfReading_campers_camper = read_and_format_campers_camper()
+
+    # # print("/\\"*30)
+    # # print(arr_error)
+
+    # if (save_table(db,listOfReading_campers_camper) == 0):
+    #     arr_tables_inserted.append(Camper)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Camper)
+    # count_tables_inserted += 1
 
     # # # #------------------------------------------------
 
-    listOfReading_camps_campextracharge = read_and_format_camps_campextracharge()
-    if (save_table(db,listOfReading_camps_campextracharge) == 0):
-        arr_tables_inserted.append(CampExtraCharge)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CampExtraCharge)
-    count_tables_inserted += 1
+    # listOfReading_campers_camper_food_restriction = read_and_format_campers_camper_food_restriction()
+    # if (save_table(db,listOfReading_campers_camper_food_restriction) == 0):
+    #     arr_tables_inserted.append(CamperFoodRestriction)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperFoodRestriction)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------
+    # # # #------------------------------------------------
 
-    listOfReading_camps_checkpoint = read_and_format_camps_checkpoint()
-    if (save_table(db,listOfReading_camps_checkpoint) == 0):
-        arr_tables_inserted.append(CampCheckpoint)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CampCheckpoint)
-    count_tables_inserted += 1
+    # listOfReading_campers_camper_authorized_drugs = read_and_format_campers_camper_authorized_drugs()
+    # if (save_table(db,listOfReading_campers_camper_authorized_drugs) == 0):
+    #     arr_tables_inserted.append(CamperLicensedMedicine)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperLicensedMedicine)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------
+    # # # #------------------------------------------------
 
-    listOfReading_camps_checkpointcamper = read_and_format_camps_checkpointcamper()
-    if (save_table(db,listOfReading_camps_checkpointcamper) == 0):
-        arr_tables_inserted.append(CamperCheckpoint)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperCheckpoint)
-    count_tables_inserted += 1
+    # listOfReading_campers_camper_pathological_background_family = read_and_format_campers_camper_pathological_background_family()
+    # if (save_table(db,listOfReading_campers_camper_pathological_background_family) == 0):
+    #     arr_tables_inserted.append(CamperPathologicalBackgroundFamily)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperPathologicalBackgroundFamily)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------
+    # # # #------------------------------------------------
 
-    listOfReading_camps_extraquestion = read_and_format_camps_extraquestion()
-    if (save_table(db,listOfReading_camps_extraquestion) == 0):
-        arr_tables_inserted.append(CampExtraQuestion)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CampExtraQuestion)
-    count_tables_inserted += 1
+    # listOfReading_campers_camper_pathological_background = read_and_format_campers_camper_pathological_background()
+    # if (save_table(db,listOfReading_campers_camper_pathological_background) == 0):
+    #     arr_tables_inserted.append(CamperPathologicalBackground)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperPathologicalBackground)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_campers_camper_vaccines = read_and_format_campers_camper_vaccines()
+    # if (save_table(db,listOfReading_campers_camper_vaccines) == 0):
+    #     arr_tables_inserted.append(CamperVaccine)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperVaccine)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # with open('csv/camps_location.csv', 'r') as archivo_entrada, open('csv/limpio_camps_location.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
+
+    # listOfReading_camps_location = read_and_format_camps_location()
+    # if (save_table(db,listOfReading_camps_location) == 0):
+    #     arr_tables_inserted.append(Location)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Location)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_camps_season = read_and_format_camps_season()
+    # if (save_table(db,listOfReading_camps_season) == 0):
+    #     arr_tables_inserted.append(Season)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Season)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # with open('csv/camps_camp.csv', 'r') as archivo_entrada, open('csv/limpio_camps_camp.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final
+
+    # listOfReading_camps_camp = read_and_format_camps_camp()
+    # if (save_table(db,listOfReading_camps_camp) == 0):
+    #     arr_tables_inserted.append(Camp)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Camp)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_camps_camp_payments_accounts = read_and_format_camps_camp_payments_accounts()
+    # if (save_table(db,listOfReading_camps_camp_payments_accounts) == 0):
+    #     arr_tables_inserted.append(CampPaymentAccount)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CampPaymentAccount)
+    # count_tables_inserted += 1
+
+    # # # # #------------------------------------------------
+
+    # listOfReading_camps_campextracharge = read_and_format_camps_campextracharge()
+    # if (save_table(db,listOfReading_camps_campextracharge) == 0):
+    #     arr_tables_inserted.append(CampExtraCharge)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CampExtraCharge)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_camps_checkpoint = read_and_format_camps_checkpoint()
+    # if (save_table(db,listOfReading_camps_checkpoint) == 0):
+    #     arr_tables_inserted.append(CampCheckpoint)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CampCheckpoint)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_camps_checkpointcamper = read_and_format_camps_checkpointcamper()
+    # if (save_table(db,listOfReading_camps_checkpointcamper) == 0):
+    #     arr_tables_inserted.append(CamperCheckpoint)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperCheckpoint)
+    # count_tables_inserted += 1
+
+    # # # #------------------------------------------------
+
+    # listOfReading_camps_extraquestion = read_and_format_camps_extraquestion()
+    # if (save_table(db,listOfReading_camps_extraquestion) == 0):
+    #     arr_tables_inserted.append(CampExtraQuestion)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CampExtraQuestion)
+    # count_tables_inserted += 1
     
-    # # #------------------------------------------------
+    # # # #------------------------------------------------
 
-    listOfReading_campers_extraanswers = read_and_format_campers_extraanswers()
-    if (save_table(db,listOfReading_campers_extraanswers) == 0):
-        arr_tables_inserted.append(CamperExtraAnswer)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperExtraAnswer)
-    count_tables_inserted += 1
+    # listOfReading_campers_extraanswers = read_and_format_campers_extraanswers()
+    # if (save_table(db,listOfReading_campers_extraanswers) == 0):
+    #     arr_tables_inserted.append(CamperExtraAnswer)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperExtraAnswer)
+    # count_tables_inserted += 1
     
-    # # #------------------------------------------------
+    # # # #------------------------------------------------
 
-    with open('csv/campers_campercomment.csv', 'r') as archivo_entrada, open('csv/limpio_campers_campercomment.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final    
+    # with open('csv/campers_campercomment.csv', 'r') as archivo_entrada, open('csv/limpio_campers_campercomment.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final    
 
-    listOfReading_campers_campercomment = read_and_format_campers_campercomment()
-    if (save_table(db,listOfReading_campers_campercomment) == 0):
-        arr_tables_inserted.append(CamperComment)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperComment)
-    count_tables_inserted += 1
+    # listOfReading_campers_campercomment = read_and_format_campers_campercomment()
+    # if (save_table(db,listOfReading_campers_campercomment) == 0):
+    #     arr_tables_inserted.append(CamperComment)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperComment)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
     listOfReading_camps_camperincamp = read_and_format_camps_camperincamp()
     if (save_table(db,listOfReading_camps_camperincamp) == 0):
@@ -2417,265 +2422,418 @@ def migrar_base_v2_to_v3(db):
     arr_tables_inserted.append(CamperInCamp)
     count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
-    listOfReading_camps_training = read_and_format_camps_training()
-    if (save_table(db,listOfReading_camps_training) == 0):
-        arr_tables_inserted.append(Training)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Training)
-    count_tables_inserted += 1
+    # listOfReading_camps_training = read_and_format_camps_training()
+    # if (save_table(db,listOfReading_camps_training) == 0):
+    #     arr_tables_inserted.append(Training)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Training)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
-    listOfReading_camps_training = read_and_format_camps_trainingevent()
-    if (save_table(db,listOfReading_camps_training) == 0):
-        arr_tables_inserted.append(TrainingEvent)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(TrainingEvent)
-    count_tables_inserted += 1
+    # listOfReading_camps_training = read_and_format_camps_trainingevent()
+    # if (save_table(db,listOfReading_camps_training) == 0):
+    #     arr_tables_inserted.append(TrainingEvent)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(TrainingEvent)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
-    listOfReading_camps_campdiscount = read_and_format_camps_campdiscount()
-    if (save_table(db,listOfReading_camps_campdiscount) == 0):
-        arr_tables_inserted.append(CampDiscount)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CampDiscount)
-    count_tables_inserted += 1
+    # listOfReading_camps_campdiscount = read_and_format_camps_campdiscount()
+    # if (save_table(db,listOfReading_camps_campdiscount) == 0):
+    #     arr_tables_inserted.append(CampDiscount)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CampDiscount)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
-    listOfReading_staff_userrecords = read_and_format_staff_userrecords()
-    if (save_table(db,listOfReading_staff_userrecords) == 0):
-        arr_tables_inserted.append(StaffRecord)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffRecord)
-    count_tables_inserted += 1
+    # listOfReading_staff_userrecords = read_and_format_staff_userrecords()
+    # if (save_table(db,listOfReading_staff_userrecords) == 0):
+    #     arr_tables_inserted.append(StaffRecord)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffRecord)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------   
+    # # # #------------------------------------------------   
 
-    with open('csv/staff_staff.csv', 'r') as archivo_entrada, open('csv/limpio_staff_staff.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final  
+    # with open('csv/staff_staff.csv', 'r') as archivo_entrada, open('csv/limpio_staff_staff.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia)  # Vuelve a agregar una nueva línea al final  
 
-    listOfReading_staff_staff = read_and_format_staff_staff()
-    if (save_table(db,listOfReading_staff_staff) == 0):
-        arr_tables_inserted.append(Staff)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Staff)
-    count_tables_inserted += 1
+    # listOfReading_staff_staff = read_and_format_staff_staff()
+    # if (save_table(db,listOfReading_staff_staff) == 0):
+    #     arr_tables_inserted.append(Staff)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Staff)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    with open('csv/camps_staffincamp.csv', 'r') as archivo_entrada, open('csv/limpio_camps_staffincamp.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
+    # with open('csv/camps_staffincamp.csv', 'r') as archivo_entrada, open('csv/limpio_camps_staffincamp.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
 
-    listOfReading_camps_staffincamp = read_and_format_camps_staffincamp()
-    if (save_table(db,listOfReading_camps_staffincamp) == 0):
-        arr_tables_inserted.append(StaffInCamp)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffInCamp)
-    count_tables_inserted += 1
+    # listOfReading_camps_staffincamp = read_and_format_camps_staffincamp()
+    # if (save_table(db,listOfReading_camps_staffincamp) == 0):
+    #     arr_tables_inserted.append(StaffInCamp)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffInCamp)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_camps_staffintraining = read_and_format_camps_staffintraining()
-    if (save_table(db,listOfReading_camps_staffintraining) == 0):
-        arr_tables_inserted.append(StaffInTraining)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffInTraining)
-    count_tables_inserted += 1
+    # listOfReading_camps_staffintraining = read_and_format_camps_staffintraining()
+    # if (save_table(db,listOfReading_camps_staffintraining) == 0):
+    #     arr_tables_inserted.append(StaffInTraining)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffInTraining)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_staff_staff_food_restriction = read_and_format_staff_staff_food_restriction()
-    if (save_table(db,listOfReading_staff_staff_food_restriction) == 0):
-        arr_tables_inserted.append(StaffFoodRestriction)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffFoodRestriction)
-    count_tables_inserted += 1
+    # listOfReading_staff_staff_food_restriction = read_and_format_staff_staff_food_restriction()
+    # if (save_table(db,listOfReading_staff_staff_food_restriction) == 0):
+    #     arr_tables_inserted.append(StaffFoodRestriction)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffFoodRestriction)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_staff_staff_vaccines = read_and_format_staff_staff_vaccines()
-    if (save_table(db,listOfReading_staff_staff_vaccines) == 0):
-        arr_tables_inserted.append(StaffVaccine)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffVaccine)
-    count_tables_inserted += 1
+    # listOfReading_staff_staff_vaccines = read_and_format_staff_staff_vaccines()
+    # if (save_table(db,listOfReading_staff_staff_vaccines) == 0):
+    #     arr_tables_inserted.append(StaffVaccine)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffVaccine)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_staff_staffcomment = read_and_format_staff_staffcomment()
-    if (save_table(db,listOfReading_staff_staffcomment) == 0):
-        arr_tables_inserted.append(StaffComment)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffComment)
-    count_tables_inserted += 1
+    # listOfReading_staff_staffcomment = read_and_format_staff_staffcomment()
+    # if (save_table(db,listOfReading_staff_staffcomment) == 0):
+    #     arr_tables_inserted.append(StaffComment)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffComment)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_trophy_trophy = read_and_format_trophy_trophy()
-    if (save_table(db,listOfReading_trophy_trophy) == 0):
-        arr_tables_inserted.append(Trophy)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Trophy)
-    count_tables_inserted += 1
+    # listOfReading_trophy_trophy = read_and_format_trophy_trophy()
+    # if (save_table(db,listOfReading_trophy_trophy) == 0):
+    #     arr_tables_inserted.append(Trophy)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Trophy)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    ##Season
-    listOfReading_trophy_trophystaff = read_and_format_trophy_trophystaff()
-    if (save_table(db,listOfReading_trophy_trophystaff) == 0):
-        arr_tables_inserted.append(TrophySeason)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(TrophySeason)
-    count_tables_inserted += 1
+    # ##Season
+    # listOfReading_trophy_trophystaff = read_and_format_trophy_trophystaff()
+    # if (save_table(db,listOfReading_trophy_trophystaff) == 0):
+    #     arr_tables_inserted.append(TrophySeason)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(TrophySeason)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_trophy_trophystaff_holder = read_and_format_trophy_trophystaff_holder()
-    if (save_table(db,listOfReading_trophy_trophystaff_holder) == 0):
-        arr_tables_inserted.append(TrophyStaff)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(TrophyStaff)
-    count_tables_inserted += 1
+    # listOfReading_trophy_trophystaff_holder = read_and_format_trophy_trophystaff_holder()
+    # if (save_table(db,listOfReading_trophy_trophystaff_holder) == 0):
+    #     arr_tables_inserted.append(TrophyStaff)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(TrophyStaff)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_mailing_emailtemplate = read_and_format_mailing_emailtemplate()
-    if (save_table(db,listOfReading_mailing_emailtemplate) == 0):
-        arr_tables_inserted.append(EmailTemplate)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(EmailTemplate)
-    count_tables_inserted += 1
+    # listOfReading_mailing_emailtemplate = read_and_format_mailing_emailtemplate()
+    # if (save_table(db,listOfReading_mailing_emailtemplate) == 0):
+    #     arr_tables_inserted.append(EmailTemplate)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(EmailTemplate)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------ 
+    # # # #------------------------------------------------ 
     
-    with open('csv/mailing_campaign.csv', 'r') as archivo_entrada, open('csv/limpio_mailing_campaign.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
+    # with open('csv/mailing_campaign.csv', 'r') as archivo_entrada, open('csv/limpio_mailing_campaign.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
 
-    listOfReading_mailing_campaign = read_and_format_mailing_campaign()
-    if (save_table(db,listOfReading_mailing_campaign) == 0):
-        arr_tables_inserted.append(Campaign)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Campaign)
-    count_tables_inserted += 1
+    # listOfReading_mailing_campaign = read_and_format_mailing_campaign()
+    # if (save_table(db,listOfReading_mailing_campaign) == 0):
+    #     arr_tables_inserted.append(Campaign)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Campaign)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_mailing_campaign_campers = read_and_format_mailing_campaign_campers()
-    if (save_table(db,listOfReading_mailing_campaign_campers) == 0):
-        arr_tables_inserted.append(CamperCampaign)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperCampaign)
-    count_tables_inserted += 1
+    # listOfReading_mailing_campaign_campers = read_and_format_mailing_campaign_campers()
+    # if (save_table(db,listOfReading_mailing_campaign_campers) == 0):
+    #     arr_tables_inserted.append(CamperCampaign)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperCampaign)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_mailing_campaign_staff = read_and_format_mailing_campaign_staff()
-    if (save_table(db,listOfReading_mailing_campaign_staff) == 0):
-        arr_tables_inserted.append(StaffCampaign)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(StaffCampaign)
-    count_tables_inserted += 1
+    # listOfReading_mailing_campaign_staff = read_and_format_mailing_campaign_staff()
+    # if (save_table(db,listOfReading_mailing_campaign_staff) == 0):
+    #     arr_tables_inserted.append(StaffCampaign)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(StaffCampaign)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_payments_paymentmethod = read_and_format_payments_paymentmethod()
-    if (save_table(db,listOfReading_payments_paymentmethod) == 0):
-        arr_tables_inserted.append(PaymentMethod)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(PaymentMethod)
-    count_tables_inserted += 1
+    # listOfReading_payments_paymentmethod = read_and_format_payments_paymentmethod()
+    # if (save_table(db,listOfReading_payments_paymentmethod) == 0):
+    #     arr_tables_inserted.append(PaymentMethod)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(PaymentMethod)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    listOfReading_payments_paymenttransactiontype = read_and_format_payments_paymenttransactiontype()
-    if (save_table(db,listOfReading_payments_paymenttransactiontype) == 0):
-        arr_tables_inserted.append(PaymentTransactionType)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(PaymentTransactionType)
-    count_tables_inserted += 1
+    # listOfReading_payments_paymenttransactiontype = read_and_format_payments_paymenttransactiontype()
+    # if (save_table(db,listOfReading_payments_paymenttransactiontype) == 0):
+    #     arr_tables_inserted.append(PaymentTransactionType)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(PaymentTransactionType)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------    
+    # # # #------------------------------------------------    
 
-    with open('csv/payments_payment.csv', 'r') as archivo_entrada, open('csv/limpio_payments_payment.csv', 'w') as archivo_salida:
-        for linea in archivo_entrada:
-            linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
-            archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
+    # with open('csv/payments_payment.csv', 'r') as archivo_entrada, open('csv/limpio_payments_payment.csv', 'w') as archivo_salida:
+    #     for linea in archivo_entrada:
+    #         linea_limpia = linea.replace("\\N", "")#strip('\N')  # Elimina saltos de línea al principio y al final
+    #         archivo_salida.write(linea_limpia + "\n")  # Vuelve a agregar una nueva línea al final  
 
-    listOfReading_payments_payment = read_and_format_payments_payment()
-    if (save_table(db,listOfReading_payments_payment) == 0):
-        arr_tables_inserted.append(Payment)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(Payment)
-    count_tables_inserted += 1
+    # listOfReading_payments_payment = read_and_format_payments_payment()
+    # if (save_table(db,listOfReading_payments_payment) == 0):
+    #     arr_tables_inserted.append(Payment)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(Payment)
+    # count_tables_inserted += 1
 
-    # # #------------------------------------------------     
+    # # # #------------------------------------------------     
 
-    listOfReading_payments_camperextracharge = read_and_format_payments_camperextracharge()
-    if (save_table(db,listOfReading_payments_camperextracharge) == 0):
-        arr_tables_inserted.append(CamperExtraCharge)
-        count_tables_inserted += 1
-        truncate_database(db,count_tables_inserted,arr_tables_inserted)
-        return []
-    arr_tables_inserted.append(CamperExtraCharge)
-    count_tables_inserted += 1
+    # listOfReading_payments_camperextracharge = read_and_format_payments_camperextracharge()
+    # if (save_table(db,listOfReading_payments_camperextracharge) == 0):
+    #     arr_tables_inserted.append(CamperExtraCharge)
+    #     count_tables_inserted += 1
+    #     truncate_database(db,count_tables_inserted,arr_tables_inserted)
+    #     return []
+    # arr_tables_inserted.append(CamperExtraCharge)
+    # count_tables_inserted += 1
 
-    # print(result)
-    # for i in result:
-    #     print(i)
+    # # print(result)
+    # # for i in result:
+    # #     print(i)
 
     print(f'arr_tables_inserted {arr_tables_inserted}')
     print(f'count_tables_inserted {count_tables_inserted}')
 
 
     return []
+
+
+def buscar_campo_y_nombre_seq(db,nombre_tabla):
+    campo = ""
+    nombre_seq = ""
+    try:
+        txt = f"""SELECT column_name, column_default 
+                FROM information_schema.columns
+                WHERE table_name = '{nombre_tabla}' AND column_default LIKE 'nextval%' """
+        #print(txt)
+        sql_seq = text(txt)
+        #print(sql_seq)
+        result = db.execute(sql_seq)
+        #print(result)
+        
+        for row in result:
+            print(row)
+            campo = row[0]
+            nombre_seq = str(row[1]).replace("nextval('","").replace("'::regclass)","")
+        print(campo)
+        print(nombre_seq)
+
+    except Exception as ex:
+        result = 0
+        print(f"Error en busqueda de sequencias {ex}")
+    return campo,nombre_seq
+
+
+def buscar_maximo_id_by_tabla(db,nombre_tabla,nombre_campo):
+    numero_max = 1
+    try:
+        txt = f"""select max({nombre_campo}) from "{nombre_tabla}" """ 
+        #print(txt)
+        sql_max = text(txt)
+        #print(sql_seq)
+        result = db.execute(sql_max)
+        #print(result)
+        
+        for row in result:
+            print(row)
+            numero_max = row[0]
+        print(numero_max)
+
+    except Exception as ex:
+        result = 0
+        print(f"Error en max de registros {ex}")
+    return numero_max
+
+
+def alterar_sequencia(db,nombre_seq,numero_max):
+    #numero_max = 1
+    try:
+        txt = f"ALTER SEQUENCE {nombre_seq} RESTART WITH {numero_max}" 
+        print(txt)
+        sql_act_seq = text(txt)
+        #print(sql_seq)
+        result = db.execute(sql_act_seq)
+        print(result)
+        db.commit()
+        
+        # for row in result:
+        #     print(row)
+        #     numero_max = row[0]
+        # print(numero_max)
+
+    except Exception as ex:
+        result = 0
+        print(f"Error en max de registros {ex}")
+    return 0
+
+
+
+@timer
+def buscar_ajustar_secuencias(db):
+
+    tablas = [
+        "camps_training",
+        "staff_userrecords",
+        "payments_paymentmethod",
+        "payments_paymenttransactiontype",
+        "catalogs_pathological_background_family",
+        "staff_staff",
+        "camps_staffincamp",
+        "staff_staff_vaccines",
+        "campers_extraanswers",
+        "payments_payment",
+        "camps_campdiscount",
+        "camps_camperincamp",
+        "campers_camper_licensed_medicine",
+        "campers_camper_pathological_background",
+        "campers_camper_pathological_background_family",
+        "staff_staffcomment",
+        "camps_staffintraining",
+        "staff_staff_food_restriction",
+        "campers_parent",
+        "catalogs_constant",
+        "campers_camper",
+        "camps_checkpointcamper",
+        "payments_camperextracharge",
+        "mailing_emailtemplate",
+        "campers_campercomment",
+        "catalogs_vaccine",
+        "mailing_school_campaign",
+        "mailing_staff_campaign",
+        "trophy_trophystaff_holder",
+        "camps_extraquestion",
+        "campers_camper_vaccines",
+        "catalogs_staff_role",
+        "role",
+        "camps_location",
+        "camps_season",
+        "camps_camp_payments_accounts",
+        "catalogs_food_restriction",
+        "catalogs_licensed_medicine",
+        "campers_school",
+        "campers_camperrecords",
+        "trophy_trophystaff",
+        "catalogs_payment_account",
+        "permission",
+        "user",
+        "catalogs_pathological_background",
+        "trophy_trophy",
+        "mailing_campaign",
+        "campers_camper_food_restriction",
+        "camps_trainingevent",
+        "mailing_camper_campaign",
+        "catalogs_currency",
+        "camps_camp",
+        "camps_campextracharge",
+        "camps_checkpoint"
+        ]
+    
+    for nombre_tabla in tablas:
+        print(nombre_tabla + " ...")
+
+        #nombre_tabla = 'camps_camperincamp'
+
+        campo, nombre_seq = buscar_campo_y_nombre_seq(db,nombre_tabla)
+
+        if nombre_seq == "":
+            continue
+
+        numero_max = buscar_maximo_id_by_tabla(db,nombre_tabla,campo)
+
+        # print(type(numero_max))
+        # print(type(None))
+
+        if numero_max is None:
+            continue
+
+        print(numero_max + 1)
+
+        resultado = alterar_sequencia(db,nombre_seq,numero_max+1)
 
