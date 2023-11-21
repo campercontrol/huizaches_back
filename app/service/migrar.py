@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends,Response, BackgroundTasks,UploadFile, Request
 from sqlalchemy.orm import Session
 
-from utils.migrar_base import migrar_base_v2_to_v3
+from utils.migrar_base import migrar_base_v2_to_v3,buscar_ajustar_secuencias
 from utils.db import SessionLocal
 
 from datetime import datetime, timedelta
@@ -29,4 +29,8 @@ def migrar_base_v2(db: Session = Depends(get_db)):
     return response
 
 
-   
+@migrar_routes.get("/ajustar/sequencias", tags=["Migracion"])
+def ajustar_secuencias(db: Session = Depends(get_db)):
+    NAME = "ajustar_secuencias"
+    response = buscar_ajustar_secuencias(db)
+    return response
