@@ -25,6 +25,7 @@ from schema.payments.payment_schema import PaymentCreate
 
 from crud.campers.camper_extra_answer_crud import create_new_extra_answer
 from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge
+from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
 
 from helper.camper_helpers import update_record_campers
 
@@ -262,6 +263,7 @@ def get_campers_for_camp(db: Session, camp_id: int):
             CamperRecord.id.label("record_id"),
             Camper.id.label("camper_id"),
             Camper.photo.label("camper_photo"),
+            Camper.doctor_precall.label("camper_doctor_precall")
             (
                 Camper.name
                 + " "
@@ -298,7 +300,36 @@ def get_campers_for_camp(db: Session, camp_id: int):
         .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
         .all()
     )
-    return db_mapping_rows_to_dict(campers)
+    campers_complete = []
+     
+    for camper in db_mapping_rows_to_dict(campers):
+        
+        comments = get_camper_comment_by_camper_for_admin(db, camper.camper_id)
+        
+        
+        campers_complete.append(
+            {
+                "camper_in_camp_id": camper.camper_in_camp_id,
+                "camper_record_id": camper.camper_record_id,
+                "record_id": camper.record_id,
+                "camper_id": camper.camper_id,
+                "camper_photo": camper.camper_photo,
+                "camper_full_name": camper.camper_full_name,
+                "camper_comments": len(comments),
+                "camper_doctor_precall": camper.camper_doctor_precall,
+                "camper_attend": camper.camper_attend,
+                "camper_attended": camper.camper_attended,
+                "camper_total": camper.camper_total,
+                "camper_total_balance": camper.camper_total_balance,
+                "camper_birthday": camper.camper_birthday,
+                "tutor_full_name": camper.tutor_full_name,
+                "tutor_email": camper.tutor_email,
+                "second_tutor_full_name": camper.second_tutor_full_name,
+                "second_tutor_email": camper.second_tutor_email,
+            }
+        )   
+
+    return campers_complete
 
 
 def get_campers_for_bracelets(db, camp_id):
