@@ -263,7 +263,7 @@ def get_campers_for_camp(db: Session, camp_id: int):
             CamperRecord.id.label("record_id"),
             Camper.id.label("camper_id"),
             Camper.photo.label("camper_photo"),
-            Camper.doctor_precall.label("camper_doctor_precall")
+            Camper.doctor_precall.label("camper_doctor_precall"),
             (
                 Camper.name
                 + " "
