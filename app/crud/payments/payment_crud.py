@@ -144,8 +144,8 @@ def get_payment_page_camper_in_camp(
 
 def update_camper_balance_camper(db, camper_id: int, camp_id: int):
     camper_payments = db.query(Payment).filter(
-        and_(Payment.camp_id == camp_id, Payment.camper_id == camper_id).all()
-    )
+        and_(Payment.camp_id == camp_id, Payment.camper_id == camper_id)).all()
+    
     total_balance = 0
     if camper_payments:
         for payment in camper_payments:
@@ -156,5 +156,6 @@ def update_camper_balance_camper(db, camper_id: int, camp_id: int):
             CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
         ).update({"payment_balance": total_balance})
     )
+    db.commit()
     
     return 1
