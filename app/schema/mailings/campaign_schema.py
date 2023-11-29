@@ -157,9 +157,78 @@ class CampaignSend(BaseModel):
     schools_id : List[int] = Field(
         title = "Schools"
     )
+    camps_id: List[int] = Field(
+        title = "Camps"
+    )
     template_title: str = Field(
         title = "Asunto del correo"
     )
     template_body: str = Field(
         title = "Cuerpo del correo"
+    )
+
+class CamperCampaignCreate(BaseModel):
+
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title = "Campaña"
+    )
+    camp_id: int =  Field(
+        title = "Camp"
+    )
+    camper_id: int  =  Field(
+        title = "Camper"
+    )
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
+class StaffCampaignCreate(BaseModel):
+    
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title = "Campaña"
+    )
+    camp_id: Optional[int] =  Field(
+        title = "Camp"
+    )
+    staff_id: int  =  Field(
+        title = "Camper"
+    )
+    training_event_id: Optional[int] =  Field(
+        title = "Training Event"
+    )
+    season_id: Optional[int] =  Field(
+        title =  "Temporada"
+    )
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
+class SchoolCampignCreate(BaseModel):
+
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title =  "Campaña"
+    )
+    camp_id: int =  Field(
+        title = "Campamento"
+    )
+    school_id: int =  Field(
+        title = "Escuela"
+    )
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
     )
