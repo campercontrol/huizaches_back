@@ -38,6 +38,9 @@ from service.mailings.email_template_service import email_template_routes
 from service.mailings.campaign_service import campaign_routes
 from service.mailings.mailing_service import mailing_routes
 from service.camps.report_service import report_routes
+from service.trophies.trophy_service import trophy_routes
+from service.trophies.trophy_season_service import trophy_season_routes
+from service.trophies.trophy_staff_service import trophy_staff_routes
 
 app = FastAPI()
 
@@ -80,6 +83,9 @@ app.include_router(email_template_routes)
 app.include_router(campaign_routes)
 app.include_router(mailing_routes)
 app.include_router(report_routes)
+app.include_router(trophy_routes)
+app.include_router(trophy_season_routes)
+app.include_router(trophy_staff_routes)
 
 from service.role import role_routes
 from service.user import user_routes
@@ -87,6 +93,10 @@ from service.token import token_routes
 from service.image import image_routes
 from service.permission import permission_routes
 from service.generar_pdf import pdf_routes
+from service.email import email_routes
+from service.toku_payment import toku_routes
+from service.migrar import migrar_routes 
+
 from fastapi.staticfiles import StaticFiles
 
 app.include_router(role_routes) # Role
@@ -95,7 +105,10 @@ app.include_router(token_routes) # token
 app.include_router(image_routes) # Image
 app.include_router(permission_routes) # Permission
 app.include_router(pdf_routes) #Pdf
+app.include_router(email_routes) #email
 app.mount("/media",StaticFiles(directory="media"),name="media")
+app.include_router(toku_routes)
+app.include_router(migrar_routes)
 
 
 @app.post("/", )

@@ -17,18 +17,19 @@ class Parent(Base):
     )
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id del titular de la cuenta")
     user_id= Column(ForeignKey('user.id'), nullable=False, default=0, doc='usuario')
+    toku_id = Column(String(512), doc="Id de toku")
     tutor_name = Column(String(512), nullable=False, doc="Nombre")
     tutor_lastname_father = Column(String(512), nullable=False, doc="Primer apellido")
     tutor_lastname_mother = Column(String(512), doc="Segundo apellido")
-    tutor_cellphone = Column(String(30), nullable=False, doc="Telefono celular")
-    tutor_home_phone = Column(String(30), doc="Telefono de casa")
-    tutor_work_phone = Column(String(30), doc="Telefono de trabajo")
+    tutor_cellphone = Column(String(512), nullable=False, doc="Telefono celular")
+    tutor_home_phone = Column(String(512), doc="Telefono de casa")
+    tutor_work_phone = Column(String(512), doc="Telefono de trabajo")
     contact_name = Column(String(512), nullable=False, doc="Nombre segundo tutor")
     contact_lastname_father = Column(String(512), nullable=False, doc="Primer apellido segundo tutor")
     contact_lastname_mother = Column(String(512), doc="Segundo apellido segundo tutor")
-    contact_cellphone = Column(String(30), nullable=False, doc="Telefono celular segundo tutor")
-    contact_home_phone = Column(String(30), doc="Telefono de casa segundo tutor")
-    contact_work_phone = Column(String(30), doc="Telefono de trabajo esgundo tutor")
+    contact_cellphone = Column(String(512), nullable=False, doc="Telefono celular segundo tutor")
+    contact_home_phone = Column(String(512), doc="Telefono de casa segundo tutor")
+    contact_work_phone = Column(String(512), doc="Telefono de trabajo esgundo tutor")
     contact_email = Column(String(75), doc="Email segundo tutor")
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
@@ -37,3 +38,12 @@ class Parent(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"""id |{self.id} - user_id|{self.user_id} - tutor_name |{self.tutor_name} - tutor_lastname_father |{self.tutor_lastname_father}
+                - tutor_lastname_mother |{self.tutor_lastname_mother}
+                - tutor_cellphone |{self.tutor_cellphone} - tutor_home_phone |{self.tutor_home_phone} - tutor_work_phone |{self.tutor_work_phone} 
+                - contact_name |{self.contact_name} - contact_lastname_father |{self.contact_lastname_father} - contact_lastname_mother |{self.contact_lastname_mother}
+                - contact_cellphone |{self.contact_cellphone} - contact_home_phone |{self.contact_home_phone} - contact_work_phone |{self.contact_work_phone}
+                - contact_email |{self.contact_email} - created_at |{self.created_at} - updated_at |{self.updated_at}
+                """

@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
-from model.trainings import TrainingEvent
+from model.trainings import TrainingEvent, Training
 from schema.trainings.training_event_schema import (
     TrainingEventCreate,
-    TrainingEventModify
+    TrainingEventModify,
 )
 
 
@@ -20,8 +20,10 @@ def get_all_active_training_event(db: Session):
     rows = db.query(TrainingEvent).filter_by(active=True).all()
     return rows
 
+
 def get_training_event_by_id(db: Session, training_event_id: int):
     return db.query(TrainingEvent).filter_by(id=training_event_id).first()
+
 
 def create_new_training_event(db: Session, new_training_event: TrainingEventCreate):
     db_training_event = None
@@ -41,7 +43,9 @@ def create_new_training_event(db: Session, new_training_event: TrainingEventCrea
     return db_training_event
 
 
-def update_training_event_by_id(db: Session, training_event_id: int, modify_training_event: TrainingEventModify):
+def update_training_event_by_id(
+    db: Session, training_event_id: int, modify_training_event: TrainingEventModify
+):
     rows_updated = (
         db.query(TrainingEvent)
         .filter_by(id=training_event_id)
@@ -50,3 +54,12 @@ def update_training_event_by_id(db: Session, training_event_id: int, modify_trai
     db.commit()
     return rows_updated
 
+
+def get_training_event_for_mailing(db: Session):
+    rows = (
+        db.query(Training.name, TrainingEvent)
+        .select_from(TrainingEvent)
+        .join(Training, Training.id == TrainingEvent.training_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)

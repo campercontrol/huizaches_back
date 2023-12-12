@@ -22,6 +22,8 @@ from model.campers import (
     CamperPathologicalBackgroundFamily,
 )
 from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
+from schema.campers.camper_record_schema import CamperRecordCreate
+from crud.campers.camper_record_crud import create_new_camper_record
 
 
 def get_all_camper(db: Session) -> any:
@@ -36,9 +38,13 @@ def get_camper_by_uuid(db: Session, camper_id: int) -> any:
 def create_new_camper(db: Session, new_camper: CamperCreate) -> any:
     db_camper = None
     try:
-        db_camper = Camper(**new_camper.dict())
+        new_camper_record = CamperRecordCreate(attend=0, attended=0, total=0)
+        camper_record = create_new_camper_record(db, new_camper_record)
+        new_camper = new_camper.dict()
+        new_camper["record_id"] = camper_record.id
+        db_camper = Camper(**new_camper)
         db.add(db_camper)
-        db.commit()
+        db.commit()        
         db.refresh(db_camper)
     except SQLAlchemyError as e:
         print("#=================================#")
@@ -49,7 +55,6 @@ def create_new_camper(db: Session, new_camper: CamperCreate) -> any:
     except Exception as e:
         print(f"No se pudo guardar en la base de datos: {e}")
     return db_camper
-
 
 def update_camper_by_id(
     db: Session, camper_id: int, modify_camper: CamperModify
@@ -147,33 +152,42 @@ def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
 
 
 def get_campers_from_parent(db: Session, parent_id: int):
-    rows= (
+    rows = (
         db.query(
             Camper.id,
             Camper.photo,
-            (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
-                "full_name"
-            ),
-            School.name.label("school")
+            (
+                Camper.name
+                + " "
+                + Camper.lastname_father
+                + " "
+                + Camper.lastname_mother
+            ).label("full_name"),
+            School.name.label("school"),
         )
         .join(School, School.id == Camper.school_id)
         .filter(Camper.parent_id == parent_id)
         .all()
-        )
-    
+    )
+
     return db_mapping_rows_to_dict(rows)
+
 
 def get_camper_band(db: Session, camper_id):
     camper = (
         db.query(
-            (Camper.name + " " + Camper.lastname_father + " " + Camper.lastname_mother).label(
-                "full_name"
-            ),
+            (
+                Camper.name
+                + " "
+                + Camper.lastname_father
+                + " "
+                + Camper.lastname_mother
+            ).label("full_name"),
             School.name.label("school"),
             Camper.photo.label("photo"),
             Camper.birthday.label("birthday"),
             CamperRecord.attend.label("future_camps"),
-            CamperRecord.attended.label("past_camps")
+            CamperRecord.attended.label("past_camps"),
         )
         .join(School, School.id == Camper.school_id)
         .join(CamperRecord, CamperRecord.id == Camper.record_id)
@@ -182,11 +196,13 @@ def get_camper_band(db: Session, camper_id):
     )
     return db_mapping_rows_to_dict(camper)
 
-def delete_camper(db, camper_id:int):
-    camper = db.query(Camper).filter(Camper.id==camper_id).first()
+
+def delete_camper(db, camper_id: int):
+    camper = db.query(Camper).filter(Camper.id == camper_id).first()
     db.delete(camper)
     db.commit()
     return {"status": True}
+
 
 def search_camper_by_name_user(db: Session, search: str):
     campers = (
@@ -199,9 +215,11 @@ def search_camper_by_name_user(db: Session, search: str):
             Camper.updated_at.label("updated"),
             Parent.id.label("tutor_id"),
             (
-            Parent.tutor_name + " " + 
-            Parent.tutor_lastname_father + " " + 
-            Parent.tutor_lastname_mother 
+                Parent.tutor_name
+                + " "
+                + Parent.tutor_lastname_father
+                + " "
+                + Parent.tutor_lastname_mother
             ).label("tutor_fullname"),
             User.id.label("user_id"),
             User.email.label("tutor_email"),
@@ -218,7 +236,7 @@ def search_camper_by_name_user(db: Session, search: str):
                 Parent.tutor_name.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_father.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_mother.ilike(r"%{}%".format(search)),
-                User.email.ilike(r"%{}%".format(search))
+                User.email.ilike(r"%{}%".format(search)),
             )
         )
         .all()
@@ -227,7 +245,7 @@ def search_camper_by_name_user(db: Session, search: str):
         return db_mapping_rows_to_dict(campers)
     else:
         return "Data not found"
-    
+
 
 def get_all_camper_admin(db: Session):
     campers = (
@@ -240,9 +258,11 @@ def get_all_camper_admin(db: Session):
             Camper.updated_at.label("updated"),
             Parent.id.label("tutor_id"),
             (
-            Parent.tutor_name + " " + 
-            Parent.tutor_lastname_father + " " + 
-            Parent.tutor_lastname_mother 
+                Parent.tutor_name
+                + " "
+                + Parent.tutor_lastname_father
+                + " "
+                + Parent.tutor_lastname_mother
             ).label("tutor_fullname"),
             User.id.label("user_id"),
             User.email.label("tutor_email"),

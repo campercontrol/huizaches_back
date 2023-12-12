@@ -3,7 +3,8 @@ from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, SmallInteger
 from sqlalchemy.dialects.postgresql import UUID
-
+from sqlalchemy.orm import relationship
+from model.campers.camper import Camper
 
 
 from utils.db import Base
@@ -28,9 +29,31 @@ class Constant(Base):
         "updated",
         DateTime(timezone=True),
         default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        onupdate=datetime.utcnow, 
     )
+    catalogs_vaccine = relationship("Vaccine", backref="catalogs_constant", cascade="all, delete-orphan")
+    catalogs_pathological_background = relationship("PathologicalBackground", backref="catalogs_constant", cascade="all, delete-orphan")
+    catalogs_pathological_background_family = relationship("PathologicalBackgroundFamily", backref="catalogs_constant", cascade="all, delete-orphan")
+    catalogs_licensed_medicine = relationship("LicensedMedicine", backref="catalogs_constant", cascade="all, delete-orphan")
+    catalogs_food_restriction = relationship("FoodRestriction", backref="catalogs_constant", cascade="all, delete-orphan")
+    camps_camperincamp = relationship("CamperInCamp", backref="catalogs_constant", cascade="all, delete-orphan")
+    mailing_campaign = relationship("Campaign", backref="catalogs_constant", cascade="all, delete-orphan")
+    mailing_emailtemplate = relationship("EmailTemplate", backref="catalogs_constant", cascade="all, delete-orphan")
+    staff_staffcomment = relationship("StaffComment", backref="catalogs_constant", cascade="all, delete-orphan")
+    staff_staff = relationship("Staff", backref="catalogs_constant", cascade="all, delete-orphan")
+    trophy_trophy = relationship("Trophy", backref="catalogs_constant", cascade="all, delete-orphan")
+    # foreign_keys=["campers_camper.gender_id","campers_camper.grade","campers_camper.can_swim","campers_camper.blood_type"]
+    # campers_camper_gender = relationship("Camper", foreign_keys = [Camper.gender_id] ,backref="catalogs_constant", cascade="all, delete-orphan")
+    # campers_camper_grade = relationship("Camper", foreign_keys = [Camper.grade], backref="catalogs_constant", cascade="all, delete-orphan")
+    # campers_camper_can_swim = relationship("Camper", foreign_keys = [Camper.can_swim] , backref="catalogs_constant", cascade="all, delete-orphan")
+    # campers_camper_blood_type = relationship("Camper", foreign_keys = [Camper.blood_type] , backref="catalogs_constant", cascade="all, delete-orphan")
+     
 
+
+
+
+    def __repr__(self):
+        return f"{self.uid} - {self.id} - {self.value} - {self.num_id} - {self.language} - {self.model_name} - {self.created_at} - {self.updated_at}"
 
 #1    masculino  1    es     gender
 #2    femenino   2    es     gender

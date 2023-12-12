@@ -10,10 +10,11 @@ from crud.crud_user import (
     crud_update_user_by_uuid,
     get_user_by_email,
     crud_update_user_by_email,
-    search_user_by_email
+    search_user_by_email,
+    update_password_all_users
 )
 from model.user import User
-from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword
+from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail
 
 # from utils.check_role import chek_permission
 from utils.db import SessionLocal
@@ -159,7 +160,7 @@ def change_password(
         return resp_token
 
     # valida email de token y email enviado
-    if email != resp_token["email"]:
+    if email != resp_token["user_email"]:
         response.status_code = 401
         respuesta = {
             "mensaje": "El email no corresponde al token",
@@ -199,7 +200,79 @@ def change_password(
                 "mensaje": "Ocurrio un error inesperado, intente de nuevo",
                 "data": "",
             }
+        
+@user_routes.post("/usuario/change_email/{email}", tags=["Usuarios"])
+def change_email(
+    email: str,
+    change_pass: UserChangeEmail,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    status_code, resp_token = validate_token_general(change_pass.access_token)
+
+    # Valida token
+    if status_code == 403:
+        response.status_code = 403
+        respuesta = {
+            "mensaje": "El tiempo para cambiar el correo expiro",
+            "data": [],
+        }
+        return respuesta
+    elif status_code == 401:
+        response.status_code = 401
+        return resp_token
+
+    # valida email de token y email enviado
+    if email != resp_token["user_email"]:
+        response.status_code = 401
+        respuesta = {
+            "mensaje": "El email no corresponde al token",
+            "data": [],
+        }
+        return respuesta
+
+    exist_email = get_user_by_email(db, email)
+
+    if not exist_email:
+        response.status_code = 401
+        return {"mensaje": "No email ingresado no esta registrado", "data": ""}
+    elif not exist_email.is_active:
+        response.status_code = 401
+        return {"mensaje": "No email ingresado esta desactivado", "data": ""}
+
+    if change_pass.email != change_pass.email_confirm:
+        response.status_code = 401
+        respuesta = {
+            "mensaje": "Ambos correos no son iguales",
+            "data": [],
+        }
+        return respuesta
+    else:
+        update_data = {"email": change_pass.email}
+        respuesta_update_user = crud_update_user_by_email(db, email, update_data)
+
+        if respuesta_update_user != 0:
+            response.status_code = 200
+            return {
+                "mensaje": "El correo se ha cambiado correctamente, lo proxima vez que inicie sesion podra usar su nuevo correo",
+                "data": [],
+            }
+        else:
+            response.status_code = 401
+            return {
+                "mensaje": "Ocurrio un error inesperado, intente de nuevo",
+                "data": "",
+            }
+
+
+        
 @user_routes.get("/search/user/{search}", tags=["Usuarios"])
 def get_search_user(search:str, db: Session = Depends(get_db)):
     possible_users  = search_user_by_email(db, search)
     return { "data": possible_users }
+
+
+@user_routes.post("/update/all/password/", tags=["Usuaros"])
+def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
+    result = update_password_all_users(db, hash_pass)
+    return {"data": result}

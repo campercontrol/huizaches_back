@@ -61,3 +61,18 @@ def get_camper_comment_by_camper_for_parent(db, camper_id: int):
         .all()
     )
     return rows
+
+
+def get_camper_comment_by_camper_for_admin(db, camper_id: int):
+    rows = (
+        db.query(CamperComment)
+        .filter(
+            and_(
+                CamperComment.camper_id == camper_id,
+                CamperComment.is_public == True,
+                CamperComment.show_to == 2,
+            )
+        )
+        .all()
+    )
+    return rows

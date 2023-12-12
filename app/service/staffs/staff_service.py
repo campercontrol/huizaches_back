@@ -20,6 +20,11 @@ from crud.catalogs.constant_crud import (
     get_all_gender_id_name,
 )
 
+from crud.trophies.trophy_staff_crud import (
+    get_trophy_by_staff,
+    get_trophy_record_by_staff
+)
+
 from schema.staffs.staff_schema import (
     ProspectCompleteCreate,
     StaffModify,
@@ -254,11 +259,14 @@ def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db
     staff_band = get_staff_band(db, staff_id)
     staff_profile = get_staff_by_id(db, staff_id)
     staff_comments = get_staff_comment_by_staff_for_admin(db, staff_id)
+    staff_trophy_records = get_trophy_record_by_staff(db, staff_id) 
+    staff_trophy = get_trophy_by_staff(db,staff_id)
     return{
-       "staff_band": staff_band[0],
+        "staff_band": staff_band[0],
+        "staff_trophy_records": staff_trophy_records,
         "staff_profile": staff_profile,
         "staff_past_camps": staff_past_camps,
         "staff_upcoming_camps": staff_upcoming_camps,
         "staff_comments": staff_comments,
-        "staff_trophies": "a"
+        "staff_trophies": staff_trophy
     }

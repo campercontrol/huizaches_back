@@ -26,3 +26,8 @@ class Role(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"{self.id} - {self.name} - {self.is_active} - {self.created_at} - {self.updated_at}"
+
+

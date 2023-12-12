@@ -1,5 +1,5 @@
 from datetime import date, datetime, datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from xmlrpc.client import boolean
 
@@ -18,19 +18,19 @@ class CampaignCreate(BaseModel):
         title="Nombre de la campaña"
     ) 
 
-    camp_parents: boolean  = Field(
+    camp_parents: Optional[boolean]  = Field(
         title="Mandar a titulares de la cuenta"
     )
 
-    camp_staff: boolean  = Field(
+    camp_staff: Optional[boolean]  = Field(
         title="Mandar a staff"
     )
 
-    camp_school: boolean  = Field(
+    camp_school:Optional[boolean]  = Field(
         title="Mandar a el colegio"
     )
 
-    active_time: str = Field(
+    active_time: Optional[str] = Field(
         title="Tiempo para enviar",
         default="1"
     )
@@ -39,11 +39,11 @@ class CampaignCreate(BaseModel):
         title="Mandar a el colegio"
     )
 
-    camp_id: int = Field(
+    camp_id: Optional[int] = Field(
         title="Tipo de template"
     )
 
-    season_id: int = Field(
+    season_id: Optional[int] = Field(
         title="Temporada"
     )
 
@@ -51,7 +51,7 @@ class CampaignCreate(BaseModel):
         title="Tipo de envío"
     )
 
-    training_event_id: int = Field(
+    training_event_id: Optional[int] = Field(
         title="Capacitación"
     )
 
@@ -59,7 +59,7 @@ class CampaignCreate(BaseModel):
         title="Template"
     )
 
-    created_at:datetime = Field(
+    created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
 
@@ -76,19 +76,19 @@ class CampaignModify(BaseModel):
         title="Nombre de la campaña"
     ) 
 
-    camp_parents: boolean  = Field(
+    camp_parents: Optional[boolean]  = Field(
         title="Mandar a titulares de la cuenta"
     )
 
-    camp_staff: boolean  = Field(
+    camp_staff: Optional[boolean]  = Field(
         title="Mandar a staff"
     )
 
-    camp_school: boolean  = Field(
+    camp_school:Optional[boolean]  = Field(
         title="Mandar a el colegio"
     )
 
-    active_time: str = Field(
+    active_time: Optional[str] = Field(
         title="Tiempo para enviar",
         default="1"
     )
@@ -97,11 +97,11 @@ class CampaignModify(BaseModel):
         title="Mandar a el colegio"
     )
 
-    camp_id: int = Field(
+    camp_id: Optional[int] = Field(
         title="Tipo de template"
     )
 
-    season_id: int = Field(
+    season_id: Optional[int] = Field(
         title="Temporada"
     )
 
@@ -109,14 +109,126 @@ class CampaignModify(BaseModel):
         title="Tipo de envío"
     )
 
-    training_event_id: int = Field(
+    training_event_id: Optional[int] = Field(
         title="Capacitación"
     )
 
     template_id: int = Field(
         title="Template"
     )
+
+    updated_at: Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
+class MailingTypeSelect(BaseModel):
+
+    camps_id:List[int] = Field(
+        title = "campamentos"
+    )
+    staffs: bool = Field(
+        title= "Se envia a staff"
+    )
+    campers: bool = Field(
+        title= "Se envia a campers"
+    )
+    schools: bool = Field(
+        title= "Se envia a escuelas"
+    )
+    training_id: int = Field(
+        title = "Capacitación"
+    )
+    season: int = Field(
+        title = "Temporada"
+    )
+
+
+class CampaignSend(BaseModel):
+
+    campaign : CampaignCreate = Field(
+        title = "Campaña"
+    )
+    campers_id : List[int] = Field(
+        title = "Campers"
+    )
+    staffs_id : List[int] = Field(
+        title = "Staffs"
+    )
+    schools_id : List[int] = Field(
+        title = "Schools"
+    )
+    camps_id: List[int] = Field(
+        title = "Camps"
+    )
+    template_title: str = Field(
+        title = "Asunto del correo"
+    )
+    template_body: str = Field(
+        title = "Cuerpo del correo"
+    )
+
+class CamperCampaignCreate(BaseModel):
+
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title = "Campaña"
+    )
+    camp_id: int =  Field(
+        title = "Camp"
+    )
+    camper_id: int  =  Field(
+        title = "Camper"
+    )
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
+class StaffCampaignCreate(BaseModel):
     
-    updated_at:datetime = Field(
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title = "Campaña"
+    )
+    camp_id: Optional[int] =  Field(
+        title = "Camp"
+    )
+    staff_id: int  =  Field(
+        title = "Camper"
+    )
+    training_event_id: Optional[int] =  Field(
+        title = "Training Event"
+    )
+    season_id: Optional[int] =  Field(
+        title =  "Temporada"
+    )
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+
+class SchoolCampignCreate(BaseModel):
+
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    campaign_id: int = Field(
+        title =  "Campaña"
+    )
+    camp_id: int =  Field(
+        title = "Campamento"
+    )
+    school_id: int =  Field(
+        title = "Escuela"
+    )
+    created_at:Optional[datetime] = Field(
         default=datetime.now()
     )

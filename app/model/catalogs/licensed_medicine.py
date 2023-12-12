@@ -29,3 +29,7 @@ class LicensedMedicine (Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"{self.uid} - {self.id} - {self.name} - {self.assigned_id} - {self.order} - {self.created_at} - {self.updated_at}"
+

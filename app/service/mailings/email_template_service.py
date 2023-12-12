@@ -10,6 +10,9 @@ from crud.mailings.email_template_crud import (
     update_email_template_by_id,
     delete_email_template
 )
+from crud.catalogs.constant_crud import (
+    get_all_email_template_type
+)
 from schema.mailings.email_template_schema import(
     EmailTemplateCreate,
     EmailTemplateModify
@@ -33,18 +36,26 @@ def get_email_template(db: Session = Depends(get_db)):
     return {"data": list_email_template}
 
 
-@email_template_routes.get("/email_template/{email_template_id}", tags=["Mailing"])
-def get_email_template_by_id(email_template_id:str,db: Session = Depends(get_db)):
+@email_template_routes.get("/email/massive/template/{email_template_id}", tags=["Mailing"])
+def get_massive_template_by_id(email_template_id:str,db: Session = Depends(get_db)):
     list_email_template = get_email_template_by_uuid(db,email_template_id)
     return {"data": list_email_template}
 
+@email_template_routes.get("/email/system/template/{email_template_id}", tags=["Mailing"])
+def get_system_template_by_id(email_template_id:str,db: Session = Depends(get_db)):
+    list_email_type = get_all_email_template_type(db, "es")
+    templates = get_email_template_by_uuid(db,email_template_id)
+    return {
+        "template_type": list_email_type,
+        "template": templates
+        }
 
-@email_template_routes.post("/email_template/", tags=["Mailing"])
+@email_template_routes.post("/email/template/", tags=["Mailing"])
 def create_email_template(new_prueba:EmailTemplateCreate,db: Session = Depends(get_db)):
     list_email_template = create_new_email_template(db,new_prueba)
     return {"data": list_email_template}
 
-@email_template_routes.patch("/email_template/{email_template_id}", tags=["Mailing"])
+@email_template_routes.patch("/email/template/{email_template_id}", tags=["Mailing"])
 def modify_email_template(email_template_id:str,modify_email_template:EmailTemplateModify,db: Session = Depends(get_db)):
 
     update_data = modify_email_template.dict(exclude_unset=True)

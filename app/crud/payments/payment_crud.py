@@ -37,10 +37,12 @@ def get_payment_by_id(db, payment_id: int):
 
 def create_new_payment(db, new_payment: PaymentCreate):
     db_payment = None
+    update_camper_balance_camper(db, new_payment.camper_id, new_payment.camp_id)
     try:
         db_payment = Payment(**new_payment.dict())
-        if db_payment.txn_type_id in (3, 4, 6):
+        if db_payment.txn_type_id in (2, 3, 5):
             db_payment.payment_amount = abs(db_payment.payment_amount) * -1
+
         else:
             db_payment.payment_amount = abs(db_payment.payment_amount)
         db.add(db_payment)
@@ -118,7 +120,7 @@ def get_payment_page_camper_in_camp(
                 + " "
                 + Camper.lastname_mother
             ).label("fullname"),
-            Camper.parent_id.label("parent_id")
+            Camper.parent_id.label("parent_id"),
         )
         .filter(Camper.id == camper_id)
         .first()
@@ -138,3 +140,22 @@ def get_payment_page_camper_in_camp(
         "payment_balance": camper_in_camp.payment_balance,
         "payment_table": payment_table,
     }
+
+
+def update_camper_balance_camper(db, camper_id: int, camp_id: int):
+    camper_payments = db.query(Payment).filter(
+        and_(Payment.camp_id == camp_id, Payment.camper_id == camper_id)).all()
+    
+    total_balance = 0
+    if camper_payments:
+        for payment in camper_payments:
+            total_balance = total_balance + payment.payment_amount
+
+    db.query(CamperInCamp).filter(
+        and_(
+            CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
+        ).update({"payment_balance": total_balance})
+    )
+    db.commit()
+    
+    return 1

@@ -47,6 +47,14 @@ def get_staff_comment_by_uid(
 def create_staff_comment(
     new_staff_comment: StaffCommentCreate, db: Session = Depends(get_db)
 ):
+    """
+    Los comentarios se manejan con permisos de quien puede verlos. Atienden a un
+    catalogo en las constantes y se guardan en el campo show_to:
+    
+    show_to = 38 Significa nivel de staff
+    show_to = 39 Significa nivel de coordinador
+    show_to = 40 significa nivel de adminstrador
+    """
     list_staff_comment = create_new_staff_comment(db, new_staff_comment)
     return {"data": list_staff_comment}
 

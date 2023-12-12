@@ -8,6 +8,10 @@ from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
+from helper.mailing_helpers import send_mail_template
+from utils.toku_payment_tools import create_customer
+
+import json
 
 
 def get_all_parent(db: Session):
@@ -18,11 +22,12 @@ def get_all_parent(db: Session):
 def get_parent_by_uuid(db: Session, parent_id: int):
     return db.query(Parent).filter_by(id=parent_id).first()
 
+
 def get_parent_for_admin_by_id(db: Session, parent_id: int):
     parent = (
         db.query(
             User.id.label("user_id"),
-            User.email.label("user_email"), 
+            User.email.label("user_email"),
             Parent.id.label("tutor_id"),
             Parent.tutor_name.label("tutor_name"),
             Parent.tutor_lastname_father.label("tutor_lastname_father"),
@@ -39,12 +44,14 @@ def get_parent_for_admin_by_id(db: Session, parent_id: int):
             Parent.contact_email.label("contact_email"),
         )
         .outerjoin(User, User.id == Parent.user_id)
-        .filter_by(id=parent_id).all()
-        )
+        .filter_by(id=parent_id)
+        .all()
+    )
     if parent:
         return db_mapping_rows_to_dict(parent)[0]
-    else: 
+    else:
         return "Parent doesn't exist"
+
 
 def create_new_parent(db, new_parent: ParentCreate):
     db_parent = None
@@ -68,10 +75,38 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
     try:
         new_parent.user_id = user_id
+        user = db.query(User.email).filter(User.id == user_id).first()
         db_parent = Parent(**new_parent.dict())
         db.add(db_parent)
         db.commit()
+        user = db.query(User.email).filter(User.id == user_id).first()
+        send_mail_template(db, [user[0]], 2, None, db_parent.id)
+        print("######################################################")
+        response_toku = create_customer(
+            db_parent.id,
+            user[0],
+            str(
+                db_parent.tutor_name
+                + " "
+                + db_parent.tutor_lastname_father
+                + " "
+                + db_parent.tutor_lastname_mother
+            ),
+            db_parent.tutor_cellphone,
+            True,
+        )
+        print(response_toku)
+        response_json = json.loads(response_toku.text)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(response_json)
+        respuesta_act = db.query(Parent).filter(Parent.id == db_parent.id).update(
+            {"toku_id": response_json['id']}
+        )
+        print("Respuesta de actualizacion")
+        print(respuesta_act)
+        db.commit()
         db.refresh(db_parent)
+
     except SQLAlchemyError as e:
         print("#=================================#")
         print(e)
@@ -115,7 +150,7 @@ def search_parent_by_name_user(db: Session, search: str):
             Parent.tutor_work_phone.label("tutor_work_phone"),
             Parent.tutor_cellphone.label("tutor_cellphone"),
             User.email.label("tutor_email"),
-            Parent.contact_email.label("second_tutor_email")
+            Parent.contact_email.label("second_tutor_email"),
         )
         .outerjoin(User, User.id == Parent.user_id)
         .filter(
@@ -123,7 +158,7 @@ def search_parent_by_name_user(db: Session, search: str):
                 Parent.tutor_name.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_father.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_mother.ilike(r"%{}%".format(search)),
-                User.email.ilike(r"%{}%".format(search))
+                User.email.ilike(r"%{}%".format(search)),
             )
         )
         .all()
@@ -138,7 +173,6 @@ def search_parent_by_name_user(db: Session, search: str):
 
 
 def get_all_parent_admin(db: Session):
-
     parents = (
         db.query(
             User.id.label("user_id"),
@@ -150,7 +184,7 @@ def get_all_parent_admin(db: Session):
             Parent.tutor_work_phone.label("tutor_work_phone"),
             Parent.tutor_cellphone.label("tutor_cellphone"),
             User.email.label("tutor_email"),
-            Parent.contact_email.label("second_tutor_email")
+            Parent.contact_email.label("second_tutor_email"),
         )
         .outerjoin(User, User.id == Parent.user_id)
         .all()
