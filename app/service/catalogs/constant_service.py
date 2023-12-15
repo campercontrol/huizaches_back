@@ -8,6 +8,7 @@ from crud.catalogs.constant_crud import (
     get_constant_by_uuid,
     create_new_constant,
     update_constant_by_id,
+    delete_constant_by_id,
     get_all_answer,
     get_all_assign_choice,
     get_all_blood_type,
@@ -127,3 +128,8 @@ def get_email_template(language:str ="es", db: Session=Depends(get_db)):
 def get_email_type(language:str ="es", db: Session=Depends(get_db)):
     list_constant= get_all_email_send_type(db, language)
     return {"data": list_constant} 
+
+@constant_routes.delete("/delete_constant/{constant_id}", tags=["Constants"])
+def delete_constant(constant_id:int, db: Session = Depends(get_db)):
+    status = delete_constant_by_id(db, constant_id)
+    return{"status": status}

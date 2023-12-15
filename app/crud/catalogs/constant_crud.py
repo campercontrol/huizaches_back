@@ -1,5 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy.orm import Session
 from model.catalogs import Constant
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case, and_, or_
@@ -54,6 +54,11 @@ def update_constant_by_id(db, constant_id, modify_constant):
     db.commit()
     return rows_updated
 
+def delete_constant_by_id(db: Session, constant_id:int):
+    constant = db.query(Constant).filter(Constant.id==constant_id).first()
+    db.delete(constant)
+    db.commit()
+    return {"status" : True}
 
 def get_all_answer(db, language: str = "es"):
     rows = (
@@ -182,6 +187,14 @@ def get_all_email_send_type(db, language: str = "es"):
     rows = (
         db.query(Constant)
         .filter(Constant.model_name == "send_type", Constant.language == language)
+        .all()
+    )
+    return rows
+
+def get_all_triage(db, language: str = "es"):
+    rows = (
+        db.query(Constant)
+        .filter(Constant.model_name == "triage", Constant.language == language)
         .all()
     )
     return rows

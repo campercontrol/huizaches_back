@@ -41,6 +41,7 @@ from service.camps.report_service import report_routes
 from service.trophies.trophy_service import trophy_routes
 from service.trophies.trophy_season_service import trophy_season_routes
 from service.trophies.trophy_staff_service import trophy_staff_routes
+from service.medical.medical_service import medical_routes
 
 app = FastAPI()
 
@@ -86,6 +87,7 @@ app.include_router(report_routes)
 app.include_router(trophy_routes)
 app.include_router(trophy_season_routes)
 app.include_router(trophy_staff_routes)
+app.include_router(medical_routes)
 
 from service.role import role_routes
 from service.user import user_routes
