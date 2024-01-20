@@ -17,6 +17,7 @@ def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
             and_(
                 MedicalCamperVisit.camper_id == camper_id,
                 MedicalCamperVisit.camp_id == camp_id,
+                MedicalCamperVisit.medical_tracing == False
             )
         )
         .all()
