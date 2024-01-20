@@ -45,7 +45,7 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
         camper = get_camper_by_uuid(db, camper_in_camp["camper_id"])
         tutor = get_parent_for_admin_by_id(db, camper.parent_id)
         camper_triages = camper_visit_triage_for_camp(db, camper.id, camp_id)
-        if tutor is not str:
+        if tutor != "Parent doesn't exist":
             camper_complete = {
                 "camper_id": camper.id,
                 "camper_photo": camper.photo,
@@ -111,7 +111,7 @@ def get_medical_camper_visit_form(camper_id: int, db: Session = Depends(get_db))
         "Por parte de la Escuela / Maestras",
         "Por parte de Camper Control (In Loco Parentis)",
         "No se administraron medicamentos",
-    ]
+    ]   
     return {
         "triage": triage_options,
         "medicine_auth": med_auth,
