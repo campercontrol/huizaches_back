@@ -11,14 +11,18 @@ from schema.medical.camper_visit_schema import CamperVisitCreate
 
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
-        db.query(Constant.id, Constant.value)
+        db.query(
+            Constant.id,
+            Constant.value,
+            MedicalCamperVisit.medical_tracing,
+            MedicalCamperVisit.initial_visit_id,
+        )
         .select_from(MedicalCamperVisit)
         .join(Constant, Constant.id == MedicalCamperVisit.triage)
         .filter(
             and_(
                 MedicalCamperVisit.camper_id == camper_id,
                 MedicalCamperVisit.camp_id == camp_id,
-                MedicalCamperVisit.medical_tracing == False
             )
         )
         .all()
@@ -40,6 +44,7 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(camper_visits)
+
 
 def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
     db_camper_visit = None
