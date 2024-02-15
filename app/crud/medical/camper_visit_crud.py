@@ -28,10 +28,9 @@ def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
 
 def camper_visit_for_camp(db, camper_id: int, camp_id: int):
     camper_visits = (
-        db.query(MedicalCamperVisit, Constant.value, Camper.name, Camper.lastname_father, Camper.lastname_mother)
+        db.query(MedicalCamperVisit, Constant.value)
         .select_from(MedicalCamperVisit)
         .join(Constant, Constant.id == MedicalCamperVisit.triage)
-        .join(Camper, Camper.id == MedicalCamperVisit.camper_id)
         .filter(
             and_(
                 MedicalCamperVisit.camper_id == camper_id,
