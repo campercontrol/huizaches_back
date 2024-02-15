@@ -11,6 +11,7 @@ from utils.db import Base
 
 
 class Staff(Base):
+    #Staff model
     __tablename__ = 'staff_staff'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc='id del staff')
