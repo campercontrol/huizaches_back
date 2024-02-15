@@ -48,6 +48,7 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
         if tutor != "Parent doesn't exist":
             camper_complete = {
                 "camper_id": camper.id,
+                "camper_name": camper_in_camp["camper_full_name"],
                 "camper_photo": camper.photo,
                 "medical_triages": camper_triages,
                 "tutor_fullname": camper_in_camp["tutor_full_name"],
