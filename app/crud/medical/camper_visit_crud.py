@@ -5,6 +5,7 @@ from utils.db import db_mapping_rows_to_dict
 
 from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs.constant import Constant
+from model.campers.camper import Camper
 from schema.medical.camper_visit_schema import CamperVisitCreate
 
 
@@ -27,9 +28,10 @@ def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
 
 def camper_visit_for_camp(db, camper_id: int, camp_id: int):
     camper_visits = (
-        db.query(MedicalCamperVisit, Constant.value)
+        db.query(MedicalCamperVisit, Constant.value, Camper.name, Camper.lastname_father, Camper.lastname_mother)
         .select_from(MedicalCamperVisit)
         .join(Constant, Constant.id == MedicalCamperVisit.triage)
+        .join(Camper, Camper.id == MedicalCamperVisit.camper_id)
         .filter(
             and_(
                 MedicalCamperVisit.camper_id == camper_id,
