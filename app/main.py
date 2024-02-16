@@ -109,6 +109,10 @@ from service.generar_pdf import pdf_routes
 from service.email import email_routes
 from service.toku_payment import toku_routes
 from service.migrar import migrar_routes 
+from service.groupings.grouping_service import grouping_router
+from service.groupings.grouping_type_service import grouping_type_router
+from service.groupings.grouping_camp_service import grouping_camp_router
+from service.groupings.grouping_camper_service import grouping_camper_router
 
 from fastapi.staticfiles import StaticFiles
 
@@ -122,7 +126,10 @@ app.include_router(email_routes) #email
 app.mount("/media",StaticFiles(directory="media"),name="media")
 app.include_router(toku_routes)
 app.include_router(migrar_routes)
-
+app.include_router(grouping_router)
+app.include_router(grouping_type_router)
+app.include_router(grouping_camp_router)
+app.include_router(grouping_camper_router)
 
 @app.post("/", )
 def root_test():
