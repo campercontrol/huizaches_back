@@ -88,27 +88,28 @@
             <table style="width: 100%; height: 11in;" >
                 <tbody>
                     <tr>
+                        {%for i in list_bracelet%}
                         <td class = "bracelete" style="width: 1in;">
                             <div class="bodyBracelete">
                                 <p class = "name">
-                                    {{name}}
+                                    {{i.name}}
                                 </p>
                                 <p class="sub_text">
                                     Escuela<br>
-                                    {{school}}<br>
+                                    {{i.school}}<br>
                                     <br>
                                     Campamento
-                                    {{camping}}
+                                    {{i.camping}}
                                 </p>
                                 <div class="barcode" style="width: 100%;">
                                     <table border="0" style="width: 100%;">
                                         <tbody>
                                             <tr>
                                                 <td style="width: 80%; height: 140px;" class = "center">
-                                                    <img class = "barcode_img" src="{{barcode_img}}" >
+                                                    <img class = "barcode_img" src="{{i.barcode_img}}" >
                                                 </td>
                                                 <td style="width: 20%; height: 140px;" class="center">
-                                                    <p class="rotate">{{barcode_code}}</p>
+                                                    <p class="rotate">{{i.barcode_code}}</p>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -116,20 +117,20 @@
                                 </div>
                                 <p class="sub_text">
                                     Tipo de sangre<br>
-                                    {{blood_type}}<br>
+                                    {{i.blood_type}}<br>
                                     <br>
                                     Alergias <br>
-                                    {{alergies}}<br> 
+                                    {{i.alergies}}<br> 
                                     <br>
                                     Otras alergias <br>
-                                    {{other_alergies}}<br>
+                                    {{i.other_alergies}}<br>
                                     <br>
                                     Comida Prohibida <br>
-                                    {{prohibed_food}}
+                                    {{i.prohibed_food}}
                                 </p>
                                 <br>
                                 <div class = "logo" >
-                                    <img class="img_logo" src="{{logo_img}}" >
+                                    <img class="img_logo" src="{{i.logo_img}}" >
                                 </div>
                                 <p class="sub_text_minor">
                                     En caso de emergencia o <br> 
@@ -146,7 +147,7 @@
                                 </p>
                             </div>
                         </td>
-                        
+                        {%endfor%}
                     </tr>
                 </tbody>
             </table>

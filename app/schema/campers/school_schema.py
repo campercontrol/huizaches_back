@@ -11,6 +11,9 @@ class SchoolCreate(BaseModel):
         title="Id",
         default=None,
         primary_key=True
+    )
+    login_id:Optional[int] = Field(
+        title= "Usuario"
     ) 
     name:str  = Field(
         title="Nombre",
@@ -88,7 +91,10 @@ class SchoolModify(BaseModel):
         title="Id",
         default=None,
         primary_key=True
-    ) 
+    )
+    login_id:Optional[int] = Field(
+        title= "Usuario"
+    )  
     name:str  = Field(
         title="Nombre",
         max_lenght= 100

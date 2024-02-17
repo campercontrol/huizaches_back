@@ -7,12 +7,14 @@ from fastapi.responses import FileResponse
 
 from crud.campers.parent_crud import (
     get_all_parent,
+    get_all_parent_admin,
     get_parent_by_uuid,
     create_new_parent,
     create_new_parent_user_id,
     update_parent_by_id,
     delete_parent, 
-    search_parent_by_name
+    search_parent_by_name_user,
+    get_parent_for_admin_by_id
 )    
 from crud.camps.camp_crud import (
     get_camp_by_id
@@ -22,7 +24,8 @@ from crud.camps.location_crud import (
 )
 from crud.camps.camper_in_camp_crud import (
     get_camper_in_camp_by_camper_camp,
-    get_camps_name_amount_camper
+    get_camps_name_amount_camper,
+    get_past_subscribe_by_camper
 )
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
@@ -96,6 +99,9 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
         camps_info = get_camps_name_amount_camper(db, camper.get('id'))
         for camp in camps_info:
             total_amount = total_amount + camp.get('camper_payment_balance')
+        past_camps = get_past_subscribe_by_camper(db, camper.get('id'))
+        for camp in past_camps:
+            total_amount = total_amount + camp.get('camper_payment_balance') 
         info.append(
             {
                 "camper": camper,
@@ -131,9 +137,9 @@ def delete_parent_by_id(parent_id:int, db: Session = Depends(get_db)):
     status = delete_parent(db, parent_id)
     return{"status": status}
 
-@parent_routes.get("/search_parent/{search}", tags=["Campers"])
+@parent_routes.get("/search/parent/{search}", tags=["Campers"])
 def get_search_parent(search:str, db: Session = Depends(get_db)):
-    possible_parents  = search_parent_by_name(db, search)
+    possible_parents  = search_parent_by_name_user(db, search)
     return { "data": possible_parents }
 
 @parent_routes.get("/payment_boucher/{camper_id}/{camp_id}", response_class=FileResponse, tags=["Campers"])
@@ -168,3 +174,13 @@ def get_payment_boucher(camper_id:int, camp_id:int, db:Session= Depends(get_db))
     
     path = generar_pdf_baucher(context)
     return FileResponse(path)
+
+@parent_routes.get("/admin/parent/{parent_id}", tags=["Campers"])
+def get_parent_for_admin(parent_id:str, db: Session = Depends(get_db)):
+    parent = get_parent_for_admin_by_id(db, parent_id)
+    return {"data": parent}
+
+@parent_routes.get("/admin/parent/", tags=["Campers"])
+async def get_parent_admin(db: Session = Depends(get_db)):
+    list_parent = get_all_parent_admin(db)
+    return {"data": list_parent}

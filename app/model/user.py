@@ -19,7 +19,7 @@ class User(Base):
     is_coordinator = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=True)
     is_employee = Column(Boolean, default=True)
-
+    
     is_superuser = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
@@ -28,3 +28,8 @@ class User(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
+
+    def __repr__(self):
+        return f"{self.id} - {self.email} - {self.hashed_pass} - {self.role_id} - {self.is_coordinator} - {self.is_admin} - {self.is_employee} - {self.is_superuser} - {self.is_active} - {self.created_at} - {self.updated_at}"
+
+

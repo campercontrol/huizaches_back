@@ -11,6 +11,7 @@ from utils.db import Base
 
 
 class Staff(Base):
+    #Staff model
     __tablename__ = 'staff_staff'
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc='id del staff')
@@ -43,9 +44,9 @@ class Staff(Base):
     staff_contact_homephone = Column(String(512))
     staff_contact_cellphone = Column(String(512))
     employee_email_send = Column(Boolean, nullable=False)
-    login_id = Column(ForeignKey("user.id"), nullable=False, default=0, doc='Usuario')
-    record_id = Column(Integer)
-    season_id = Column(ForeignKey("camps_season.id"), nullable=False, default=0, doc='Temporada')
+    login_id = Column(ForeignKey("user.id"), nullable=True,  doc='Usuario')
+    record_id = Column(ForeignKey("staff_userrecords.id"), nullable=True,  server_default="1", doc='Record')
+    season_id = Column(ForeignKey("camps_season.id"), nullable=True, doc='Temporada')
 
     created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(

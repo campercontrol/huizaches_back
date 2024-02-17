@@ -14,8 +14,8 @@ def generar_pdf_info_camping():
     #ruta2 = generate_code128_no_fotter("200798")
 
     #Traer imagen en base64
-    barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}.png").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo.png").decode("utf-8")
+    barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
 
     context = {
         "logo": logo_64,
@@ -104,6 +104,7 @@ def generar_pdf_info_camping():
         print("path_not_found")
 
     # config = pdfkit.configuration(wkhtmltopdf='/opt/bin/wkhtmltopdf')
+    return output_pdf
 
 
 def generar_pdf_info_camping_multiple():
@@ -211,8 +212,8 @@ def generar_pdf_info_camping_multiple_merge_files():
     #ruta2 = generate_code128_no_fotter("200798")
 
     #Traer imagen en base64
-    barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}.png").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo.png").decode("utf-8")
+    barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
 
     context = {
         "logo": logo_64,
@@ -306,3 +307,4 @@ def generar_pdf_info_camping_multiple_merge_files():
     #Write out the merged PDF file
     merger.write("media/merged_camping_info.pdf")
     merger.close()
+    return "media/merged_camping_info.pdf"

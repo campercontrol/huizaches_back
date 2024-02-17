@@ -16,6 +16,7 @@ class School(Base):
         index=True,
     )
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id de la escuela")
+    login_id = Column(ForeignKey("user.id"), doc='Usuario')
     name = Column(String(512), nullable=False, doc="Nombre de la escuela")
     address = Column(Text, doc="Dirección de la escuela")
     url = Column(String(512,), doc="Pagina web de la escuela")

@@ -52,3 +52,9 @@ def update_season_by_id(db: Session, season_id: int, modify_season: SeasonModify
     )
     db.commit()
     return rows_updated
+
+def delete_season(db: Session, season_id:int):
+    season = db.query(Season).filter(Season.id==season_id).first()
+    db.delete(season)
+    db.commit()
+    return {"status" : True}

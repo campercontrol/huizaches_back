@@ -7,7 +7,9 @@ from crud.camps.staff_in_camp_crud import (
     get_all_staff_in_camp,
     create_new_staff_in_camp,
     volunteer_staff,
-    unsubscribe_staff
+    unsubscribe_staff,
+    accept_staff_in_camp,
+    assign_role_staff
 )
 from schema.camps.staff_in_camp_schema import(
     StaffInCampCreate,
@@ -46,3 +48,13 @@ def create_staff_volunteer(new_staff_in_camp:StaffInCampCreate, db: Session = De
 def unsubscribe_staff_to_camp(id_staff_in_camp:int , db: Session = Depends(get_db)):
     staff_in_camp = unsubscribe_staff(db, id_staff_in_camp)
     return {"data": staff_in_camp}
+
+@staff_in_camp_routes.post("/accept/staff/camp/{camp_id}", tags=["StaffInCamp"])
+def accept_staff_camp(staffs_id:list[int], camp_id:int, db: Session = Depends(get_db)):
+    staff_in_camp = accept_staff_in_camp(db, camp_id, staffs_id)
+    return {"data": staff_in_camp}
+
+@staff_in_camp_routes.post("/update/staff/role/{camp_id}/{role_id}", tags=["StaffInCamp"])
+def update_role_staff(staffs_id:list[int], camp_id:int, role_id:int, db: Session = Depends(get_db)):
+    staff = assign_role_staff(db, camp_id, staffs_id, role_id)
+    return {"data": staff}

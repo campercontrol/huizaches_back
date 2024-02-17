@@ -42,6 +42,9 @@ class ProspectCreate(BaseModel):
     bio: str= Field(
         title= "Biografia"
     )
+    cv : str = Field(
+        title= "Curriculum"
+    )
     photo: str = Field(
         title= "Fotografía"
     )
@@ -73,6 +76,10 @@ class ProspectCreate(BaseModel):
         title="temporada",
         default=1   
     )
+    record_id: Optional[int] = Field(
+        title="record",
+        default=1
+    )
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
@@ -82,86 +89,122 @@ class ProspectCompleteCreate(BaseModel):
     prospect : ProspectCreate
 
 
-
-class StaffCreate(BaseModel):
-   
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    ) 
-    paid: bool = Field(
-        title="Pagado"
-    )
-    payment_amount: condecimal(decimal_places= 2)
-    
-    payment_date: date = Field(
-        title = "Fecha del pago"
-    )
-    txn_number: str = Field(
-        title= "Numero de transacción",
-        max_lenght= 150       
-    )    
-    camp_id: int = Field(
-        title="Camp"
-    )
-    camper_id: int = Field(
-        title="Camper"
-    )
-    currency_id: int = Field(
-        title="Divisa"
-    )
-    parent_id: int = Field(
-        title="Titular de la cuenta"
-    )
-    payment_method_id: int = Field(
-        title="Metodo de pago"
-    )
-    txn_type_id: int = Field(
-        title="Tipo de transacción"
-    ) 
-    created_at:Optional[datetime] = Field(
-        default=datetime.now()
-    )
-
-
 class StaffModify(BaseModel):
     
     id:Optional[int] = Field(
         title="Id",
         default=None,
         primary_key=True
+    )
+    login_id: Optional[int] = Field(
+        title= "Usuario"
     ) 
-    paid: bool = Field(
-        title="Pagado"
-    )
-    payment_amount: condecimal(decimal_places= 2)
-    
-    payment_date: date = Field(
-        title = "Fecha del pago"
-    )
-    txn_number: str = Field(
+    name: str = Field(
         title= "Numero de transacción",
-        max_lenght= 150       
-    )    
-    camp_id: int = Field(
-        title="Camp"
+        max_lenght= 50       
     )
-    camper_id: int = Field(
-        title="Camper"
+    lastname_father: str = Field(
+        title= "Numero de transacción",
+        max_lenght= 50       
     )
-    currency_id: int = Field(
-        title="Divisa"
+    lastname_mother: Optional[str] = Field(
+        title= "Numero de transacción",
+        max_lenght= 50       
     )
-    parent_id: int = Field(
-        title="Titular de la cuenta"
+    gender_id: int = Field(
+        title="Genero"
     )
-    payment_method_id: int = Field(
-        title="Metodo de pago"
+    birthday: date = Field(
+        title="Fecha de nacimiento"
     )
-    txn_type_id: int = Field(
-        title="Tipo de transacción"
-    ) 
+    affliction: str = Field(
+        title = "Enfermedades que padece"
+    )
+    curp: str = Field(
+        title= "CURP",
+        max_lenght= 25       
+    )
+    rfc: str = Field(
+        title= "RFC"
+    )
+    bio: str= Field(
+        title= "Biografia"
+    )
+    cv : str = Field(
+        title= "Curriculum"
+    )
+    photo: str = Field(
+        title= "Fotografía"
+    )
+    cellphone: str = Field(
+        title="Celular",
+        max_lenght=20
+    )
+    home_phone: str = Field(
+        title="Telefono de casa",
+        max_lenght=20
+    )
+    blood_type : str = Field(
+        title="Tipo de sangre"
+    )
+    drug_allergies: str = Field(
+        title = "Alergia a medicamentos"
+    )
+    other_allergies: str = Field(
+        title = "Otras alergias"
+    )
+    nocturnal_disorders: str = Field(
+        title = "Problemas nocturnos"
+    )
+    phobias: str = Field(
+        title = "Fobias o miedos"
+    )
+    drugs: str = Field(
+        title = "Durante el campamento, ¿Estará tomando algún medicamento?"
+    )
+    prohibited_foods: str = Field(
+        title = "Comida prohibida"
+    )
+    staff_contact_name: str = Field(
+        title="Nombre de contacto"
+    )
+    staff_contact_relation: str = Field(
+        title="Relacion con la persona de contacto"
+    )
+    staff_contact_homephone: str = Field(
+        title="Telefono de casa de contacto"
+    )
+    staff_contact_cellphone: str = Field(
+        title="Telefono celular de contacto"
+    )
+    facebook: str = Field(
+        title="Facebook",
+        max_lenght=25
+    )
+    coordinator: Optional[bool] = Field(
+        title="Coordinador"
+    )
+    employee: bool = Field(
+        title="empleado"
+    )
+    employee_email_send: bool = Field( 
+        title="correo de activacion",
+        default=False
+    )
+    season_id: int = Field( 
+        title="temporada",
+        default=1   
+    )
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+
+class StaffCatalog(BaseModel):
+    id:int
+    name: str
+    is_active: boolean
+
+class StaffComplete(BaseModel):
+    staff: StaffModify
+    vaccines : Optional[list[StaffCatalog]]
+    food_restrictions : Optional[list[StaffCatalog]]

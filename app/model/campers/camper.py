@@ -22,13 +22,13 @@ class Camper(Base):
     height = Column(Float(53), nullable=False, doc='Altura')
     weight = Column(Float(53), nullable=False, doc='Peso')
     grade = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Grado escolar')
-    school_id = Column(ForeignKey('campers_school.id'), nullable=False, default=0, doc='Escuela')
+    school_id = Column(ForeignKey('campers_school.id'), nullable=True, default=None, doc='Escuela')
     school_other = Column(String(512), doc='Otra escuela')
     email = Column(String(75), nullable=False, doc='Email')
     can_swim = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Sabe nadar')
     affliction = Column(Text, nullable=False,doc='Enfermedades')
     blood_type = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='Tipo de sangre')
-    temporal_blood_type = Column(String(15), doc="Tipo de sangre temporal para la migración")
+    temporal_blood_type = Column(String(100), doc="Tipo de sangre temporal para la migración")
     heart_problems = Column(Text, nullable= False, doc= 'Problemas cardiacos')
     psicology_treatments = Column(Text, nullable= False, doc= 'Tratamientos psicologicos y psiquiatricos')
     prevent_activities = Column(Text, nullable= False, doc='Cirugias, fracturas o esguinces que le impidan realizar actividades ')
@@ -48,8 +48,14 @@ class Camper(Base):
     contact_relation = Column(String(512), nullable=False,  doc='Relación del camper con el  contacto de emergencia')
     contact_homephone = Column(String(512), nullable=False,  doc='Telefono de casa del contacto de emergencia')
     contact_cellphone = Column(String(512), nullable=False,  doc='Celular del contacto de emergencia')
-    parent_id = Column(ForeignKey("campers_parent.id"), nullable=False, default=0, doc='Titular de la cuenta')
-    record_id = Column(ForeignKey("campers_camperrecords.id"), nullable=False, default=0, doc='Titular de la cuenta')
+    parent_id = Column(ForeignKey("campers_parent.id"), nullable=True, default=None, doc='Titular de la cuenta')
+    record_id = Column(ForeignKey("campers_camperrecords.id"), nullable=True, default=None, doc='Titular de la cuenta')
+
+    # gender = relationship("Constant", foreign_keys=[gender_id])
+    # grade_id = relationship("Constant", foreign_keys=[grade])
+    # can_swim_id = relationship("Constant", foreign_keys=[can_swim])
+    # blood_type_id = relationship("Constant", foreign_keys=[blood_type])
+
     
 
     created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)

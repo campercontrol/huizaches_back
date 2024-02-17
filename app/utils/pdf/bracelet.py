@@ -4,25 +4,50 @@ from utils.barcode_tools import generate_code128, generate_code128_no_fotter
 from utils.image_tools import img_to_base_64
 #from fastapi.templating impor Jin
 
-def generar_pdf_bracelete():
+def generar_pdf_bracelete(list_campers, camp_name):
     
-    code = "200798"
-    ruta1 = generate_code128_no_fotter(code) 
-    barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
+    #code = "200798"
+    #ruta1 = generate_code128_no_fotter(code) 
+    #barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
     logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
 
-    context = {
-        "name":"AILYN ROSALÉ CALDERÓN TORRES",
-        "school":"Escuela Prueba",
-        "camping":"PRUEBA 1",
-        "barcode_img":barcode_64,
-        "barcode_code":code,        
-        "blood_type":"A+",
-        "alergies":"NO",
-        "other_alergies":"NO",
-        "prohibed_foo":"NO",
-        "logo_img":logo_64,
-        }
+    list_b = []
+    for camper in list_campers:
+        code =  str(getattr(camper, "camper_id")).zfill(6)
+        ruta1 = generate_code128_no_fotter(code) 
+        barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
+        
+        context = {
+            "name":  getattr(camper, "name"),
+            "school": getattr(camper, "school"),
+            "camping": camp_name,
+            "barcode_img":barcode_64,
+            "barcode_code":code,        
+            "blood_type": getattr(camper, "blood_type"),
+            "alergies": getattr(camper, "alergies"),
+            "other_alergies": getattr(camper, "other_alergies"),
+            "prohibed_foo":  getattr(camper, "prohibed_foo"),
+            "logo_img":logo_64,
+            }
+        list_b.append(context)
+
+    list_context = {
+        "list_bracelet" : list_b
+    }
+
+
+    #context = {
+    #    "name":"AILYN ROSALÉ CALDERÓN TORRES",
+    #    "school":"Escuela Prueba",
+    #    "camping":"PRUEBA 1",
+    #    "barcode_img":barcode_64,
+    #    "barcode_code":code,        
+    #    "blood_type":"A+",
+    #    "alergies":"NO",
+    #    "other_alergies":"NO",
+    #    "prohibed_foo":"NO",
+    #    "logo_img":logo_64,
+    #    }
     
     template_loader = jinja2.FileSystemLoader('media/templates_pdf/')
     template_env= jinja2.Environment(loader = template_loader)
@@ -31,7 +56,7 @@ def generar_pdf_bracelete():
 
     template = template_env.get_template(html_info_camper)
  
-    html_content = template.render(context) #Renderiza los datos en el html
+    html_content = template.render(list_context) #Renderiza los datos en el html
 
     print("//////////")
     print(html_content)
@@ -58,40 +83,41 @@ def generar_pdf_bracelete():
     except OSError:
     #not present in PATH
         print("path_not_found")
+    return output_pdf
 
 
-def generar_pdf_bracelete_multiple():
+def generar_pdf_bracelete_multiple(list_campers, camp_name):
     
     code = "200798"
     ruta1 = generate_code128_no_fotter(code) 
     barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
     logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
 
-    context = {
-        "name":"AILYN ROSALÉ CALDERÓN TORRES",
-        "school":"Escuela Prueba",
-        "camping":"PRUEBA 1",
-        "barcode_img":barcode_64,
-        "barcode_code":code,        
-        "blood_type":"A+",
-        "alergies":"NO",
-        "other_alergies":"NO",
-        "prohibed_foo":"NO",
-        "logo_img":logo_64,
-        }
+    list_b = []
+    for camper in list_campers:
+        code =  str(getattr(camper, "camper_id")).zfill(6)
+        ruta1 = generate_code128_no_fotter(code) 
+        barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
+        
+        context = {
+            "name":  getattr(camper, "name"),
+            "school": getattr(camper, "school"),
+            "camping": camp_name,
+            "barcode_img":barcode_64,
+            "barcode_code":code,        
+            "blood_type": getattr(camper, "blood_type"),
+            "alergies": getattr(camper, "alergies"),
+            "other_alergies": getattr(camper, "other_alergies"),
+            "prohibed_foo":  getattr(camper, "prohibed_foo"),
+            "logo_img":logo_64,
+            }
+        list_b.append(context)
     
     list_of_context = {
-        "list_bracelet" : [
-            context,
-            context,
-            context,
-            context,
-            context,
-            context,
-            context,
-            context
-        ]
+        "list_bracelet" : list_b
     }
+
+    print(list_of_context)
     
     template_loader = jinja2.FileSystemLoader('media/templates_pdf/')
     template_env= jinja2.Environment(loader = template_loader)
@@ -127,5 +153,6 @@ def generar_pdf_bracelete_multiple():
     except OSError:
     #not present in PATH
         print("path_not_found")
+    return output_pdf
 
 

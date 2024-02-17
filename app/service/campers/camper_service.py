@@ -1,6 +1,7 @@
 from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends, Request
+#from fastapi_pagination import Page, add_pagination, paginate
 from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
 
@@ -40,6 +41,7 @@ from crud.campers_catalogs.camper_pathological_background_fm_crud import (
 )
 from crud.campers.camper_crud import (
     get_all_camper,
+    get_all_camper_admin,
     get_camper_by_uuid,
     create_new_camper,
     update_camper_by_id,
@@ -50,6 +52,7 @@ from crud.campers.camper_crud import (
     get_pathological_background_fm_by_camper,
     get_campers_from_parent,
     get_camper_band,
+    search_camper_by_name_user,
     delete_camper
 )
 from crud.campers.parent_crud import get_parent_by_uuid
@@ -59,6 +62,7 @@ from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
     get_cancelled_by_camper,
     get_past_subscribe_by_camper,
+    get_camps_name_amount_camper
 )
 from crud.crud_user import get_user_by_uuid
 from crud.campers.school_crud import get_active_school
@@ -156,48 +160,53 @@ def create_camper(camper_complete: CamperComplete, db: Session = Depends(get_db)
     # )
     # rewrite_image(tmp_path_photo, final_path_photo)
 
-    for vaccine in camper_complete.vaccines:
-        camper_vaccine = CamperVaccineCreate(
-            camper_id=new_camper_id, vaccine_id=vaccine.id, is_active=vaccine.is_active
-        )
-        print(camper_vaccine)
-        create_new_camper_vaccine(db, camper_vaccine)
+    if camper_complete.vaccines:
+        for vaccine in camper_complete.vaccines:
+            camper_vaccine = CamperVaccineCreate(
+                camper_id=new_camper_id, vaccine_id=vaccine.id, is_active=vaccine.is_active
+            )
+            print(camper_vaccine)
+            create_new_camper_vaccine(db, camper_vaccine)
 
-    for food_restriction in camper_complete.food_restrictions:
-        camper_food_restriction = CamperFoodRestrictionCreate(
-            camper_id=new_camper_id,
-            food_restriction_id=food_restriction.id,
-            is_active=food_restriction.is_active,
-        )
-        create_new_camper_food_restriction(db, camper_food_restriction)
+    if camper_complete.food_restrictions:
+        for food_restriction in camper_complete.food_restrictions:
+            camper_food_restriction = CamperFoodRestrictionCreate(
+                camper_id=new_camper_id,
+                food_restriction_id=food_restriction.id,
+                is_active=food_restriction.is_active,
+            )
+            create_new_camper_food_restriction(db, camper_food_restriction)
 
-    for licensed_medicine in camper_complete.licensed_medicines:
-        camper_licensed_medicine = CamperLicensedMedicineCreate(
-            camper_id=new_camper_id,
-            licensed_medicine_id=licensed_medicine.id,
-            is_active=licensed_medicine.is_active,
-        )
-        create_new_camper_licensed_medicine(db, camper_licensed_medicine)
+    if camper_complete.licensed_medicines:
+        for licensed_medicine in camper_complete.licensed_medicines:
+            camper_licensed_medicine = CamperLicensedMedicineCreate(
+                camper_id=new_camper_id,
+                licensed_medicine_id=licensed_medicine.id,
+                is_active=licensed_medicine.is_active,
+            )
+            create_new_camper_licensed_medicine(db, camper_licensed_medicine)
 
-    for pathological_background in camper_complete.pathological_background:
-        camper_pathological_background = CamperPathologicalBackCreate(
-            camper_id=new_camper_id,
-            pathological_background_id=pathological_background.id,
-            is_active=pathological_background.is_active,
-        )
-        create_new_camper_pathological_background(db, camper_pathological_background)
+    if camper_complete.pathological_background:
+        for pathological_background in camper_complete.pathological_background:
+            camper_pathological_background = CamperPathologicalBackCreate(
+                camper_id=new_camper_id,
+                pathological_background_id=pathological_background.id,
+                is_active=pathological_background.is_active,
+            )
+            create_new_camper_pathological_background(db, camper_pathological_background)
 
-    for pathological_background_fm in camper_complete.pathological_background_fm:
-        camper_pathological_background_fm = CamperPathologicalBackFmCreate(
-            camper_id=new_camper_id,
-            pathological_background_fm_id=pathological_background_fm.id,
-            is_active=pathological_background_fm.is_active,
-        )
-        create_new_camper_pathological_background_fm(
-            db, camper_pathological_background_fm
-        )
+    if camper_complete.pathological_background_fm:
+        for pathological_background_fm in camper_complete.pathological_background_fm:
+            camper_pathological_background_fm = CamperPathologicalBackFmCreate(
+                camper_id=new_camper_id,
+                pathological_background_fm_id=pathological_background_fm.id,
+                is_active=pathological_background_fm.is_active,
+            )
+            create_new_camper_pathological_background_fm(
+                db, camper_pathological_background_fm
+            )
 
-    return new_camper
+    return {"camper_id": new_camper_id}
 
 
 @camper_routes.patch("/camper/{camper_id}", tags=["Campers"])
@@ -415,9 +424,17 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
+    total_amount = 0
+    
+    for camp in camper_subscribe_camps:
+        total_amount = total_amount + camp.get('camper_payment_balance')
+
+    for camp in camper_passed_camps:
+        total_amount = total_amount + camp.get('camper_payment_balance') 
     data = {
         "camper_band": camper_band,
         "camper_info": camper_info,
+        "camper_total_amount": total_amount,
         "parent": parent,
         "user_email": user[0].email,
         "camper_comments_parent": camper_comments_parent,
@@ -431,3 +448,13 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
 def delete_camper_by_id(camper_id:int, db: Session = Depends(get_db)):
     status = delete_camper(db, camper_id)
     return{"status": status}
+
+@camper_routes.get("/search/camper/{search}", tags=["Campers"])
+def get_search_camper(search:str, db: Session = Depends(get_db)):
+    possible_campers  = search_camper_by_name_user(db, search)
+    return { "data": possible_campers }
+
+@camper_routes.get("/admin/camper/", tags=["Campers"])
+def get_admin_camper(db: Session = Depends(get_db)):
+    campers = get_all_camper_admin(db)
+    return { "data": campers }

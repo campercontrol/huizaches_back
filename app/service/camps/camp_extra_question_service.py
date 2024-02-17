@@ -9,6 +9,7 @@ from crud.camps.camp_extra_question_crud import (
     get_extra_question_by_camp,
     create_new_extra_question,
     update_extra_question_by_id,
+    delete_extra_question
 )
 
 from schema.camps.camp_extra_question_schema import (
@@ -76,3 +77,10 @@ def update_camp_extra_question(
 def extra_question_bycamp(camp_id, db: Session = Depends(get_db)):
     list_extra_questions = get_extra_question_by_camp(db, camp_id)
     return{"data": list_extra_questions}
+
+@extra_question_routes.delete("/delete/camp_extra_question/{camp_extra_question_id}", tags=["CampsExtraQuestion"])
+def delete_camp_extra_question_by_id(camp_extra_question_id:int, db: Session = Depends(get_db)):
+    status = delete_extra_question(db, camp_extra_question_id)
+    return{"status": status}
+
+

@@ -31,41 +31,39 @@ class Payment(Base):
     payment_amount = Column(Float(53), nullable=False)
     txn_number = Column(String(200), nullable=False)
     camp_id = Column(
-        "camp", ForeignKey("camps_camp.id"), nullable=False, default=0, doc="Campamento"
+        "camp", 
+        ForeignKey("camps_camp.id"), 
+        nullable=True, 
+        doc="Campamento"
     )
     camper_id = Column(
         "camper",
         ForeignKey("campers_camper.id"),
-        nullable=False,
-        default=0,
+        nullable=True,
         doc="Camper",
     )
     currency_id = Column(
         "currency",
         ForeignKey("catalogs_currency.id"),
-        nullable=False,
-        default=0,
+        nullable=True,
         doc="Divisa",
     )
     parent_id = Column(
         "parent",
         ForeignKey("campers_parent.id"),
-        nullable=False,
-        default=0,
+        nullable=True,
         doc="Titular de la cuenta",
     )
     payment_method_id = Column(
         "payment_method",
         ForeignKey("payments_paymentmethod.id"),
-        nullable=False,
-        default=0,
+        nullable=True,
         doc="Metodo de pago",
     )
     txn_type_id = Column(
         "txn_type",
         ForeignKey("payments_paymenttransactiontype.id"),
-        nullable=False,
-        default=0,
+        nullable=True,
         doc="Metodo de pago",
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)

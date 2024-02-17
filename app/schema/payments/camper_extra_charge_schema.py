@@ -66,3 +66,13 @@ class ExtraChargeListCreate(BaseModel):
 
 class CamperExtraChargeListCreate(BaseModel):
     extra_charges: list[ExtraChargeListCreate]
+
+class ExtraChargeMultiple(BaseModel):
+    
+    camp_extra_charge_is_selected:bool = Field(
+        title="Seleccionado"
+    )
+
+    camp_extra_charge_id:int = Field(
+        title = "Cargo extra id"
+    )
