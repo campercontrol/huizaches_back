@@ -6,7 +6,7 @@ from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
 
 
 def get_all_groupings(db: Session):
-    return db.query(Grouping).all()
+    return db.query(Grouping).order_by(Grouping.id).all()
 
 
 def get_grouping_by_id(db: Session, grouping_id: int):
@@ -38,3 +38,4 @@ def delete_grouping(db: Session, grouping_id: int):
         db.commit()
         return True
     return False
+

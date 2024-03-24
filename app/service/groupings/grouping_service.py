@@ -8,7 +8,7 @@ from crud.groupings.grouping_crud import (
     update_grouping,
     delete_grouping
 )
-from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
+from schema.groupings.grouping_schema import GroupingBase, GroupingCreate, GroupingUpdate, GroupingGet
 from utils.db import SessionLocal
 
 grouping_router = APIRouter()
@@ -21,12 +21,12 @@ def get_db():
         db.close()
 
 
-@grouping_router.get("/groupings/", response_model=list[GroupingCreate], tags=["Grouping"])
+@grouping_router.get("/groupings/", tags=["Grouping"])
 def list_groupings(db: Session = Depends(get_db)):
     return get_all_groupings(db)
 
 
-@grouping_router.get("/groupings/{grouping_id}", response_model=GroupingCreate, tags=["Grouping"])
+@grouping_router.get("/groupings/{grouping_id}", response_model=GroupingGet, tags=["Grouping"])
 def read_grouping(grouping_id: int, db: Session = Depends(get_db)):
     db_grouping = get_grouping_by_id(db, grouping_id)
     if db_grouping is None:
