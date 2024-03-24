@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import update
 from model.groupings.grouping_type import GroupingType
@@ -17,18 +18,9 @@ def create_new_grouping_type(db: Session, grouping_type_data: GroupingTypeCreate
     return db_grouping_type
 
 def update_grouping_type(db: Session, grouping_type_id: int, update_data):
-    # db.query(GroupingType).filter(GroupingType.id == grouping_type_id).update(update_data.dict())
-    # groupingType = (
-    #     update(GroupingType).
-    #     values(name =  update_data.name).
-    #     where(GroupingType.id == grouping_type_id)
-    # )
-    # result = db.execute(groupingType)
-    # print(groupingType)
-    # rows_updated = (
-    #     db.query(GroupingType).filter_by(id=grouping_type_id).update(update_data.dict())
-    # )
     groupingType = db.query(GroupingType).filter_by(id=grouping_type_id).one_or_none()
+    if groupingType == None:
+        raise HTTPException(status_code=404, detail="GroupingType not found")
     groupingType.name = update_data.name
     db.commit()
     return groupingType

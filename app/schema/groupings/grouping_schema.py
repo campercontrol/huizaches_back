@@ -35,6 +35,6 @@ class GroupingUpdate(GroupingBase):
     is_active:Optional[bool]
     grouping_type_id:Optional[int]
 
-    updated_at:datetime = Field(
-        default=datetime.now()
-    )
+class GroupingResponse(GroupingBase):
+    id:int
+    grouping_type_id:int

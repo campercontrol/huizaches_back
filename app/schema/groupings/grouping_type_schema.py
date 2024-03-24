@@ -25,6 +25,4 @@ class GroupingTypeUpdate(BaseModel):
         title='Nombre de la agrupación',
         default=None
     )
-    updated_at:datetime = Field(
-        default=datetime.now()
-    )
+    
