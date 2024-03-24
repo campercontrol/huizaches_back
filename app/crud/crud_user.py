@@ -149,6 +149,7 @@ def get_user_by_email(db, email):
 
 def get_profile_id_by_user_id(db, user_id:int ):
 
+    profile_id = ['']
     user = (
         db.query(User.role_id)
         .filter_by(id = user_id)
@@ -208,3 +209,4 @@ def update_password_all_users(db, hashed_pass:str):
 
     # "$2b$12$9QchmEH2rcRnHlfBnGe7ZunGbonntZc/RX2NHgClT7YSiakHRy.Pm"
     return 1
+

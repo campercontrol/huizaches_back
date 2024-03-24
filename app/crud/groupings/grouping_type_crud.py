@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 from model.groupings.grouping_type import GroupingType
 from schema.groupings.grouping_type_schema import GroupingTypeCreate, GroupingTypeUpdate
 
 def get_all_grouping_types(db: Session):
-    return db.query(GroupingType).all()
+    return db.query(GroupingType).order_by(GroupingType.id).all()
 
 def get_grouping_type_by_id(db: Session, grouping_type_id: int):
     return db.query(GroupingType).filter(GroupingType.id == grouping_type_id).first()
@@ -15,11 +16,22 @@ def create_new_grouping_type(db: Session, grouping_type_data: GroupingTypeCreate
     db.refresh(db_grouping_type)
     return db_grouping_type
 
-def update_grouping_type(db: Session, grouping_type_id: int, update_data: GroupingTypeUpdate):
-    db.query(GroupingType).filter(GroupingType.id == grouping_type_id).update(update_data.dict())
+def update_grouping_type(db: Session, grouping_type_id: int, update_data):
+    # db.query(GroupingType).filter(GroupingType.id == grouping_type_id).update(update_data.dict())
+    # groupingType = (
+    #     update(GroupingType).
+    #     values(name =  update_data.name).
+    #     where(GroupingType.id == grouping_type_id)
+    # )
+    # result = db.execute(groupingType)
+    # print(groupingType)
+    # rows_updated = (
+    #     db.query(GroupingType).filter_by(id=grouping_type_id).update(update_data.dict())
+    # )
+    groupingType = db.query(GroupingType).filter_by(id=grouping_type_id).one_or_none()
+    groupingType.name = update_data.name
     db.commit()
-    return db.query(GroupingType).filter(GroupingType.id == grouping_type_id).first()
-
+    return groupingType
 
 def delete_grouping_type(db: Session, grouping_type_id: int):
     grouping_type_to_delete = db.query(GroupingType).filter(GroupingType.id == grouping_type_id).first()
@@ -28,3 +40,4 @@ def delete_grouping_type(db: Session, grouping_type_id: int):
         db.commit()
         return True
     return False
+

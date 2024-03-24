@@ -7,7 +7,7 @@ from crud.groupings.grouping_type_crud import (
     update_grouping_type,
     delete_grouping_type
 )
-from schema.groupings.grouping_type_schema import GroupingTypeCreate, GroupingTypeUpdate
+from schema.groupings.grouping_type_schema import GroupingTypeBase, GroupingTypeCreate, GroupingTypeUpdate
 from utils.db import SessionLocal
 
 grouping_type_router = APIRouter()
@@ -19,7 +19,7 @@ def get_db():
     finally:
         db.close()
 
-@grouping_type_router.get("/grouping_types/", response_model=list[GroupingTypeCreate], tags=["GroupingType"])
+@grouping_type_router.get("/grouping_types/", response_model=list[GroupingTypeBase], tags=["GroupingType"])
 def list_grouping_types(db: Session = Depends(get_db)):
     return get_all_grouping_types(db)
 

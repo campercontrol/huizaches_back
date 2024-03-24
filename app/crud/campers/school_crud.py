@@ -72,3 +72,4 @@ def delete_school(db: Session, school_id:int):
     db.delete(school)
     db.commit()
     return {"status" : True}
+

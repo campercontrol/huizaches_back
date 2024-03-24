@@ -1,11 +1,30 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
 class GroupingTypeBase(BaseModel):
-    name: str
+    id: Optional[int] = Field(
+        title="Id",
+        default = None,
+        primary_key=True
+    )
+    name: str = Field (
+        title='Nombre de la agrupación'
+    )
+    class Config:
+        orm_mode = True
 
 class GroupingTypeCreate(GroupingTypeBase):
-    pass
+    name: str = Field (
+        title='Nombre de la agrupación',
+        min_length=1
+    )
 
-class GroupingTypeUpdate(GroupingTypeBase):
-    pass
+class GroupingTypeUpdate(BaseModel):
+    name: str = Field (
+        title='Nombre de la agrupación',
+        default=None
+    )
+    updated_at:datetime = Field(
+        default=datetime.now()
+    )
