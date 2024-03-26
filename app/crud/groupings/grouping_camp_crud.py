@@ -12,7 +12,6 @@ def create_new_grouping_camp(db: Session, grouping_camp_data: GroupingCampCreate
     db_grouping_camp = GroupingCamp(**grouping_camp_data.dict())
     db.add(db_grouping_camp)
     db.commit()
-    db.refresh(db_grouping_camp)
     return db_grouping_camp
 
 def update_grouping_camp(db: Session, grouping_camp_id: int, update_data: GroupingCampUpdate):

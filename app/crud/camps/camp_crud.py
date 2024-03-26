@@ -142,7 +142,20 @@ def get_records_for_camp(db: Session, camp_id: int):
     }
 
 
-2
+# 2
+
+
+def get_camp_by_search(db: Session, search: str):
+    camps = (
+        db.query(Camp.id.label("camp_id"), Camp.name.label("camp_name"))
+        .filter(Camp.name.ilike(r"%{}%".format(search)))
+        .all()
+    )
+
+    if not camps:
+        return "Data not found"
+
+    return db_mapping_rows_to_dict(camps)
 
 
 def get_camp_by_search(db: Session, search: str):
