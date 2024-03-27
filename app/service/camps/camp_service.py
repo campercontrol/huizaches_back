@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
 
@@ -29,6 +29,7 @@ from crud.camps.camper_in_camp_crud import (
     get_campers_for_camp,
     subscribe_camper_to_camps,
     create_update_camper_extras_camp,
+    get_campers_in_camp_and_groupings
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -245,3 +246,11 @@ def post_extras_camp_for_camper(
 def get_search_camp(search: str, db: Session = Depends(get_db)):
     possible_camps = get_camp_by_search(db, search)
     return {"data": possible_camps}
+
+@camp_router.get("/get_campers_in_camp__groupings/{camp_id}", tags=["GroupingCamp"])
+def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depends(get_db)):
+    campers_groupings = get_campers_in_camp_and_groupings(db,camp_id)
+
+    if len(campers_groupings) == 0:
+        raise HTTPException(status_code=404, detail="Camp not found")
+    return {"data": campers_groupings}

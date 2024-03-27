@@ -1,9 +1,12 @@
 from sqlalchemy import case, and_
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
+from model.groupings.grouping import Grouping
+from model.groupings.grouping_camp import GroupingCamp
+from model.groupings.grouping_camper import GroupingCamper
 from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
 from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
 from model.payments import CamperExtraCharge
@@ -526,7 +529,26 @@ def get_camper_in_camp_by_camper(db, camper_id: int):
     data = db.query(CamperInCamp).filter(CamperInCamp.camper_id == camper_id).all()
     return data
 
-
+def get_campers_in_camp_and_groupings(db, camp_id: int):
+    query = (
+        db.query(
+            Camper.id,
+            (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
+            Camper.birthday,
+            Constant.value.label('gender'),
+            func.string_agg(Grouping.name, ',').label('groupings')
+        )
+        .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+        .join(Constant, Camper.gender_id == Constant.id)
+        .outerjoin(GroupingCamper, Camper.id == GroupingCamper.camper_id)
+        .outerjoin(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+        .outerjoin(Grouping, GroupingCamp.grouping_id == Grouping.id)
+        .filter(CamperInCamp.camp_id == camp_id)
+        .group_by(Camper.id, Constant.value)
+    )
+    
+    data = db.execute(query)
+    return data.mappings().all()
 
 """
 Camper extra charges

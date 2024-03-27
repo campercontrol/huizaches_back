@@ -21,7 +21,6 @@ def create_new_grouping_camper(db: Session, grouping_camper_data: GroupingCamper
     db_grouping_camper = GroupingCamper(**grouping_camper_data.dict())
     db.add(db_grouping_camper)
     db.commit()
-    db.refresh(db_grouping_camper)
     return db_grouping_camper
 
 
