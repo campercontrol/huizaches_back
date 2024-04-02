@@ -6,8 +6,9 @@ from crud.groupings.grouping_camper_crud import (
     create_new_grouping_camper,
     update_grouping_camper,
     assign_grouping_camp_to_campers,
+    get_available_campers_to_add_in_grouping
 )
-from schema.groupings.grouping_camper_schema import GroupingCamperCreate, GroupingCamperUpdate, GroupingCamperResponse
+from schema.groupings.grouping_camper_schema import GroupingCamperCreate, GroupingCamperUpdate, GroupingCamperResponse, GroupingAvailableCampers
 from utils.db import SessionLocal
 
 grouping_camper_router = APIRouter()
@@ -29,6 +30,16 @@ def read_grouping_camper(grouping_camper_id: int, db: Session = Depends(get_db))
     if db_grouping_camper is None:
         raise HTTPException(status_code=404, detail="GroupingCamper not found")
     return db_grouping_camper
+
+@grouping_camper_router.get("/groupings/{grouping_camp_id}/available_campers", tags=["GroupingCamper"])
+def read_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session = Depends(get_db)):
+    db_available_campers_to_add = get_available_campers_to_add_in_grouping(grouping_camp_id, db)
+    if len(db_available_campers_to_add) == 0:
+      raise HTTPException(status_code=404, detail="Grouping_camp not found")  
+    return db_available_campers_to_add
+
+# @grouping_camper_router.post("groupings/")
+
 
 @grouping_camper_router.post("/grouping_campers/", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
 def create_grouping_camper(grouping_camper: GroupingCamperCreate, db: Session = Depends(get_db)):

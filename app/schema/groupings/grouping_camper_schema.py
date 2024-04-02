@@ -8,6 +8,13 @@ class GroupingCamperBase(BaseModel):
     class Config:
         orm_mode = True
  
+class GroupingAvailableCampers(BaseModel):
+    id: int
+    name: str
+    birthday: datetime
+    gender: str
+    class Config:
+        orm_mode = True
 
 class GroupingCamperCreate(GroupingCamperBase):
     pass

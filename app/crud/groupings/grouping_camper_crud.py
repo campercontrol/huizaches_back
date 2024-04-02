@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from model.groupings.grouping_camper import GroupingCamper
 from model.groupings.grouping_camp import GroupingCamp
+from model.campers.camper import Camper
+from model.catalogs.constant import Constant
+from model.camps import CamperInCamp
+from fastapi import HTTPException
 from schema.groupings.grouping_camper_schema import (
     GroupingCamperCreate,
     GroupingCamperUpdate,
@@ -56,3 +60,29 @@ def update_grouping_camper(
     return (
         db.query(GroupingCamper).filter(GroupingCamper.id == grouping_camper_id).first()
     )
+def get_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session):
+    grouping_camp = db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camp_id).first();
+    if grouping_camp == None:
+        raise HTTPException(status_code=404, detail="Grouping camp not found");  
+    
+
+    query = db.query(
+        Camper.id,
+        (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
+        Camper.birthday,
+        Constant.value.label('gender')
+    ).join(
+        CamperInCamp, CamperInCamp.camper_id == Camper.id
+    ).join(
+        Constant, Camper.gender_id == Constant.id
+    ).filter(
+        CamperInCamp.camp_id == grouping_camp.camp_id,
+            ~Camper.id.in_(
+                db.query(GroupingCamper.camper_id).filter(
+                    GroupingCamper.grouping_camp_id == grouping_camp_id
+            )
+        )
+    ).order_by(Camper.id)
+    
+    data = db.execute(query)
+    return data.mappings().all()

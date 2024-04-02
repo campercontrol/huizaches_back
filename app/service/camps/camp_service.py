@@ -247,7 +247,7 @@ def get_search_camp(search: str, db: Session = Depends(get_db)):
     possible_camps = get_camp_by_search(db, search)
     return {"data": possible_camps}
 
-@camp_router.get("/get_campers_in_camp__groupings/{camp_id}", tags=["GroupingCamp"])
+@camp_router.get("/campers/groupings/camps/{camp_id}", tags=["GroupingCamp"])
 def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depends(get_db)):
     campers_groupings = get_campers_in_camp_and_groupings(db,camp_id)
 

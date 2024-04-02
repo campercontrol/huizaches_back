@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from crud.groupings.grouping_camp_crud import (
     get_all_grouping_camps,
     get_grouping_camp_by_id,
+    get_camp_groupings_by_camp_id,
     create_new_grouping_camp,
     update_grouping_camp,
 )
@@ -28,6 +29,13 @@ def read_grouping_camp(grouping_camp_id: int, db: Session = Depends(get_db)):
     if db_grouping_camp is None:
         raise HTTPException(status_code=404, detail="GroupingCamp not found")
     return db_grouping_camp
+
+@grouping_camp_router.get("/groupings/camps/{camp_id}", tags=["GroupingCamp"])
+def get_groupings_by_camp(camp_id: int, db: Session = Depends(get_db)):
+    db_camp_groupings = get_camp_groupings_by_camp_id(db, camp_id)
+    if len(db_camp_groupings) == 0:
+        raise HTTPException(status_code=404, detail="Camp not found")
+    return {"data": db_camp_groupings }
 
 @grouping_camp_router.post("/grouping_camps/", response_model=GroupingCampResponse, tags=["GroupingCamp"])
 def create_grouping_camp(grouping_camp: GroupingCampCreate, db: Session = Depends(get_db)):
