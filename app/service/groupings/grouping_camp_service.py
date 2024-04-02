@@ -30,7 +30,7 @@ def read_grouping_camp(grouping_camp_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="GroupingCamp not found")
     return db_grouping_camp
 
-@grouping_camp_router.get("/groupings/camps/{camp_id}", tags=["GroupingCamp"])
+@grouping_camp_router.get("/camps/{camp_id}/groupings", tags=["GroupingCamp"])
 def get_groupings_by_camp(camp_id: int, db: Session = Depends(get_db)):
     db_camp_groupings = get_camp_groupings_by_camp_id(db, camp_id)
     if len(db_camp_groupings) == 0:
