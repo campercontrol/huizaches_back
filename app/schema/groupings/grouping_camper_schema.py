@@ -17,7 +17,8 @@ class GroupingAvailableCampers(BaseModel):
         orm_mode = True
 
 class GroupingCamperCreate(GroupingCamperBase):
-    pass
+    camper_id: int
+    grouping_camp_id: int
 
 class GroupingCamperUpdate(GroupingCamperBase):
     pass

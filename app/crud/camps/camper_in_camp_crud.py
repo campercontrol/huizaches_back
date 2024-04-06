@@ -1,7 +1,7 @@
 from sqlalchemy import case, and_
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 from model.groupings.grouping import Grouping
@@ -530,21 +530,26 @@ def get_camper_in_camp_by_camper(db, camper_id: int):
     return data
 
 def get_campers_in_camp_and_groupings(db, camp_id: int):
+    catalog_one = aliased(Constant)
+    catalog_two = aliased(Constant)
+    
     query = (
         db.query(
             Camper.id,
             (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
             Camper.birthday,
-            Constant.value.label('gender'),
+            catalog_one.value.label('gender'),
+            catalog_two.value.label('grade'),
             func.string_agg(Grouping.name, ',').label('groupings')
         )
         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
-        .join(Constant, Camper.gender_id == Constant.id)
+        .join(catalog_one, Camper.gender_id == catalog_one.id)
+        .join(catalog_two, Camper.grade == catalog_two.id)
         .outerjoin(GroupingCamper, Camper.id == GroupingCamper.camper_id)
         .outerjoin(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
         .outerjoin(Grouping, GroupingCamp.grouping_id == Grouping.id)
         .filter(CamperInCamp.camp_id == camp_id)
-        .group_by(Camper.id, Constant.value)
+        .group_by(Camper.id, catalog_one.value, catalog_two.value)
     )
     
     data = db.execute(query)

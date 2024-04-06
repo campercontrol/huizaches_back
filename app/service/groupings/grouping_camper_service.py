@@ -25,29 +25,27 @@ def list_grouping_campers(db: Session = Depends(get_db)):
     return get_all_grouping_campers(db)
 
 @grouping_camper_router.get("/grouping_campers/{grouping_camper_id}", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
-def read_grouping_camper(grouping_camper_id: int, db: Session = Depends(get_db)):
+def get_grouping_camper(grouping_camper_id: int, db: Session = Depends(get_db)):
     db_grouping_camper = get_grouping_camper_by_id(db, grouping_camper_id)
     if db_grouping_camper is None:
         raise HTTPException(status_code=404, detail="GroupingCamper not found")
     return db_grouping_camper
 
 @grouping_camper_router.get("/groupings/{grouping_camp_id}/available_campers", tags=["GroupingCamper"])
-def read_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session = Depends(get_db)):
+def get_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session = Depends(get_db)):
     db_available_campers_to_add = get_available_campers_to_add_in_grouping(grouping_camp_id, db)
     if len(db_available_campers_to_add) == 0:
       raise HTTPException(status_code=404, detail="Grouping_camp not found")  
     return db_available_campers_to_add
 
-# @grouping_camper_router.post("groupings/")
 
-
-@grouping_camper_router.post("/grouping_campers/", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
-def create_grouping_camper(grouping_camper: GroupingCamperCreate, db: Session = Depends(get_db)):
+@grouping_camper_router.post("/grouping_campers/", tags=["GroupingCamper"])
+def add_camper_to_grouping(grouping_camper: GroupingCamperCreate, db: Session = Depends(get_db)):
     return create_new_grouping_camper(db, grouping_camper)
 
-@grouping_camper_router.post("/grouping_campers/assign/", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
-def create_grouping_camper(campers_id: list[int], grouping_camp_id: int, db: Session = Depends(get_db)):
-    return assign_grouping_camp_to_campers(db, campers_id, grouping_camp_id)
+# @grouping_camper_router.post("/grouping_campers/assign/", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
+# def create_grouping_camper(campers_id: list[int], grouping_camp_id: int, db: Session = Depends(get_db)):
+#     return assign_grouping_camp_to_campers(db, campers_id, grouping_camp_id)
 
 @grouping_camper_router.put("/grouping_campers/{grouping_camper_id}", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
 def update_grouping_camper_endpoint(
