@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from model.groupings.grouping_camp import GroupingCamp
+from model.groupings.grouping_camper import GroupingCamper
 from model.groupings.grouping import Grouping
 from model.groupings.grouping_type import GroupingType
 from schema.groupings.grouping_camp_schema import GroupingCampCreate, GroupingCampUpdate
@@ -22,16 +24,36 @@ def update_grouping_camp(db: Session, grouping_camp_id: int, update_data: Groupi
     return db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camp_id).first()
 
 def get_camp_groupings_by_camp_id(db: Session, camp_id: int):
+    # query = (
+    #     db.query(
+    #         GroupingCamp.id,
+    #         Grouping.id.label('grouping_id'),
+    #         Grouping.name.label('grouping'),
+    #         GroupingType.name.label('type')
+    #     )
+    #     .join(GroupingCamp, GroupingCamp.grouping_id == Grouping.id)
+    #     .join(GroupingType, Grouping.grouping_type_id == GroupingType.id)
+    #     .filter(GroupingCamp.camp_id == camp_id)
+    # )
     query = (
         db.query(
             GroupingCamp.id,
             Grouping.id.label('grouping_id'),
             Grouping.name.label('grouping'),
-            GroupingType.name.label('type')
+            GroupingType.name.label('type'),
+            func.concat(func.count(GroupingCamper.id), '/', GroupingCamp.maximum_capacity).label('capacity')            
         )
         .join(GroupingCamp, GroupingCamp.grouping_id == Grouping.id)
         .join(GroupingType, Grouping.grouping_type_id == GroupingType.id)
+        .outerjoin(GroupingCamper, GroupingCamp.id == GroupingCamper.grouping_camp_id)
         .filter(GroupingCamp.camp_id == camp_id)
+        .group_by(
+            Grouping.id,
+            GroupingCamp.id,
+            Grouping.name,
+            GroupingType.name
+        )
     )
     data = db.execute(query)
     return data.mappings().all()
+    
