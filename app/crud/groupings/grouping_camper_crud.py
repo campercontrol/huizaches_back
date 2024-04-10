@@ -21,34 +21,34 @@ def get_grouping_camper_by_id(db: Session, grouping_camper_id: int):
     )
 
 
-def create_new_grouping_camper(db: Session, grouping_camper: GroupingCamperCreate):
+def create_new_grouping_camper(db: Session, grouping_campers: GroupingCamperCreate):
     db.begin()
+    grouping_camp_id = grouping_campers[0].grouping_camp_id
+
     try:
-        grouping_camp_row = db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camper.grouping_camp_id).first()
-        grouping_current_capacity = db.query(GroupingCamper).filter(GroupingCamper.grouping_camp_id == grouping_camper.grouping_camp_id).count()
+        grouping_camp_row = db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camp_id).first()
+        grouping_current_capacity = db.query(GroupingCamper).filter(GroupingCamper.grouping_camp_id == grouping_camp_id).count()
+
+        if len(grouping_campers) + grouping_current_capacity > grouping_camp_row.maximum_capacity:
+            return {"detail": "La cantidad de campers excede la capacidad de la agrupación"}
 
         if grouping_camp_row == None:
             return {"detail": "No se econtró el grouping_camp_id"}        
 
-        if grouping_current_capacity >= grouping_camp_row.maximum_capacity:
-            return {"detail": "La agrupación ya se encuentra a su máxima capacidad"}
-
-        search_grouping_camper = db.query(GroupingCamper).filter(GroupingCamper.camper_id == grouping_camper.camper_id, GroupingCamper.grouping_camp_id == grouping_camper.grouping_camp_id).first()
-        
-        if  not search_grouping_camper == None:
-            return {"detail": "El camper ya se encuentra en la agrupación"}
-        
-        db_grouping_camper = GroupingCamper(**grouping_camper.dict())
-        db.add(db_grouping_camper)
-        
-    except:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Internal server error")
-    else:
+        for grouping_camper in grouping_campers:
+            search_grouping_camper = db.query(GroupingCamper).filter(GroupingCamper.camper_id == grouping_camper.camper_id, GroupingCamper.grouping_camp_id == grouping_camp_id).first()        
+            if not search_grouping_camper == None:
+                return {"detail": "El camper " + str(search_grouping_camper.camper_id) + ' ya se encuentra en la agrupación. No se añadieron los campers'}
+            new_grouping_camper = GroupingCamper(**grouping_camper.dict())
+            db.add(new_grouping_camper)
         db.commit()
-        db.refresh(db_grouping_camper)
+    except Exception as ex:
+        print(ex)
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Ocurrio un error, los campers no se añadieron correctamente")
+    
     db.close()
-    return db_grouping_camper
+    return {"detail": "Se han añadido correctamente los campers a la agrupación"}
     
 
 def assign_grouping_camp_to_campers(db: Session, campers_id, grouping_camp_id):

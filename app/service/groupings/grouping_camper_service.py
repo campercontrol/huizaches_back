@@ -40,7 +40,7 @@ def get_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session 
 
 
 @grouping_camper_router.post("/grouping_campers/", tags=["GroupingCamper"])
-def add_camper_to_grouping(grouping_camper: GroupingCamperCreate, db: Session = Depends(get_db)):
+def add_camper_to_grouping(grouping_camper: list[GroupingCamperCreate], db: Session = Depends(get_db)):
     return create_new_grouping_camper(db, grouping_camper)
 
 # @grouping_camper_router.post("/grouping_campers/assign/", response_model=GroupingCamperResponse, tags=["GroupingCamper"])
