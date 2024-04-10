@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from model.groupings.grouping_camper import GroupingCamper
 from model.groupings.grouping_camp import GroupingCamp
 from model.campers.camper import Camper
@@ -87,17 +87,22 @@ def available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session):
     grouping_camp = db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camp_id).first();
     if grouping_camp == None:
         raise HTTPException(status_code=404, detail="Grouping camp not found")  
+        
+    catalog_one = aliased(Constant)
+    catalog_two = aliased(Constant)
     
-
     query = db.query(
         Camper.id,
         (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
         Camper.birthday,
-        Constant.value.label('gender')
+        catalog_one.value.label('gender'),
+        catalog_two.value.label('grade')
     ).join(
         CamperInCamp, CamperInCamp.camper_id == Camper.id
     ).join(
-        Constant, Camper.gender_id == Constant.id
+        catalog_one, Camper.gender_id == catalog_one.id
+    ).join(
+        catalog_two, Camper.grade == catalog_two.id
     ).filter(
         CamperInCamp.camp_id == grouping_camp.camp_id,
             ~Camper.id.in_(
