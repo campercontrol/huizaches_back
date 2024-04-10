@@ -6,7 +6,7 @@ from crud.groupings.grouping_camper_crud import (
     create_new_grouping_camper,
     update_grouping_camper,
     assign_grouping_camp_to_campers,
-    get_available_campers_to_add_in_grouping
+    available_campers_to_add_in_grouping
 )
 from schema.groupings.grouping_camper_schema import GroupingCamperCreate, GroupingCamperUpdate, GroupingCamperResponse, GroupingAvailableCampers
 from utils.db import SessionLocal
@@ -33,7 +33,7 @@ def get_grouping_camper(grouping_camper_id: int, db: Session = Depends(get_db)):
 
 @grouping_camper_router.get("/groupings/{grouping_camp_id}/available_campers", tags=["GroupingCamper"])
 def get_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session = Depends(get_db)):
-    db_available_campers_to_add = get_available_campers_to_add_in_grouping(grouping_camp_id, db)
+    db_available_campers_to_add = available_campers_to_add_in_grouping(grouping_camp_id, db)
     if len(db_available_campers_to_add) == 0:
       raise HTTPException(status_code=404, detail="Grouping_camp not found")  
     return db_available_campers_to_add

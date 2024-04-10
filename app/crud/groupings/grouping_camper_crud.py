@@ -83,10 +83,10 @@ def update_grouping_camper(
     return (
         db.query(GroupingCamper).filter(GroupingCamper.id == grouping_camper_id).first()
     )
-def get_available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session):
+def available_campers_to_add_in_grouping(grouping_camp_id: int, db: Session):
     grouping_camp = db.query(GroupingCamp).filter(GroupingCamp.id == grouping_camp_id).first();
     if grouping_camp == None:
-        raise HTTPException(status_code=404, detail="Grouping camp not found");  
+        raise HTTPException(status_code=404, detail="Grouping camp not found")  
     
 
     query = db.query(
