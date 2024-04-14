@@ -14,8 +14,19 @@ from schema.camps.camp_checkpoint_schema import (
 
 
 def get_all_camp_checkpoint(db):
-    rows = db.query(CampCheckpoint).all()
-    return rows
+    query = db.query(
+            CampCheckpoint.id,
+            CampCheckpoint.name,
+            CampCheckpoint.chekpoint_date,
+            CampCheckpoint.order,
+            Camp.start, 
+            Camp.end
+        ).join(
+            Camp, CampCheckpoint.camp_id == Camp.id
+        ).order_by(CampCheckpoint.id)
+    data = db.execute(query)
+    return data.mappings().all()
+    
 
 
 def get_camp_checkpoint_by_id(db, camp_checkpoint_id: int):
