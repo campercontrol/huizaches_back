@@ -73,6 +73,7 @@ def create_new_parent(db, new_parent: ParentCreate):
 
 def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
+    email_welcome_template = 1
     try:
         new_parent.user_id = user_id
         user = db.query(User.email).filter(User.id == user_id).first()
@@ -80,7 +81,7 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db.add(db_parent)
         db.commit()
         user = db.query(User.email).filter(User.id == user_id).first()
-        send_mail_template(db, [user[0]], 2, None, db_parent.id)
+        send_mail_template(db, [user[0]], email_welcome_template, None, db_parent.id)
         print("######################################################")
         response_toku = create_customer(
             db_parent.id,
