@@ -3,6 +3,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 from model.role import Role
 from model.user import User
+from model.campers import School
+from model.medical import Doctor
 from model.campers import Parent
 from model.staffs import Staff
 from utils.hash import hash_str
@@ -150,13 +152,19 @@ def get_user_by_email(db, email):
 def get_profile_id_by_user_id(db, user_id:int ):
 
     profile_id = ['']
-    user = (
+    parent_role = 1
+    staff_role = 2
+    school_role = 3
+    doctor_role = 5
+    user_role = (
         db.query(User.role_id)
         .filter_by(id = user_id)
         .first()
     )
-
-    if user[0] == 1:
+    print("get profile ===============")
+    print(user_role[0])
+    
+    if user_role[0] == parent_role:
         profile_id = (
             db.query(Parent.id)
             .join(User, User.id == Parent.user_id)
@@ -164,13 +172,28 @@ def get_profile_id_by_user_id(db, user_id:int ):
             .first()
         )
 
-    if user[0] == 2:
+    if user_role[0] == staff_role:
         profile_id = (
             db.query(Staff.id)
             .join(User, User.id == Staff.login_id)
             .filter( Staff.login_id == user_id)
             .first()
         )
+    if user_role[0] == school_role:
+        profile_id = (
+            db.query(School.id)
+            .join(User, User.id == School.login_id)
+            .filter(Staff.login_id == user_id)
+            .first()
+        )
+    if user_role[0] == doctor_role:
+        profile_id = (
+            db.query(Doctor.id)
+            .join(User, User.id == Doctor.login_id)
+            .filter(Doctor.login_id == user_id)
+            .first()
+        )
+    # print(profile_id[0])
     return profile_id[0]
 
 def search_user_by_email(db: Session, search: str):

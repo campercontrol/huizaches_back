@@ -117,10 +117,10 @@ def reset_password(
     exist_email = get_user_by_email(db, user_reset.email)
     if not exist_email:
         response.status_code = 401
-        return {"mensaje": "No email ingresado no esta registrado", "data": ""}
+        return {"mensaje": "No email ingresado no está registrado", "data": ""}
     elif not exist_email.is_active:
         response.status_code = 401
-        return {"mensaje": "No email ingresado esta desactivado", "data": ""}
+        return {"mensaje": "El email ingresado está desactivado", "data": ""}
     else:
         accessToken = generate_access_token_reset_pass(user_reset.email)
         send_simple_message(
