@@ -7,6 +7,7 @@ from crud.staffs.staff_crud import (
     get_all_prospect,
     get_all_staff,
     create_new_prospect,
+    create_complete_prospect,
     accept_prospect,
     delete_prospect,
     staff_dashboard,
@@ -88,8 +89,11 @@ def get_staff(db: Session = Depends(get_db)):
 def create_prospect(
     new_prospect: ProspectCompleteCreate, db: Session = Depends(get_db)
 ):
-    user = create_new_prospect_user(db, new_prospect.user)
-    prospect = create_new_prospect(db, new_prospect.prospect, user.id)
+    # user = create_new_prospect_user(db, new_prospect.user)
+    # prospect = create_new_prospect(db, new_prospect.prospect, user.id)
+
+    prospect = create_complete_prospect(db, new_prospect)
+
     return {"data": prospect}
 
 

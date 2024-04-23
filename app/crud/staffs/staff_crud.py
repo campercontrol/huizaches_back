@@ -3,11 +3,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
+from fastapi import HTTPException
 from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
 from model import User
-
+from utils.hash import hash_str
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
 
@@ -71,6 +71,46 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_prospect
 
+def create_complete_prospect(db, new_prospect):
+    try:
+        prospect_user = User(
+            email= new_prospect.user.email,
+            hashed_pass=hash_str(new_prospect.user.passw),
+            role_id= 2,
+            is_active= False,
+            is_coordinator = False,
+            is_admin = False,
+            is_employee = False,
+            is_superuser = False           
+                 
+        )
+        db.add(prospect_user)
+        db.commit()
+        db.refresh(prospect_user)
+
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el prospect")
+
+    try:
+        new_prospect.prospect.login_id = prospect_user.id
+        prospect_profile = Staff(**new_prospect.prospect.dict())
+        prospect_profile.employee = False
+        prospect_profile.coordinator = False
+        db.add(prospect_profile)
+        db.commit()
+        db.refresh(prospect_profile)
+    
+    except Exception as ex:
+        db.rollback()
+        db.delete(prospect_user)
+        db.commit()
+        print(ex)
+        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
+
+
+    return prospect_profile
 
 def delete_prospect(db, prospect_id: int):
     prospect = db.query(Staff).filter(Staff.id == prospect_id).first()

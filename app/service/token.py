@@ -33,7 +33,12 @@ def get_db():
 
 
 def authenticate_user(db, username: str, password: str):
+    print("USERNAME")
+    print(username)
     user = get_user_by_email(db, username)
+    print("USER DB")
+    print(user)
+
     if not user:
         return 2
     if not verify_str_hash(password, user.hashed_pass):
@@ -112,10 +117,10 @@ async def login_for_access_token(
         - Si el detail es 3 el login fue incorrecto, la contraseña es inco-
           rrecta.
     """
-    print(form_data.username)
+    # print(form_data.username)
     user = authenticate_user(db, form_data.username, form_data.password)
-    print(user)
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    # print(user)
+    # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     if user == 2:
         detail = 2
         raise HTTPException(

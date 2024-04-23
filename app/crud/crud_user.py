@@ -161,8 +161,8 @@ def get_profile_id_by_user_id(db, user_id:int ):
         .filter_by(id = user_id)
         .first()
     )
-    print("get profile ===============")
-    print(user_role[0])
+    # print("get profile ===============")
+    # print(user_role[0])
     
     if user_role[0] == parent_role:
         profile_id = (
