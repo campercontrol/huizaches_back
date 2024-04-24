@@ -96,11 +96,27 @@ def create_complete_prospect(db, new_prospect):
         raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el prospect")
 
     try:
+        staff_new_record = StaffRecord(
+            attend = 0,
+            attended = 0,
+            total = 0
+        )
+        db.add(staff_new_record)
+        db.commit()
+        db.refresh(staff_new_record)
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
+
+    try:
         new_prospect.prospect.login_id = prospect_user.id
         prospect_profile = Staff(**new_prospect.prospect.dict())
         prospect_profile.employee = False
         prospect_profile.coordinator = False
         prospect_profile.season_id = current_season
+        prospect_profile.record_id = staff_new_record.id    
+
         db.add(prospect_profile)
         db.commit()
         db.refresh(prospect_profile)
@@ -108,6 +124,7 @@ def create_complete_prospect(db, new_prospect):
     except Exception as ex:
         db.rollback()
         db.delete(prospect_user)
+        db.delete(staff_new_record)
         db.commit()
         print(ex)
         raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
