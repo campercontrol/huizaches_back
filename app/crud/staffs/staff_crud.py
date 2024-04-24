@@ -72,7 +72,7 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     return db_prospect
 
 def create_complete_prospect(db, new_prospect):
-    current_season = 17
+    current_season = 77
     
     try:
         prospect_user = User(
