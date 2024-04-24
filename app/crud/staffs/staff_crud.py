@@ -72,6 +72,8 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     return db_prospect
 
 def create_complete_prospect(db, new_prospect):
+    current_season = 17
+    
     try:
         prospect_user = User(
             email= new_prospect.user.email,
@@ -98,6 +100,7 @@ def create_complete_prospect(db, new_prospect):
         prospect_profile = Staff(**new_prospect.prospect.dict())
         prospect_profile.employee = False
         prospect_profile.coordinator = False
+        prospect_profile.season_id = current_season
         db.add(prospect_profile)
         db.commit()
         db.refresh(prospect_profile)
