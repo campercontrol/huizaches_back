@@ -150,63 +150,16 @@ def get_camper_by_id_complete(
 
 @camper_routes.post("/camper/", tags=["Campercamper_schema"])
 def create_camper(camper_complete: CamperComplete, db: Session = Depends(get_db)):
-    new_camper = create_new_camper(db, camper_complete.camper)
-    new_camper_id = getattr(new_camper, "id")
-    tmp_path_photo = getattr(new_camper, "photo")
+    new_camper = create_new_camper(db, camper_complete)
+    # new_camper_id = getattr(new_camper, "id")
+    # tmp_path_photo = getattr(new_camper, "photo")
     # final_path_photo = str(
     #    getattr(new_camper, "id")
     #    + getattr(new_camper, "name")
     #    + getattr(new_camper, "lastname_father")
     # )
     # rewrite_image(tmp_path_photo, final_path_photo)
-
-    if camper_complete.vaccines:
-        for vaccine in camper_complete.vaccines:
-            camper_vaccine = CamperVaccineCreate(
-                camper_id=new_camper_id, vaccine_id=vaccine.id, is_active=vaccine.is_active
-            )
-            print(camper_vaccine)
-            create_new_camper_vaccine(db, camper_vaccine)
-
-    if camper_complete.food_restrictions:
-        for food_restriction in camper_complete.food_restrictions:
-            camper_food_restriction = CamperFoodRestrictionCreate(
-                camper_id=new_camper_id,
-                food_restriction_id=food_restriction.id,
-                is_active=food_restriction.is_active,
-            )
-            create_new_camper_food_restriction(db, camper_food_restriction)
-
-    if camper_complete.licensed_medicines:
-        for licensed_medicine in camper_complete.licensed_medicines:
-            camper_licensed_medicine = CamperLicensedMedicineCreate(
-                camper_id=new_camper_id,
-                licensed_medicine_id=licensed_medicine.id,
-                is_active=licensed_medicine.is_active,
-            )
-            create_new_camper_licensed_medicine(db, camper_licensed_medicine)
-
-    if camper_complete.pathological_background:
-        for pathological_background in camper_complete.pathological_background:
-            camper_pathological_background = CamperPathologicalBackCreate(
-                camper_id=new_camper_id,
-                pathological_background_id=pathological_background.id,
-                is_active=pathological_background.is_active,
-            )
-            create_new_camper_pathological_background(db, camper_pathological_background)
-
-    if camper_complete.pathological_background_fm:
-        for pathological_background_fm in camper_complete.pathological_background_fm:
-            camper_pathological_background_fm = CamperPathologicalBackFmCreate(
-                camper_id=new_camper_id,
-                pathological_background_fm_id=pathological_background_fm.id,
-                is_active=pathological_background_fm.is_active,
-            )
-            create_new_camper_pathological_background_fm(
-                db, camper_pathological_background_fm
-            )
-
-    return {"camper_id": new_camper_id}
+    return {"camper_id": new_camper.id}
 
 
 @camper_routes.patch("/camper/{camper_id}", tags=["Campers"])

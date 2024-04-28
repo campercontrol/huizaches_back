@@ -49,6 +49,7 @@ def create_new_camper_vaccine(db: Session, new_camper_vaccine: CamperVaccineCrea
         db_camper_vaccine = None
         return db_camper_vaccine
     except Exception as ex:
+        db.rollback()
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_camper_vaccine
 
