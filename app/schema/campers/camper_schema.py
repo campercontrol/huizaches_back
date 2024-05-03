@@ -118,9 +118,9 @@ class CamperCreate(BaseModel):
     parent_id:int = Field(
         title="Titular de la cuenta"
     )
-    record_id:int = Field(
-        title="Record de campamentos del camper"
-    )
+    # record_id:int = Field(
+    #     title="Record de campamentos del camper"
+    # )
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
