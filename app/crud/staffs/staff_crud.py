@@ -8,6 +8,7 @@ from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
 from model import User
 from utils.hash import hash_str
+from helper.mailing_helpers import send_mail_prospect
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
 
@@ -73,7 +74,7 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
 
 def create_complete_prospect(db, new_prospect):
     current_season = 77
-    
+    welcome_prospect_template = 1 
     try:
         prospect_user = User(
             email= new_prospect.user.email,
@@ -120,16 +121,16 @@ def create_complete_prospect(db, new_prospect):
         db.add(prospect_profile)
         db.commit()
         db.refresh(prospect_profile)
-    
+        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile)
     except Exception as ex:
-        db.rollback()
-        db.delete(prospect_user)
+        db.delete(prospect_profile)
         db.delete(staff_new_record)
+        db.delete(prospect_user)
         db.commit()
         print(ex)
         raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
 
-
+    
     return prospect_profile
 
 def delete_prospect(db, prospect_id: int):

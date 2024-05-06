@@ -83,29 +83,29 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         user = db.query(User.email).filter(User.id == user_id).first()
         send_mail_template(db, [user[0]], email_welcome_template, None, db_parent.id)
         print("######################################################")
-        response_toku = create_customer(
-            db_parent.id,
-            user[0],
-            str(
-                db_parent.tutor_name
-                + " "
-                + db_parent.tutor_lastname_father
-                + " "
-                + db_parent.tutor_lastname_mother
-            ),
-            db_parent.tutor_cellphone,
-            True,
-        )
-        print(response_toku)
-        response_json = json.loads(response_toku.text)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(response_json)
-        respuesta_act = db.query(Parent).filter(Parent.id == db_parent.id).update(
-            {"toku_id": response_json['id']}
-        )
-        print("Respuesta de actualizacion")
-        print(respuesta_act)
-        db.commit()
+        # response_toku = create_customer(
+        #     db_parent.id,
+        #     user[0],
+        #     str(
+        #         db_parent.tutor_name
+        #         + " "
+        #         + db_parent.tutor_lastname_father
+        #         + " "
+        #         + db_parent.tutor_lastname_mother
+        #     ),
+        #     db_parent.tutor_cellphone,
+        #     True,
+        # )
+        # print(response_toku)
+        # response_json = json.loads(response_toku.text)
+        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        # print(response_json)
+        # respuesta_act = db.query(Parent).filter(Parent.id == db_parent.id).update(
+        #     {"toku_id": response_json['id']}
+        # )
+        # print("Respuesta de actualizacion")
+        # print(respuesta_act)
+        # db.commit()
         db.refresh(db_parent)
 
     except SQLAlchemyError as e:
