@@ -121,7 +121,7 @@ def create_complete_prospect(db, new_prospect):
         db.add(prospect_profile)
         db.commit()
         db.refresh(prospect_profile)
-        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile)
+        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
     except Exception as ex:
         db.delete(prospect_profile)
         db.delete(staff_new_record)

@@ -7,8 +7,9 @@ from crud.campers.camper_crud import get_campers_from_parent
 from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from utils.db import db_mapping_rows_to_dict
-from helper.mailing_helpers import send_mail_template
+from helper.mailing_helpers import send_mail_parent
 from utils.toku_payment_tools import create_customer
 
 import json
@@ -73,49 +74,21 @@ def create_new_parent(db, new_parent: ParentCreate):
 
 def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
-    email_welcome_template = 1
+    email_welcome_template = 16
     try:
         new_parent.user_id = user_id
-        user = db.query(User.email).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.id == user_id).first()
         db_parent = Parent(**new_parent.dict())
         db.add(db_parent)
         db.commit()
-        user = db.query(User.email).filter(User.id == user_id).first()
-        send_mail_template(db, [user[0]], email_welcome_template, None, db_parent.id)
-        print("######################################################")
-        # response_toku = create_customer(
-        #     db_parent.id,
-        #     user[0],
-        #     str(
-        #         db_parent.tutor_name
-        #         + " "
-        #         + db_parent.tutor_lastname_father
-        #         + " "
-        #         + db_parent.tutor_lastname_mother
-        #     ),
-        #     db_parent.tutor_cellphone,
-        #     True,
-        # )
-        # print(response_toku)
-        # response_json = json.loads(response_toku.text)
-        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        # print(response_json)
-        # respuesta_act = db.query(Parent).filter(Parent.id == db_parent.id).update(
-        #     {"toku_id": response_json['id']}
-        # )
-        # print("Respuesta de actualizacion")
-        # print(respuesta_act)
-        # db.commit()
         db.refresh(db_parent)
+        send_mail_parent(db, [user[0]], email_welcome_template, user, db_parent)
 
-    except SQLAlchemyError as e:
-        print("#=================================#")
-        print(e)
-        print("#=================================#")
-        db_parent = None
-        return db_parent
     except Exception as e:
-        print(f"No se pudo guardar en la base de datos: {e}")
+        db.rollback()
+        print(e)
+        raise HTTPException(status_code=500, detail="Ocurrió un error al crear el padre")
+
     return db_parent
 
 

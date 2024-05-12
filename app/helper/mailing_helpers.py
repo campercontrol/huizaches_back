@@ -4,7 +4,7 @@ from model.mailings import EmailTemplate
 
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
-
+from utils.functions_jwt import create_user_verify_url
 
 def send_mail_template(
     db,
@@ -33,14 +33,51 @@ def send_mail_template(
     )
     return 1
 
+def send_mail_parent(
+    db,
+    send_to: list[str],
+    template_id: int,
+    parent_profile,
+    parent_user
+):
+    # data = {
+    #     "user_email": parent_profile.email
+    # }
+    # url = create_user_verify_url(data)
+
+    context = {
+        "username": parent_profile.name,
+        "father_lastname": parent_profile.tutor_lastname_father
+    }
+
+    template_content =  (
+        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+    )
+    # print(template_content[0])
+    template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
+    html_content = template_env.render(context)
+    send_simple_message(
+        "", send_to, template_content.title, html_content
+    )
+    return 1
 
 def send_mail_prospect(
     db,
     send_to: list[str],
     template_id: int,
-    prospect_profile
+    prospect_profile,
+    prospect_user
 ):
-    context = {"username": prospect_profile.name}
+
+    data = {
+        "user_email": prospect_user.email
+    }
+    url = create_user_verify_url(data)
+
+    context = {
+        "username": prospect_profile.name,
+        "verify_url": url
+    }
 
     template_content =  (
         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()

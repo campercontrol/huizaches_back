@@ -17,6 +17,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_MINUTES = 35
 ACCESS_RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 60
+USER_VERIFY_URL_EXPIRE_MINUTES = 180
 
 
 # Dependency
@@ -131,6 +132,12 @@ def validate_token_general(token_data):
 
 #Crear token 
 
+def create_user_verify_url(data: dict):
+    user_verify_url_expire = timedelta(minutes=USER_VERIFY_URL_EXPIRE_MINUTES)
+    token = create_access_token(data, expires_delta=user_verify_url_expire)
+    url = f'http://migracion.campercontrol.com/user/verify?t={token}' 
+    return url
+    
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     to_encode = data.copy()

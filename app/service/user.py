@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends, Response, BackgroundTasks, UploadFile
+from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.crud_user import (
@@ -137,7 +137,28 @@ def reset_password(
             "data": "",
         }
 
+@user_routes.post("/user/verify/")
+def verify_account(t: str, db: Session = Depends(get_db)):
+    data = validate_token_general(t)
+    if data[0] == 403:
+        raise HTTPException(status_code=401, detail="Token Has expired") 
+    if data[0] == 401:
+        raise HTTPException(status_code=401, detail="Invalid token") 
+    email = data[1]["user_email"]
+    try:
+        db.begin()
+        account =  db.query(User).filter_by(email=email).first()
+        account.is_active = True
+        db.add(account)
+        db.commit()
+        db.refresh(account)
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        raise HTTPException(status_code=500, detail="Internal server error") 
+    return {"detail": "The account was successfully verified"}
 
+    
 @user_routes.post("/usuario/change_password/{email}", tags=["Usuarios"])
 def change_password(
     email: str,
