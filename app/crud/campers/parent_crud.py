@@ -82,13 +82,14 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db.add(db_parent)
         db.commit()
         db.refresh(db_parent)
-        send_mail_parent(db, [user[0]], email_welcome_template, user, db_parent)
-
+        send_mail_parent(db, [user.email], email_welcome_template, user, db_parent)
     except Exception as e:
-        db.rollback()
+        db.delete(db_parent)
+        db.delete(user)
+        db.commit()
         print(e)
         raise HTTPException(status_code=500, detail="Ocurrió un error al crear el padre")
-
+    
     return db_parent
 
 

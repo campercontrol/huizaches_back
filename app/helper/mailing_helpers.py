@@ -37,23 +37,22 @@ def send_mail_parent(
     db,
     send_to: list[str],
     template_id: int,
+    parent_user,
     parent_profile,
-    parent_user
 ):
     # data = {
     #     "user_email": parent_profile.email
     # }
     # url = create_user_verify_url(data)
-
     context = {
-        "username": parent_profile.name,
+        "username": parent_profile.tutor_name,
         "father_lastname": parent_profile.tutor_lastname_father
     }
 
     template_content =  (
         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
     )
-    # print(template_content[0])
+
     template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
     html_content = template_env.render(context)
     send_simple_message(
@@ -82,7 +81,6 @@ def send_mail_prospect(
     template_content =  (
         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
     )
-    # print(template_content[0])
     template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
     html_content = template_env.render(context)
     send_simple_message(
