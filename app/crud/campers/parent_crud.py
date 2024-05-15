@@ -82,7 +82,7 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db.add(db_parent)
         db.commit()
         db.refresh(db_parent)
-        send_mail_parent(db, [user.email], email_welcome_template, user, db_parent)
+        send_mail_parent(db, [user.email, db_parent.contact_email], email_welcome_template, user, db_parent)
     except Exception as e:
         db.delete(db_parent)
         db.delete(user)
