@@ -1,6 +1,6 @@
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
-
+from sqlalchemy.exc import SQLAlchemyError
 from model.catalogs import Currency
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
@@ -53,6 +53,15 @@ def update_currency_by_id(db, currency_id, modify_currency):
 
 def delete_currency(db: Session, currency_id:int):
     currency = db.query(Currency).filter(Currency.id==currency_id).first()
-    db.delete(currency)
-    db.commit()
-    return {"status" : True}
+    try:
+        db.delete(currency)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "detail": "Can´t delete currency, currency referenced by other table"}    
+    except:
+        db.rollback()
+        return {"status": 3, "detail": "Internal Server Error"}
+    
+    return {"status" : 1,
+            "detail": "Currency deleted successfully"}
