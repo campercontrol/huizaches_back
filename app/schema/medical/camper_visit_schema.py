@@ -65,7 +65,7 @@ class CamperVisitCreate(BaseModel):
     camper_id:int = Field(
         title="Camper"
     )
-    initial_visit_id:int = Field(
+    initial_visit_id:Optional[int] = Field(
         title="Consulta medica principal"
     )
     created_at:Optional[datetime] = Field(

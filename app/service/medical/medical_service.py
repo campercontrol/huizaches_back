@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.camps.camp_crud import get_camp_by_id
@@ -122,6 +122,8 @@ def get_medical_camper_visit_form(camper_id: int, db: Session = Depends(get_db))
 
 @medical_routes.post("/medical/camper/visit/", tags=["Medical"])
 def create_medical_camper_visit(camper_visit: CamperVisitCreate, db: Session = Depends(get_db)):
-    new_camper_visit =  create_new_camper_visit(db, camper_visit)
-    
-    return new_camper_visit
+    response =  create_new_camper_visit(db, camper_visit)
+
+    if response['status'] == 3 or response['status'] == 2 :
+        raise HTTPException(status_code=500, detail= response['detail'])
+    return response
