@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.catalogs.licensed_medicine_crud import (
@@ -59,5 +59,10 @@ def update_licensed_medicine(licensed_medicine_id:str,modify_licensed_medicine:L
 
 @licensed_medicine_routes.delete("/delete_licensed_medicine/{licensed_medicine_id}", tags=["Catalogs"])
 def delete_licensed_medicine_by_id(licensed_medicine_id:int, db: Session = Depends(get_db)):
-    status = delete_licensed_medicine(db, licensed_medicine_id)
-    return{"status": status}
+    response = delete_licensed_medicine(db, licensed_medicine_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Licensed medicine not found")
+
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response['detail'])
+    return response    

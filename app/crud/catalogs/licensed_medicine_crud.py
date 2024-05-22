@@ -1,4 +1,4 @@
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from model.catalogs import LicensedMedicine
 from schema.catalogs.licensed_medicine_schema import (
@@ -71,6 +71,16 @@ def update_licensed_medicine_by_id(
 
 def delete_licensed_medicine(db: Session, licensed_medicine_id:int):
     licensed_medicine = db.query(LicensedMedicine).filter(LicensedMedicine.id==licensed_medicine_id).first()
-    db.delete(licensed_medicine)
-    db.commit()
-    return {"status" : True}
+
+    if licensed_medicine == None:
+        return None
+    try:
+        db.delete(licensed_medicine)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "detail": "Can not delete licensed_medicine, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "detail": "Internal Server Error"}
+    return {"status" : 1, "detail": "Licensed_medicine family deleted successfully"}
