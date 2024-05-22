@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.catalogs.vaccine_crud import (
@@ -61,8 +61,13 @@ def update_vaccine(vaccine_id:str,modify_vaccine:VaccineModify,db: Session = Dep
 
 @vaccine_routes.delete("/delete_vaccine/{vaccine_id}", tags=["Catalogs"])
 def delete_vaccine_by_id(vaccine_id:int, db: Session = Depends(get_db)):
-    status = delete_vaccine(db, vaccine_id)
-    return{"status": status}
+    response = delete_vaccine(db, vaccine_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Vaccine not found")
+
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response['detail'])
+    return response    
 
 @vaccine_routes.post("/update/order/catalogs", tags=["Catalogs"])
 def update_catalogs_order(list:list, catalog_type:int, db: Session = Depends(get_db)):
