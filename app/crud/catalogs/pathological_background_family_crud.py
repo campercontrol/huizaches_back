@@ -1,5 +1,5 @@
 from sqlalchemy import case
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 
@@ -75,6 +75,16 @@ def update_pathological_background_family_by_id(
 
 def delete_pathological_back_fm(db: Session, pathological_back_fm_id:int):
     pathological_back_fm = db.query(PathologicalBackgroundFamily).filter(PathologicalBackgroundFamily.id==pathological_back_fm_id).first()
-    db.delete(pathological_back_fm)
-    db.commit()
-    return {"status" : True}
+    
+    if pathological_back_fm == None:
+        return None
+    try:
+        db.delete(pathological_back_fm)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "detail": "Can not delete pathological background family, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "detail": "Internal Server Error"}
+    return {"status" : 1, "detail": "Pathological background family deleted successfully"}

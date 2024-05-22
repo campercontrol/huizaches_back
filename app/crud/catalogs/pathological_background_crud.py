@@ -83,4 +83,4 @@ def delete_pathological_back(db: Session, pathological_back_id:int):
     except:
         db.rollback()
         return {"status": 3, "detail": "Internal Server Error"}
-    return {"status" : 1, "detail": "Currency deleted successfully"}
+    return {"status" : 1, "detail": "Pathological background deleted successfully"}
