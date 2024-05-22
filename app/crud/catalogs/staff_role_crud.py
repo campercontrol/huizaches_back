@@ -1,4 +1,4 @@
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 
 from model.catalogs import StaffRole
@@ -54,6 +54,16 @@ def update_staff_role_by_id(db, staff_role_id, modify_staff_role):
 
 def delete_staff_role(db: Session, staff_role_id:int):
     staff_role = db.query(StaffRole).filter(StaffRole.id==staff_role_id).first()
-    db.delete(staff_role)
-    db.commit()
-    return {"status" : True}
+    
+    if staff_role == None:
+        return None
+    try:
+        db.delete(staff_role)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "detail": "Can not delete staff role, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "detail": "Internal Server Error"}
+    return {"status" : 1, "detail": "Staff role deleted successfully"}
