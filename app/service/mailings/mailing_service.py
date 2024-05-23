@@ -107,20 +107,20 @@ def get_inf_campaign_camp(
     templates = get_all_massive_template(db)
     campers_info = []
     staffs_info = []
-    school_info = None
+    school_info = []
     if campers:
         campers_complete = get_campers_for_camp(db, camp_id)
+        print("CAMPERS!!!!!!!!!!!!!")
+        print(campers_complete)
         for camper_c in campers_complete:
             campers_info.append(
                 {   
-                    "camper_id": getattr(camper_c, "camper_id"),
-                    "camper_full_name": getattr(camper_c, "camper_full_name"),
-                    "tutor_full_name": getattr(camper_c, "tutor_full_name"),
-                    "tutor_email": getattr(camper_c, "tutor_email"),
-                    "second_tutor_full_name": getattr(
-                        camper_c, "second_tutor_full_name"
-                    ),
-                    "second_tutor_email": getattr(camper_c, "second_tutor_email"),
+                    "camper_id": camper_c["camper_id"],
+                    "camper_full_name": camper_c["camper_full_name"],
+                    "tutor_full_name": camper_c["tutor_full_name"],
+                    "tutor_email": camper_c["tutor_full_name"],
+                    "second_tutor_full_name": camper_c["second_tutor_full_name"],
+                    "second_tutor_email": camper_c["second_tutor_email"]
                 }
             )
     if staffs:
@@ -128,9 +128,9 @@ def get_inf_campaign_camp(
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
-                    "staff_id": getattr(staff_c, "staff_id"),
-                    "staff_full_name": getattr(staff_c, "staff_full_name"),
-                    "staff_email": getattr(staff_c, "staff_email"),
+                    "staff_id": camper_c["staff_id"],
+                    "staff_full_name": camper_c["staff_full_name"],
+                    "staff_email": camper_c["staff_email"]
                 }
             )
     if school:
