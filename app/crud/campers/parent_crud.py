@@ -45,7 +45,7 @@ def get_parent_for_admin_by_id(db: Session, parent_id: int):
             Parent.contact_email.label("contact_email"),
         )
         .outerjoin(User, User.id == Parent.user_id)
-        .filter_by(id=parent_id)
+        .filter(Parent.id == parent_id)
         .all()
     )
     if parent:

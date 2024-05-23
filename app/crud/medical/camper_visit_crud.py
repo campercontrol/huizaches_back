@@ -12,7 +12,7 @@ from schema.medical.camper_visit_schema import CamperVisitCreate
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
         db.query(
-            Constant.id,
+            MedicalCamperVisit.id,
             Constant.value,
             MedicalCamperVisit.medical_tracing,
             MedicalCamperVisit.initial_visit_id,

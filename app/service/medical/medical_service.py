@@ -43,9 +43,13 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
     campers_medical = []
     for camper_in_camp in campers:
         camper = get_camper_by_uuid(db, camper_in_camp["camper_id"])
+        # print("camper")
+        # print(camper.parent_id)
         tutor = get_parent_for_admin_by_id(db, camper.parent_id)
         camper_triages = camper_visit_triage_for_camp(db, camper.id, camp_id)
+
         if tutor != "Parent doesn't exist":
+        
             camper_complete = {
                 "camper_id": camper.id,
                 "camper_name": camper_in_camp["camper_full_name"],
@@ -58,6 +62,7 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
                 "second_tutor_email": camper_in_camp["second_tutor_email"],
                 "second_tutor_cellphone": tutor.contact_cellphone,
             }
+            # print(camper_complete)
             campers_medical.append(camper_complete)
     staffs_medical = []
     for staff_in_camp in staffs:
