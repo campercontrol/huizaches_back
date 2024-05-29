@@ -1,5 +1,5 @@
 from sqlalchemy import case, or_
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
 from model.role import Role
 from model.user import User
@@ -233,3 +233,38 @@ def update_password_all_users(db, hashed_pass:str):
     # "$2b$12$9QchmEH2rcRnHlfBnGe7ZunGbonntZc/RX2NHgClT7YSiakHRy.Pm"
     return 1
 
+def update_user_by_id(db: Session, user_id:int, user_data):
+    
+    if user_data.passw:
+        user_data.passw = hash_str(user_data.passw)
+
+    try:
+        updated_user = db.query(
+        User
+        ).filter_by(
+            id = user_id,
+        ).update(
+            user_data,
+            synchronize_session="fetch"
+        )
+    except Exception as e:
+        return {"status 3"}
+
+
+
+def delete_user_by_id(db: Session, user_id:int):
+    user = db.query(User).filter(User.id==user_id).first()
+    db.delete(user)
+    db.commit()
+    if user == None:
+        return None
+    try:
+        db.delete(user)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "msg": "Can not delete user, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "User deleted successfully"}

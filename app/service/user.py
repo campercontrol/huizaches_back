@@ -11,7 +11,9 @@ from crud.crud_user import (
     get_user_by_email,
     crud_update_user_by_email,
     search_user_by_email,
-    update_password_all_users
+    update_password_all_users,
+    update_user_by_id,
+    delete_user_by_id
 )
 from model.user import User
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail
@@ -81,33 +83,38 @@ def get_user_by_id(
     return {"data": resultado}
 
 
-@user_routes.patch("/usuario/{user_id}", tags=["Usuarios"])
-def update_user(
-    user_id: str,
-    user: UserModify,
-    response: Response,
-    db: Session = Depends(get_db),
-):
-    NAME = "update_user"
+# @user_routes.patch("/usuario/{user_id}", tags=["Usuarios"])
+# def update_user(
+#     user_id: str,
+#     user: UserModify,
+#     response: Response,
+#     db: Session = Depends(get_db),
+# ):
+#     response = update_user_by_id(db, user_id, user)
 
-    update_data = user.dict(exclude_unset=True)
-    print(update_data)
-    exist_user = get_user_by_uuid(db, user_id)
-    if not exist_user:
-        response.status_code = 401
-        return {"mensaje": "El usuario buscado no existe"}
+#     if
 
-    if "passw" in update_data:
-        update_data["hashed_pass"] = hash_str(update_data["passw"])
-        update_data.pop("passw")
 
-    respuesta_update_user = crud_update_user_by_uuid(db, user_id, update_data)
+    # NAME = "update_user"
 
-    if respuesta_update_user != 0:
-        exist_user = get_user_by_uuid(db, user_id)
-        return {"mensaje": "Actualizado Correctamente", "data": exist_user}
-    else:
-        return {"mensaje": "Ningun registro fue afectado", "data": ""}
+    # update_data = user.dict(exclude_unset=True)
+    # print(update_data)
+    # exist_user = get_user_by_uuid(db, user_id)
+    # if not exist_user:
+    #     response.status_code = 401
+    #     return {"mensaje": "El usuario buscado no existe"}
+
+    # if "passw" in update_data:
+    #     update_data["hashed_pass"] = hash_str(update_data["passw"])
+    #     update_data.pop("passw")
+
+    # respuesta_update_user = crud_update_user_by_uuid(db, user_id, update_data)
+
+    # if respuesta_update_user != 0:
+    #     exist_user = get_user_by_uuid(db, user_id)
+    #     return {"mensaje": "Actualizado Correctamente", "data": exist_user}
+    # else:
+    #     return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
 
 @user_routes.post("/usuario/reset_password", tags=["Usuarios"])
@@ -117,10 +124,10 @@ def reset_password(
     exist_email = get_user_by_email(db, user_reset.email)
     if not exist_email:
         response.status_code = 401
-        return {"mensaje": "No email ingresado no está registrado", "data": ""}
+        return {"mensaje": "Email not registered", "data": ""}
     elif not exist_email.is_active:
         response.status_code = 401
-        return {"mensaje": "El email ingresado está desactivado", "data": ""}
+        return {"mensaje": "Account is not active", "data": ""}
     else:
         accessToken = generate_access_token_reset_pass(user_reset.email)
         send_simple_message(
@@ -293,7 +300,18 @@ def get_search_user(search:str, db: Session = Depends(get_db)):
     return { "data": possible_users }
 
 
-@user_routes.post("/update/all/password/", tags=["Usuaros"])
+@user_routes.post("/update/all/password/", tags=["Usuarios"])
 def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
     result = update_password_all_users(db, hash_pass)
     return {"data": result}
+
+@user_routes.delete("/delete_usuario/{user_id}", tags=["Usuarios"])
+def delete_user(user_id:str, db: Session = Depends(get_db)):
+    response = delete_user_by_id(user_id)
+    
+    if response == None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response)
+    return {"detail": response}    

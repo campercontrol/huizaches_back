@@ -79,8 +79,8 @@ def delete_licensed_medicine(db: Session, licensed_medicine_id:int):
         db.commit()
     except IntegrityError:
         db.rollback()
-        return {"status": 2, "detail": "Can not delete licensed_medicine, referenced by other table"}
+        return {"status": 2, "msg": "Can not delete licensed_medicine, referenced by other table"}
     except:
         db.rollback()
-        return {"status": 3, "detail": "Internal Server Error"}
-    return {"status" : 1, "detail": "Licensed_medicine family deleted successfully"}
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "Licensed_medicine deleted successfully"}

@@ -64,5 +64,6 @@ def delete_licensed_medicine_by_id(licensed_medicine_id:int, db: Session = Depen
         raise HTTPException(status_code=404, detail="Licensed medicine not found")
 
     if response['status'] == 3:
-        raise HTTPException(status_code=500, detail= response['detail'])
-    return response    
+        raise HTTPException(status_code=500, detail=response)
+
+    return {"detail": response }    

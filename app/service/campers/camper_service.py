@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 #from fastapi_pagination import Page, add_pagination, paginate
 from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
@@ -399,8 +399,13 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
 
 @camper_routes.delete("/delete_camper/{camper_id}", tags=["Campers"])
 def delete_camper_by_id(camper_id:int, db: Session = Depends(get_db)):
-    status = delete_camper(db, camper_id)
-    return{"status": status}
+    response = delete_camper(db, camper_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Camper not found")
+
+    if response['status'] == 3:
+         raise HTTPException(status_code=500, detail=response)
+    return {"detail": response}    
 
 @camper_routes.get("/search/camper/{search}", tags=["Campers"])
 def get_search_camper(search:str, db: Session = Depends(get_db)):

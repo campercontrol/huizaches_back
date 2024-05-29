@@ -1,4 +1,4 @@
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import case, or_
 from datetime import date, datetime
@@ -300,9 +300,19 @@ def get_camper_band(db: Session, camper_id):
 
 def delete_camper(db, camper_id: int):
     camper = db.query(Camper).filter(Camper.id == camper_id).first()
-    db.delete(camper)
-    db.commit()
-    return {"status": True}
+    if camper == None:
+        return None
+    try:
+        db.delete([])
+        db.commit()
+        
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "msg": "Can not delete camper, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "Camper deleted successfully"}
 
 
 def search_camper_by_name_user(db: Session, search: str):

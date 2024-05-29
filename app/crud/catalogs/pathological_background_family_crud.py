@@ -83,8 +83,8 @@ def delete_pathological_back_fm(db: Session, pathological_back_fm_id:int):
         db.commit()
     except IntegrityError:
         db.rollback()
-        return {"status": 2, "detail": "Can not delete pathological background family, referenced by other table"}
+        return {"status": 2, "msg": "Can not delete pathological background family, referenced by other table"}
     except:
         db.rollback()
-        return {"status": 3, "detail": "Internal Server Error"}
-    return {"status" : 1, "detail": "Pathological background family deleted successfully"}
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "Pathological background family deleted successfully"}

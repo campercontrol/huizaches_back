@@ -70,8 +70,8 @@ def delete_vaccine(db: Session, vaccine_id:int):
         db.commit()
     except IntegrityError:
         db.rollback()
-        return {"status": 2, "detail": "Can not delete vaccine, referenced by other table"}
+        return {"status": 2, "msg": "Can not delete vaccine, referenced by other table"}
     except:
         db.rollback()
-        return {"status": 3, "detail": "Internal Server Error"}
-    return {"status" : 1, "detail": "Vaccine deleted successfully"}
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "Vaccine deleted successfully"}

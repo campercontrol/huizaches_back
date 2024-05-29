@@ -66,8 +66,8 @@ def delete_vaccine_by_id(vaccine_id:int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Vaccine not found")
 
     if response['status'] == 3:
-        raise HTTPException(status_code=500, detail= response['detail'])
-    return response    
+        raise HTTPException(status_code=500, detail=response)
+    return {"detail":response}    
 
 @vaccine_routes.post("/update/order/catalogs", tags=["Catalogs"])
 def update_catalogs_order(list:list, catalog_type:int, db: Session = Depends(get_db)):

@@ -65,5 +65,5 @@ def delete_pathological_back_fm_by_id(pathological_back_fm_id:int, db: Session =
         raise HTTPException(status_code=404, detail="Pathological background not found")
 
     if response['status'] == 3:
-        raise HTTPException(status_code=500, detail= response['detail'])
-    return response    
+        raise HTTPException(status_code=500, detail= response)
+    return { "detail": response }    
