@@ -166,6 +166,9 @@ class CampaignSend(BaseModel):
     template_body: str = Field(
         title = "Cuerpo del correo"
     )
+    email_subject: Optional[str] = Field(
+        title= "Asunto del correo"
+    )
 
 class CamperCampaignCreate(BaseModel):
 

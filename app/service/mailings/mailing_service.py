@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.mailings.email_template_crud import (
@@ -27,9 +27,15 @@ from model.mailings import (
     EmailTemplate,
 )
 from model.catalogs import Constant
+from model.user import User
+from model.campers import Parent
+from model.campers import Camper
+from model.campers import School
+from model.staffs import Staff
 from schema.mailings.campaign_schema import CampaignSend
 
 from helper.mailing_helpers import send_mail_template
+from utils.email_tools import send_simple_message
 
 from utils.db import SessionLocal
 
@@ -229,7 +235,58 @@ def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
 
 @mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
 def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
+    
+    campers_id = campaign_send.campers_id
+    staffs_id = campaign_send.staffs_id
+    schools_id = campaign_send.schools_id
+    tutors_emails = []
+    staff_emails = []
+    school_emails = []
+    try:
+        if campaign_send.campers_id:
+            for camper_id in campers_id:
+                tutor_email = db.query(
+                    Parent.contact_email,
+                    User.email
+                ).join(
+                    Camper, Camper.parent_id == Parent.id
+                ).join(
+                    User, User.id == Parent.user_id
+                ).filter(
+                    Camper.id == camper_id
+                ).first()
+                tutors_emails.append(tutor_email[0])
+                tutors_emails.append(tutor_email[1])
+            print(tutors_emails)
+            send_simple_message("", tutors_emails, campaign_send.email_subject, campaign_send.template_body)
+            
 
-    return 1
-
-
+        if campaign_send.staffs_id:
+            for staff_id in staffs_id:
+                staff_email = db.query(
+                    User.email
+                ).join(
+                    Staff, Staff.login_id == User.id
+                ).filter(
+                    Staff.id == staff_id
+                ).first()
+            staff_emails.append(staff_email[0])
+        print(staff_emails)
+        send_simple_message("", staff_emails, campaign_send.email_subject, campaign_send.template_body)
+        
+        if campaign_send.schools_id:
+            for school_id in schools_id:
+                school_email = db.query(
+                    User.email
+                ).join(
+                    School, School.login_id == User.id
+                ).filter(
+                    School.id == school_id
+                ).first()
+                school_emails.append(school_email[0])
+        print(school_emails)
+        send_simple_message("", school_emails, campaign_send.email_subject, campaign_send.template_body)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
+    return {"status": 1, "detail": "Emails sent successfully"}
