@@ -19,6 +19,7 @@ def get_all_user(db, is_active):
             User.hashed_pass.label('hashed_pass'),
             User.role_id.label('role_id'),
             Role.name.label('role_name'),
+            User.is_admin,
             User.is_superuser.label('is_superuser'),
             User.is_active.label('is_active'),
         )

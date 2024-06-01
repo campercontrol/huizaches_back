@@ -17,7 +17,7 @@ from crud.crud_user import (
 )
 from model.user import User
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail
-
+from model.staffs import Staff, StaffRecord
 # from utils.check_role import chek_permission
 from utils.db import SessionLocal
 from utils.email_tools import send_simple_message
@@ -53,23 +53,73 @@ def get_users(is_active: boolean = True, db: Session = Depends(get_db)):
 def create_user(user: UserCreate, response: Response, db: Session = Depends(get_db)):
     NAME = "create_user"
 
-    revisar_correo = get_user_by_email(db, user.email)
+    check_email = get_user_by_email(db, user.email)
 
-    if revisar_correo:
-        response.status_code = 401
-        return {"mensaje": "Correo ya existente", "data": []}
+    if check_email:
+        # return {"mensaje": "Correo ya existente", "data": []}
+        return {"detail": {"status": 2, "msg": "Correo existente, no se puede crear el usuario"}}
 
-    resultado = create_new_user(db, user)
+    new_user = create_new_user(db, user)
+    new_user_role = new_user.role_id
 
-    print("#=================")
-    print(resultado)
-    print("#=================")
-    if resultado is not None:
-        response.status_code = 200
-        return {"mensaje": "Exitoso", "data": resultado}
-    else:
-        response.status_code = 401
-        return {"mensaje": "No se pudo guardar en la BD", "data": resultado}
+    if new_user_role == 1:
+        pass
+    if new_user_role == 2:
+        current_season = 76
+        try:
+            staff_new_record = StaffRecord(
+                attend = 0,
+                attended = 0,
+                total = 0
+            )
+            db.add(staff_new_record)
+            db.commit()
+            db.refresh(staff_new_record)
+
+            default_prospect_profile = {
+                "name": "Staff",
+                "lastname_father": "default",
+                "lastname_mother": "user",
+                "photo": "media/tmp/default_user.png",
+                "birthday": "2000-01-01",
+                "curp": "CURP",
+                "bio": "",
+                "facebook": "default staff",
+                "home_phone": "5555555555",
+                "cellphone": "5555555555",
+                "cv": "media/cv/default.pdf",
+                "gender_id": 4,
+                "record_id":staff_new_record.id,
+                "season_id": current_season,
+                "login_id": new_user.id,
+                "coordinator": False,
+                "employee_email_send": False,
+                "employee": True,
+            }  
+            new_default_prospect_profile = Staff(**default_prospect_profile)
+            db.add(new_default_prospect_profile)
+            db.commit()
+            db.refresh(new_default_prospect_profile)
+        except Exception as e:
+            print(e)
+            db.delete(new_default_prospect_profile)
+            db.delete(staff_new_record)
+            db.delete(new_user)
+            db.commit()
+            raise HTTPException(status_code=500, detail={"status":3, "msg": "Internal server error"})
+
+        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario"}}
+
+
+    # print("#=================")
+    # print(resultado)
+    # print("#=================")
+    # if resultado is not None:
+    #     response.status_code = 200
+    #     return {"mensaje": "Exitoso", "data": resultado}
+    # else:
+    #     response.status_code = 401
+    #     return {"mensaje": "No se pudo guardar en la BD", "data": resultado}
 
 
 @user_routes.get("/usuario/{user_id}", tags=["Usuarios"])
