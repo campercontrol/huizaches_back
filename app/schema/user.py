@@ -37,7 +37,7 @@ class UserModify(BaseModel):
     email: Optional[EmailStr] = Field(
         title="Email",
     )
-    passw: Optional[str] = Field(
+    hashed_pass: Optional[str] = Field(
         default=None,
         title="Password",
         max_length=200,

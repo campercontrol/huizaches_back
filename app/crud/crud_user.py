@@ -236,21 +236,38 @@ def update_password_all_users(db, hashed_pass:str):
 
 def update_user_by_id(db: Session, user_id:int, user_data):
     
-    if user_data.passw:
-        user_data.passw = hash_str(user_data.passw)
+    print(user_data)
+    # if user_data['hashed_pass']:
+    # user_data['hashed_pass'] = hash_str(user_data['hashed_pass'])
+    
 
     try:
-        updated_user = db.query(
-        User
-        ).filter_by(
-            id = user_id,
-        ).update(
-            user_data,
-            synchronize_session="fetch"
-        )
+        user_to_update = db.query(User).filter_by(id=user_id).one()
+        
+        if user_data['hashed_pass'] != None:
+            user_to_update.hashed_pass = hash_str(user_data['hashed_pass'])
+        if user_data['role_id'] != None:
+            user_to_update.role_id = user_data['role_id']
+        if user_data['is_admin'] != None:
+            user_to_update.is_admin = user_data['is_admin']
+        if user_data['is_superuser'] != None:
+            user_to_update.is_superuser = user_data['is_superuser']
+        if user_data['is_coordinator'] != None:
+            user_to_update.is_coordinator = user_data['is_coordinator']
+        if user_data['is_employee'] != None:
+            user_to_update.is_employee = user_data['is_employee'] 
+        if user_data['is_active'] != None:
+            user_to_update.is_active = user_data['is_active']       
+        if user_data['email'] != None:
+            user_to_update.email = user_data['email']
+        
+        db.commit()
+        
     except Exception as e:
-        return {"status 3"}
-
+        db.rollback()
+        print(e)
+        return {"status": 3, "msg": "Internal server error"}
+    return {"status": 1, "msg": "User updated successfully"}
 
 
 def delete_user_by_id(db: Session, user_id:int):

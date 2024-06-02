@@ -133,6 +133,21 @@ def get_user_by_id(
     return {"data": resultado}
 
 
+@user_routes.patch("/usuario/{user_id}", tags=["Usuarios"])
+def update_user(
+    user_id: str,
+    user: UserModify,
+    response: Response,
+    db: Session = Depends(get_db)
+):
+    response = update_user_by_id(db, user_id, user.dict())
+    # if response == None:
+    #     raise HTTPException(status_code=404, detail="User not found")
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail=response)
+    return {"detail": response}
+
+
 # @user_routes.patch("/usuario/{user_id}", tags=["Usuarios"])
 # def update_user(
 #     user_id: str,
@@ -142,29 +157,28 @@ def get_user_by_id(
 # ):
 #     response = update_user_by_id(db, user_id, user)
 
-#     if
 
 
-    # NAME = "update_user"
+#     # NAME = "update_user"
 
-    # update_data = user.dict(exclude_unset=True)
-    # print(update_data)
-    # exist_user = get_user_by_uuid(db, user_id)
-    # if not exist_user:
-    #     response.status_code = 401
-    #     return {"mensaje": "El usuario buscado no existe"}
+#     update_data = user.dict(exclude_unset=True)
+#     print(update_data)
+#     exist_user = get_user_by_uuid(db, user_id)
+#     if not exist_user:
+#         response.status_code = 401
+#         return {"mensaje": "El usuario buscado no existe"}
 
-    # if "passw" in update_data:
-    #     update_data["hashed_pass"] = hash_str(update_data["passw"])
-    #     update_data.pop("passw")
+#     if "passw" in update_data:
+#         update_data["hashed_pass"] = hash_str(update_data["passw"])
+#         update_data.pop("passw")
 
-    # respuesta_update_user = crud_update_user_by_uuid(db, user_id, update_data)
+#     respuesta_update_user = crud_update_user_by_uuid(db, user_id, update_data)
 
-    # if respuesta_update_user != 0:
-    #     exist_user = get_user_by_uuid(db, user_id)
-    #     return {"mensaje": "Actualizado Correctamente", "data": exist_user}
-    # else:
-    #     return {"mensaje": "Ningun registro fue afectado", "data": ""}
+#     if respuesta_update_user != 0:
+#         exist_user = get_user_by_uuid(db, user_id)
+#         return {"mensaje": "Actualizado Correctamente", "data": exist_user}
+#     else:
+#         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
 
 @user_routes.post("/usuario/reset_password", tags=["Usuarios"])
