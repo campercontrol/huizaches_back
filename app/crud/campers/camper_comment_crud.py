@@ -19,21 +19,21 @@ def get_camper_comment_by_id(db, camper_comment_id: int):
 
 
 def create_new_camper_comment(db, new_camper_comment: CamperCommentCreate):
-    db_camper_comment = None
     try:
         db_camper_comment = CamperComment(**new_camper_comment.dict())
         db.add(db_camper_comment)
         db.commit()
         db.refresh(db_camper_comment)
-    except SQLAlchemyError as e:
+    except SQLAlchemyError as alchemyError:
+        db.rollback()
         print("#=================================#")
-        print(e)
+        print(alchemyError)
         print("#=================================#")
-        db_camper_comment = None
-        return db_camper_comment
-    except Exception as e:
+        return {"status": 3, "msg": "An error ocurred while saving"} 
+    except Exception as ex:
         print(f"No se pudo guardar en la base de datos: {ex}")
-    return db_camper_comment
+        return {"status": 3, "msg": "An error ocurred while saving"}
+    return {"status": 1, "msg": "Camper comment saved succesfully"}
 
 
 def update_camper_comment_by_id(

@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.campers.camper_comment_crud import (
@@ -47,8 +47,10 @@ def get_camper_comment_by_uid(
 def create_camper_comment(
     new_camper_comment: CamperCommentCreate, db: Session = Depends(get_db)
 ):
-    list_camper_comment = create_new_camper_comment(db, new_camper_comment)
-    return {"data": list_camper_comment}
+    response = create_new_camper_comment(db, new_camper_comment)
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response)
+    return {"detail": response}
 
 
 @camper_comment_router.patch(
