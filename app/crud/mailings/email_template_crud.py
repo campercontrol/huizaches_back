@@ -17,14 +17,18 @@ def get_all_email_template(db):
 
 
 def get_email_template_by_uuid(db, email_template_id):
-    return (
-        db.query(EmailTemplate)
-        .filter_by(
-            id=email_template_id,
-        )
-        .first()
-    )
-
+    query = (db.query(EmailTemplate.id, 
+                      EmailTemplate.order,
+                      EmailTemplate.template,
+                      EmailTemplate.created_at,
+                      EmailTemplate.title,
+                      Constant.value.label("template_type"))
+             .join(Constant, EmailTemplate.template_type == Constant.id).filter(
+        EmailTemplate.id == email_template_id
+    ))
+    data = db.execute(query)
+    # print(data.mappings().all()[0])
+    return data.mappings().all()[0]
 
 def create_new_email_template(db, new_email_template: EmailTemplateCreate):
     db_email_template = None
