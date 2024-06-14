@@ -5,7 +5,6 @@ from model.mailings import EmailTemplate
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
 from utils.functions_jwt import create_user_verify_url
-
 def send_mail_template(
     db,
     send_to: list[str],
@@ -77,6 +76,25 @@ def send_mail_prospect(
         "username": prospect_profile.name,
         "verify_url": url
     }
+
+    template_content =  (
+        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+    )
+    template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
+    html_content = template_env.render(context)
+    send_simple_message(
+        "", send_to, template_content.title, html_content
+    )
+    return 1
+
+def send_massive_template(
+    db,
+    send_to: list[str],
+    template_id: int,
+    camp_info
+):
+
+    context = camp_info
 
     template_content =  (
         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
