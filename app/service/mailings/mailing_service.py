@@ -15,6 +15,7 @@ from crud.mailings.mailing_crud import (
     get_sent_training,
     get_sent_candidates,
 )
+from utils.db import db_mapping_rows_to_dict
 from crud.camps.camper_in_camp_crud import get_campers_for_camp
 from crud.camps.staff_in_camp_crud import get_staff_in_camp
 from crud.training.staff_in_training_crud import get_all_staff_in_training_event
@@ -31,10 +32,11 @@ from model.user import User
 from model.campers import Parent
 from model.campers import Camper
 from model.campers import School
+from model.camps import Camp
 from model.staffs import Staff
 from schema.mailings.campaign_schema import CampaignSend
 
-from helper.mailing_helpers import send_mail_template
+from helper.mailing_helpers import send_mail_template, send_massive_template
 from utils.email_tools import send_simple_message
 
 from utils.db import SessionLocal
@@ -172,14 +174,12 @@ def get_inf_campaign_camps(
         for camper_c in campers_complete:
             campers_info.append(
                 {
-                    "camper_id": getattr(camper_c, "camper_id"),
-                    "camper_full_name": getattr(camper_c, "camper_full_name"),
-                    "tutor_full_name": getattr(camper_c, "tutor_full_name"),
-                    "tutor_email": getattr(camper_c, "tutor_email"),
-                    "second_tutor_full_name": getattr(
-                        camper_c, "second_tutor_full_name"
-                    ),
-                    "second_tutor_email": getattr(camper_c, "second_tutor_email"),
+                    "camper_id": camper_c["camper_id"],
+                    "camper_full_name": camper_c["camper_full_name"],
+                    "tutor_full_name": camper_c["tutor_full_name"],
+                    "tutor_email": camper_c["tutor_email"],
+                    "second_tutor_full_name": camper_c["second_tutor_full_name"],
+                    "second_tutor_email": camper_c["second_tutor_email"],
                 }
             )
     if staffs:
@@ -187,9 +187,9 @@ def get_inf_campaign_camps(
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
-                    "staff_id": getattr(staff_c, "staff_id"),
-                    "staff_full_name": getattr(staff_c, "staff_full_name"),
-                    "staff_email": getattr(staff_c, "staff_email"),
+                    "staff_id": staff_c["staff_id"],
+                    "staff_full_name": staff_c["staff_full_name"],
+                    "staff_email": staff_c["staff_email"],
                 }
             )
     if school:
@@ -235,13 +235,28 @@ def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
 
 @mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
 def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
-    
+    camp_id = campaign_send.campaign.camp_id
     campers_id = campaign_send.campers_id
     staffs_id = campaign_send.staffs_id
     schools_id = campaign_send.schools_id
     tutors_emails = []
     staff_emails = []
     school_emails = []
+    camp_info_query = (db.query(Camp.id,
+                                Camp.name,
+                                Camp.start,
+                                Camp.end,
+                                Camp.start,
+                                Camp.url,
+                                Camp.photo_password,
+                                Camp.photo_url,
+                                Camp.public_price,
+                                Camp.venue
+                                ).filter(Camp.id == camp_id))
+    
+    camp_info_response = db.execute(camp_info_query)
+    camp_info = camp_info_response.mappings().all()[0]
+    print(camp_info)
     try:
         if campaign_send.campers_id:
             for camper_id in campers_id:
@@ -259,7 +274,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                 tutors_emails.append(tutor_email[1])
             print(tutors_emails)
             send_simple_message("", tutors_emails, campaign_send.email_subject, campaign_send.template_body)
-            
+            # send_massive_template(db, )            
 
         if campaign_send.staffs_id:
             for staff_id in staffs_id:
