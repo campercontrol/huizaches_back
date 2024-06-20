@@ -1,4 +1,4 @@
-from sqlalchemy import case, and_
+from sqlalchemy import case, distinct, and_
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -334,6 +334,26 @@ def get_campers_for_camp(db: Session, camp_id: int):
 
     return campers_complete
 
+
+def get_campers_in_camp_mailing(db, camp_id):
+        
+    query = (
+        db.query(
+            Camper.id,
+            (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('camper_full_name'),
+            (Parent.tutor_name + ' ' + Parent.tutor_lastname_father + ' ' + Parent.tutor_lastname_mother).label('tutor_full_name'),
+            (Parent.contact_name + ' ' + Parent.contact_lastname_father + ' ' + Parent.contact_lastname_mother).label('second_tutor_full_name'),
+            Parent.contact_email.label('second_tutor_email'),
+            User.email.label('tutor_email')
+        )
+        .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+        .join(Parent, Parent.id == Camper.parent_id)
+        .join(User, User.id == Parent.user_id)
+        .filter(CamperInCamp.camp_id == camp_id)
+    )
+    
+    data = db.execute(query)
+    return data.mappings().all()
 
 def get_campers_for_bracelets(db, camp_id):
     list_campers = (

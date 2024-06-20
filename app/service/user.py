@@ -7,6 +7,7 @@ from crud.crud_user import (
     get_all_user,
     create_new_user,
     get_user_by_uuid,
+    get_users_all_info,
     crud_update_user_by_uuid,
     get_user_by_email,
     crud_update_user_by_email,
@@ -47,6 +48,14 @@ def get_users(is_active: boolean = True, db: Session = Depends(get_db)):
     list_user = get_all_user(db, is_active)
 
     return {"data": list_user}
+
+@user_routes.get("/usuario/info", tags=["Usuarios"])
+def get_user_info(user_id: int, db: Session = Depends(get_db)):
+
+    response = get_users_all_info(db, user_id)
+
+    return response
+
 
 
 @user_routes.post("/usuario", tags=["Usuarios"], status_code=200)
@@ -92,9 +101,10 @@ def create_user(user: UserCreate, response: Response, db: Session = Depends(get_
                 "record_id":staff_new_record.id,
                 "season_id": current_season,
                 "login_id": new_user.id,
-                "coordinator": False,
+                "coordinator": True,
                 "employee_email_send": False,
                 "employee": True,
+                
             }  
             new_default_prospect_profile = Staff(**default_prospect_profile)
             db.add(new_default_prospect_profile)
@@ -106,7 +116,7 @@ def create_user(user: UserCreate, response: Response, db: Session = Depends(get_
             db.delete(staff_new_record)
             db.delete(new_user)
             db.commit()
-            raise HTTPException(status_code=500, detail={"status":3, "msg": "Internal server error"})
+            raise HTTPException(status_code=500, detail={"status":3, "msg": "Ocurrio un error en el servidor. No se guardo correctamente el usuario"})
 
         return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario"}}
 
@@ -371,7 +381,7 @@ def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
 
 @user_routes.delete("/delete_usuario/{user_id}", tags=["Usuarios"])
 def delete_user(user_id:str, db: Session = Depends(get_db)):
-    response = delete_user_by_id(user_id)
+    response = delete_user_by_id(db, user_id)
     
     if response == None:
         raise HTTPException(status_code=404, detail="User not found")

@@ -1,12 +1,26 @@
 from sqlalchemy import case, or_
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import delete
 from model.role import Role
 from model.user import User
 from model.campers import School
-from model.medical import Doctor
+from model.campers import Camper
 from model.campers import Parent
 from model.staffs import Staff
+from model.staffs import StaffVaccine
+from model.staffs import StaffComment
+from model.staffs import StaffFoodRestriction
+from model.trainings import StaffInTraining
+from model.camps import StaffInCamp
+from model.mailings import StaffCampaign
+from model.medical import Doctor
+from model.medical import MedicalStaffVisit
+from model.trophies import TrophyStaff
+from model.payments import Payment
+from model.mailings import SchoolCampaign
+from model.camps import Camp
+
 from utils.hash import hash_str
 from utils.db import db_mapping_rows_to_dict
 
@@ -33,6 +47,19 @@ def get_all_user(db, is_active):
 
     return db_mapping_rows_to_dict(rows)
 
+def get_users_all_info(db, user_id):
+    query = db.query(
+        User.id,
+        User.email,
+        Parent.tutor_name,
+        Parent.tutor_lastname_father,
+        Parent.tutor_lastname_mother
+    ).join(Parent, User.id == Parent.user_id).filter(User.id == user_id)
+    data = db.execute(query)
+    parent = data.mappings().first()
+    print(parent)
+    
+    
 
 def create_new_user(db, new_user):
     db_user = None
@@ -272,17 +299,102 @@ def update_user_by_id(db: Session, user_id:int, user_data):
 
 def delete_user_by_id(db: Session, user_id:int):
     user = db.query(User).filter(User.id==user_id).first()
-    db.delete(user)
-    db.commit()
-    if user == None:
-        return None
-    try:
-        db.delete(user)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        return {"status": 2, "msg": "Can not delete user, referenced by other table"}
-    except:
-        db.rollback()
-        return {"status": 3, "msg": "Internal Server Error"}
-    return {"status" : 1, "msg": "User deleted successfully"}
+    
+    parent_role = 1
+    staff_role = 2
+    school_role = 3
+    teacher_role = 4
+    doctor_role = 5
+    
+    if user.role_id == parent_role:
+        try:
+            parent_user = db.query(Parent).filter(Parent.user_id == user.id).first()
+            stmt_delete_parent_payment = delete(Payment).where(Payment.parent_id == parent_user.id) 
+            stmt_delete_parent_campers = delete(Camper).where(Camper.parent_id == parent_user.id)
+            stmt_delete_parent_user = delete(Parent).where(Parent.id == parent_user.id)
+            stmt_delete_user = delete(User).where(User.id == user.id)
+            db.execute(stmt_delete_parent_payment)
+            db.execute(stmt_delete_parent_campers)
+            db.execute(stmt_delete_parent_user)
+            db.execute(stmt_delete_user)
+            db.commit()
+        except IntegrityError as IntegrityEx:
+            db.rollback()
+            print(IntegrityEx)
+            return {"status": 2, "msg": "Can not delete Parent user, referenced by other table"}
+        except Exception as ex:
+            db.rollback()
+            print(ex)
+            return {"status": 3, "msg": "An unknown error ocurred while deleting"}
+        return {"status": 1, "msg": "Parent user succesfully deleted"}
+        
+    if user.role_id == staff_role:
+        try:
+            staff_user = db.query(Staff).filter(Staff.login_id == user.id).first()
+            stmt_delete_staff_vaccines = delete(StaffVaccine).where(StaffVaccine.staff_id == staff_user.id) 
+            stmt_delete_staff_food_restriction = delete(StaffFoodRestriction).where(StaffFoodRestriction.staff_id == staff_user.id)
+            stmt_delete_staff_comment = delete(StaffComment).where(StaffComment.staff_id == staff_user.id)
+            stmt_delete_staff_in_training = delete(StaffInTraining).where(StaffInTraining.staff_id == staff_user.id)
+            stmt_delete_staff_in_camps = delete(StaffInCamp).where(StaffInCamp.staff_id == staff_user.id)
+            stmt_delete_staff_medical_visit = delete(MedicalStaffVisit).where(MedicalStaffVisit.staff_id == staff_user.id)
+            stmt_delete_staff_trophy = delete(TrophyStaff).where(TrophyStaff.staff_id == staff_user.id)
+            stmt_delete_staff_campaign = delete(StaffCampaign).where(StaffCampaign.staff_id == staff_user.id)
+            stmt_delete_staff_user = delete(Staff).where(Staff.id == staff_user.id)
+            
+            stmt_delete_user = delete(User).where(User.id == user.id)
+            db.execute(stmt_delete_staff_vaccines)
+            db.execute(stmt_delete_staff_food_restriction)
+            db.execute(stmt_delete_staff_comment)
+            db.execute(stmt_delete_staff_in_training)
+            db.execute(stmt_delete_staff_in_camps)
+            db.execute(stmt_delete_staff_medical_visit)
+            db.execute(stmt_delete_staff_trophy)
+            db.execute(stmt_delete_staff_campaign)
+            db.execute(stmt_delete_staff_user)
+            db.execute(stmt_delete_user)
+            db.commit()
+        except IntegrityError as IntegrityEx:
+            db.rollback()
+            print(IntegrityEx)
+            return {"status": 2, "msg": "Can not staff user, Staff user referenced by other table"}
+        except Exception as ex:
+            # db.rollback()
+            print(ex)
+            return {"status": 3, "msg": "An unknown error ocurred while deleting"}
+        return {"status": 1, "msg": "Staff user succesfully deleted"}
+        
+    if user.role_id == school_role:
+        try: 
+            school_user = db.query(School).filter(School.login_id == user.id).first()
+            stmt_delete_school_email_campaign = delete(SchoolCampaign).where(SchoolCampaign.school_id == school_user.id)
+            stmt_delete_camp_school = delete(Camp).where(Camp.school_id == school_user.id)
+            stmt_delete_school_user = delete(School).where(School.id == school_user.id)
+            stmt_delete_user = delete(User).where(User.id == user.id)
+            db.execute(stmt_delete_school_email_campaign)
+            db.execute(stmt_delete_camp_school)
+            db.execute(stmt_delete_school_user)
+            db.execute(stmt_delete_user)
+            db.commit()
+        except IntegrityError as IntegrityEx:
+            db.rollback()
+            print(IntegrityEx)
+            return {"status": 2, "msg": "Can not delete School user, School referenced by camps camp"}
+        except Exception as ex:
+            return {"status": 3, "msg": "An unknown error ocurred while deleting"}
+        return {"status": 1, "msg": "School user succesfully deleted"}
+    
+    if user.role_id == school_role:
+        try:
+            medical_user = db.query(Doctor).filter(Doctor.login_id == user.id).first()
+            stmt_delete_medical_user = delete(School).where(School.id == school_user.id)
+            stmt_delete_user = delete(User).where(User.id == user.id)
+            db.execute(stmt_delete_medical_user)
+            db.execute(stmt_delete_user)
+            db.commit()
+        except IntegrityError as IntegrityEx:
+            db.rollback()
+            print(IntegrityEx)
+            return {"status": 2, "msg": "Can not delete Medical user, referenced by other table"}
+        except Exception as ex:
+            return {"status": 3, "msg": "An unknown error ocurred while deleting"}
+        return {"status": 1, "msg": "Medical user succesfully deleted"}

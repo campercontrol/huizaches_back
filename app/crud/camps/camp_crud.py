@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
+from model.campers import School
 from model.camps import Camp, Location, CamperInCamp, StaffInCamp
 from model.campers import Camper
 from schema.camps.camp_schema import CampCreate, CampModify
@@ -169,3 +169,9 @@ def get_camp_by_search(db: Session, search: str):
         return "Data not found"
 
     return db_mapping_rows_to_dict(camps)
+
+def get_school_info_by_camp(db: Session, camp_id:int):
+    query = (db.query(School.id.label('school_id'), School.name, School.email).join(Camp, Camp.school_id == School.id))
+    data = db.execute(query)
+    return data.mappings().first()
+

@@ -11,6 +11,7 @@ from crud.staffs.staff_crud import (
     accept_prospect,
     delete_prospect,
     staff_dashboard,
+    staff_camps,
     get_staff_by_id,
     update_staff_by_id,
     get_staff_band
@@ -113,6 +114,11 @@ def delete_prospect_by_id(prospect_id: int, db: Session = Depends(get_db)):
 def get_staff_dashboard(staff_id: int, db: Session = Depends(get_db)):
     staff_dashboard_info = staff_dashboard(db, staff_id)
     return {"data": staff_dashboard_info}
+
+@staff_routes.get("/staff/{staff_id}/camps", tags=["Staff"])
+def get_staff_camps(staff_id: int, db: Session = Depends(get_db)):
+    response = staff_camps(db, staff_id)
+    return {"data": response}
 
 
 @staff_routes.get("/staff/{staff_id}", tags=["Staff"])

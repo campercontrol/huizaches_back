@@ -16,10 +16,11 @@ from crud.mailings.mailing_crud import (
     get_sent_candidates,
 )
 from utils.db import db_mapping_rows_to_dict
-from crud.camps.camper_in_camp_crud import get_campers_for_camp
+from crud.camps.camper_in_camp_crud import get_campers_for_camp, get_campers_in_camp_mailing
 from crud.camps.staff_in_camp_crud import get_staff_in_camp
 from crud.training.staff_in_training_crud import get_all_staff_in_training_event
 from crud.staffs.staff_crud import get_all_prospect_by_season
+from crud.camps.camp_crud import get_school_info_by_camp
 from model.mailings import (
     CamperCampaign,
     StaffCampaign,
@@ -136,9 +137,9 @@ def get_inf_campaign_camp(
         for staff_c in staffs_complete:
             staffs_info.append(
                 {
-                    "staff_id": camper_c["staff_id"],
-                    "staff_full_name": camper_c["staff_full_name"],
-                    "staff_email": camper_c["staff_email"]
+                    "staff_id": staff_c["staff_id"],
+                    "staff_full_name": staff_c["staff_full_name"],
+                    "staff_email": staff_c["staff_email"]
                 }
             )
     if school:
@@ -166,42 +167,37 @@ def get_inf_campaign_camps(
     """
 
     templates = get_all_massive_template(db)
-    campers_info = []
-    staffs_info = []
-    school_info = None
-    if campers:
-        campers_complete = get_campers_for_camp(db, camps_id[0])
-        for camper_c in campers_complete:
-            campers_info.append(
-                {
-                    "camper_id": camper_c["camper_id"],
-                    "camper_full_name": camper_c["camper_full_name"],
-                    "tutor_full_name": camper_c["tutor_full_name"],
-                    "tutor_email": camper_c["tutor_email"],
-                    "second_tutor_full_name": camper_c["second_tutor_full_name"],
-                    "second_tutor_email": camper_c["second_tutor_email"],
-                }
-            )
-    if staffs:
-        staffs_complete = get_staff_in_camp(db, camps_id[0])
-        for staff_c in staffs_complete:
-            staffs_info.append(
-                {
-                    "staff_id": staff_c["staff_id"],
-                    "staff_full_name": staff_c["staff_full_name"],
-                    "staff_email": staff_c["staff_email"],
-                }
-            )
-    if school:
-        school_info = {"school_id": 1, "school": "Escuela 1", "school_email": "escuela@correo.com"}
-
-    return {
-        "massive_templates": templates,
-        "campers": campers_info,
-        "staffs": staffs_info,
-        "school": school_info,
-    }
-
+    
+    if len(camps_id) > 0:
+        camps = []
+        campers_list = []
+        staff_list = []
+        school_list = {}
+        mailing_campaign = {}
+        for camp_id in camps_id:
+            # campers_complete = get_campers_for_camp(db, camps_id)
+            if campers: 
+                campers_list = get_campers_in_camp_mailing(db, camp_id)
+            if staffs:
+                staff_list =  get_staff_in_camp(db, camp_id)
+            if school:
+                school_list = get_school_info_by_camp(db, camp_id)         
+            camp_info_query = db.query(Camp.id, Camp.name).filter(Camp.id == camp_id)
+            
+            camp_data = db.execute(camp_info_query)
+            camp_info = camp_data.mappings().first()
+            camps.append({"camp": {
+                "name": camp_info.name,
+                "id" : camp_info.id,
+                "campers": campers_list,
+                "staff": staff_list,
+                "school": school_list
+            }})
+            
+        mailing_campaign['massive_templates'] = templates
+        mailing_campaign['camps'] = camps
+        return mailing_campaign
+    
 
 @mailing_routes.get("/mailing/send/campaign/training/", tags=["Mailing"])
 def get_inf_campaign_training(training_id: int, db: Session = Depends(get_db)):

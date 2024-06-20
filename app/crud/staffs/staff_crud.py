@@ -158,6 +158,8 @@ def update_staff_by_id(db: Session, staff_id: int, modify_staff: StaffModify) ->
     db.commit()
     return rows_updated
 
+def staff_camps(db, staff_id: int):
+    pass
 
 def staff_dashboard(db, staff_id: int):
     user = (
