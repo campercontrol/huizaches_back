@@ -1,4 +1,4 @@
-from sqlalchemy import case
+from sqlalchemy import case, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
@@ -29,7 +29,14 @@ def get_season_by_id(db: Session, season_id: int):
 def create_new_season(db: Session, new_season: SeasonCreate):
     db_season = None
     try:
-        db_season = Season(**new_season.dict())
+        if new_season["current"]:
+            switch_current_to_false_stmt =  (
+                update(Season)
+                .where(Season.current == True)
+                .values(current=False)
+            )
+        db.execute(switch_current_to_false_stmt)
+        db_season = Season(**new_season)
         db.add(db_season)
         db.commit()
         db.refresh(db_season)
@@ -40,18 +47,31 @@ def create_new_season(db: Session, new_season: SeasonCreate):
         db_season = None
         return db_season
     except Exception as ex:
+        db_season = None
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_season
 
 
 def update_season_by_id(db: Session, season_id: int, modify_season: SeasonModify):
-    rows_updated = (
-        db.query(Season)
-        .filter_by(id=season_id)
-        .update(modify_season, synchronize_session="fetch")
-    )
-    db.commit()
-    return rows_updated
+    try: 
+        if modify_season["current"]:
+            switch_to_false_stmt =  (
+                update(Season)
+                .where(Season.current == True)
+                .values(current=False)
+            )
+            db.execute(switch_to_false_stmt)
+        rows_updated = (
+            db.query(Season)
+            .filter_by(id=season_id)
+            .update(modify_season, synchronize_session="fetch")
+        )
+        db.commit()
+    except Exception as ex:
+        print(ex)
+        return {"status": 3, "msg": "Internal Server Error"}
+    
+    return {"status": 1, "msg": "Season updated successfully"}
 
 def delete_season(db: Session, season_id:int):
     season = db.query(Season).filter(Season.id==season_id).first()
