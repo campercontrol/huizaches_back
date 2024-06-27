@@ -11,6 +11,7 @@ from utils.hash import hash_str
 from helper.mailing_helpers import send_mail_prospect
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
+from crud.camps.season_crud import get_current_Season
 
 
 def get_all_prospect(db):
@@ -73,7 +74,7 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     return db_prospect
 
 def create_complete_prospect(db, new_prospect):
-    current_season = 77
+    season = get_current_Season(db)
     welcome_prospect_template = 1 
     try:
         prospect_user = User(
@@ -115,7 +116,7 @@ def create_complete_prospect(db, new_prospect):
         prospect_profile = Staff(**new_prospect.prospect.dict())
         prospect_profile.employee = False
         prospect_profile.coordinator = False
-        prospect_profile.season_id = current_season
+        prospect_profile.season_id = season['id']
         prospect_profile.record_id = staff_new_record.id    
 
         db.add(prospect_profile)
@@ -301,3 +302,11 @@ def get_staff_band(db, staff_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(staff_band)
+
+def get_staff_info_mailing(db: Session, staff_id: int):
+    query = db.query(Staff.name,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(Staff.id == staff_id)
+    data = db.execute(query)
+    return data.mappings().first()

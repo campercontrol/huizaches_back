@@ -24,7 +24,11 @@ def get_season_by_id(db: Session, season_id: int):
         )
         .first()
     )
-
+def get_current_Season(db: Session):
+    query = db.query(Season.id, Season.name).filter(Season.current == True)
+    season = db.execute(query)
+    return season.mappings().first()
+    
 
 def create_new_season(db: Session, new_season: SeasonCreate):
     db_season = None

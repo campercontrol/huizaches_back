@@ -90,9 +90,6 @@ def get_staff(db: Session = Depends(get_db)):
 def create_prospect(
     new_prospect: ProspectCompleteCreate, db: Session = Depends(get_db)
 ):
-    # user = create_new_prospect_user(db, new_prospect.user)
-    # prospect = create_new_prospect(db, new_prospect.prospect, user.id)
-
     prospect = create_complete_prospect(db, new_prospect)
 
     return {"data": prospect}
