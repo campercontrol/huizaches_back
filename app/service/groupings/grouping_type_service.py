@@ -34,7 +34,7 @@ def read_grouping_type(grouping_type_id: int, db: Session = Depends(get_db)):
 def create_grouping_type(grouping_type: GroupingTypeCreate, db: Session = Depends(get_db)):
     return create_new_grouping_type(db, grouping_type)
 
-@grouping_type_router.patch("/grouping_types/{grouping_type_id}", tags=["GroupingType"])
+@grouping_type_router.put("/grouping_types/{grouping_type_id}", tags=["GroupingType"])
 def update_grouping_type_endpoint(
     grouping_type_id: int, grouping_type: GroupingTypeUpdate, db: Session = Depends(get_db)
 ):
