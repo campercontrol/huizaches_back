@@ -39,11 +39,16 @@ def create_grouping(grouping: GroupingCreate, db: Session = Depends(get_db)):
     return create_new_grouping(db, grouping)
 
 
-@grouping_router.put("/groupings/{grouping_id}", response_model=GroupingResponse, tags=["Grouping"])
+@grouping_router.patch("/groupings/{grouping_id}", tags=["Grouping"])
 def update_grouping_endpoint(
     grouping_id: int, grouping: GroupingUpdate, db: Session = Depends(get_db)
 ):
-    return update_grouping(db, grouping_id, grouping)
+    update_grouping_dict = grouping.dict(exclude_unset= True)
+    grouping_update_result = update_grouping(db, grouping_id, update_grouping_dict)
+    if grouping_update_result['status'] == 3:
+        raise HTTPException(status_code=500, detail=grouping_update_result)
+    return {"detail": grouping_update_result}
+
 
 
 @grouping_router.delete("/groupings/{grouping_id}", tags=["Grouping"])
