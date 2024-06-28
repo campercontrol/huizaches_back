@@ -76,11 +76,14 @@ def update_camper_extra_answer(
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
-@extra_answer_routes.get("/camper_extra_answers_by_camp/{camper_id}/{camp_id}")
+# @extra_answer_routes.get("/camper_extra_answers_by_camp/{camper_id}/{camp_id}")
+# def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):
+#     extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
+#     return {"data": extra_answers}
+@extra_answer_routes.get("/extra_answers_camper/{camper_id}/{camp_id}")
 def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):
-    extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
-    return {"data": extra_answers}
-
+     extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
+     return {"data": extra_answers}
 
 @extra_answer_routes.post("/camper/extra_answers/",  tags=["Campers"])
 def set_extra_answers_camper( extra_answers:CamperExtraAnswerListCreate, db:Session=Depends(get_db)):
