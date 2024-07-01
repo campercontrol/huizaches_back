@@ -244,38 +244,39 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
         campers = camp["camp"]["campers"]
         staffs = camp["camp"]["staff"]
         school = camp["camp"]["school"]
-
-        for camper in campers:
-            parent_info = get_parent_by_camper_id(db, camper["id"])
-            camper_info = get_camper_info_mailing(db, camper["id"])
-            email_context = {
-                "camper": camper_info,
-                "user": parent_info,
-                "camp": camp_info,
-                "payment": default_payment_variables
-                            
-            }
-            send_mail_template(db, camper["tutor_email"],template_id, email_context)
-        for staff in staffs:
-            staff_info = get_staff_info_mailing(db, staff["staff_id"])
+        if len(campers) > 0:
+            for camper in campers:
+                parent_info = get_parent_by_camper_id(db, camper["id"])
+                camper_info = get_camper_info_mailing(db, camper["id"])
+                email_context = {
+                    "camper": camper_info,
+                    "user": parent_info,
+                    "camp": camp_info,
+                    "payment": default_payment_variables
+                                
+                }
+                send_mail_template(db, camper["tutor_email"],template_id, email_context)
+        if len(staffs) > 0: 
+            for staff in staffs:
+                staff_info = get_staff_info_mailing(db, staff["staff_id"])
+                email_context = {
+                    "camper": default_camper_variables,
+                    "user": staff_info,
+                    "camp": camp_info,
+                    "payment": default_payment_variables
+                }
+                send_mail_template(db, staff["staff_email"],template_id, email_context)
+        if school:        
             email_context = {
                 "camper": default_camper_variables,
-                "user": staff_info,
-                "camp": camp_info,
-                "payment": default_payment_variables
+                "user": {
+                    "name": school["name"],
+                    "email": school["email"],
+                },
+                "payment": default_payment_variables,
+                "camp": camp_info
             }
-            send_mail_template(db, staff["staff_email"],template_id, email_context)
-            
-        email_context = {
-            "camper": default_camper_variables,
-            "user": {
-                "name": school["name"],
-                "email": school["email"],
-            },
-            "payment": default_payment_variables,
-            "camp": camp_info
-        }
-        send_mail_template(db, school["email"],template_id, email_context)
+            send_mail_template(db, school["email"],template_id, email_context)
         
     return {"status": 1, "msg": "emails sent successfully"}
 
