@@ -1,10 +1,7 @@
-from xmlrpc.client import boolean
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from crud.mailings.email_template_crud import (
-    get_all_email_template,
     get_all_massive_template,
     get_all_system_template,
 )
@@ -15,29 +12,22 @@ from crud.mailings.mailing_crud import (
     get_sent_training,
     get_sent_candidates,
 )
-from utils.db import db_mapping_rows_to_dict
 from crud.camps.camper_in_camp_crud import get_campers_for_camp, get_campers_in_camp_mailing
 from crud.camps.staff_in_camp_crud import get_staff_in_camp
 from crud.training.staff_in_training_crud import get_all_staff_in_training_event
 from crud.staffs.staff_crud import get_all_prospect_by_season
-from crud.camps.camp_crud import get_school_info_by_camp
+from crud.campers.parent_crud import get_parent_by_camper_id
+from crud.campers.camper_crud import get_camper_info_mailing
+from crud.camps.camp_crud import get_school_info_by_camp, get_camp_info_by_id_mailing
+from crud.staffs.staff_crud import get_staff_info_mailing
+from crud.training.training_crud import get_training_by_id
 from model.mailings import (
-    CamperCampaign,
-    StaffCampaign,
-    SchoolCampaign,
-    Campaign,
-    EmailTemplate,
+    Campaign
 )
-from model.catalogs import Constant
-from model.user import User
-from model.campers import Parent
-from model.campers import Camper
-from model.campers import School
 from model.camps import Camp
-from model.staffs import Staff
-from schema.mailings.campaign_schema import CampaignSend
+from schema.mailings.campaign_schema import CampaignSend, CampaignSendStaff
 
-from helper.mailing_helpers import send_mail_template, send_massive_template
+from helper.mailing_helpers import send_mail_template
 from utils.email_tools import send_simple_message
 
 from utils.db import SessionLocal
@@ -155,7 +145,7 @@ def get_inf_campaign_camp(
 
 @mailing_routes.post("/mailing/send/campaign/camps/", tags=["Mailing"])
 def get_inf_campaign_camps(
-    camps_id: list[int],
+    camps_id: "list[int]",
     campers: bool,
     staffs: bool,
     school: bool,
@@ -175,7 +165,6 @@ def get_inf_campaign_camps(
         school_list = {}
         mailing_campaign = {}
         for camp_id in camps_id:
-            # campers_complete = get_campers_for_camp(db, camps_id)
             if campers: 
                 campers_list = get_campers_in_camp_mailing(db, camp_id)
             if staffs:
@@ -205,13 +194,16 @@ def get_inf_campaign_training(training_id: int, db: Session = Depends(get_db)):
     Significa traer la info necesaria para un correo que se enviará a diferentes
     participantes de una capacitación
     """
-    templates = get_all_massive_template(db)
-    staffs_complete = get_all_staff_in_training_event(db, training_id)
+    # templates = get_all_massive_template(db)
+    # staffs_complete = get_all_staff_in_training_event(db, training_id)
+    training_info = get_training_by_id(db, training_id)
+    print(training_info)
 
-    return {
-        "massive_templates": templates,
-        "staffs": staffs_complete,
-    }
+    return 1
+    # return {
+    #     "massive_templates": templates,
+    #     "staffs": staffs_complete,
+    # }
 
 
 @mailing_routes.get("/mailing/send/campaign/candidates/", tags=["Mailing"])
@@ -231,73 +223,109 @@ def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
 
 @mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
 def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
-    camp_id = campaign_send.campaign.camp_id
-    campers_id = campaign_send.campers_id
-    staffs_id = campaign_send.staffs_id
-    schools_id = campaign_send.schools_id
-    tutors_emails = []
-    staff_emails = []
-    school_emails = []
-    camp_info_query = (db.query(Camp.id,
-                                Camp.name,
-                                Camp.start,
-                                Camp.end,
-                                Camp.start,
-                                Camp.url,
-                                Camp.photo_password,
-                                Camp.photo_url,
-                                Camp.public_price,
-                                Camp.venue
-                                ).filter(Camp.id == camp_id))
+    camps = campaign_send.camps
+    template_id = campaign_send.campaign.template_id
+    default_camper_variables = {
+        "name": "",
+        "fullname": "",
+        "grade": "",
+        "school": ""
+    }
+    default_payment_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "txn_type": "",
+        "txn_number": "",
+    }
     
-    camp_info_response = db.execute(camp_info_query)
-    camp_info = camp_info_response.mappings().all()[0]
-    print(camp_info)
-    try:
-        if campaign_send.campers_id:
-            for camper_id in campers_id:
-                tutor_email = db.query(
-                    Parent.contact_email,
-                    User.email
-                ).join(
-                    Camper, Camper.parent_id == Parent.id
-                ).join(
-                    User, User.id == Parent.user_id
-                ).filter(
-                    Camper.id == camper_id
-                ).first()
-                tutors_emails.append(tutor_email[0])
-                tutors_emails.append(tutor_email[1])
-            print(tutors_emails)
-            send_simple_message("", tutors_emails, campaign_send.email_subject, campaign_send.template_body)
-            # send_massive_template(db, )            
+    for camp in camps:
+        # print(camp["camp"]["id"])
+        camp_info = get_camp_info_by_id_mailing(db, camp["camp"]["id"])
+        campers = camp["camp"]["campers"]
+        staffs = camp["camp"]["staff"]
+        school = camp["camp"]["school"]
 
-        if campaign_send.staffs_id:
-            for staff_id in staffs_id:
-                staff_email = db.query(
-                    User.email
-                ).join(
-                    Staff, Staff.login_id == User.id
-                ).filter(
-                    Staff.id == staff_id
-                ).first()
-            staff_emails.append(staff_email[0])
-        print(staff_emails)
-        send_simple_message("", staff_emails, campaign_send.email_subject, campaign_send.template_body)
+        for camper in campers:
+            parent_info = get_parent_by_camper_id(db, camper["id"])
+            camper_info = get_camper_info_mailing(db, camper["id"])
+            email_context = {
+                "camper": camper_info,
+                "user": parent_info,
+                "camp": camp_info,
+                "payment": default_payment_variables
+                            
+            }
+            send_mail_template(db, camper["tutor_email"],template_id, email_context)
+        for staff in staffs:
+            staff_info = get_staff_info_mailing(db, staff["staff_id"])
+            email_context = {
+                "camper": default_camper_variables,
+                "user": staff_info,
+                "camp": camp_info,
+                "payment": default_payment_variables
+            }
+            send_mail_template(db, staff["staff_email"],template_id, email_context)
+            
+        email_context = {
+            "camper": default_camper_variables,
+            "user": {
+                "name": school["name"],
+                "email": school["email"],
+            },
+            "payment": default_payment_variables,
+            "camp": camp_info
+        }
+        send_mail_template(db, school["email"],template_id, email_context)
         
-        if campaign_send.schools_id:
-            for school_id in schools_id:
-                school_email = db.query(
-                    User.email
-                ).join(
-                    School, School.login_id == User.id
-                ).filter(
-                    School.id == school_id
-                ).first()
-                school_emails.append(school_email[0])
-        print(school_emails)
-        send_simple_message("", school_emails, campaign_send.email_subject, campaign_send.template_body)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
-    return {"status": 1, "detail": "Emails sent successfully"}
+    return {"status": 1, "msg": "emails sent successfully"}
+
+
+@mailing_routes.post("/mailing/send/email/staff_in_training", tags=["Mailings"])
+def send_massive_email_staff_in_training(campaign_send: CampaignSendStaff, db: Session = Depends(get_db)):
+    template_id = campaign_send.campaign.template_id
+    staffs = campaign_send.staffs
+    default_camper_variables = {
+        "name": "",
+        "fullname": "",
+        "grade": "",
+        "school": ""
+    }
+    default_payment_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "txn_type": "",
+        "txn_number": "",
+    }
+    default_camp_info_variables = {
+        "name": "",
+        "start": "",
+        "end": "",
+        "start_registration": "", 
+        "end_registration": "",
+        "registration": "",
+        "url": "",
+        "special_message": "",
+        "special_message": "",
+        "special_message_admin": "",
+        "public_price": "",
+        "insurance": "",
+        "venue": "",
+        "photo_url": "",
+        "photo_password": "",
+        "medical_report": "",
+        "occupancy_camp": "",
+        "school": "", 
+        "location": ""
+    }
+    for staff in staffs:
+        staff_info = get_staff_info_mailing(db, staff["id"])
+        email_context = {
+            "camper": default_camper_variables,
+            "user": staff_info,
+            "camp": default_camp_info_variables,
+            "payment": default_payment_variables
+        }
+        send_mail_template(db, staff["email"],template_id, email_context)
+            
+    return {"status": 1, "msg": "emails sent successfully"}
+

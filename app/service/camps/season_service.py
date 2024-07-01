@@ -50,7 +50,6 @@ def create_season(new_season:SeasonCreate,db: Session = Depends(get_db)):
 def update_season(season_id:str,modify_season:SeasonModify,db: Session = Depends(get_db)):
 
     update_data = modify_season.dict(exclude_unset=True)
-    print(update_data)
     season_update_result = update_season_by_id(db,season_id,update_data)
 
     if season_update_result['status'] == 3:

@@ -87,21 +87,23 @@ def send_mail_prospect(
     )
     return 1
 
-def send_massive_template(
+def send_mail_template(
     db,
-    send_to: list[str],
+    send_to: str,
     template_id: int,
-    camp_info
+    context: dict
 ):
-
-    context = camp_info
 
     template_content =  (
         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
     )
     template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
     html_content = template_env.render(context)
-    send_simple_message(
-        "", send_to, template_content.title, html_content
-    )
-    return 1
+    try:    
+        send_simple_message(
+            "", send_to, template_content.title, html_content
+        )
+        return True
+    except Exception as ex:
+        print(ex)
+        return False

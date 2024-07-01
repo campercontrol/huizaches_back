@@ -148,27 +148,29 @@ class CampaignSend(BaseModel):
     campaign : CampaignCreate = Field(
         title = "Campaña"
     )
-    campers_id : List[int] = Field(
-        title = "Campers"
-    )
-    staffs_id : List[int] = Field(
-        title = "Staffs"
-    )
-    schools_id : List[int] = Field(
-        title = "Schools"
-    )
-    camps_id: List[int] = Field(
-        title = "Camps"
+    camps: "list[dict]" = Field(
+        title = "Datos del camp"
     )
     template_title: str = Field(
         title = "Asunto del correo"
     )
-    template_body: str = Field(
-        title = "Cuerpo del correo"
+    email_subject: Optional[str] = Field(
+        title= "Asunto del correo"
+    )
+class CampaignSendStaff(BaseModel):
+    campaign : CampaignCreate = Field(
+        title = "Campaña"
+    )
+    staffs: "list[dict]" = Field(
+        title = "Datos del camp"
+    )
+    template_title: str = Field(
+        title = "Asunto del correo"
     )
     email_subject: Optional[str] = Field(
         title= "Asunto del correo"
     )
+
 
 class CamperCampaignCreate(BaseModel):
 

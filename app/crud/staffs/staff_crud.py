@@ -16,9 +16,13 @@ from crud.camps.season_crud import get_current_Season
 
 def get_all_prospect(db):
     rows = (
-        db.query(Staff, User.email, Season.name.label("season_name"))
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                    StaffRecord.attend,
+                    StaffRecord.attended,
+                    StaffRecord.total)
         .join(User, User.id == Staff.login_id)
         .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == False)
         .all()
     )
@@ -44,9 +48,13 @@ def get_all_prospect_by_season(db, season_id: int):
 
 def get_all_staff(db):
     rows = (
-        db.query(Staff, User.email, Season.name.label("season_name"))
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                 StaffRecord.attend,
+                 StaffRecord.attended,
+                 StaffRecord.total)
         .join(User, User.id == Staff.login_id)
         .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == True)
         .all()
     )

@@ -103,7 +103,16 @@ def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify
     return rows_updated
 
 
-# def get_campers_from_parent
+def get_parent_by_camper_id(db, camper_id):
+    
+    query = db.query(Parent.tutor_name.label("name"),
+                     Parent.tutor_lastname_father.label("lastname_father"),
+                     Parent.tutor_lastname_mother.label("lastname_mother"),
+                     User.email).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)
+    data = db.execute(query)
+    return data.mappings().first()
+ 
+    
 
 
 def delete_parent(db: Session, parent_id: int):
