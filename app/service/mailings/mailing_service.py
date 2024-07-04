@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.mailings.email_template_crud import (
     get_all_massive_template,
     get_all_system_template,
 )
-from crud.mailings.campaign_crud import get_all_campaign
+from crud.mailings.campaign_crud import get_all_campaign, create_new_campaign, add_camper_to_campaign
 from crud.mailings.mailing_crud import (
     get_sent_camp,
     get_sent_camps,
@@ -20,6 +20,7 @@ from crud.campers.parent_crud import get_parent_by_camper_id
 from crud.campers.camper_crud import get_camper_info_mailing
 from crud.camps.camp_crud import get_school_info_by_camp, get_camp_info_by_id_mailing
 from crud.staffs.staff_crud import get_staff_info_mailing
+from crud.mailings.campaign_crud import get_campaign_all_info_by_id
 from crud.training.training_crud import get_training_by_id
 from model.mailings import (
     Campaign
@@ -220,11 +221,22 @@ def get_inf_campaign_candidates(season_id: int, db: Session = Depends(get_db)):
         "staffs": staffs_complete,
     }
 
-
+@mailing_routes.get("/mailing/campaign_info/{campaign_id}", tags=["Mailing"])
+def get_campaign_info(campaign_id: int, db: Session = Depends(get_db)):
+    """
+    Devuelve toda la información sobre un template enviado
+    """
+    campaign_info = get_campaign_all_info_by_id(db, campaign_id)
+    
+    if campaign_info["campaign"] == None:
+         raise HTTPException(status_code=404)
+    return campaign_info
 @mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
 def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
     camps = campaign_send.camps
+    campaign = campaign_send.campaign
     template_id = campaign_send.campaign.template_id
+    
     default_camper_variables = {
         "name": "",
         "fullname": "",
@@ -237,6 +249,10 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
         "txn_type": "",
         "txn_number": "",
     }
+    new_campaign = create_new_campaign(db, campaign)
+
+    if new_campaign == None:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while creating the campaing"})
     
     for camp in camps:
         # print(camp["camp"]["id"])
@@ -255,7 +271,15 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "payment": default_payment_variables
                                 
                 }
-                send_mail_template(db, camper["tutor_email"],template_id, email_context)
+                camper_campaign = {
+                    "campaign_id": new_campaign.id,
+                    "camp_id": camp_info["id"],
+                    "camper_id": camper["id"]
+                }                
+                sendmail_status = send_mail_template(db, camper["tutor_email"],template_id, email_context)
+                if sendmail_status: 
+                    add_camper_to_campaign(db, camper_campaign)
+                
         if len(staffs) > 0: 
             for staff in staffs:
                 staff_info = get_staff_info_mailing(db, staff["staff_id"])

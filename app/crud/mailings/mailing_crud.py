@@ -63,7 +63,6 @@ def get_public_for_campaign(db, campaign_id: int):
         "school": school,
     }
 
-
 def get_sent_camp(db, campaign_id: int):
     public_campaign = get_public_for_campaign(db, campaign_id)
     campaign = (
