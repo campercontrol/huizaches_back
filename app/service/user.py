@@ -1,8 +1,8 @@
 from xmlrpc.client import boolean
-
+import os
 from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session
-
+from utils.hash import hash_str
 from crud.crud_user import (
     get_all_user,
     create_new_user,
@@ -14,14 +14,16 @@ from crud.crud_user import (
     search_user_by_email,
     update_password_all_users,
     update_user_by_id,
-    delete_user_by_id
+    delete_user_by_id,
+    get_user_info_by_email
 )
 from model.user import User
-from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail
+from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail, UserSendMailResetPassword
 from model.staffs import Staff, StaffRecord
 # from utils.check_role import chek_permission
 from utils.db import SessionLocal
 from utils.email_tools import send_simple_message
+from helper.mailing_helpers import send_mail_template
 from utils.functions_jwt import generate_access_token_reset_pass, validate_token_general
 from utils.hash import hash_str
 from utils.image_tools import write_image
@@ -191,32 +193,57 @@ def update_user(
 #         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
 
-@user_routes.post("/usuario/reset_password", tags=["Usuarios"])
+@user_routes.post("/user/send_mail_password_reset", tags=["Usuarios"])
 def reset_password(
-    user_reset: UserResetPassword, response: Response, db: Session = Depends(get_db)
+    user_reset: UserSendMailResetPassword, response: Response, db: Session = Depends(get_db)
 ):
-    exist_email = get_user_by_email(db, user_reset.email)
-    if not exist_email:
-        response.status_code = 401
-        return {"mensaje": "Email not registered", "data": ""}
-    elif not exist_email.is_active:
-        response.status_code = 401
-        return {"mensaje": "Account is not active", "data": ""}
+    user = get_user_by_email(db, user_reset.email)
+    template_id = 2 # Password Recover 
+    if not user:
+        # response.status_code = 401
+        return {"detail": {"status": 2, "msg": "Email is not registered"}}
+    elif not user.is_active:
+        # response.status_code = 401
+        return {"detail": {"status": 3, "msg": "The account is not active"}}
     else:
         accessToken = generate_access_token_reset_pass(user_reset.email)
-        send_simple_message(
-            "",
-            [user_reset.email],
-            "Reinicio de contraseña",
-            f"""Porfavor entra a esta url para realizar el cambio de contraseña
-            Url: 127.0.0.1/reset_password/?email={user_reset.email}&token={accessToken}
-            """,
-        )
-        response.status_code = 200
-        return {
-            "mensaje": "Se ha enviado un correo con instrucciones para la recuperacion de su contraseña",
-            "data": "",
+        user_info = get_user_info_by_email(db, user_reset.email)
+        base_url = os.getenv("PROD_URL")
+        url = f'{base_url}/reset_password/?email={user_reset.email}&token={accessToken}' 
+        email_variables = {
+                "user": user_info,
+                "reset_url": url
         }
+        email_status = send_mail_template(db, user_reset.email, template_id, email_variables)
+        if email_status:
+            return {"detail": {"status": 1, "msg": "Email password reset sent successfully"}}
+        else:
+            return {"detail": {"status": 3, "msg": "An error ocurred while sending email"}}
+        
+@user_routes.post("/user/reset_password", tags=["Usuarios"])
+def reset_password(
+    user_reset: UserResetPassword, t: str, db: Session = Depends(get_db)
+):
+    data = validate_token_general(t)
+    if data[0] == 403:
+        raise HTTPException(status_code=401, detail="Token Has expired") 
+    if data[0] == 401:
+        raise HTTPException(status_code=401, detail="Invalid token") 
+    try:
+        account = db.query(User).filter_by(email=user_reset.email).first()
+        new_hashed_password = hash_str(user_reset.password)
+        account.hashed_pass = new_hashed_password
+        db.add(account)
+        db.commit()        
+    except Exception as ex:
+        db.rollback()
+        print(f"An error ocurred while changing the password: {ex}")
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while changing the password"}) 
+    return {"detail": {
+        "status": 1,
+        "msg": "Password updated successfully"
+    }}
+    
 
 @user_routes.post("/user/verify/")
 def verify_account(t: str, db: Session = Depends(get_db)):

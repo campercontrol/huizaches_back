@@ -61,11 +61,15 @@ class UserModify(BaseModel):
         title="Is active",
     )
 
-
+class UserSendMailResetPassword(BaseModel):
+    email: EmailStr = Field(
+        title="Email",
+    )
 class UserResetPassword(BaseModel):
     email: EmailStr = Field(
         title="Email",
     )
+    password: str
 
 
 class UserChangePassword(BaseModel):

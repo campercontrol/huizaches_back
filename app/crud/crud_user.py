@@ -177,6 +177,37 @@ def crud_update_user_by_email(db, email, update_data):
 def get_user_by_email(db, email):
     return db.query(User).filter_by(email=email).first()
 
+
+def get_user_info_by_email(db: Session, email: str):
+    user = db.query(User).filter_by(email=email).first()
+    parent_role = 1
+    staff_role = 2
+    school_role = 3
+    doctor_role = 5
+    
+    if user.role_id == parent_role:
+        user_info_query = db.query(User.email, Parent.tutor_name.label("name")).join(Parent, Parent.user_id == User.id)
+        user_info = db.execute(user_info_query)
+        user_info = user_info.mappings().first()
+    if user.role_id == school_role:
+        user_info_query = db.query(User.email, School.name).join(School, School.login_id == User.id)
+        user_info = db.execute(user_info_query)
+        user_info = user_info.mappings().first()
+    if user.role_id == staff_role:
+        user_info_query = db.query(User.email, Staff.name.label("name")).join(Staff, Staff.login_id == User.id)
+        user_info = db.execute(user_info_query)
+        user_info = user_info.mappings().first()
+    if user.role_id == doctor_role:
+        user_info_query = db.query(User.email, Doctor.name.label("name")).join(Doctor, Doctor.login_id == User.id)
+        user_info = db.execute(user_info_query)
+        user_info = user_info.mappings().first()
+    
+    return user_info
+    
+        
+    
+    
+
 def get_profile_id_by_user_id(db, user_id:int ):
 
     profile_id = ['']
