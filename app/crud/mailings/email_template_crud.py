@@ -30,6 +30,21 @@ def get_email_template_by_uuid(db, email_template_id):
     # print(data.mappings().all()[0])
     return data.mappings().all()[0]
 
+
+def get_email_template_by_uuid_template_type(db, email_template_id):
+    query = (db.query(EmailTemplate.id, 
+                      EmailTemplate.order,
+                      EmailTemplate.template,
+                      EmailTemplate.created_at,
+                      EmailTemplate.title,
+                      EmailTemplate.template_type)
+             .filter(
+        EmailTemplate.id == email_template_id
+    ))
+    data = db.execute(query)
+    data = data.mappings().first()
+    return data
+
 def create_new_email_template(db, new_email_template: EmailTemplateCreate):
     db_email_template = None
     try:
