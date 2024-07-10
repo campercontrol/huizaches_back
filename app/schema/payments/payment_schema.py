@@ -15,10 +15,11 @@ class PaymentCreate(BaseModel):
     paid: bool = Field(
         title="Pagado"
     )
-    payment_amount: condecimal(decimal_places= 2)
+    payment_amount: condecimal(decimal_places= 2) # type: ignore
     
     payment_date: date = Field(
-        title = "Fecha del pago"
+        title = "Fecha del pago",
+        default=datetime.now()
     )
     txn_number: str = Field(
         title= "Numero de transacción",

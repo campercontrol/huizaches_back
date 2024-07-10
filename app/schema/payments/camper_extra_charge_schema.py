@@ -72,7 +72,21 @@ class ExtraChargeMultiple(BaseModel):
     camp_extra_charge_is_selected:bool = Field(
         title="Seleccionado"
     )
-
     camp_extra_charge_id:int = Field(
         title = "Cargo extra id"
+    )
+    extra_charge_name: str = Field(
+        title = "Nombre del cargo extra"
+    )
+    extra_charge_price: str = Field(
+        title = "precio del cargo extra"
+    )
+    extra_charge_symbol: str = Field(
+        title = "Nombre del cargo extra"
+    )
+    extra_selected: boolean = Field(
+        title = "Cargo seleccionado"
+    )
+    camper_id: int = Field(
+        title = "ID del camper"
     )

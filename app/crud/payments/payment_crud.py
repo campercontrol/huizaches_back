@@ -10,7 +10,6 @@ from model.camps import Camp, CamperInCamp
 
 from utils.payments.payment_table import get_payment_table
 
-from crud.camps.camper_in_camp_crud import get_camper_in_camp_by_camper_camp
 from crud.payments.payment_method_crud import get_all_payment_method
 from crud.payments.payment_transaction_type_crud import get_all_payment_transaction_type
 
@@ -36,28 +35,54 @@ def get_payment_by_id(db, payment_id: int):
 
 
 def create_new_payment(db, new_payment: PaymentCreate):
-    db_payment = None
-    update_camper_balance_camper(db, new_payment.camper_id, new_payment.camp_id)
-    try:
-        db_payment = Payment(**new_payment.dict())
-        if db_payment.txn_type_id in (2, 3, 5):
-            db_payment.payment_amount = abs(db_payment.payment_amount) * -1
+    # db_payment = None
+    # print(new_payment)    
+    camper_id = new_payment["camper_id"]
+    camp_id = new_payment["camp_id"]
+    # update_camper_balance_camper(db, camper_id, camp_id)
+    # try:
+    #     db_payment = Payment(**new_payment)
+    #     if db_payment.txn_type_id in (1, 2, 9):
+    #         db_payment.payment_amount = abs(int(db_payment.payment_amount)) * -1
 
-        else:
-            db_payment.payment_amount = abs(db_payment.payment_amount)
+    #     else:
+    #         db_payment.payment_amount = abs(int(db_payment.payment_amount))
+    #     db.add(db_payment)
+    #     db.commit()
+    #     db.refresh(db_payment)
+    # except SQLAlchemyError as e:
+    #     print("#=================")
+    #     print(e)
+    #     print("#=================")
+    #     db_payment = None
+    #     return db_payment
+    # except Exception as ex:
+    #     print(f"No se pudo guardar en la base de datos: {ex}")
+    # return db_payment
+    
+    camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)).first()
+    print(camper_in_camp.payment_balance)    
+    try:
+        print(new_payment)
+        db_payment = Payment(**new_payment)
         db.add(db_payment)
         db.commit()
-        db.refresh(db_payment)
-    except SQLAlchemyError as e:
-        print("#=================")
-        print(e)
-        print("#=================")
-        db_payment = None
-        return db_payment
+        if db_payment.txn_type_id in (1,2,9):
+            total_balance = abs(camper_in_camp.payment_balance) - abs(float(db_payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp) 
+            db.commit()
+        else:
+            total_balance = abs(camper_in_camp.payment_balance) + abs(float(db_payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp) 
+            db.commit()            
+        
     except Exception as ex:
-        print(f"No se pudo guardar en la base de datos: {ex}")
-    return db_payment
-
+        db.rollback()
+        print(f"An error ocurred while saving payment: {ex}")
+        
+    return 1
 
 def update_payment_by_id(db, payment_id: int, modify_payment: PaymentModify):
     rows_updated = (
@@ -93,7 +118,24 @@ def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
 
     return payment_table
 
-
+# imported here due to a circular import
+def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int):
+    camper_in_camp = (
+        db.query(CamperInCamp)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.camp_id == camp_id,
+                CamperInCamp.status == 36,
+            )
+        )
+        .first()
+    )
+    if camper_in_camp:
+        return camper_in_camp
+    else:
+        return False
+    
 def get_payment_page_camper_in_camp(
     db, camper_id: int, camp_id: int, camper_in_camp_id: int
 ):
@@ -154,8 +196,16 @@ def update_camper_balance_camper(db, camper_id: int, camp_id: int):
     db.query(CamperInCamp).filter(
         and_(
             CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
-        ).update({"payment_balance": total_balance})
-    )
+        )
+    ).update({"payment_balance": total_balance})
     db.commit()
     
     return 1
+
+def get_payment_transaction_type_by_movement(db: Session, movement_id):
+    query = db.query(PaymentTransactionType.uid, 
+                     PaymentTransactionType.id, 
+                     PaymentTransactionType.name,
+                     PaymentTransactionType.movement).filter(PaymentTransactionType.movement == movement_id)
+    data = db.execute(query)
+    return data.mappings().first()

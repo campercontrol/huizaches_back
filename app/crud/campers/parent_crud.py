@@ -106,6 +106,7 @@ def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify
 def get_parent_by_camper_id(db, camper_id):
     
     query = db.query(Parent.tutor_name.label("name"),
+                     Parent.id,
                      Parent.tutor_lastname_father.label("lastname_father"),
                      Parent.tutor_lastname_mother.label("lastname_mother"),
                      User.email).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)

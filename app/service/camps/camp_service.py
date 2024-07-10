@@ -232,12 +232,13 @@ def subscrible_camper_to_multiple_camps(
 @camp_router.post("/camper/extras/camp/", tags=["Camps"])
 def post_extras_camp_for_camper(
     camper_id: int,
+    camp_id: int,
     extra_answers: list[ExtraAnswerMultiple],
     extra_charges: list[ExtraChargeMultiple],
     db: Session = Depends(get_db),
 ):
     status = create_update_camper_extras_camp(
-        db, camper_id, extra_answers, extra_charges
+        db, camper_id, camp_id, extra_answers, extra_charges
     )
     return {"status": status}
 
