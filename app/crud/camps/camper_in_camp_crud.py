@@ -31,8 +31,9 @@ from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charg
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id
 from crud.campers.parent_crud import get_parent_by_camper_id
+from crud.campers.camper_crud import get_camper_by_uuid
 from helper.camper_helpers import update_record_campers
-from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment
+from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment_and_update_balance, create_new_payment
 
 
 def get_all_camper_in_camp(db: Session):
@@ -389,6 +390,9 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     extra_questions = []
 
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
+    camper = get_camper_by_uuid(db, camper_id)
+    parent = get_parent_by_camper_id(db, camper_id)
+    transaction_type = get_payment_transaction_type_by_movement(db, 1)
     for camp_id in camps_id:
         camper_in_camp = (
             db.query(CamperInCamp)
@@ -468,8 +472,23 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 payment_balance=getattr(camp, "public_price"),
             )
             camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
-
+        
+        # se genera el costo del camp
+        payment = {
+            "paid": False,
+            "payment_amount": camp.public_price,
+            "txn_number": "Camper:" + camper.name, 
+            "camp_id": camp_id,
+            "camper_id": camper_id,
+            "currency_id": camp.currency_id,
+            "parent_id": parent["id"],
+            "txn_type_id": transaction_type["id"]           
+        }
+        create_new_payment(db, payment)
+   
+    
     update_record_campers(db, camper_id)
+
 
     # Aqui vamos a poner si ya tuvo un campamento previo o no.
 
@@ -561,7 +580,7 @@ def create_update_camper_extras_camp(
                     "txn_type_id": transaction_type["id"]
                     
                 }
-                create_new_payment(db, payment_extra_charge)
+                create_new_payment_and_update_balance(db, payment_extra_charge)
                 
     return 1
 

@@ -7,7 +7,7 @@ from crud.payments.payment_crud import (
     get_all_payment,
     get_payment_by_id,
     update_payment_by_id,
-    create_new_payment,
+    create_new_payment_and_update_balance,
     get_payment_by_camper_camp,
     get_payment_page_camper_in_camp
 )
@@ -40,7 +40,7 @@ def get_payment_by__id(payment_id:str,db: Session = Depends(get_db)):
 
 @payment_routes.post("/payment/", tags=["Payments"])
 def create_payment(new_payment:PaymentCreate,db: Session = Depends(get_db)):
-    payment = create_new_payment(db, new_payment)
+    payment = create_new_payment_and_update_balance(db, new_payment)
     return {"data": payment}
 
 @payment_routes.patch("/payment/{payment_id}", tags=["Payments"])

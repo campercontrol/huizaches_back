@@ -33,8 +33,20 @@ def get_payment_by_id(db, payment_id: int):
         .first()
     )
 
-
 def create_new_payment(db, new_payment: PaymentCreate):
+    db_payment = None
+    try:
+        print(new_payment)
+        db_payment = Payment(**new_payment)
+        db.add(db_payment)
+        db.commit()
+        db.refresh(db_payment)
+    except Exception as ex:
+        db.rollback()
+        print(f"An error ocurred while saving new payment {ex}")
+    return db_payment    
+    
+def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
     # db_payment = None
     # print(new_payment)    
     camper_id = new_payment["camper_id"]
@@ -105,15 +117,12 @@ def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
             PaymentTransactionType.name.label("txn_name"),
         )
         .select_from(Payment)
-        .join(Camper, Camper.id == camper_id)
-        .join(Camp, Camp.id == camp_id)
-        .join(PaymentMethod, PaymentMethod.id == Payment.payment_method_id)
+        .join(PaymentMethod, PaymentMethod.id == Payment.payment_method_id, isouter=True)
         .join(PaymentTransactionType, PaymentTransactionType.id == Payment.txn_type_id)
         .filter(and_(Payment.camper_id == camper_id, Payment.camp_id == camp_id))
         .order_by(Payment.payment_date.asc())
         .all()
     )
-
     payment_table = get_payment_table(db, rows)
 
     return payment_table
