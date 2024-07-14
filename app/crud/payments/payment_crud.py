@@ -36,7 +36,12 @@ def get_payment_by_id(db, payment_id: int):
 def create_new_payment(db, new_payment: PaymentCreate):
     db_payment = None
     try:
-        print(new_payment)
+        if new_payment["payment_amount"] < 0:
+            new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+        
+        if new_payment["txn_type_id"] in (1,2,9):
+            new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+        
         db_payment = Payment(**new_payment)
         db.add(db_payment)
         db.commit()
@@ -47,35 +52,17 @@ def create_new_payment(db, new_payment: PaymentCreate):
     return db_payment    
     
 def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
-    # db_payment = None
-    # print(new_payment)    
     camper_id = new_payment["camper_id"]
     camp_id = new_payment["camp_id"]
-    # update_camper_balance_camper(db, camper_id, camp_id)
-    # try:
-    #     db_payment = Payment(**new_payment)
-    #     if db_payment.txn_type_id in (1, 2, 9):
-    #         db_payment.payment_amount = abs(int(db_payment.payment_amount)) * -1
-
-    #     else:
-    #         db_payment.payment_amount = abs(int(db_payment.payment_amount))
-    #     db.add(db_payment)
-    #     db.commit()
-    #     db.refresh(db_payment)
-    # except SQLAlchemyError as e:
-    #     print("#=================")
-    #     print(e)
-    #     print("#=================")
-    #     db_payment = None
-    #     return db_payment
-    # except Exception as ex:
-    #     print(f"No se pudo guardar en la base de datos: {ex}")
-    # return db_payment
-    
     camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)).first()
-    print(camper_in_camp.payment_balance)    
     try:
-        print(new_payment)
+        
+        if new_payment["payment_amount"] < 0:
+            new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+        
+        if new_payment["txn_type_id"] in (1,2,9):
+            new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+        
         db_payment = Payment(**new_payment)
         db.add(db_payment)
         db.commit()
@@ -90,11 +77,12 @@ def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
             db.add(camper_in_camp) 
             db.commit()            
         
+        db.refresh(db_payment)
     except Exception as ex:
+        db_payment = None
         db.rollback()
-        print(f"An error ocurred while saving payment: {ex}")
-        
-    return 1
+        print(f"An error ocurred while saving payment: {ex}")    
+    return db_payment
 
 def update_payment_by_id(db, payment_id: int, modify_payment: PaymentModify):
     rows_updated = (

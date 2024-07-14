@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.payments.payment_crud import (
@@ -40,7 +40,9 @@ def get_payment_by__id(payment_id:str,db: Session = Depends(get_db)):
 
 @payment_routes.post("/payment/", tags=["Payments"])
 def create_payment(new_payment:PaymentCreate,db: Session = Depends(get_db)):
-    payment = create_new_payment_and_update_balance(db, new_payment)
+    payment = create_new_payment_and_update_balance(db, new_payment.dict())
+    if payment == None:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while saving payment"})
     return {"data": payment}
 
 @payment_routes.patch("/payment/{payment_id}", tags=["Payments"])

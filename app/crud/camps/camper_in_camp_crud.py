@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
-from datetime import date
+from datetime import date, datetime
 from model.groupings.grouping import Grouping
 from model.groupings.grouping_camp import GroupingCamp
 from model.groupings.grouping_camper import GroupingCamper
@@ -479,6 +479,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             "payment_amount": camp.public_price,
             "txn_number": "Camper:" + camper.name, 
             "camp_id": camp_id,
+            "payment_date": datetime.now(),
             "camper_id": camper_id,
             "currency_id": camp.currency_id,
             "parent_id": parent["id"],
@@ -574,6 +575,7 @@ def create_update_camper_extras_camp(
                     "payment_amount": extra_charge.extra_charge_price,
                     "txn_number": "Costo extra" + extra_charge.extra_charge_name,
                     "camp_id": camp_id,
+                    "payment_date": datetime.now(),
                     "camper_id": extra_charge.camper_id,
                     "currency_id": camp_extra_charge.currency_id,
                     "parent_id": parent["id"],
