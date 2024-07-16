@@ -4,14 +4,28 @@ from sqlalchemy import func
 from model.mailings import Campaign, CamperCampaign, EmailTemplate
 from model.camps import Camp
 from model.campers import Camper
+from model.catalogs import Constant
 from schema.mailings.campaign_schema import CampaignCreate, CampaignModify
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
 
 
 def get_all_campaign(db):
-    rows = db.query(Campaign).all()
-    return rows
+    query = db.query(Campaign.id, 
+                    Campaign.name,
+                    Campaign.camp_parents,
+                    Campaign.camp_staff,
+                    Campaign.camp_school,
+                    Campaign.active_time,
+                    Campaign.camp_id,
+                    Campaign.season_id,
+                    Campaign.send_type_id,
+                    Campaign.training_event_id,
+                    Constant.value.label('template_type'),
+                    EmailTemplate.title).join(Campaign, Campaign.template_id == EmailTemplate.id).join(Constant, Constant.id == EmailTemplate.template_type)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
 
 def get_campaign_by_uuid(db, campaign_id):
     return (
