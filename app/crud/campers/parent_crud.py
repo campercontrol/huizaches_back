@@ -141,6 +141,7 @@ def search_parent_by_name_user(db: Session, search: str):
         .filter(
             or_(
                 Parent.tutor_name.ilike(r"%{}%".format(search)),
+                Parent.contact_email.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_father.ilike(r"%{}%".format(search)),
                 Parent.tutor_lastname_mother.ilike(r"%{}%".format(search)),
                 User.email.ilike(r"%{}%".format(search)),
