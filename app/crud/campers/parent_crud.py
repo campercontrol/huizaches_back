@@ -153,7 +153,7 @@ def search_parent_by_name_user(db: Session, search: str):
     if parents:
         possible_parents = append_campers_for_parent_admin(db, parents)
     else:
-        possible_parents = "Data not found"
+        possible_parents = []
 
     return possible_parents
 
