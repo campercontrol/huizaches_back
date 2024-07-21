@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from jose import jwt
 from sqlalchemy.orm import Session
 
@@ -83,6 +84,8 @@ def get_permissions_menu(db, user, lang):
         )
 
     list_menu_permission = []
+    
+    print(permissions_list)
 
     for i in permissions_list:
         a = i.__dict__
@@ -123,19 +126,10 @@ async def login_for_access_token(
     # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     if user == 2:
         detail = 2
-        raise HTTPException(
-            status_code=500,
-            detail=detail,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        return JSONResponse(content={"detail": detail}, headers={"WWW-Authenticate": "Bearer"})
     elif user == 3:
         detail = 3
-        raise HTTPException(
-            status_code=500,
-            detail=detail,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+        return JSONResponse(content={"detail": detail}, headers={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
