@@ -2,9 +2,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from model.campers import School
+from crud.crud_user import create_new_user
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
-
+from schema.user import UserCreate
 
 def get_all_school(db):
     rows= db.query(School).all()
@@ -21,9 +22,18 @@ def get_school_by_uuid(db, school_id):
 
 def create_new_school(db, new_school):
     db_school = None
+    
+    new_user_obj = UserCreate(
+        email=new_school.email,
+        passw=new_school.password,
+        role_id=3,
+        is_superuser=False
+    )
+    new_school_user = create_new_user(db, new_user_obj)
     try:
         db_school = School(
             id=new_school.id,
+            login_id=new_school_user.id,
             name=new_school.name,
             address = new_school.address,
             url = new_school.url,
@@ -46,14 +56,16 @@ def create_new_school(db, new_school):
         db.add(db_school)
         db.commit()
         db.refresh(db_school)
-    except SQLALchemyError as e:
+    except SQLAlchemyError as e:
+        db.rollback()
         print("#=================================#")
         print(e)
         print("#=================================#")
         db_school = None
         return db_school
     except Exception as e:
-        print(f"No se pudo guardar en la base de datos: {ex}")
+        db.rollback()
+        print(f"No se pudo guardar en la base de datos: {e}")
     return db_school
 
 def update_school_by_id(db, school_id, modify_school):

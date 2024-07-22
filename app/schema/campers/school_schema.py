@@ -12,9 +12,12 @@ class SchoolCreate(BaseModel):
         default=None,
         primary_key=True
     )
-    login_id:Optional[int] = Field(
-        title= "Usuario"
-    ) 
+    email: str = Field(
+        title= "Correo"
+    )
+    password: str = Field(
+        title="contraseña"
+    )
     name:str  = Field(
         title="Nombre",
         max_lenght= 100
