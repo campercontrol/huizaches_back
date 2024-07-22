@@ -17,6 +17,7 @@ def get_all_campaign(db):
                     Campaign.camp_staff,
                     Campaign.camp_school,
                     Campaign.active_time,
+                    Campaign.created_at,
                     Campaign.camp_id,
                     Campaign.season_id,
                     Campaign.send_type_id,
