@@ -32,7 +32,7 @@ class MedicalCamperVisit(Base):
     already_sent = Column(Boolean, nullable=False)
     camp_id = Column(
         "camp", 
-        ForeignKey("camps_camp.id"), 
+        ForeignKey("camps_camp.id", ondelete="cascade"), 
         nullable=True, 
         doc="Campamento"
     )

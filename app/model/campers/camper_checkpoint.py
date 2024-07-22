@@ -21,7 +21,7 @@ class CamperCheckpoint(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id del camper_checkpoint")
     checkin = Column(Boolean, nullable=False)
     checkin_date = Column(DateTime(True), nullable=False)
-    camper_id = Column(ForeignKey("campers_camper.id"), nullable=False, default=0, doc='Camper')
+    camper_id = Column(ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, default=0, doc='Camper')
     checkpoint_id = Column(ForeignKey("camps_checkpoint.id"), nullable=False, default=0, doc='Checkpoint')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(

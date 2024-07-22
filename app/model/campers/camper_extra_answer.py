@@ -28,7 +28,7 @@ class CamperExtraAnswer(Base):
     id = Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True)
     answer = Column(Text)
     camper_id = Column(
-        ForeignKey("campers_camper.id"), nullable=False, default=0, doc="Camper"
+        ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, default=0, doc="Camper"
     )
     question_id = Column(
         ForeignKey("camps_extraquestion.id"),

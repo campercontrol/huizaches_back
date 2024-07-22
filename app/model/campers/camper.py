@@ -48,7 +48,7 @@ class Camper(Base):
     contact_relation = Column(String(512), nullable=False,  doc='Relación del camper con el  contacto de emergencia')
     contact_homephone = Column(String(512), nullable=False,  doc='Telefono de casa del contacto de emergencia')
     contact_cellphone = Column(String(512), nullable=False,  doc='Celular del contacto de emergencia')
-    parent_id = Column(ForeignKey("campers_parent.id"), nullable=True, default=None, doc='Titular de la cuenta')
+    parent_id = Column(ForeignKey("campers_parent.id", ondelete="cascade"), nullable=True, default=None, doc='Titular de la cuenta')
     record_id = Column(ForeignKey("campers_camperrecords.id"), nullable=True, default=None, doc='Titular de la cuenta')
 
     # gender = relationship("Constant", foreign_keys=[gender_id])

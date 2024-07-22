@@ -25,7 +25,7 @@ class GroupingCamper(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id")
     camper_id = Column(
         Integer,
-        ForeignKey("campers_camper.id"),
+        ForeignKey("campers_camper.id", ondelete="cascade"),
         index=True,
     )
     grouping_camp_id = Column(
