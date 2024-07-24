@@ -16,6 +16,7 @@ from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
     CamperInCampModify,
 )
+
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     ExtraAnswerMultiple,
@@ -405,6 +406,19 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
         )
         camp = db.query(Camp).filter(Camp.id == camp_id).first()
         
+        
+        extra_charges_camp = get_extra_charge_by_camp(db, camp.id)
+        
+        if extra_charges_camp:
+            for extra_charge_camp in extra_charges_camp:
+                new_camper_extra_charge_obj = CamperExtraChargeCreate(
+                    is_selected=False,
+                    camper_id=camper.id,
+                    extra_charge_id=extra_charge_camp.id
+                    
+                )
+                create_new_camper_extra_charge(db, new_camper_extra_charge_obj)
+            
         camp_extra_charges = (
             db.query(
                 Camp.id.label("camp_id"),
