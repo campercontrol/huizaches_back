@@ -15,7 +15,8 @@ from crud.crud_user import (
     update_password_all_users,
     update_user_by_id,
     delete_user_by_id,
-    get_user_info_by_email
+    get_user_info_by_email,
+    get_user_delete_info
 )
 from model.user import User
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail, UserSendMailResetPassword
@@ -57,7 +58,12 @@ def get_user_info(user_id: int, db: Session = Depends(get_db)):
     response = get_users_all_info(db, user_id)
 
     return response
-
+@user_routes.get("/user_delete_info", tags=["Usuarios"])
+def get_user_info_to_delete(user_id:str, db: Session = Depends(get_db)):
+    response = get_user_delete_info(db, user_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return response
 
 
 @user_routes.post("/usuario", tags=["Usuarios"], status_code=200)

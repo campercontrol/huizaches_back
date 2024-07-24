@@ -29,7 +29,7 @@ from schema.payments.payment_schema import PaymentCreate
 from crud.campers.camper_extra_answer_crud import create_new_extra_answer
 from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
-from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id
+from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id, get_extra_charge_by_camp
 from crud.campers.parent_crud import get_parent_by_camper_id
 from crud.campers.camper_crud import get_camper_by_uuid
 from helper.camper_helpers import update_record_campers
@@ -404,7 +404,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             .first()
         )
         camp = db.query(Camp).filter(Camp.id == camp_id).first()
-
+        
         camp_extra_charges = (
             db.query(
                 Camp.id.label("camp_id"),
@@ -431,31 +431,6 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
         for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
             extra_charges.append(camp_extra_charge)
 
-        camp_extra_questions = (
-            db.query(
-                Camp.id.label("camp_id"),
-                Camp.name.label("camp_name"),
-                CampExtraQuestion.id.label("camp_extra_question_id"),
-                CampExtraQuestion.question.label("camp_extra_question_question"),
-                CampExtraQuestion.is_required.label("camp_extra_question_required"),
-                CamperExtraAnswer.id.label("camper_extra_answer_id"),
-                CamperExtraAnswer.answer.label("camp_extra_answer_answer"),
-            )
-            .outerjoin(
-                CamperExtraAnswer,
-                CamperExtraAnswer.question_id == CampExtraQuestion.id,
-            )
-            .join(Camp, Camp.id == CampExtraQuestion.camp_id)
-            .filter(
-                and_(
-                    CampExtraQuestion.camp_id == camp_id,
-                    CamperExtraAnswer.camper_id == camper_id,
-                )
-            )
-            .all()
-        )
-        for camp_extra_question in db_mapping_rows_to_dict(camp_extra_questions):
-            extra_questions.append(camp_extra_question)
 
         if camper_in_camp and getattr(camper_in_camp, "status") != 36:
             db.query(CamperInCamp).filter(

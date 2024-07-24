@@ -206,3 +206,11 @@ def get_payment_transaction_type_by_movement(db: Session, movement_id):
                      PaymentTransactionType.movement).filter(PaymentTransactionType.movement == movement_id)
     data = db.execute(query)
     return data.mappings().first()
+
+def get_all_camper_payments(db: Session, camper_id):
+    query = db.query(Payment.id,
+                     Payment.payment_amount,
+                     Payment.txn_number).filter(Payment.camper_id == camper_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

@@ -58,8 +58,9 @@ def delete_currency(db: Session, currency_id:int):
     try:
         db.delete(currency)
         db.commit()
-    except IntegrityError:
+    except IntegrityError as Ie:
         db.rollback()
+        print(Ie)
         return {"status": 2, "msg": "Can´t delete currency, currency referenced by other table"}    
     except Exception as e:
         print(e)

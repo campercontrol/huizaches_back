@@ -402,3 +402,9 @@ def get_all_camper_admin(db: Session):
         return db_mapping_rows_to_dict(campers)
     else:
         return "Data not found"
+
+def get_campers_in_school(db: Session, school_id:str):
+    query = db.query(func.concat(Camper.name, " ", Camper.lastname_father, " ", Camper.lastname_mother).label("fullname")).filter(Camper.school_id == school_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

@@ -10,18 +10,17 @@ from model.campers import School
 from model.campers import Camper
 from model.campers import Parent
 from model.staffs import Staff
-from model.camps.location import Location
 from model.camps.camper_in_camp import CamperInCamp
-from model.catalogs.currency import Currency
-from model.catalogs.constant import Constant
 from model.medical import Doctor
-from model.mailings import SchoolCampaign
 from model.camps import Camp
 from utils.hash import hash_str
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
-
+from crud.payments.payment_crud import get_all_camper_payments
+from crud.camps.staff_in_camp_crud import get_staff_all_camps_by_staff_id
+from crud.trophies.trophy_staff_crud import get_all_staff_trophies
+from crud.training.staff_in_training_crud import get_all_staff_training
+from crud.campers.camper_crud import get_campers_in_school
 def get_all_user(db, is_active):
     rows = (
         db.query(
@@ -57,24 +56,94 @@ def get_users_all_info(db, user_id):
     print(parent)
     
 def get_subscribe_by_camper(db: Session, camper_id: int):
-    rows = (
-        db.query(
-            Camp.id.label("camp_id"),
-            Camp.name,
-        )
-        .join(Camp, CamperInCamp.camp_id == Camp.id)
-        .join(Camper, CamperInCamp.camper_id == Camper.id)
-        .filter(
-            CamperInCamp.camper_id == camper_id
-        ).all()
-    )
-    return db_mapping_rows_to_dict(rows)
-
-
+    query = db.query(
+                Camp.id.label("camp_id"),
+                Camp.name,
+            ).join(CamperInCamp, CamperInCamp.camp_id == Camp.id).filter(CamperInCamp.camper_id == camper_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
+    
+def get_all_school_camps(db: Session, school_id: str):
+    query = db.query(Camp.name).filter(Camp.school_id == school_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
     
 def get_user_delete_info(db, user_id):
-    pass
+    user = db.query(User).filter(User.id==user_id).first()
+    
+    if not user:
+        print("no")
+        return None 
+    
+    parent_role = 1
+    staff_role = 2
+    school_role = 3
+    teacher_role = 4
+    doctor_role = 5
+    
+    if user.role_id == parent_role:
+        parent = db.query(Parent).filter_by(user_id=user.id).first()
+        
+        campers = db.query(Camper).filter_by(parent_id = parent.id).all()
+        campers_info = []
+        for camper in campers:
+            camps = get_subscribe_by_camper(db, camper.id)
+            payments = get_all_camper_payments(db, camper.id)
+            camper_obj = {
+                "camper_fullname": camper.name + ' ' + camper.lastname_father + ' ' + camper.lastname_mother,
+                "camps": camps,
+                "payments": payments
+            }
+            campers_info.append(camper_obj)
+        parent_info = {
+            "id": parent.id,
+            "role_id": user.role_id,
+            "parent_fullname": parent.tutor_name + ' ' + parent.tutor_lastname_father + ' ' + parent.tutor_lastname_mother,
+            "campers": campers_info
+        }
+        return parent_info             
+    if user.role_id == staff_role:
+        staff = db.query(Staff).filter_by(login_id=user.id).first()
+        staff_camps = get_staff_all_camps_by_staff_id(db, staff.id)
+        trophies = get_all_staff_trophies(db, staff.id)
+        trainings = get_all_staff_training(db, staff.id)
 
+        staff_info = {
+            "id": staff.id,
+            "role_id": user.role_id,
+            "staff_fullname": staff.name + ' ' + staff.lastname_father + ' ' + staff.lastname_mother,
+            "camps": staff_camps,
+            "trophies": trophies,
+            "trainings": trainings
+        }
+        return staff_info
+    
+    if user.role_id == doctor_role:
+        doctor = db.query(Doctor).filter_by(login_id=user.id).first()
+
+        doctor_info = {
+            "id": doctor.id,
+            "role_id": user.role_id,
+            "doctor_fullname": doctor.name + ' ' + doctor.lastname_father + ' ' + doctor.lastname_mother,
+        }
+        return doctor_info
+        
+    if user.role_id == school_role:
+        school = db.query(School).filter_by(login_id=user.id).first()
+        school_camps = get_all_school_camps(db, school.id)
+        school_campers = get_campers_in_school(db, school.id)
+        school_info = {
+            "id": school.id,
+            "role_id": user.role_id,
+            "school_name": school.name,
+            "school_camps": school_camps,
+            "school_campers": school_campers
+        }
+        return school_info
+        
+    
 def create_new_user(db, new_user):
     db_user = None
     try:

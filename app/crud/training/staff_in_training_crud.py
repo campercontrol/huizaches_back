@@ -189,3 +189,8 @@ def staff_training_dashboard(db, staff_id: int):
         "next_trainings": next_trainings,
         "trainings": trainings,
     }
+def get_all_staff_training(db, staff_id):
+    query = db.query(Training.name).join(StaffInTraining, Training.id == StaffInTraining.training_event_id).filter(StaffInTraining.staff_id == staff_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data 
