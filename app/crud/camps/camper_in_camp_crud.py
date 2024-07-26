@@ -33,6 +33,8 @@ from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_ad
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id, get_extra_charge_by_camp
 from crud.campers.parent_crud import get_parent_by_camper_id
 from crud.campers.camper_crud import get_camper_by_uuid
+from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
+from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from helper.camper_helpers import update_record_campers
 from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment_and_update_balance, create_new_payment
 
@@ -388,7 +390,6 @@ def get_campers_for_bracelets(db, camp_id):
 
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     extra_charges = []
-    extra_questions = []
 
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
     camper = get_camper_by_uuid(db, camper_id)
@@ -445,7 +446,19 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
         for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
             extra_charges.append(camp_extra_charge)
 
-
+        camp_extra_questions = get_extra_question_by_camp(db, camp.id)
+        
+        if camp_extra_questions:
+            for camp_extra_question in camp_extra_questions:
+                new_camper_extra_answer_obj = CamperExtraAnswerCreate(
+                    answer= '',
+                    camper_id = camper.id,
+                    question_id = camp_extra_question.id,
+                                   
+                )
+            create_new_extra_answer(db, new_camper_extra_answer_obj)
+        extra_questions = get_extra_answer_by_camper_camp(db, camper.id, camp.id)
+        
         if camper_in_camp and getattr(camper_in_camp, "status") != 36:
             db.query(CamperInCamp).filter(
                 and_(
