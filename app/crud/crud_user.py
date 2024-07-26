@@ -74,13 +74,11 @@ def get_user_delete_info(db, user_id):
     user = db.query(User).filter(User.id==user_id).first()
     
     if not user:
-        print("no")
         return None 
     
     parent_role = 1
     staff_role = 2
     school_role = 3
-    teacher_role = 4
     doctor_role = 5
     
     if user.role_id == parent_role:
@@ -114,7 +112,7 @@ def get_user_delete_info(db, user_id):
             "id": staff.id,
             "role_id": user.role_id,
             "staff_fullname": staff.name + ' ' + staff.lastname_father + ' ' + staff.lastname_mother,
-            "camps": staff_camps,
+            "staff_in_camp": staff_camps,
             "trophies": trophies,
             "trainings": trainings
         }

@@ -207,8 +207,7 @@ def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
     return db_mapping_rows_to_dict(camps)
 
 def get_staff_all_camps_by_staff_id(db: Session, staff_id:int):
-    query = db.query(StaffInCamp.id,
-                     Camp.name).join(Camp, Camp.id == StaffInCamp.staff_id).filter(StaffInCamp.staff_id == staff_id)
+    query = db.query(Camp.name, Camp.id).join(StaffInCamp, StaffInCamp.camp_id== Camp.id).filter(StaffInCamp.staff_id == staff_id)
     data = db.execute(query)
     data = data.mappings().all()
     return data
