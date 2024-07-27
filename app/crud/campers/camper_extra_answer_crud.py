@@ -59,10 +59,13 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
     for extra_question in extra_questions:
         row = (
             db.query(
-                CampExtraQuestion.id.label("id"),
+                CampExtraQuestion.id.label("question_id"),
                 CampExtraQuestion.question.label("question"),
                 CampExtraQuestion.is_required.label("is_required"),
+                CampExtraQuestion.camp_id,
                 CamperExtraAnswer.answer.label("answer"),
+                CamperExtraAnswer.camper_id
+                
             )
             .join(
                 CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id
