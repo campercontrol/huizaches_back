@@ -389,6 +389,7 @@ def get_campers_for_bracelets(db, camp_id):
 
 
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
+    
     extra_charges = []
 
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)

@@ -1,5 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy import and_
 from model.campers import CamperExtraAnswer
 from model.camps import CampExtraQuestion
 
@@ -53,39 +53,17 @@ def update_extra_answer_by_id(
 
 
 def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
-    extra_answers = []
-    extra_questions = get_extra_question_by_camp(db, camp_id)
-
-    for extra_question in extra_questions:
-        row = (
-            db.query(
-                CampExtraQuestion.id.label("question_id"),
-                CampExtraQuestion.question.label("question"),
-                CampExtraQuestion.is_required.label("is_required"),
-                CampExtraQuestion.camp_id,
-                CamperExtraAnswer.answer.label("answer"),
-                CamperExtraAnswer.camper_id
-                
-            )
-            .join(
-                CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id
-            )
-            .filter_by(question_id=getattr(extra_question, "id"))
-            .all()
-        )
-
-        if row:
-            extra_answers.append(db_mapping_rows_to_dict(row)[0])
-        else:
-            question = {
-                "id": extra_question.id,
-                "question": extra_question.question,
-                "is_required": extra_question.is_required,
-                "answer": "",
-            }
-            extra_answers.append(question)
-
-    return extra_answers
+    query = db.query(
+        CampExtraQuestion.id.label("question_id"),
+        CampExtraQuestion.question.label("question"),
+        CampExtraQuestion.is_required.label("is_required"),
+        CampExtraQuestion.camp_id,
+        CamperExtraAnswer.answer.label("answer"),
+        CamperExtraAnswer.camper_id).join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id).filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id))
+    
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
 
 
 def create_update_extra_answers(db, extra_answers: CamperExtraAnswerListCreate):
