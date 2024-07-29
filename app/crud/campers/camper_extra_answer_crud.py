@@ -1,7 +1,7 @@
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import and_
 from model.campers import CamperExtraAnswer
-from model.camps import CampExtraQuestion
+from model.camps import CampExtraQuestion, Camp
 
 from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from schema.campers.camper_extra_answer_schema import (
@@ -58,8 +58,9 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
         CampExtraQuestion.question.label("question"),
         CampExtraQuestion.is_required.label("is_required"),
         CampExtraQuestion.camp_id,
+        Camp.name.label("camp_name"),
         CamperExtraAnswer.answer.label("answer"),
-        CamperExtraAnswer.camper_id).join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id).filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id))
+        CamperExtraAnswer.camper_id).join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id).join(Camp, Camp.id == CampExtraQuestion.camp_id).filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id))
     
     data = db.execute(query)
     data = data.mappings().all()
