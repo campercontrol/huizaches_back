@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.trophies.trophy_staff_crud import (
@@ -40,6 +40,8 @@ def get_trophy_staff_by__id(trophy_staff_id:str,db: Session = Depends(get_db)):
 @trophy_staff_routes.post("/trophy_staff/", tags=["Trophies"])
 def create_trophy_staff(new_trophy_staff:TrophyStaffCreate,db: Session = Depends(get_db)):
     trophy_staff = create_new_trophy_staff(db, new_trophy_staff)
+    if trophy_staff == None:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An unknown error ocurred while saving"})
     return {"data": trophy_staff}
 
 @trophy_staff_routes.patch("/trophy_staff/{trophy_staff_id}", tags=["Trophies"])

@@ -27,6 +27,6 @@ class Location(Base):
     updated_at = Column(
         "updated", 
         DateTime(timezone=True),
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=datetime.now(),
+        onupdate=datetime.now(),
     )

@@ -14,7 +14,7 @@ from crud.camps.camp_crud import (
     update_camp_by_id,
     delete_camp,
     get_camp_by_search,
-    # create_new_camp_payment_account  
+    create_new_camp_payment_account  
 )
 from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
 from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
@@ -113,7 +113,7 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
                 camp_id= new_camp_id,
                 paymentaccount_id = payment_account.id
             )
-            # create_new_camp_payment_account(db, new_camp_payment_account_obj)
+            create_new_camp_payment_account(db, new_camp_payment_account_obj)
         
     if new_camp.extra_question:
         for question in new_camp.extra_question:

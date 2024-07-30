@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 from model.campers import School
-from model.camps import Camp, Location
+from model.camps import Camp, Location, CampPaymentAccount
 from model.campers import Camper
 from schema.camps.camp_schema import CampCreate, CampModify
 
@@ -198,3 +198,21 @@ def get_school_info_by_camp(db: Session, camp_id:int):
     data = db.execute(query)
     return data.mappings().first()
 
+def create_new_camp_payment_account(db: Session, new_camp_payment_account):
+    db_camp_payment_account = None
+    try:
+        db_camp_payment_account = CampPaymentAccount(**new_camp_payment_account.dict())
+        db.add(db_camp_payment_account)
+        db.commit()
+        db.refresh(db_camp_payment_account)
+    except SQLAlchemyError as e:
+        db.rollback()
+        print("#========================#")
+        print(e)
+        print("#========================#")
+        db_camp_payment_account = None
+        return db_camp_payment_account
+    except Exception as ex:
+        db.rollback()
+        print(f"No se pudo guardar en la base de datos: {ex}")
+    return db_camp_payment_account

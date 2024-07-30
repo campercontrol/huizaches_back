@@ -9,7 +9,8 @@ from crud.campers.school_crud import (
     create_new_school,
     update_school_by_id,
     get_active_school,
-    delete_school
+    delete_school,
+    school_dashboard
 )    
 
 from schema.campers.school_schema import(
@@ -65,3 +66,8 @@ def get_all_active_school(db: Session = Depends(get_db)):
 def delete_school_by_id(school_id:int, db: Session = Depends(get_db)):
     status = delete_school(db, school_id)
     return{"status": status}
+
+@school_routes.get("/school_dashboard/{school_id}", tags=["School"])
+def get_staff_dashboard(staff_id: int, db: Session = Depends(get_db)):
+    school_dashboard_info = school_dashboard(db, staff_id)
+    return {"data": school_dashboard_info}

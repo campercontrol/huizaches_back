@@ -212,14 +212,7 @@ class CampModify(BaseModel):
     )
 
 class PaymentAccount(BaseModel):
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    ) 
-    name:int = Field(
-        title = "Nombre de la cuenta de banco"
-    )
+    id:int
 
 class CampDiscountCreate(BaseModel):
     id:Optional[int] = Field(

@@ -85,3 +85,121 @@ def delete_school(db: Session, school_id:int):
     db.commit()
     return {"status" : True}
 
+def school_dashboard(db: Session, school_id: int):
+    pass
+    # user = (
+    #     db.query(User.is_active, User.is_employee, Staff.staff_contact_name)
+    #     .join(User, User.id == Staff.login_id)
+    #     .filter(Staff.id == staff_id)
+    #     .first()
+    # )
+
+    # if user[0] and user[1] and user[2]:
+    #     camps_id = []
+    #     available_camps = (
+    #         db.query(
+    #             StaffInCamp.id.label("staff_in_camp_id"),
+    #             Camp.id.label("camp_id"),
+    #             Camp.name.label("camp_name"),
+    #             Location.name.label("location_name"),
+    #             Camp.public_price.label("public_price"),
+    #             Camp.start.label("camp_start"),
+    #             Camp.end.label("camp_end"),
+    #         )
+    #         .join(StaffInCamp, StaffInCamp.camp_id == Camp.id)
+    #         .join(Location, Camp.location_id == Location.id)
+    #         .filter(
+    #             and_(
+    #                 StaffInCamp.staff_id == staff_id,
+    #                 StaffInCamp.confirmed_staff == False,
+    #                 Camp.active == True,
+    #                 Camp.end >= date.today(),
+    #             )
+    #         )
+    #         .all()
+    #     )
+    #     available_camps = db_mapping_rows_to_dict(available_camps)
+    #     available_camps_final = []
+
+    #     for staff_in_camp in available_camps:
+    #         camps_id.append(staff_in_camp["camp_id"])
+    #         records = get_records_for_camp(db, staff_in_camp["camp_id"])
+    #         staff_in_camp = dict(staff_in_camp)
+    #         staff_in_camp["records"] = records
+    #         available_camps_final.append(staff_in_camp)
+
+    #     staff_camps = (
+    #         db.query(
+    #             StaffInCamp.id.label("staff_in_camp_id"),
+    #             Camp.id.label("camp_id"),
+    #             Camp.name.label("camp_name"),
+    #             Location.name.label("location_name"),
+    #             Camp.public_price.label("public_price"),
+    #             Camp.start.label("camp_start"),
+    #             Camp.end.label("camp_end"),
+    #         )
+    #         .join(StaffInCamp, StaffInCamp.camp_id == Camp.id)
+    #         .join(Location, Camp.location_id == Location.id)
+    #         .filter(
+    #             and_(
+    #                 StaffInCamp.staff_id == staff_id,
+    #                 StaffInCamp.confirmed_staff == True,
+    #                 Camp.active == True,
+    #                 Camp.end >= date.today(),
+    #             )
+    #         )
+    #         .all()
+    #     )
+
+    #     staff_camps = db_mapping_rows_to_dict(staff_camps)
+    #     staff_camps_final = []
+
+    #     for staff_in_camp in staff_camps:
+    #         camps_id.append(staff_in_camp["camp_id"])
+    #         records = get_records_for_camp(db, staff_in_camp["camp_id"])
+    #         staff_in_camp = dict(staff_in_camp)
+    #         staff_in_camp["records"] = records
+    #         staff_camps_final.append(staff_in_camp)
+
+    #     next_camps = (
+    #         db.query(
+    #             Camp.id.label("camp_id"),
+    #             Camp.name.label("camp_name"),
+    #             Location.name.label("location_name"),
+    #             Camp.public_price.label("public_price"),
+    #             Camp.start.label("camp_start"),
+    #             Camp.end.label("camp_end"),
+    #         )
+    #         .join(Location, Location.id == Camp.location_id)
+    #         .filter(
+    #             and_(
+    #                 Camp.active == True,
+    #                 Camp.end >= date.today(),
+    #             )
+    #         )
+    #         .all()
+    #     )
+
+    #     next_camps = db_mapping_rows_to_dict(next_camps)
+    #     next_camps_filter = [d for d in next_camps if d["camp_id"] not in camps_id]
+    #     next_camps_final = []
+
+    #     for camp in next_camps_filter:
+    #         records = get_records_for_camp(db, camp["camp_id"])
+    #         camp = dict(camp)
+    #         camp["records"] = records
+    #         next_camps_final.append(camp)
+
+    #     return {
+    #         "available_camps": available_camps_final,
+    #         "staff_camps": staff_camps_final,
+    #         "next_camps": next_camps_final,
+    #     }
+
+    # else:
+    #     complete_profile = True if user[2] else False
+    #     return {
+    #         "is_active": user[0],
+    #         "is_employee": user[1],
+    #         "complete_profile": complete_profile,
+    #     }
