@@ -41,6 +41,12 @@ class CamperExtraCharge(Base):
         default=0,
         doc="Camp Extra Charge",
     )
+    payment_id = Column(
+        ForeignKey("payments_payment.id"),
+        nullable=True,
+        default=0,
+        doc="Payment id", 
+    )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated",
