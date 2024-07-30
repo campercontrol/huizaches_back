@@ -596,71 +596,37 @@ def create_update_camper_extras_camp(
     
     if extra_answers:
         for extra_answer in extra_answers:
-            if (
-                db.query(CamperExtraAnswer)
-                .filter(
-                    and_(
-                        CamperExtraAnswer.question_id
-                        == extra_answer.question_id,
-                        CamperExtraAnswer.camper_id == camper_id,
-                    )
-                )
-                .update({"answer": extra_answer.answer})
-            ):
-                db.commit()
-            else:
-                extra_answer_new = CamperExtraAnswerCreate(
-                    answer=extra_answer.answer,
-                    camper_id=camper_id,
-                    question_id=extra_answer.question_id,
-                )
-                status = create_new_extra_answer(db, extra_answer_new)
+            extra_answer_new = CamperExtraAnswerCreate(
+                answer=extra_answer.answer,
+                camper_id=camper_id,
+                question_id=extra_answer.question_id,
+            )
+            status = create_new_extra_answer(db, extra_answer_new)
 
     if extra_charges:
         for extra_charge in extra_charges:
-            if (
-                db.query(CamperExtraCharge)
-                .filter(
-                    and_(
-                        CamperExtraCharge.extra_charge_id
-                        == extra_charge.camp_extra_charge_id,
-                        CamperExtraCharge.camper_id == camper_id,
-                    )
-                )
-                .update(
-                    {
-                        "is_selected": getattr(
-                            extra_charge, "camp_extra_charge_is_selected"
-                        )
-                    }
-                )
-            ):
-                print("updated")
-                db.commit()
-            else:
-                print("executing")
-                extra_charge_new = CamperExtraChargeCreate(
-                    is_selected=extra_charge.camp_extra_charge_is_selected,
-                    camper_id=camper_id,
-                    extra_charge_id=extra_charge.camp_extra_charge_id,
-                )
-                created_extra_charge = create_new_camper_extra_charge(db, extra_charge_new)
-                camp_extra_charge = get_extra_charge_by_id(db, created_extra_charge.extra_charge_id)
-                parent = get_parent_by_camper_id(db, camper_id)
-                transaction_type = get_payment_transaction_type_by_movement(db, 6)
-                payment_extra_charge = {
-                    "paid": False,
-                    "payment_amount": extra_charge.camp_extra_charge_price,
-                    "txn_number": "Costo extra" + extra_charge.camp_extra_charge_name,
-                    "camp_id": extra_charge.camp_id,
-                    "payment_date": datetime.now(),
-                    "camper_id": camper_id,
-                    "currency_id": camp_extra_charge.currency_id,
-                    "parent_id": parent["id"],
-                    "txn_type_id": transaction_type["id"]
+            extra_charge_new = CamperExtraChargeCreate(
+                is_selected=extra_charge.camp_extra_charge_is_selected,
+                camper_id=camper_id,
+                extra_charge_id=extra_charge.camp_extra_charge_id,
+            )
+            created_extra_charge = create_new_camper_extra_charge(db, extra_charge_new)
+            camp_extra_charge = get_extra_charge_by_id(db, created_extra_charge.extra_charge_id)
+            parent = get_parent_by_camper_id(db, camper_id)
+            transaction_type = get_payment_transaction_type_by_movement(db, 6)
+            payment_extra_charge = {
+                "paid": False,
+                "payment_amount": extra_charge.camp_extra_charge_price,
+                "txn_number": "Costo extra" + extra_charge.camp_extra_charge_name,
+                "camp_id": extra_charge.camp_id,
+                "payment_date": datetime.now(),
+                "camper_id": camper_id,
+                "currency_id": camp_extra_charge.currency_id,
+                "parent_id": parent["id"],
+                "txn_type_id": transaction_type["id"]
                     
-                }
-                create_new_payment_and_update_balance(db, payment_extra_charge)
+            }
+            create_new_payment_and_update_balance(db, payment_extra_charge)
                 
     return 1
 
