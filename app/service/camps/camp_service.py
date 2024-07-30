@@ -14,6 +14,7 @@ from crud.camps.camp_crud import (
     update_camp_by_id,
     delete_camp,
     get_camp_by_search,
+    create_new_camp_payment_account  
 )
 from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
 from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
@@ -43,9 +44,9 @@ from crud.camps.camp_extra_question_crud import (
 from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
-
 from schema.camps.camp_schema import CampCreate, CampModify, CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
+from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
 from schema.payments.payment_schema import PaymentCreate
 from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
@@ -104,7 +105,16 @@ def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
 def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
     camp = create_new_camp(db, new_camp.camp)
     new_camp_id = getattr(camp, "id")
+    payment_accounts = new_camp.payment_accounts
 
+    if payment_accounts:
+        for payment_account in payment_accounts:
+            new_camp_payment_account_obj = CreateCampPaymentAccount(
+                camp_id= new_camp_id,
+                paymentaccount_id = payment_account.id
+            )
+            create_new_camp_payment_account(db, new_camp_payment_account_obj)
+        
     if new_camp.extra_question:
         for question in new_camp.extra_question:
             new_question = CampExtraQuestionCreate(
@@ -232,13 +242,12 @@ def subscrible_camper_to_multiple_camps(
 @camp_router.post("/camper/extras/camp/", tags=["Camps"])
 def post_extras_camp_for_camper(
     camper_id: int,
-    camp_id: int,
     extra_answers: list[ExtraAnswerMultiple],
     extra_charges: list[ExtraChargeMultiple],
     db: Session = Depends(get_db),
 ):
     status = create_update_camper_extras_camp(
-        db, camper_id, camp_id, extra_answers, extra_charges
+        db, camper_id, extra_answers, extra_charges
     )
     return {"status": status}
 
