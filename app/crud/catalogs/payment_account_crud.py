@@ -66,11 +66,11 @@ def delete_payment_account(db: Session, payment_account_id: int):
 
 
 def get_payment_account_for_camp(db: Session, camp_id: int):
-    payment_accounts = (
-        db.query(PaymentAccount)
-        .select_from(CampPaymentAccount)
-        .join(PaymentAccount, PaymentAccount.id == CampPaymentAccount.paymentaccount_id)
-        .filter(CampPaymentAccount.camp_id == camp_id)
-        .all()
-    )
-    return db_mapping_rows_to_dict(payment_accounts)
+    query = db.query(PaymentAccount.id,
+                     PaymentAccount.name,
+                     PaymentAccount.bank,
+                     PaymentAccount.account_number,
+                     PaymentAccount.clabe_number).select_from(CampPaymentAccount).join(PaymentAccount, PaymentAccount.id == CampPaymentAccount.paymentaccount_id).filter(CampPaymentAccount.camp_id == camp_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
