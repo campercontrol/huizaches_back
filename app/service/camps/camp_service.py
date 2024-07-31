@@ -105,8 +105,7 @@ def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
 def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
     camp = create_new_camp(db, new_camp.camp)
     new_camp_id = getattr(camp, "id")
-    payment_accounts = new_camp.payment_accounts
-
+    payment_accounts = new_camp.camp.payment_accounts
     if payment_accounts:
         for payment_account in payment_accounts:
             new_camp_payment_account_obj = CreateCampPaymentAccount(
