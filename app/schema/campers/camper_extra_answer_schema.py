@@ -72,7 +72,9 @@ class ExtraAnswerMultiple(BaseModel):
     answer:str = Field(
         title="Respuesta"
     )
-
+    camper_extra_answer_id:int = Field(
+        title = "ID de la respuesta del camper"
+    )
     question_id:int = Field(
         title = "Pregunta"
     )

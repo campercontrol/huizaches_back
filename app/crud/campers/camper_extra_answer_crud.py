@@ -60,6 +60,7 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
         CampExtraQuestion.camp_id,
         Camp.name.label("camp_name"),
         CamperExtraAnswer.answer.label("answer"),
+        CamperExtraAnswer.id.label("camper_extra_answer_id"),
         CamperExtraAnswer.camper_id).join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id).join(Camp, Camp.id == CampExtraQuestion.camp_id).filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id))
     
     data = db.execute(query)
