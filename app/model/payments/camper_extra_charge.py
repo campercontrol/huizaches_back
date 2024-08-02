@@ -45,7 +45,8 @@ class CamperExtraCharge(Base):
         ForeignKey("payments_payment.id"),
         nullable=True,
         default=None,
-        doc="Payment id", 
+        doc="Payment id",
+        ondelete="SET NULL"
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
