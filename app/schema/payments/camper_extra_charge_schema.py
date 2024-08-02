@@ -84,9 +84,12 @@ class ExtraChargeMultiple(BaseModel):
     camp_extra_charge_price: str = Field(
         title = "precio del cargo extra"
     )
-    camper_extra_charge_payment_id: int = Field(
-        title = "ID del payment asociado al cargo extra del camper"
+    camper_extra_charge_id: int = Field(
+        title = "Id del cargo del camper"
     )
+    # camper_extra_charge_payment_id: int = Field(
+    #     title = "ID del payment asociado al cargo extra del camper"
+    # )
     # extra_charge_symbol: str = Field(
     #     title = "Nombre del cargo extra"
     # )

@@ -597,23 +597,27 @@ def create_update_camper_extras_camp(
     if extra_answers:
         for extra_answer in extra_answers:
             db_extra_answer = get_extra_answer_by_uuid(db, extra_answer.camper_extra_answer_id)
-            db_extra_answer.answer = extra_answer.answer
-            db.commit()
-            
+            try:
+                db_extra_answer.answer = extra_answer.answer
+                db.commit()
+            except Exception as ex:
+                db.rollback()
+                print(ex)
+                
 
     if extra_charges:
         for extra_charge in extra_charges:
             camper_extra_charge = get_camper_extra_charge_by_id(db, extra_charge.camper_extra_charge_id)
+
             if extra_charge.camp_extra_charge_is_selected == True:
-                if extra_charge.camper_extra_charge_payment_id == None:
-                    
+                if camper_extra_charge.payment_id == None:
                     camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
                     parent = get_parent_by_camper_id(db, camper_id)
                     transaction_type = get_payment_transaction_type_by_movement(db, 6)
                     payment_extra_charge = {
                         "paid": False,
-                        "payment_amount": extra_charge.camp_extra_charge_price,
-                        "txn_number": "Costo extra" + extra_charge.camp_extra_charge_name,
+                        "payment_amount": int(extra_charge.camp_extra_charge_price),
+                        "txn_number": "Costo extra" + " "+ extra_charge.camp_extra_charge_name,
                         "camp_id": extra_charge.camp_id,
                         "payment_date": datetime.now(),
                         "camper_id": camper_id,
@@ -623,10 +627,23 @@ def create_update_camper_extras_camp(
                             
                     }
                     payment = create_new_payment_and_update_balance(db, payment_extra_charge)
-                    camper_extra_charge.payment_id = payment.id
-            else:
-                if extra_charge.camper_extra_charge_payment_id:
-                    delete_payment_and_update_balance(db, camper_extra_charge.payment_id)                
+                    try:
+                        camper_extra_charge.payment_id = payment.id
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)
+                    
+            if extra_charge.camp_extra_charge_is_selected == False:
+                if camper_extra_charge.payment_id:
+                    delete_payment_and_update_balance(db, camper_extra_charge.payment_id, camper_extra_charge.camper_id)
+                    try:
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)                
     return 1
 
 

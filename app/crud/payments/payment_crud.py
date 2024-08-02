@@ -84,19 +84,27 @@ def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
         print(f"An error ocurred while saving payment: {ex}")    
     return db_payment
 
-def delete_payment_and_update_balance(db: Session, payment_id: int):
+def delete_payment_and_update_balance(db: Session, payment_id: int, camper_id):
     payment = get_payment_by_id(db, payment_id)
-    camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == payment.camp_id, CamperInCamp.camper_id == payment.camper)).first()
-    if payment.txn_type_id in (1,2,9):
-        total_balance = abs(camper_in_camp.payment_balance) + abs(float(payment.payment_amount))
-        camper_in_camp.payment_balance = total_balance
-        db.add(camper_in_camp) 
-        db.commit()
-    else:
-        total_balance = abs(camper_in_camp.payment_balance) - abs(float(payment.payment_amount))
-        camper_in_camp.payment_balance = total_balance
-        db.add(camper_in_camp) 
-        db.commit()            
+    camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == payment.camp_id, CamperInCamp.camper_id == camper_id)).first()
+    try:
+        if payment.txn_type_id in (1,2,9):
+            total_balance = abs(camper_in_camp.payment_balance) + abs(float(payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp)
+            db.delete(payment)
+            db.commit()
+        else:
+            total_balance = abs(camper_in_camp.payment_balance) - abs(float(payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp) 
+            db.delete(payment)
+            db.commit()            
+    except Exception as ex:     
+        db.rollback()
+        print(f"An error ocurred while saving payment: {ex}")
+        return False
+    return True            
         
 def update_payment_by_id(db, payment_id: int, modify_payment: PaymentModify):
     rows_updated = (
