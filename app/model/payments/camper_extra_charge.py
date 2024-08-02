@@ -42,11 +42,10 @@ class CamperExtraCharge(Base):
         doc="Camp Extra Charge",
     )
     payment_id = Column(
-        ForeignKey("payments_payment.id"),
+        ForeignKey("payments_payment.id", ondelete='SET NULL'),
         nullable=True,
         default=None,
-        doc="Payment id",
-        ondelete="SET NULL"
+        doc="Payment id"
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
