@@ -259,9 +259,9 @@ def post_extras_camp_for_camper(
         db, camper_id, extra_charges
     )
     if result == 1:
-        return {"detail": {"status": 1, "msg": "Camper extra charges saved succesfully"}}
+        return {"detail": {"status": 1, "msg": "Camper extra charges updated succesfully"}}
     if result == 3:
-        raise HTTPException(status_code=500, detail= {"status": 1, "msg": "Camper extra charges saved succesfully"})
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An unknown error ocurred while updating"})
 
 
 @camp_router.patch("/camper/extra_answers/", tags=["Camps"])
