@@ -194,7 +194,7 @@ def get_camp_by_search(db: Session, search: str):
     return db_mapping_rows_to_dict(camps)
 
 def get_school_info_by_camp(db: Session, camp_id:int):
-    query = (db.query(School.id.label('school_id'), School.name, School.email).join(Camp, Camp.school_id == School.id))
+    query = (db.query(School.id.label('school_id'), School.name, School.email, School.contact_second_email, School.contact_third_email ).join(Camp, Camp.school_id == School.id))
     data = db.execute(query)
     return data.mappings().first()
 
