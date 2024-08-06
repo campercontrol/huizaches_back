@@ -8,7 +8,6 @@ from crud.camps.camp_crud import (
     get_all_camp,
     get_all_active_camp,
     get_school_camp_for_camper,
-    get_summer_camp_for_camper,
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id,
@@ -16,15 +15,15 @@ from crud.camps.camp_crud import (
     get_camp_by_search,
     create_new_camp_payment_account  
 )
-from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
+from crud.campers.camper_crud import get_camper_by_uuid
+from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
 from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
+from schema.campers.camper_extra_answer_schema import CamperExtraAnswerModify, UpdateCamperExtraAnswer
 
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
     get_all_camper_in_camp,
-    get_subscribe_by_camper,
-    get_cancelled_by_camper,
-    get_past_subscribe_by_camper,
+    update_camper_extra_charges,
     get_camper_in_camp_by_camper_camp,
     update_camper_in_camp_by_id,
     get_campers_for_camp,
@@ -44,7 +43,7 @@ from crud.camps.camp_extra_question_crud import (
 from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
-from schema.camps.camp_schema import CampCreate, CampModify, CampComplete
+from schema.camps.camp_schema import CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
 from schema.payments.payment_schema import PaymentCreate
@@ -250,6 +249,37 @@ def post_extras_camp_for_camper(
     )
     return {"status": status}
 
+@camp_router.patch("/camper/extra_charges/", tags=["Camps"])
+def post_extras_camp_for_camper(
+    camper_id: int,
+    extra_charges: "list[ExtraChargeMultiple]",
+    db: Session = Depends(get_db),
+):
+    result = update_camper_extra_charges(
+        db, camper_id, extra_charges
+    )
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Camper extra charges saved succesfully"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 1, "msg": "Camper extra charges saved succesfully"})
+
+
+@camp_router.patch("/camper/extra_answers/", tags=["Camps"])
+def update_extra_answers_for_camper(
+    extra_answers: "list[UpdateCamperExtraAnswer]",
+    db: Session = Depends(get_db),
+):   
+    response = update_extra_answer_by_id(
+        db, extra_answers
+    )
+    if response == None:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An error ocurred while saving"})
+    if response == 1:
+        return {"detail": {"status": 1, "msg": "Extra answers updated succesfully"}}
+    if response == 0:
+        return {"detail": {"status": 2, "msg": "Extra answers not found"}}
+        
+        
 
 @camp_router.get("/search/camp/{search}", tags=["Camps"])
 def get_search_camp(search: str, db: Session = Depends(get_db)):

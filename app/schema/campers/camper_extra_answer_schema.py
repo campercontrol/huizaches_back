@@ -25,6 +25,16 @@ class CamperExtraAnswerCreate(BaseModel):
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+class UpdateCamperExtraAnswer(BaseModel):
+    id: int = Field(
+        title="extra_answer_id"
+    ) 
+    answer:str = Field(
+        title="Respuesta"
+    )
+    updated_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
 
 class CamperExtraAnswerModify(BaseModel):
     id:Optional[int] = Field(

@@ -7,6 +7,7 @@ from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     CamperExtraAnswerModify,
+    UpdateCamperExtraAnswer,
     CamperExtraAnswerListCreate,
 )
 from utils.db import db_mapping_rows_to_dict
@@ -41,14 +42,21 @@ def create_new_extra_answer(db, new_extra_answer: CamperExtraAnswerCreate):
 
 
 def update_extra_answer_by_id(
-    db, extra_answer_id: int, modify_extra_answer: CamperExtraAnswerModify
+    db, extra_answers: UpdateCamperExtraAnswer
 ):
-    rows_updated = (
-        db.query(CamperExtraAnswer)
-        .filter_by(id=extra_answer_id)
-        .update(modify_extra_answer, synchronize_session="fetch")
-    )
-    db.commit()
+    rows_updated = None
+    try:
+        for extra_answer in extra_answers:
+            rows_updated = (
+                db.query(CamperExtraAnswer)
+                .filter_by(id=extra_answer.id)
+                .update(extra_answer.dict(), synchronize_session="fetch")
+            )
+        db.commit()
+    except Exception as ex:
+        print(f"An error ocurred while saving extra_answer {ex}" )
+        db.rollback()
+    print(rows_updated)
     return rows_updated
 
 
