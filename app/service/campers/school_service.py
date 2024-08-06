@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.campers.school_crud import (
@@ -41,8 +41,14 @@ def get_school_by_id(school_id:str, db: Session = Depends(get_db)):
 
 @school_routes.post("/school/", tags=["Campers"])
 def create_school(new_school:SchoolCreate, db: Session =Depends(get_db)):
-    list_school = create_new_school(db, new_school)
-    return {"data": list_school}
+    result = create_new_school(db, new_school)
+    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "School created successfully"}}
+    if result == 2:
+        return {"detail": {"status": 2, "msg": "Email account already in use"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An unknown error ocurred while saving"})
 
 @school_routes.patch("/school/{school_id}", tags=["Campers"])
 def update_school(school_id:str,modify_school:SchoolModify,db: Session = Depends(get_db)):

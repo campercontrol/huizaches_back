@@ -12,7 +12,7 @@ class SchoolCreate(BaseModel):
         default=None,
         primary_key=True
     )
-    email: str = Field(
+    login_email: str = Field(
         title= "Correo"
     )
     password: str = Field(
@@ -41,8 +41,8 @@ class SchoolCreate(BaseModel):
         title="Celular de primer contacto",
         max_lenght= 15
     ) 
-    email: Optional[str]  = Field(
-        title="Email de contacto",
+    contact_first_email: Optional[str]  = Field(
+        title="Email de primer contacto",
         max_lenght= 30
     ) 
     contact_second_name: Optional[str]  = Field(
