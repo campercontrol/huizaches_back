@@ -65,50 +65,28 @@ def update_camper_extra_charge_by_id(
 
 
 def get_extra_charge_by_camper_camp(db, camper_id: int, camp_id: int):
-    extra_charges = []
-    extra_charges_camp = get_extra_charge_by_camp(db, camp_id)
-    for extra_charge_camp in extra_charges_camp:
-        row = (
+    query = (
             db.query(
-                CampExtraCharge.id.label("id"),
-                CampExtraCharge.name.label("name"),
-                CampExtraCharge.price.label("price"),
-                CamperExtraCharge.is_selected.label("is_selected")
+                CampExtraCharge.id.label("extra_charge_id"),
+                CampExtraCharge.name.label("extra_charge_name"),
+                Currency.symbol.label("extra_charge_symbol"),
+                CampExtraCharge.price.label("extra_charge_price"),
+                CamperExtraCharge.is_selected.label("extra_selected"),
+                CamperExtraCharge.id.label("camper_extra_charge_id")
             )
             .select_from(CamperExtraCharge)
             .join(
                 CampExtraCharge, CampExtraCharge.id == CamperExtraCharge.extra_charge_id
+            ).join(
+                Currency, CampExtraCharge.currency_id == Currency.id
             )
             .filter(
                 CamperExtraCharge.camper_id == camper_id,
-                CamperExtraCharge.extra_charge_id == getattr(extra_charge_camp, "id"),
+                CampExtraCharge.camp_id == camp_id
             )
-            .first()
-        )
-
-        if row:
-            value = row[3]
-        else:
-            value = False
-
-        symbol = (
-            db.query(Currency.symbol)
-            .select_from(CampExtraCharge)
-            .join(Currency, Currency.id == CampExtraCharge.currency_id)
-            .filter(CampExtraCharge.id == getattr(extra_charge_camp, "id"))
-            .first()
-        )
-
-        extra_charges.append(
-            {
-                "extra_charge_id": getattr(extra_charge_camp, "id"),
-                "extra_charge_name": getattr(extra_charge_camp, "name"),
-                "extra_charge_price": getattr(extra_charge_camp, "price"),
-                "extra_charge_symbol": symbol[0],
-                "extra_selected": value,
-            }
-        )
-
+        )    
+    extra_charges = db.execute(query)
+    extra_charges = extra_charges.mappings().all()
     return extra_charges
 
 
