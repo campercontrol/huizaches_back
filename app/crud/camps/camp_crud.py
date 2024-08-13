@@ -1,15 +1,137 @@
+import dataclasses
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-from model.campers import School
-from model.camps import Camp, Location, CampPaymentAccount
+from model.camps import Camp, Location, CampPaymentAccount, CamperInCamp, CampExtraCharge
 from model.campers import Camper
+from model.campers.parent import Parent
+from model.user import User
+from model.catalogs import (
+    Vaccine,
+    FoodRestriction,
+    LicensedMedicine,
+    PathologicalBackground,
+    PathologicalBackgroundFamily,
+    Constant
+)
+from model.campers import (
+    School, 
+    CamperPathologicalBackground,
+    CamperLicensedMedicine,
+    CamperFoodRestriction,
+    CamperVaccine,
+    CamperRecord,
+    
+    
+)
 from schema.camps.camp_schema import CampCreate, CampModify
-
+from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp
 from crud.camps.camper_in_camp_crud import get_campers_for_module
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
+from crud.campers_catalogs.camper_food_restriction_crud import get_camper_food_restriction
+
+
+
+def get_camp_gnl_report(db: Session, camp_id: int):
+
+    catalog_gender = aliased(Constant)
+    catalog_grade = aliased(Constant)
+    catalog_swim =  aliased(Constant)
+    catalog_blood_type =  aliased(Constant)
+
+
+
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Camper.birthday,
+                      Camper.height,
+                      Camper.weight,
+                      catalog_gender.value.label('gender'),
+                      catalog_grade.value.label('grade'),
+                      School.name,
+                      Camper.school_other,
+                      catalog_swim.value.label('swim'),
+                      Camper.affliction,
+                      catalog_blood_type.value.label('blood_type'),
+                      Camper.heart_problems,
+                      Camper.psicology_treatments,
+                      Camper.prevent_activities,
+                      Camper.other_allergies,
+                      Camper.nocturnal_disorders,
+                      Camper.phobias,
+                      Camper.drugs,
+                      Camper.doctor_precall,
+                      Camper.prohibited_foods,
+                      Camper.comments_admin,
+                      Camper.insurance_company,
+                      Camper.insurance_number,
+                      Camper.security_social_number,
+                      Parent.tutor_name,
+                      Parent.tutor_lastname_father,
+                      Parent.tutor_lastname_mother,
+                      Parent.tutor_cellphone,
+                      Parent.tutor_home_phone,
+                      Parent.tutor_work_phone,
+                      User.email.label("parent_email"),
+                      Parent.contact_name.label("second_tutor_name"),
+                      Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
+                      Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
+                      Parent.contact_cellphone.label("second_tutor_cellphone"),
+                      Parent.contact_home_phone.label("second_tutor_fathers_lastname"),
+                      Parent.contact_work_phone.label("second_tutor_work_phone"),
+                      Parent.contact_email.label("second_tutor_email"),
+                      Camper.contact_name.label("emergency contact"),
+                      Camper.contact_relation.label("contact kinship"),
+                      Camper.contact_cellphone,
+                      Camper.contact_homephone,
+                      CamperInCamp.payment_balance,
+                      
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_gender, Camper.gender_id == catalog_gender.id)
+             .join(catalog_grade, Camper.grade == catalog_grade.id)
+             .join(catalog_swim, Camper.can_swim == catalog_swim.id)
+             .join(catalog_blood_type, Camper.blood_type == catalog_blood_type.id)
+             .join(Parent, Camper.parent_id == Parent.id)
+             .join(User, Parent.user_id == User.id)
+             .join(School, Camper.school_id== School.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+
+    campers_report = []
+   
+    for camper in campers:
+        camper_dict = dict(camper)
+        camper_pathological_background = get_pathological_background_by_camper(db, camper.id) 
+        camper_food_restriction = get_camper_food_restriction(db, camper.id)
+        camper_licensed_medicine = get_camper_licensed_medicine(db, camper.id)
+        camper_extra_charges = get_extra_charge_by_camper_camp(db, camper.id, camp_id)
+        # print(camper_food_restriction)
+        for pathological_background in camper_pathological_background:
+            # print(pathological_backgrond["name"])
+            camper_dict[pathological_background["name"]] = pathological_background["is_active"]
+        
+        for food_restriction in camper_food_restriction:
+            camper_dict[food_restriction["name"]] = food_restriction["is_active"]
+            
+        for licensed_medicine in camper_licensed_medicine:
+            camper_dict[licensed_medicine["name"]] = licensed_medicine["is_active"]
+            
+        for extra_charge in camper_extra_charges:
+            extracharge_column_name = f"{extra_charge['name']} ${extra_charge['price']}"
+            camper_dict[extracharge_column_name] = extra_charge["is_selected"]
+        
+        campers_report.append(camper_dict)
+        
+            
+            
+    return campers_report
 
 
 def get_all_camp(db: Session):
@@ -95,11 +217,11 @@ def get_camp_by_id(db: Session, camp_id: int):
     return db.query(Camp).filter_by(id=camp_id).first()
 
 def get_camp_info_by_id_mailing(db: Session, camp_id: int):
-    query = db.query(Camp.id, 
-                     Camp.name, 
+    query = db.query(Camp.id,
+                     Camp.name,
                      Camp.start,
-                     Camp.end, 
-                     Camp.start_registration, 
+                     Camp.end,
+                     Camp.start_registration,
                      Camp.end_registration,
                      Camp.registration,
                      Camp.url,

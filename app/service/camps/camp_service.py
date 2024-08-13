@@ -13,7 +13,8 @@ from crud.camps.camp_crud import (
     update_camp_by_id,
     delete_camp,
     get_camp_by_search,
-    create_new_camp_payment_account  
+    create_new_camp_payment_account,
+    get_camp_gnl_report
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -293,3 +294,9 @@ def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depen
     if len(campers_groupings) == 0:
         raise HTTPException(status_code=404, detail="Camp not found")
     return {"data": campers_groupings}
+
+@camp_router.get("/camps/{camp_id}/general_report", tags=["Camps"])
+def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_general_report = get_camp_gnl_report(db, camp_id)
+    
+    return {"data": camp_general_report}

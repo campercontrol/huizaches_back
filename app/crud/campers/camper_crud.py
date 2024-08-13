@@ -22,6 +22,9 @@ from model.campers import (
     CamperPathologicalBackground,
     CamperPathologicalBackgroundFamily,
 )
+from model.payments import CamperExtraCharge
+from model.camps import CampExtraCharge
+
 from schema.campers_catalogs.camper_food_restriction_schema import (
     CamperFoodRestrictionCreate,
     CamperFoodRestrictionModify
@@ -70,6 +73,7 @@ from crud.campers_catalogs.camper_pathological_background_fm_crud import (
 from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
 from schema.campers.camper_record_schema import CamperRecordCreate
 from crud.campers.camper_record_crud import create_new_camper_record
+
 
 
 def get_all_camper(db: Session) -> any:
@@ -233,6 +237,37 @@ def get_pathological_background_by_camper(db: Session, camper_id: int):
     )
     return db_mapping_rows_to_dict(rows)
 
+def get_camper_licensed_medicine(db: Session, camper_id: int):
+    rows = (
+        db.query(
+            LicensedMedicine.id,
+            LicensedMedicine.name,
+            CamperLicensedMedicine.is_active,
+        ).select_from(CamperLicensedMedicine)
+        .join(LicensedMedicine, CamperLicensedMedicine.licensed_medicine_id == LicensedMedicine.id)
+        .filter(CamperLicensedMedicine.camper_id == camper_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+def get_extra_charge_by_camper_camp(db, camper_id: int, camp_id: int):
+    rows = (
+            db.query(
+                CampExtraCharge.id,
+                CampExtraCharge.name,
+                CampExtraCharge.price,
+                CamperExtraCharge.is_selected,
+            )
+            .select_from(CamperExtraCharge)
+            .join(
+                CampExtraCharge, CampExtraCharge.id == CamperExtraCharge.extra_charge_id
+            )
+            .filter(
+                CamperExtraCharge.camper_id == camper_id,
+                CampExtraCharge.camp_id == camp_id
+            ).all()
+        )    
+    return db_mapping_rows_to_dict(rows)
 
 def get_pathological_background_fm_by_camper(db: Session, camper_id: int):
     rows = (
