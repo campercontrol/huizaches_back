@@ -249,6 +249,18 @@ def get_camper_licensed_medicine(db: Session, camper_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(rows)
+def get_camper_vaccines(db, camper_id):
+    rows = (
+        db.query(
+            Vaccine.id,
+            Vaccine.name,
+            CamperVaccine.is_active,
+        ).select_from(CamperVaccine)
+        .join(Vaccine, CamperVaccine.vaccine_id == Vaccine.id)
+        .filter(CamperVaccine.camper_id == camper_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
 
 def get_extra_charge_by_camper_camp(db, camper_id: int, camp_id: int):
     rows = (

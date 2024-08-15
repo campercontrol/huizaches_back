@@ -1,5 +1,5 @@
 import dataclasses
-from sqlalchemy import case, and_
+from sqlalchemy import case, and_, func, extract
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
@@ -27,11 +27,185 @@ from model.campers import (
     
 )
 from schema.camps.camp_schema import CampCreate, CampModify
-from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp
+from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp, get_camper_vaccines
 from crud.camps.camper_in_camp_crud import get_campers_for_module
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.campers_catalogs.camper_food_restriction_crud import get_camper_food_restriction
+from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin, get_camper_comment_by_camper_for_parent, get_camper_comment_by_camper_for_school
 
+
+
+def get_camp_insr_report(db: Session, camp_id: int):
+    catalog_gender = aliased(Constant)
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Camper.birthday,
+                      func.concat(extract('year', func.age(func.current_date(), Camper.birthday)), " years ",  extract('month', func.age(func.current_date(), Camper.birthday)), " months ").label("Age"),
+                      catalog_gender.value.label('gender'),
+                      ).select_from(CamperInCamp)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_gender, Camper.gender_id == catalog_gender.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+    
+    return campers
+
+def get_camp_contact_report(db: Session, camp_id: int):
+    
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Parent.tutor_name,
+                      Parent.tutor_lastname_father,
+                      Parent.tutor_lastname_mother,
+                      Parent.tutor_cellphone,
+                      Parent.tutor_home_phone,
+                      Parent.tutor_work_phone,
+                      User.email.label("tutor_email"),
+                      Parent.contact_name.label("second_tutor_name"),
+                      Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
+                      Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
+                      Parent.contact_cellphone.label("second_tutor_cellphone"),
+                      Parent.contact_home_phone.label("second_tutor_fathers_lastname"),
+                      Parent.contact_work_phone.label("second_tutor_work_phone"),
+                      Parent.contact_email.label("second_tutor_email"),
+                      Camper.contact_name.label("emergency_contact"),
+                      Camper.contact_relation.label("emergency_contact_kinship"),
+                      Camper.contact_homephone.label("emergency_contact_phone"),
+                      Camper.contact_cellphone.label("emergency_contact_cellphone")                      
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(Parent, Camper.parent_id == Parent.id)
+             .join(User, Parent.user_id == User.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+    return campers
+
+def get_camp_contact_report(db: Session, camp_id: int):
+    
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Parent.tutor_name,
+                      Parent.tutor_lastname_father,
+                      Parent.tutor_lastname_mother,
+                      Parent.tutor_cellphone,
+                      Parent.tutor_home_phone,
+                      Parent.tutor_work_phone,
+                      User.email.label("tutor_email"),
+                      Parent.contact_name.label("second_tutor_name"),
+                      Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
+                      Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
+                      Parent.contact_cellphone.label("second_tutor_cellphone"),
+                      Parent.contact_home_phone.label("second_tutor_fathers_lastname"),
+                      Parent.contact_work_phone.label("second_tutor_work_phone"),
+                      Parent.contact_email.label("second_tutor_email"),
+                      Camper.contact_name.label("emergency_contact"),
+                      Camper.contact_relation.label("emergency_contact_kinship"),
+                      Camper.contact_homephone.label("emergency_contact_phone"),
+                      Camper.contact_cellphone.label("emergency_contact_cellphone")                      
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(Parent, Camper.parent_id == Parent.id)
+             .join(User, Parent.user_id == User.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+    return campers
+
+
+def get_camp_medical_report(db: Session, camp_id: int):
+
+    catalog_gender = aliased(Constant)
+    catalog_swim =  aliased(Constant)
+    catalog_blood_type =  aliased(Constant)
+
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      func.concat(extract('year', func.age(func.current_date(), Camper.birthday)), " years ",  extract('month', func.age(func.current_date(), Camper.birthday)), " months ").label("Age"),
+                      Camper.height,
+                      Camper.weight,
+                      catalog_gender.value.label('gender'),
+                      catalog_swim.value.label('swim'),
+                      Camper.affliction,
+                      catalog_blood_type.value.label('blood_type'),
+                      Camper.heart_problems,
+                      Camper.psicology_treatments,
+                      Camper.prevent_activities,
+                      Camper.other_allergies,
+                      Camper.nocturnal_disorders,
+                      Camper.phobias,
+                      Camper.drugs,
+                      Camper.doctor_precall,
+                      Camper.prohibited_foods,
+                      Camper.insurance,
+                      Camper.insurance_number,
+                      Camper.security_social_number,
+                      Parent.tutor_name,
+                      Parent.tutor_lastname_father,
+                      Parent.tutor_lastname_mother,
+                      Parent.tutor_cellphone,
+                      Parent.tutor_home_phone,
+                      Parent.tutor_work_phone,
+                      User.email.label("tutor_email"),
+                      Parent.contact_name.label("second_tutor_name"),
+                      Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
+                      Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
+                      Parent.contact_cellphone.label("second_tutor_cellphone"),
+                      Parent.contact_home_phone.label("second_tutor_fathers_lastname"),
+                      Parent.contact_work_phone.label("second_tutor_work_phone"),
+                      Parent.contact_email.label("second_tutor_email"),
+                      Camper.contact_name.label("emergency_contact"),
+                      Camper.contact_relation.label("emergency_contact_kinship"),
+                      Camper.contact_cellphone.label("emergency_contact_cellphone"),
+                      Camper.contact_homephone.label("emergency_home_phone")                      
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_gender, Camper.gender_id == catalog_gender.id)
+             .join(catalog_swim, Camper.can_swim == catalog_swim.id)
+             .join(catalog_blood_type, Camper.blood_type == catalog_blood_type.id)
+             .join(Parent, Camper.parent_id == Parent.id)
+             .join(User, Parent.user_id == User.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+    
+    campers_report = []
+   
+    for camper in campers:
+        camper_dict = dict(camper)
+        camper_pathological_background = get_pathological_background_by_camper(db, camper.id) 
+        camper_food_restriction = get_camper_food_restriction(db, camper.id)
+        camper_licensed_medicine = get_camper_licensed_medicine(db, camper.id)
+        camper_vaccines = get_camper_vaccines(db, camper.id)
+        
+        for pathological_background in camper_pathological_background:
+            camper_dict[pathological_background["name"]] = pathological_background["is_active"]
+        
+        for food_restriction in camper_food_restriction:
+            camper_dict[food_restriction["name"]] = food_restriction["is_active"]
+        
+        for vaccines in camper_vaccines:
+            camper_dict[vaccines["name"]] = vaccines["is_active"]
+            
+        for licensed_medicine in camper_licensed_medicine:
+            camper_dict[licensed_medicine["name"]] = licensed_medicine["is_active"]
+            
+        campers_report.append(camper_dict)
+    
+    return campers_report
+    
 
 
 def get_camp_gnl_report(db: Session, camp_id: int):
@@ -76,7 +250,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
                       Parent.tutor_cellphone,
                       Parent.tutor_home_phone,
                       Parent.tutor_work_phone,
-                      User.email.label("parent_email"),
+                      User.email.label("tutor_email"),
                       Parent.contact_name.label("second_tutor_name"),
                       Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
                       Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
@@ -89,7 +263,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
                       Camper.contact_cellphone,
                       Camper.contact_homephone,
                       CamperInCamp.payment_balance,
-                      
+                      Camper.created_at.label("registration date")
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
@@ -111,14 +285,22 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_pathological_background = get_pathological_background_by_camper(db, camper.id) 
         camper_food_restriction = get_camper_food_restriction(db, camper.id)
         camper_licensed_medicine = get_camper_licensed_medicine(db, camper.id)
+        camper_vaccines = get_camper_vaccines(db, camper.id)
+        # camper_vacciones = 
         camper_extra_charges = get_extra_charge_by_camper_camp(db, camper.id, camp_id)
-        # print(camper_food_restriction)
+        camper_parent_comments = get_camper_comment_by_camper_for_parent(db, camper.id)
+        camper_school_comments = get_camper_comment_by_camper_for_school(db, camper.id)
+        camper_admin_comments = get_camper_comment_by_camper_for_admin(db, camper.id)
+        
         for pathological_background in camper_pathological_background:
             # print(pathological_backgrond["name"])
             camper_dict[pathological_background["name"]] = pathological_background["is_active"]
         
         for food_restriction in camper_food_restriction:
             camper_dict[food_restriction["name"]] = food_restriction["is_active"]
+        
+        for vaccines in camper_vaccines:
+            camper_dict[vaccines["name"]] = vaccines["is_active"]
             
         for licensed_medicine in camper_licensed_medicine:
             camper_dict[licensed_medicine["name"]] = licensed_medicine["is_active"]
@@ -127,10 +309,11 @@ def get_camp_gnl_report(db: Session, camp_id: int):
             extracharge_column_name = f"{extra_charge['name']} ${extra_charge['price']}"
             camper_dict[extracharge_column_name] = extra_charge["is_selected"]
         
+        camper_dict["Comments (Parent)"] = camper_parent_comments
+        camper_dict["Comments (Staff)"] = camper_admin_comments
+        camper_dict["Comments (School)"] = camper_school_comments
         campers_report.append(camper_dict)
         
-            
-            
     return campers_report
 
 

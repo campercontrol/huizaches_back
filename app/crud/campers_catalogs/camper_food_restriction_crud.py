@@ -31,17 +31,6 @@ def get_camper_food_restriction_by_uuid(db: Session, camper_food_restriction_id:
         .first()
     )
 def get_camper_food_restriction(db, camper_id):
-    # rows = ( db.query(CamperFoodRestriction)
-    #     .filter(
-    #         CamperFoodRestriction.camper_id == camper_id
-    #     )
-    #     .all())
-    # return db_mapping_rows_to_dict(rows)
-    # query = db.query(CamperFoodRestriction).filter(CamperFoodRestriction.camper_id == camper_id)
-    
-    # data = db.execute(query)
-    # data = data.mappings().all()
-    # return data
     rows = (
         db.query(
             FoodRestriction.id,

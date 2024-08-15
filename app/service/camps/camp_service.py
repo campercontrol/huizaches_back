@@ -14,7 +14,10 @@ from crud.camps.camp_crud import (
     delete_camp,
     get_camp_by_search,
     create_new_camp_payment_account,
-    get_camp_gnl_report
+    get_camp_gnl_report,
+    get_camp_insr_report,
+    get_camp_contact_report,
+    get_camp_medical_report
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -300,3 +303,21 @@ def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
     camp_general_report = get_camp_gnl_report(db, camp_id)
     
     return {"data": camp_general_report}
+
+@camp_router.get("/camps/{camp_id}/insurance_report", tags=["Camps"])
+def get_camp_insurance_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_insurance_general_report = get_camp_insr_report(db, camp_id)
+    
+    return camp_insurance_general_report
+
+@camp_router.get("/camps/{camp_id}/contact_report", tags=["Camps"])
+def camp_contact_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_contact_report = get_camp_contact_report(db, camp_id)
+    
+    return camp_contact_report
+
+
+@camp_router.get("/camps/{camp_id}/medical_report", tags=["Camps"])
+def camp_medical_report(camp_id: int, db: Session = Depends(get_db)):
+    medical_report = get_camp_medical_report(db, camp_id)
+    return medical_report
