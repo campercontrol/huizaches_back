@@ -1,4 +1,3 @@
-from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -17,12 +16,15 @@ from crud.camps.camp_crud import (
     get_camp_gnl_report,
     get_camp_insr_report,
     get_camp_contact_report,
-    get_camp_medical_report
+    get_camp_medical_report,
+    get_camp_food_report,
+    get_camp_social_report,
+    get_camp_extras_report
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
 from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
-from schema.campers.camper_extra_answer_schema import CamperExtraAnswerModify, UpdateCamperExtraAnswer
+from schema.campers.camper_extra_answer_schema import UpdateCamperExtraAnswer
 
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
@@ -321,3 +323,18 @@ def camp_contact_report(camp_id: int, db: Session = Depends(get_db)):
 def camp_medical_report(camp_id: int, db: Session = Depends(get_db)):
     medical_report = get_camp_medical_report(db, camp_id)
     return medical_report
+
+@camp_router.get("/camps/{camp_id}/food_report", tags=["Camps"])
+def camp_food_report(camp_id: int, db: Session = Depends(get_db)):
+    food_report = get_camp_food_report(db, camp_id)
+    return food_report
+
+@camp_router.get("/camps/{camp_id}/social_report", tags=["Camps"])
+def camp_social_report(camp_id: int, db: Session = Depends(get_db)):
+    social_report = get_camp_social_report(db, camp_id)
+    return social_report
+
+@camp_router.get("/camps/{camp_id}/extras_report", tags=["Camps"])
+def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
+    extras_report = get_camp_extras_report(db, camp_id)
+    return extras_report

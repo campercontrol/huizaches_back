@@ -1,30 +1,17 @@
-import dataclasses
-from sqlalchemy import case, and_, func, extract
+from sqlalchemy import and_, func, extract
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-from model.camps import Camp, Location, CampPaymentAccount, CamperInCamp, CampExtraCharge
+from model.camps import Camp, Location, CampPaymentAccount, CamperInCamp
 from model.campers import Camper
 from model.campers.parent import Parent
 from model.user import User
 from model.catalogs import (
-    Vaccine,
-    FoodRestriction,
-    LicensedMedicine,
-    PathologicalBackground,
-    PathologicalBackgroundFamily,
     Constant
 )
 from model.campers import (
-    School, 
-    CamperPathologicalBackground,
-    CamperLicensedMedicine,
-    CamperFoodRestriction,
-    CamperVaccine,
-    CamperRecord,
-    
-    
+    School    
 )
 from schema.camps.camp_schema import CampCreate, CampModify
 from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp, get_camper_vaccines
@@ -286,14 +273,12 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_food_restriction = get_camper_food_restriction(db, camper.id)
         camper_licensed_medicine = get_camper_licensed_medicine(db, camper.id)
         camper_vaccines = get_camper_vaccines(db, camper.id)
-        # camper_vacciones = 
         camper_extra_charges = get_extra_charge_by_camper_camp(db, camper.id, camp_id)
         camper_parent_comments = get_camper_comment_by_camper_for_parent(db, camper.id)
         camper_school_comments = get_camper_comment_by_camper_for_school(db, camper.id)
         camper_admin_comments = get_camper_comment_by_camper_for_admin(db, camper.id)
         
         for pathological_background in camper_pathological_background:
-            # print(pathological_backgrond["name"])
             camper_dict[pathological_background["name"]] = pathological_background["is_active"]
         
         for food_restriction in camper_food_restriction:
@@ -316,6 +301,106 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         
     return campers_report
 
+def get_camp_food_report(db: Session, camp_id: int):
+
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Camper.other_allergies,
+                      Camper.prohibited_foods
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+
+    campers_report = []
+   
+    for camper in campers:
+        camper_dict = dict(camper)
+        camper_food_restriction = get_camper_food_restriction(db, camper.id)
+        
+        for food_restriction in camper_food_restriction:
+            camper_dict[food_restriction["name"]] = food_restriction["is_active"]
+        
+        campers_report.append(camper_dict)
+        
+    return campers_report
+
+def get_camp_social_report(db: Session, camp_id: int):
+
+    catalog_gender = aliased(Constant)
+    catalog_grade = aliased(Constant)
+    catalog_swim =  aliased(Constant)
+
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      Camper.birthday,
+                      catalog_gender.value.label('gender'),
+                      catalog_grade.value.label('grade'),
+                      Camper.prevent_activities,
+                      Camper.psicology_treatments,
+                      Camper.nocturnal_disorders,
+                      Camper.phobias,
+                      Camper.drugs,
+                      catalog_swim.value.label('swim')
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_gender, Camper.gender_id == catalog_gender.id)
+             .join(catalog_grade, Camper.grade == catalog_grade.id)
+             .join(catalog_swim, Camper.can_swim == catalog_swim.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+
+    campers_report = []
+   
+    for camper in campers:
+        camper_dict = dict(camper)
+        camper_parent_comments = get_camper_comment_by_camper_for_parent(db, camper.id)
+        camper_school_comments = get_camper_comment_by_camper_for_school(db, camper.id)
+        camper_admin_comments = get_camper_comment_by_camper_for_admin(db, camper.id)
+                
+        camper_dict["Comments (Parent)"] = camper_parent_comments
+        camper_dict["Comments (Staff)"] = camper_admin_comments
+        camper_dict["Comments (School)"] = camper_school_comments
+        campers_report.append(camper_dict)
+        
+    return campers_report
+
+def get_camp_extras_report(db: Session, camp_id: int):
+
+    query = (db.query(Camper.id,
+                      Camper.name,
+                      Camper.lastname_father,
+                      Camper.lastname_mother,
+                      CamperInCamp.payment_balance
+                      ).select_from(CamperInCamp)
+             .join(Camp, CamperInCamp.camp_id == Camp.id)
+             .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .filter(CamperInCamp.camp_id == camp_id))
+    campers = db.execute(query)
+    campers = campers.mappings().all()
+
+    campers_report = []
+   
+    for camper in campers:
+        camper_dict = dict(camper)
+
+        camper_extra_charges = get_extra_charge_by_camper_camp(db, camper.id, camp_id)
+         
+        for extra_charge in camper_extra_charges:
+            extracharge_column_name = f"{extra_charge['name']} ${extra_charge['price']}"
+            camper_dict[extracharge_column_name] = extra_charge["is_selected"]
+
+        campers_report.append(camper_dict)
+        
+    return campers_report
 
 def get_all_camp(db: Session):
     rows = db.query(Camp).all()
