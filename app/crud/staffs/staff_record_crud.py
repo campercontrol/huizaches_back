@@ -4,13 +4,11 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
 
-from model.staffs import StaffRecord
-
+from model.staffs import StaffRecord,Staff
 from schema.staffs.staff_record_schema import (
     StaffRecordCreate,
     StaffRecordModify,
 )
-
 
 def get_all_staff_record(db):
     rows = db.query(StaffRecord).all()
@@ -58,9 +56,11 @@ def update_staff_record_by_id(db, staff_record_id: int, modify_staff_record: Sta
 def get_record_by_staff_id(db, staff_id:int):
     
     record_numbers = (
-        db.query(StaffRecord.attend, StaffRecord.attended, StaffRecord.total)
-        .filter_by(staff_id=staff_id)
+        db.query(StaffRecord.id, StaffRecord.attend, StaffRecord.attended, StaffRecord.total).select_from(StaffRecord)
+        .join(Staff, StaffRecord.id == Staff.record_id)
+        .filter(Staff.id == staff_id)
         .first()
     )
+    
     
     return record_numbers

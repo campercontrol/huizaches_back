@@ -13,6 +13,7 @@ from schema.camps.staff_in_camp_schema import (
     StaffInCampCreate,
     StaffInCampModify,
 )
+from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id
 
 
 def get_all_staff_in_camp(db: Session):
@@ -43,22 +44,17 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
     try:
         db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
         db_staff_in_camp.confirmed_staff = False
+        staff_record = get_record_by_staff_id(db, new_staff_in_camp.staff_id)
+        new_staff_record = get_staff_record_by_id(db, staff_record.id)
+        new_staff_record.attend += 1
+        new_staff_record.total += 1
         db.add(db_staff_in_camp)
         db.commit()
         db.refresh(db_staff_in_camp)
-    except SQLAlchemyError as e:
-        print("#=================")
-        print(e)
-        print("#=================")
-        db_staff_in_camp = None
-        return db_staff_in_camp
     except Exception as ex:
-        print(f"No se pudo guardar en la base de datos: {ex}")
+        db.rollback()
+        print(f"An error ocurred while saving: {ex}")
     return db_staff_in_camp
-
-
-# def assign_staff(db: Session, staff_id:int, camp_id:int):
-
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
     db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
