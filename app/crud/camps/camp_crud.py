@@ -213,7 +213,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
                       Camper.weight,
                       catalog_gender.value.label('gender'),
                       catalog_grade.value.label('grade'),
-                      School.name,
+                      School.name.label("school"),
                       Camper.school_other,
                       catalog_swim.value.label('swim'),
                       Camper.affliction,
