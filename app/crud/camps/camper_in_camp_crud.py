@@ -98,6 +98,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
+            Camp.show_payment_parent,
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
