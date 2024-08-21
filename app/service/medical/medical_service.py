@@ -13,7 +13,7 @@ from crud.medical.camper_visit_crud import (
     create_new_camper_visit
 )
 from crud.medical.staff_visit_crud import staff_visit_triage_for_camp
-from crud.campers.parent_crud import get_parent_for_admin_by_id, get_parent_by_uuid
+from crud.campers.parent_crud import get_parent_for_admin_by_id, get_parent_by_uuid, get_parent_by_camper_id
 from crud.campers.camper_crud import get_camper_by_uuid
 from service.campers.camper_service import get_camper_by_id_complete
 from crud.staffs.staff_crud import get_staff_by_id
@@ -97,7 +97,8 @@ def get_medical_camp_camper(
     camper_visits = camper_visit_for_camp(db, camper_id, camp_id)
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     camper = camper_info["camper"]
-    parent_info = get_parent_by_uuid(db, camper.id)
+    camper_parent = get_parent_by_camper_id(db, camper.id)
+    parent_info = get_parent_by_uuid(db, camper_parent["id"])
     return {
         "camper_visits": camper_visits,
         "camper_info": camper_info,
