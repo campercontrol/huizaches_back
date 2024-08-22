@@ -249,6 +249,7 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                 "camper_payment_balance": getattr(camp, "camper_payment_balance"),
                 "currency_symbol": getattr(camp, "currency_symbol"),
                 "currency_acronyms": getattr(camp, "currency_acronyms"),
+                "show_payment_parent": getattr(camp, "show_payment_parent")
             }
         )
     """
