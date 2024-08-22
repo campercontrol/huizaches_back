@@ -175,6 +175,29 @@ def get_past_camp_confirmed_by_staff(db: Session, staff_id:int):
 
     return db_mapping_rows_to_dict(camps)
 
+def get_all_past_camp_by_staff(db: Session, staff_id:int):
+
+    camps = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Location.name.label("location"),
+            Camp.start.cast(Date).label("camp_start"),
+            Camp.end.cast(Date).label("camp_end"),
+            Camp.url.label("camp_url"),
+        )
+        .select_from(StaffInCamp)
+        .join(Camp, Camp.id == StaffInCamp.camp_id)
+        .join(Location, Location.id == Camp.location_id)
+        .filter(
+            StaffInCamp.staff_id == staff_id,
+            Camp.start <= date.today()
+        )
+        .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
+
 def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
 
     camps = (
@@ -192,6 +215,29 @@ def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
     .filter(
         StaffInCamp.staff_id == staff_id, 
         StaffInCamp.confirmed_staff == True, 
+        Camp.start > date.today()
+    )
+    .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
+
+def get_all_future_camp_by_staff(db: Session, staff_id:int):
+
+    camps = (
+    db.query(
+        Camp.id.label("camp_id"),
+        Camp.name.label("camp_name"),
+        Location.name.label("location"),
+        Camp.start.cast(Date).label("camp_start"),
+        Camp.end.cast(Date).label("camp_end"),
+        Camp.url.label("camp_url"),
+    )
+    .select_from(StaffInCamp)
+    .join(Camp, Camp.id == StaffInCamp.camp_id)
+    .join(Location, Location.id == Camp.location_id)
+    .filter(
+        StaffInCamp.staff_id == staff_id,
         Camp.start > date.today()
     )
     .all()

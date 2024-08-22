@@ -54,7 +54,9 @@ from crud.staff_catalogs.staff_food_restriction_crud import (
 
 from crud.camps.staff_in_camp_crud import (
     get_past_camp_confirmed_by_staff,
-    get_future_camp_confirmed_by_staff
+    get_future_camp_confirmed_by_staff,
+    get_all_past_camp_by_staff,
+    get_all_future_camp_by_staff
 )
 
 from crud.staffs.staff_comment_crud import (
@@ -261,8 +263,8 @@ def get_staff_complete(staff_id: int, language: str, db: Session = Depends(get_d
 @staff_routes.get("/staff/profile/{staff_id}/{language}", tags=["Staff"])
 def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db)):
     
-    staff_past_camps = get_past_camp_confirmed_by_staff(db, staff_id)
-    staff_upcoming_camps = get_future_camp_confirmed_by_staff(db, staff_id)
+    staff_past_camps = get_all_past_camp_by_staff(db, staff_id)
+    staff_upcoming_camps = get_all_future_camp_by_staff(db, staff_id)
     staff_band = get_staff_band(db, staff_id)
     staff_profile = get_staff_by_id(db, staff_id)
     staff_comments = get_staff_comment_by_staff_for_admin(db, staff_id)
