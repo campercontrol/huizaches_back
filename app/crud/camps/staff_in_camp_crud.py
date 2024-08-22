@@ -13,7 +13,7 @@ from schema.camps.staff_in_camp_schema import (
     StaffInCampCreate,
     StaffInCampModify,
 )
-from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id
+from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status
 
 
 def get_all_staff_in_camp(db: Session):
@@ -44,12 +44,9 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
     try:
         db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
         db_staff_in_camp.confirmed_staff = False
-        staff_record = get_record_by_staff_id(db, new_staff_in_camp.staff_id)
-        new_staff_record = get_staff_record_by_id(db, staff_record.id)
-        new_staff_record.attend += 1
-        new_staff_record.total += 1
         db.add(db_staff_in_camp)
         db.commit()
+        update_staff_record_status(db, new_staff_in_camp.staff_id)
         db.refresh(db_staff_in_camp)
     except Exception as ex:
         db.rollback()

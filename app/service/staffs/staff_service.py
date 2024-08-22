@@ -38,8 +38,6 @@ from schema.staff_catalogs.staff_food_restriction_schema import (
     StaffFoodRestrictionModify
 )
 
-from crud.crud_user import create_new_user, create_new_prospect_user
-
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
 from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.staff_catalogs.staff_vaccine_crud import (
@@ -62,6 +60,7 @@ from crud.camps.staff_in_camp_crud import (
 from crud.staffs.staff_comment_crud import (
     get_staff_comment_by_staff_for_admin
 )
+from crud.staffs.staff_record_crud import update_all_staff_record_status, update_staff_record_status
 
 from utils.db import SessionLocal
 
@@ -83,6 +82,7 @@ def get_prospects(db: Session = Depends(get_db)):
 
 @staff_routes.get("/staff/", tags=["Staff"])
 def get_staff(db: Session = Depends(get_db)):
+    update_all_staff_record_status(db)
     list_staff = get_all_staff(db)
     return {"data": list_staff}
 
@@ -277,3 +277,10 @@ def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db
         "staff_comments": staff_comments,
         "staff_trophies": staff_trophy
     }
+    
+    
+@staff_routes.post("/staff_record_status", tags=["Staff"])
+def staff_record_status(db: Session = Depends(get_db)):
+    result = update_staff_record_status(db, 22881)
+    return result
+    
