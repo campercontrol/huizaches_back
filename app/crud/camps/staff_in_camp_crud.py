@@ -185,6 +185,7 @@ def get_all_past_camp_by_staff(db: Session, staff_id:int):
             Camp.start.cast(Date).label("camp_start"),
             Camp.end.cast(Date).label("camp_end"),
             Camp.url.label("camp_url"),
+            StaffInCamp.confirmed_staff
         )
         .select_from(StaffInCamp)
         .join(Camp, Camp.id == StaffInCamp.camp_id)
@@ -232,6 +233,7 @@ def get_all_future_camp_by_staff(db: Session, staff_id:int):
         Camp.start.cast(Date).label("camp_start"),
         Camp.end.cast(Date).label("camp_end"),
         Camp.url.label("camp_url"),
+        StaffInCamp.confirmed_staff
     )
     .select_from(StaffInCamp)
     .join(Camp, Camp.id == StaffInCamp.camp_id)
