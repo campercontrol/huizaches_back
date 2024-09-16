@@ -1,12 +1,9 @@
 import uuid
 import os
-from sqlalchemy import case
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from utils.db import db_mapping_rows_to_dict
 
 from crud.camps.camp_crud import get_camp_by_id
-from model.campers import Camper, School, CamperRecord, Parent
+from model.campers import Camper, Parent
 from model.user import User
 
 # SDK de Mercado Pago
