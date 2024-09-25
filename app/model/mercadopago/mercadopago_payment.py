@@ -3,7 +3,8 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    Integer
+    Integer,
+    Boolean
 )
 from utils.db import Base
 class MercadopagoPayment(Base):
@@ -16,6 +17,7 @@ class MercadopagoPayment(Base):
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
     payment_id = Column(Integer, nullable=False, unique=True)
+    status = Column(Boolean, nullable=False)
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated",

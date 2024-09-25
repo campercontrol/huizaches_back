@@ -4,7 +4,8 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    Integer
+    Integer,
+    Boolean
 )
 from utils.db import Base
 class MercadopagoMerchantOrder(Base):
@@ -16,6 +17,7 @@ class MercadopagoMerchantOrder(Base):
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
+    status = Column(Boolean, nullable=False)
     merchant_order_id = Column(Integer, nullable=False, unique=True)
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
