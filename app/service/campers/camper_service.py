@@ -344,8 +344,8 @@ def get_camper_dashboard(camper_id: int, db: Session = Depends(get_db)):
     for camper_in_camp in camper_subscribe_camps:
         camp_ids.append(camper_in_camp["camp_id"])
 
-    for camper_in_camp in camper_cancelled_camps:
-        camp_ids.append(camper_in_camp["camp_id"])
+    # for camper_in_camp in camper_cancelled_camps:
+    #     camp_ids.append(camper_in_camp["camp_id"])
 
     for camper_in_camp in camper_passed_camps:
         camp_ids.append(camper_in_camp["camp_id"])
