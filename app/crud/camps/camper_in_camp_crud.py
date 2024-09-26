@@ -9,7 +9,7 @@ from model.groupings.grouping_camp import GroupingCamp
 from model.groupings.grouping_camper import GroupingCamper
 from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
 from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
-from model.payments import CamperExtraCharge
+from model.payments import CamperExtraCharge, Payment
 from model.catalogs import Constant, Currency
 from model.user import User
 from schema.camps.camper_in_camp_schema import (
@@ -392,8 +392,8 @@ def get_campers_for_bracelets(db, camp_id):
 #  k
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     
+    
     extra_charges = []
-
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
     camper = get_camper_by_uuid(db, camper_id)
     parent = get_parent_by_camper_id(db, camper_id)
@@ -409,23 +409,31 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             )
             .first()
         )
+        # remove cancelled camp
         if camper_in_camp:  
             camper_extra_answers = (
                 db.query(CamperExtraAnswer).join(CampExtraQuestion, CamperExtraAnswer.question_id == CampExtraQuestion.id)
                 .where(and_(CamperExtraAnswer.camper_id == camper_id, 
                         CampExtraQuestion.camp_id == camp_id)).all())
-            for camper_extra_answer in camper_extra_answers:
-                camper_extra_answer_to_delete = db.query(CamperExtraAnswer).filter(CamperExtraAnswer.id == camper_extra_answer.id).first()
-                db.delete(camper_extra_answer_to_delete)
-            
+            if camper_extra_answers:
+                for camper_extra_answer in camper_extra_answers:
+                    camper_extra_answer_to_delete = db.query(CamperExtraAnswer).filter(CamperExtraAnswer.id == camper_extra_answer.id).first()
+                    db.delete(camper_extra_answer_to_delete)
             camper_extra_charges = (
                 db.query(CamperExtraCharge).join(CampExtraCharge, CamperExtraCharge.extra_charge_id == CampExtraCharge.id)
                 .where(and_(CamperExtraCharge.camper_id == camper_id,
                             CampExtraCharge.camp_id == camp_id)).all())
-            for camper_extra_charge in camper_extra_charges:
-                camper_extra_charge_to_delete = db.query(CamperExtraCharge).filter(CamperExtraCharge.id == camper_extra_charge.id).first()
-                db.delete(camper_extra_charge_to_delete)
-            db.delete(camper_in_camp)    
+            if camper_extra_charges:
+                for camper_extra_charge in camper_extra_charges:
+                    camper_extra_charge_to_delete = db.query(CamperExtraCharge).filter(CamperExtraCharge.id == camper_extra_charge.id).first()
+                    db.delete(camper_extra_charge_to_delete)
+            
+            camp_payments = db.query(Payment).where(and_(Payment.camp_id == camp_id, Payment.camper_id == camper_id)).all()
+            if camp_payments:
+                for camp_payment in camp_payments:
+                    db.delete(camp_payment) 
+
+            db.delete(camper_in_camp)                
             db.commit()
         
         camp = db.query(Camp).filter(Camp.id == camp_id).first()
