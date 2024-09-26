@@ -421,7 +421,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             camper_extra_charges = (
                 db.query(CamperExtraCharge).join(CampExtraCharge, CamperExtraCharge.extra_charge_id == CampExtraCharge.id)
                 .where(and_(CamperExtraCharge.camper_id == camper_id,
-                            CampExtraCharge.camp_id == camp.id)).all())
+                            CampExtraCharge.camp_id == camp_id)).all())
             for camper_extra_charge in camper_extra_charges:
                 camper_extra_charge_to_delete = db.query(CamperExtraCharge).filter(CamperExtraCharge.id == camper_extra_charge.id).first()
                 db.delete(camper_extra_charge_to_delete)
