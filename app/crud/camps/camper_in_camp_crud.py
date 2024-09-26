@@ -399,6 +399,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     parent = get_parent_by_camper_id(db, camper_id)
     transaction_type = get_payment_transaction_type_by_movement(db, 1)
     for camp_id in camps_id:
+
         camper_in_camp = (
             db.query(CamperInCamp)
             .filter(
@@ -408,9 +409,26 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             )
             .first()
         )
+        if camper_in_camp:  
+            camper_extra_answers = (
+                db.query(CamperExtraAnswer).join(CampExtraQuestion, CamperExtraAnswer.question_id == CampExtraQuestion.id)
+                .where(and_(CamperExtraAnswer.camper_id == camper_id, 
+                        CampExtraQuestion.camp_id == camp_id)).all())
+            for camper_extra_answer in camper_extra_answers:
+                camper_extra_answer_to_delete = db.query(CamperExtraAnswer).filter(CamperExtraAnswer.id == camper_extra_answer.id).first()
+                db.delete(camper_extra_answer_to_delete)
+            
+            camper_extra_charges = (
+                db.query(CamperExtraCharge).join(CampExtraCharge, CamperExtraCharge.extra_charge_id == CampExtraCharge.id)
+                .where(and_(CamperExtraCharge.camper_id == camper_id,
+                            CampExtraCharge.camp_id == camp.id)).all())
+            for camper_extra_charge in camper_extra_charges:
+                camper_extra_charge_to_delete = db.query(CamperExtraCharge).filter(CamperExtraCharge.id == camper_extra_charge.id).first()
+                db.delete(camper_extra_charge_to_delete)
+            db.delete(camper_in_camp)    
+            db.commit()
+        
         camp = db.query(Camp).filter(Camp.id == camp_id).first()
-        
-        
         extra_charges_camp = get_extra_charge_by_camp(db, camp.id)
         
         if extra_charges_camp:
@@ -463,21 +481,14 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             create_new_extra_answer(db, new_camper_extra_answer_obj)
         extra_questions = get_extra_answer_by_camper_camp(db, camper.id, camp.id)
         
-        if camper_in_camp and getattr(camper_in_camp, "status") != 36:
-            db.query(CamperInCamp).filter(
-                and_(
-                    CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
-                )
-            ).update({"status": 36})
-            db.commit()
-        elif not camper_in_camp:
-            new_camper_in_camp = CamperInCampCreate(
-                camper_id=camper_id,
-                camp_id=camp_id,
-                status=36,
-                payment_balance=getattr(camp, "public_price"),
-            )
-            camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
+        
+        new_camper_in_camp = CamperInCampCreate(
+            camper_id=camper_id,
+            camp_id=camp_id,
+            status=36,
+            payment_balance=getattr(camp, "public_price"),
+        )
+        camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
         
         # se genera el costo del camp
         payment = {
