@@ -1,7 +1,9 @@
+from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-
+from datetime import date
 from model.campers import School
+from model.camps import Camp
 from crud.crud_user import create_new_user, get_user_by_email
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
@@ -10,6 +12,15 @@ from schema.user import UserCreate
 def get_all_school(db):
     rows= db.query(School).all()
     return rows
+
+def get_upcoming_school_camps(db: Session, school_id: int):
+    data = db.query(Camp).where(and_(Camp.school_id == school_id, Camp.start > date.today())).all()
+    return data
+    
+def get_past_school_camps(db: Session, school_id: int):
+    data = db.query(Camp).where(and_(Camp.school_id == school_id, Camp.start < date.today())).all()
+    return data
+    
 
 def get_school_by_uuid(db, school_id):
     return(

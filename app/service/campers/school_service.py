@@ -10,7 +10,9 @@ from crud.campers.school_crud import (
     update_school_by_id,
     get_active_school,
     delete_school,
-    school_dashboard
+    school_dashboard,
+    get_upcoming_school_camps,
+    get_past_school_camps
 )    
 
 from schema.campers.school_schema import(
@@ -38,6 +40,17 @@ def get_school(db: Session = Depends(get_db)):
 def get_school_by_id(school_id:str, db: Session = Depends(get_db)):
     list_school = get_school_by_uuid(db, school_id)
     return {"data": list_school}
+
+
+@school_routes.get("/school/{school_id}/upcoming_camps", tags=["School"])
+def upcoming_school_camps(school_id:str, db: Session = Depends(get_db)):
+    upcoming_camps = get_upcoming_school_camps(db, school_id)
+    return {"data": upcoming_camps}
+
+@school_routes.get("/school/{school_id}/past_camps", tags=["School"])
+def past_school_camps(school_id:str, db: Session = Depends(get_db)):
+    past_school = get_past_school_camps(db, school_id)
+    return {"data": past_school}
 
 @school_routes.post("/school/", tags=["Campers"])
 def create_school(new_school:SchoolCreate, db: Session =Depends(get_db)):
