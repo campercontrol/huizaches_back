@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 
 from crud.camps.camp_crud import get_camp_by_id
 from model.campers import Camper, Parent
+from model.camps.camp import Camp
+from model.mercadopago import MercadopagoMerchantOrder, MercadopagoPayment
+from utils.db import db_mapping_rows_to_dict
 from model.user import User
 
 # SDK de Mercado Pago
@@ -14,11 +17,29 @@ sdk = mercadopago.SDK(mp_token)
 
 
 def get_customer_info(db: Session, camper_id: int):
-    query = db.query(Camper, Parent, User).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).join(User, User.id == Parent.user_id).where(Camper.id == camper_id)
+    query = db.query(Camper.id.label("camper_id"),
+                     Camper.name,
+                     Camper.lastname_father,
+                     Camper.lastname_mother,
+                     Parent.tutor_name,
+                     Parent.tutor_lastname_father,
+                     Parent.tutor_lastname_mother,
+                     Parent.contact_cellphone,
+                     User.email
+                     ).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).join(User, User.id == Parent.user_id).where(Camper.id == camper_id)
     data = db.execute(query)
     data = data.mappings().first()
     return data
 
+
+def get_camp_info(db: Session, camp_id: int):
+    query = db.query(Camp.id,
+                     Camp.name
+                     ).where(Camp.id == camp_id)
+    data = db.execute(query)
+    data = data.mappings().first()
+    return data
+    
 
 def get_merchant_order(merchant_order_id : int):
     merchant_order_response = sdk.merchant_order().get(merchant_order_id)
@@ -26,6 +47,13 @@ def get_merchant_order(merchant_order_id : int):
     print(merchant_order)
     return merchant_order
 
+def get_internal_merchant_order_by_id(db: Session, merchant_order_id: int):
+    merchant_order = db.query(MercadopagoMerchantOrder).filter(MercadopagoMerchantOrder.merchant_order_id == merchant_order_id).first()
+    return merchant_order
+
+def get_internal_payment_by_id(db: Session, payment_id: int):
+    payment = db.query(MercadopagoPayment).filter(MercadopagoPayment.payment_id == payment_id).first()
+    return payment
 
 def get_payment(payment_id : int):
     merchant_order_response = sdk.payment().get(payment_id)
@@ -35,17 +63,23 @@ def get_payment(payment_id : int):
     
 
 def create_preference(db: Session, camp_id: int, camper_id: int, customer_defined_amount: int):
-    camp_info = get_camp_by_id(db, camp_id) 
+    camp_info = get_camp_info(db, camp_id) 
     customer_info = get_customer_info(db, camper_id)    
     id = uuid.uuid4()
     id = str(id)
+    
+    metadata = {
+        "customer": dict(customer_info),
+        "camp": dict(camp_info)
+    }  
+
     
     request = {
         "items": [
             {
 			    "id": id,
-			    "title": camp_info.name,
-			    "description": f'{camp_info.name} - {customer_info.Camper.name} {customer_info.Camper.lastname_father} {customer_info.Camper.lastname_mother}',
+			    "title": camp_info['name'],
+			    "description": camp_info['name'] + " - " + customer_info['name'] + " " + customer_info['lastname_father'] + " " + customer_info['lastname_mother'],
 			    "currency_id": "MXN",
 			    "unit_price": customer_defined_amount,
        			"quantity": 1
@@ -53,12 +87,12 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
         ],
         # "marketplace_fee": 0,
         "payer": {
-            "name": f'{customer_info.Parent.tutor_name}',
-            "surname": f'{customer_info.Parent.tutor_lastname_father} {customer_info.Parent.tutor_lastname_mother}',
-            "email": customer_info.User.email,
+            "name": customer_info['tutor_name'],
+            "surname": customer_info['tutor_lastname_father'] + customer_info['tutor_lastname_mother'],
+            "email": customer_info['email'],
             "phone": {
                 "area_code": 52,
-                "number": customer_info.Parent.contact_cellphone,
+                "number": customer_info['contact_cellphone'],
             },
             # "identification": {
             #     "type": "CPF",
@@ -84,7 +118,7 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
         "binary_mode": True,
         # "external_reference": "2",
         # "marketplace": "marketplace",
-        "notification_url": "https://4dea-201-141-18-223.ngrok-free.app/mercado_pago/notify",
+        "notification_url": "https://822f-201-141-109-215.ngrok-free.app/mercado_pago/notify",
         # "operation_type": "regular_payment",
         "payment_methods": {
             # "default_payment_method_id": "master",
@@ -100,7 +134,8 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
             # ],
             "installments": 3,
             "default_installments": 1,
-        }
+        },
+        "metadata": metadata
         # "statement_descriptor": "Test Store",
     }
 
