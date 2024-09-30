@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends,Response, BackgroundTasks,UploadFile, Request
 from sqlalchemy.orm import Session
-from model.mercadopago import mercadopago_merchant_order, MercadopagoMerchantOrder
+from model.mercadopago import MercadopagoPayment, MercadopagoMerchantOrder
 from crud.mercadopago.mercadopago_crud import create_preference, get_merchant_order, get_payment, get_internal_merchant_order_by_id, get_internal_payment_by_id
 from utils.db import SessionLocal
 
@@ -28,16 +28,10 @@ async def mercado_pago_payment_notification(request: Request, id: Optional[int] 
     if topic:
         if topic == 'payment':
             print("payment")
-            internal_payment = get_internal_payment_by_id(id)
-            
-            
-            
+            internal_payment = get_internal_payment_by_id(id)       
         if topic == 'merchant_order':
             get_internal_merchant_order_by_id(id)
             print("merchant_order")
-
-
-    
     try : 
         print(f'request json : {await request.json()}')
         # return request.body()
