@@ -4,7 +4,10 @@ from sqlalchemy.orm import Session
 from datetime import date
 from model.campers import School
 from model.camps import Camp
+from model.camps.season import Season
+from model.camps.location import Location
 from crud.crud_user import create_new_user, get_user_by_email
+from crud.camps.camp_crud import get_records_for_camp
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
 from schema.user import UserCreate
@@ -14,12 +17,100 @@ def get_all_school(db):
     return rows
 
 def get_upcoming_school_camps(db: Session, school_id: int):
-    data = db.query(Camp).where(and_(Camp.school_id == school_id, Camp.start > date.today())).all()
-    return data
+    query = (
+                db.query(
+                    Camp.id,
+                     Camp.name,
+                     Camp.start,
+                     Camp.end,
+                     Camp.start_registration,
+                     Camp.end_registration,
+                     Camp.registration,
+                     Camp.url,
+                     Camp.special_message,
+                     Camp.special_message_admin,
+                     Camp.public_price,
+                     Camp.show_payment_parent,
+                     Camp.show_rebate_parent,
+                     Camp.show_paypal_button,
+                     Camp.show_payment_order,
+                     Camp.reminder_camp_days,
+                     Camp.reminder_discount_days,                                                        
+                     Camp.insurance,
+                     Camp.venue,
+                     Camp.photo_url,
+                     Camp.photo_password,
+                     Camp.medical_report,
+                     Camp.occupancy_camp,
+                     Camp.active,
+                     Camp.general_camp,
+                     School.name.label("school"),
+                     Location.name.label("location"),
+                     Season.name.label("season_name"),
+                     Camp.show_mercadopago_button,
+                     Camp.recommended_payment_dates
+                    )
+                .join(Location, Camp.location_id == Location.id)
+                .join(School, School.id == Camp.school_id)
+                .join(Season, Camp.season_id == Season.id)
+                .where(and_(Camp.school_id == school_id, Camp.start > date.today()))
+            )
+    camps = []            
+    camps_data = db.execute(query)
+    camps_data = camps_data.mappings().all()
+    for camp in camps_data:
+        camp = dict(camp)
+        camp["records"] = get_records_for_camp(db, camp["id"])
+        camps.append(camp)
+    return camps
     
 def get_past_school_camps(db: Session, school_id: int):
-    data = db.query(Camp).where(and_(Camp.school_id == school_id, Camp.start < date.today())).all()
-    return data
+    query = (
+                db.query(
+                    Camp.id,
+                     Camp.name,
+                     Camp.start,
+                     Camp.end,
+                     Camp.start_registration,
+                     Camp.end_registration,
+                     Camp.registration,
+                     Camp.url,
+                     Camp.special_message,
+                     Camp.special_message_admin,
+                     Camp.public_price,
+                     Camp.show_payment_parent,
+                     Camp.show_rebate_parent,
+                     Camp.show_paypal_button,
+                     Camp.show_payment_order,
+                     Camp.reminder_camp_days,
+                     Camp.reminder_discount_days,                                                        
+                     Camp.insurance,
+                     Camp.venue,
+                     Camp.photo_url,
+                     Camp.photo_password,
+                     Camp.medical_report,
+                     Camp.occupancy_camp,
+                     Camp.active,
+                     Camp.general_camp,
+                     School.name.label("school"),
+                     Location.name.label("location"),
+                     Season.name.label("season_name"),
+                     Camp.show_mercadopago_button,
+                     Camp.recommended_payment_dates
+                    )
+                .join(Location, Camp.location_id == Location.id)
+                .join(School, School.id == Camp.school_id)
+                .join(Season, Camp.season_id == Season.id)
+                .where(and_(Camp.school_id == school_id, Camp.start < date.today()))
+            )
+    camps = []            
+    camps_data = db.execute(query)
+    camps_data = camps_data.mappings().all()
+    for camp in camps_data:
+        camp = dict(camp)
+        camp["records"] = get_records_for_camp(db, camp["id"])
+        camps.append(camp)
+    return camps
     
 
 def get_school_by_uuid(db, school_id):

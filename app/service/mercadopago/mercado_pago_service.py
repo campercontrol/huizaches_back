@@ -1,6 +1,8 @@
+from typing import Optional
 from fastapi import APIRouter, Depends,Response, BackgroundTasks,UploadFile, Request
 from sqlalchemy.orm import Session
-from crud.mercadopago.mercadopago_crud import create_preference, get_merchant_order, get_payment
+from model.mercadopago import mercadopago_merchant_order, MercadopagoMerchantOrder
+from crud.mercadopago.mercadopago_crud import create_preference, get_merchant_order, get_payment, get_internal_merchant_order_by_id, get_internal_payment_by_id
 from utils.db import SessionLocal
 
 mercadopago_routes = APIRouter()
@@ -21,7 +23,21 @@ def create_item(camp_id : int, camper_id: int, customer_defined_amount: int, db:
 
         
 @mercadopago_routes.post("/mercado_pago/notify", tags=["mercadopago"])
-async def mercado_pago_payment_notification(request: Request):
+async def mercado_pago_payment_notification(request: Request, id: Optional[int] = None, topic: Optional[str] = None):
+    
+    if topic:
+        if topic == 'payment':
+            print("payment")
+            internal_payment = get_internal_payment_by_id(id)
+            
+            
+            
+        if topic == 'merchant_order':
+            get_internal_merchant_order_by_id(id)
+            print("merchant_order")
+
+
+    
     try : 
         print(f'request json : {await request.json()}')
         # return request.body()
