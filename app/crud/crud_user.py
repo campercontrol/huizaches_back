@@ -325,7 +325,7 @@ def get_profile_id_by_user_id(db, user_id:int ):
         profile_id = (
             db.query(School.id)
             .join(User, User.id == School.login_id)
-            .filter(Staff.login_id == user_id)
+            .filter(School.login_id == user_id)
             .first()
         )
     if user_role[0] == doctor_role:
