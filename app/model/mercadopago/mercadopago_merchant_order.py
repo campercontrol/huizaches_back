@@ -19,7 +19,7 @@ class MercadopagoMerchantOrder(Base):
     )
     status = Column(Boolean, nullable=False)
     external_id = Column(
-        ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), Integer, nullable=False
+        ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), nullable=False
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
