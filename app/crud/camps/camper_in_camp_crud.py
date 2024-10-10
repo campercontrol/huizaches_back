@@ -7,6 +7,7 @@ from datetime import date, datetime
 from model.groupings.grouping import Grouping
 from model.groupings.grouping_camp import GroupingCamp
 from model.groupings.grouping_camper import GroupingCamper
+from model.groupings.grouping_type import GroupingType
 from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
 from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
 from model.payments import CamperExtraCharge, Payment
@@ -724,32 +725,75 @@ def get_camper_in_camp_by_camper(db, camper_id: int):
     data = db.query(CamperInCamp).filter(CamperInCamp.camper_id == camper_id).all()
     return data
 
+# def get_campers_in_camp_and_groupings(db, camp_id: int):
+#     catalog_one = aliased(Constant)
+#     catalog_two = aliased(Constant)
+    
+#     query = (
+#         db.query(
+#             Camper.id,
+#             (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
+#             Camper.birthday,
+#             catalog_one.value.label('gender'),
+#             catalog_two.value.label('grade'),
+#             func.string_agg(Grouping.name, ',').label('groupings')
+#         )
+#         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+#         .join(catalog_one, Camper.gender_id == catalog_one.id)
+#         .join(catalog_two, Camper.grade == catalog_two.id)
+#         .outerjoin(GroupingCamper, Camper.id == GroupingCamper.camper_id)
+#         .outerjoin(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+#         .outerjoin(Grouping, GroupingCamp.grouping_id == Grouping.id)
+#         .filter(CamperInCamp.camp_id == camp_id)
+#         .group_by(Camper.id, catalog_one.value, catalog_two.value)
+#     )
+    
+#     data = db.execute(query)
+#     return data.mappings().all()
+
 def get_campers_in_camp_and_groupings(db, camp_id: int):
     catalog_one = aliased(Constant)
     catalog_two = aliased(Constant)
     
-    query = (
+    campers_query = (
         db.query(
             Camper.id,
             (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
             Camper.birthday,
             catalog_one.value.label('gender'),
-            catalog_two.value.label('grade'),
-            func.string_agg(Grouping.name, ',').label('groupings')
+            catalog_two.value.label('grade')
         )
         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
         .join(catalog_one, Camper.gender_id == catalog_one.id)
         .join(catalog_two, Camper.grade == catalog_two.id)
-        .outerjoin(GroupingCamper, Camper.id == GroupingCamper.camper_id)
-        .outerjoin(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
-        .outerjoin(Grouping, GroupingCamp.grouping_id == Grouping.id)
-        .filter(CamperInCamp.camp_id == camp_id)
-        .group_by(Camper.id, catalog_one.value, catalog_two.value)
-    )
-    
-    data = db.execute(query)
-    return data.mappings().all()
+        .where(CamperInCamp.camp_id == camp_id)
 
+    )
+    campers = db.execute(campers_query)
+    campers = campers.mappings().all()
+    
+    campers_groupings_data = []
+    for camper in campers:
+        camper = dict(camper)
+        campers_groupings_query = (
+        db.query(
+            Grouping.id,
+            Grouping.name,
+            GroupingType.id.label("grouping_type_id"),
+            GroupingType.name.label("grouping_type_name")
+        ).select_from(Grouping)
+        .join(GroupingType, GroupingType.id == Grouping.grouping_type_id)
+        .join(GroupingCamp, Grouping.id == GroupingCamp.grouping_id)
+        .join(GroupingCamper, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+        .where(and_(GroupingCamper.camper_id == camper["id"], GroupingCamp.camp_id == camp_id))
+        )
+        campers_groupings = db.execute(campers_groupings_query)
+        campers_groupings = campers_groupings.mappings().all()
+        camper["groupings"] = campers_groupings
+        campers_groupings_data.append(camper)
+        
+    print(campers_groupings_data)
+    return campers_groupings_data
 """
 Camper extra charges
 {
