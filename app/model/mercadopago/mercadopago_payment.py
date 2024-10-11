@@ -21,6 +21,10 @@ class MercadopagoPayment(Base):
     external_id = Column(
         ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), nullable=False
     )
+    internal_payment_id = Column(
+        ForeignKey("payments_payment.id", ondelete="cascade")
+    )
+    
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated",
