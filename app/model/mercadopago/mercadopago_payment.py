@@ -4,7 +4,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
-    String
+    String,
+    BigInteger
 )
 from utils.db import Base
 class MercadopagoPayment(Base):
@@ -16,7 +17,7 @@ class MercadopagoPayment(Base):
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
-    payment_id = Column(Integer, nullable=False, unique=True)
+    payment_id = Column(BigInteger, nullable=False, unique=True)
     status = Column(String, nullable=False)
     external_id = Column(
         ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), nullable=False
