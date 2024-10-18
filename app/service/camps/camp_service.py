@@ -49,6 +49,8 @@ from crud.camps.camp_extra_question_crud import (
 from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
+from crud.mercadopago.mercadopago_crud import get_mercado_pago_payments_by_camp_id_and_camper_id
+
 from schema.camps.camp_schema import CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
@@ -338,3 +340,9 @@ def camp_social_report(camp_id: int, db: Session = Depends(get_db)):
 def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
     extras_report = get_camp_extras_report(db, camp_id)
     return extras_report
+
+
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/mercadopago/payments", tags=["Camps"])
+def mercado_pago_payments_by_camp_id_and_camper_id(camp_id: int, camper_id: int, db:Session = Depends(get_db)):
+    mercadopago_payments = get_mercado_pago_payments_by_camp_id_and_camper_id(db, camp_id, camper_id)
+    return mercadopago_payments
