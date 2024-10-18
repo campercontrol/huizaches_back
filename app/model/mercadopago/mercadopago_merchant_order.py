@@ -5,7 +5,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
-    String
+    String,
+    BigInteger
 )
 from utils.db import Base
 class MercadopagoMerchantOrder(Base):
@@ -14,6 +15,7 @@ class MercadopagoMerchantOrder(Base):
     camp_id = Column(
         ForeignKey("camps_camp.id", ondelete="cascade"), nullable=False, doc="Campamento"
     )
+    merchant_order_id = Column(BigInteger, nullable=False, unique=True)
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
