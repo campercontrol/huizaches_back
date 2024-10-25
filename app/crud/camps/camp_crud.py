@@ -7,6 +7,8 @@ from model.camps import Camp, Location, CampPaymentAccount, CamperInCamp
 from model.campers import Camper
 from model.campers.parent import Parent
 from model.user import User
+from model.payments.payment import Payment
+from model.payments.payment_method import PaymentMethod
 from model.catalogs import (
     Constant
 )
@@ -40,6 +42,34 @@ def get_camp_insr_report(db: Session, camp_id: int):
     
     return campers
 
+
+def get_camp_incomes(db: Session, camp_id: int):
+    
+    payment_methods = db.query(PaymentMethod).all()
+    incomes_per_payment_method = []
+    for payment_method in payment_methods:
+        total_payment_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
+        total_transactions_per_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
+        income = {
+            "payment_method": payment_method.name,
+            "transactions": total_transactions_per_payment_method,
+            "total_amount": total_payment_amount or 0
+        }
+        incomes_per_payment_method.append(income)
+    
+    total_discount_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()   
+    total_transactions_per_discount = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()
+
+    discount_income = {
+        "payment_method": "Descuentos",
+        "transactions": total_transactions_per_discount,
+        "total_amount": total_discount_amount or 0
+    }
+    incomes_per_payment_method.append(discount_income)
+    
+    return incomes_per_payment_method
+    
+        
 def get_camp_contact_report(db: Session, camp_id: int):
     
     query = (db.query(Camper.id,

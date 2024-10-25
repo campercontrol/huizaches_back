@@ -19,7 +19,8 @@ from crud.camps.camp_crud import (
     get_camp_medical_report,
     get_camp_food_report,
     get_camp_social_report,
-    get_camp_extras_report
+    get_camp_extras_report,
+    get_camp_incomes
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -77,6 +78,11 @@ def get_db():
 def get_camp(db: Session = Depends(get_db)):
     list_camp = get_all_camp(db)
     return {"data": list_camp}
+
+@camp_router.get("/camp/{camp_id}/incomes", tags=["Camps"])
+def camp_incomes(camp_id: int, db: Session = Depends(get_db)):
+    response = get_camp_incomes(db, camp_id)
+    return response
 
 
 @camp_router.get("/active_camp/", tags=["Camps"])
