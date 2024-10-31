@@ -2,12 +2,17 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
+from model.groupings.grouping_type import GroupingType
 from model.groupings.grouping import Grouping
 from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
 
 
 def get_all_groupings(db: Session):
-    return db.query(Grouping).order_by(Grouping.id).all()
+    query = db.query(Grouping.id, Grouping.name, Grouping.is_active, GroupingType.name.label('grouping_type_id')).join(GroupingType, GroupingType.id == Grouping.grouping_type_id).order_by(Grouping.id)
+    groupings = db.execute(query)
+    groupings = groupings.mappings().all()
+    return groupings
+
 
 
 def get_grouping_by_id(db: Session, grouping_id: int):
