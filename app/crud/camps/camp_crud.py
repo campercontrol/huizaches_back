@@ -79,10 +79,12 @@ def get_camp_incomes(db: Session, camp_id: int):
             camper_info = db.query(Camper).select_from(Camper).filter(Camper.id == camper.camper_id).first()
             for payment_method in payment_methods:
                 camper_payments_by_payment_method_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
+                camper_total_transactions_by_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
                 camper_payment_by_method_id = {
                     "id": payment_method.id,
                     "payment_method": payment_method.name,
-                    "total_amount": camper_payments_by_payment_method_total_amount or 0
+                    "total_amount": camper_payments_by_payment_method_total_amount or 0,
+                    "transactions": camper_total_transactions_by_payment_method or 0
                 }
                 camper_payments_by_method.append(camper_payment_by_method_id)
             # camper comments
@@ -706,3 +708,5 @@ def create_new_camp_payment_account(db: Session, new_camp_payment_account):
         db.rollback()
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_camp_payment_account
+
+
