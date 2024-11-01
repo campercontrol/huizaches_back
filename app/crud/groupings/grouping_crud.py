@@ -8,7 +8,7 @@ from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
 
 
 def get_all_groupings(db: Session):
-    query = db.query(Grouping.id, Grouping.name, Grouping.is_active, GroupingType.name.label('grouping_type_id')).join(GroupingType, GroupingType.id == Grouping.grouping_type_id).order_by(Grouping.id)
+    query = db.query(Grouping.id, Grouping.name, Grouping.is_active, GroupingType.id.label('grouping_type_id'), GroupingType.name.label('grouping_type_name')).join(GroupingType, GroupingType.id == Grouping.grouping_type_id).order_by(Grouping.id)
     groupings = db.execute(query)
     groupings = groupings.mappings().all()
     return groupings
