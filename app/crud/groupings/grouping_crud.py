@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from model.groupings.grouping_type import GroupingType
 from model.groupings.grouping import Grouping
+from model.groupings.grouping_camper import GroupingCamper
 from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
 
 
@@ -56,3 +57,14 @@ def delete_grouping(db: Session, grouping_id: int):
         return True
     return False
 
+def delete_grouping_camper(db: Session, grouping_id: int):
+    grouping_to_delete = db.query(GroupingCamper).filter(GroupingCamper.id == grouping_id).first()
+    if not grouping_to_delete:
+        return 2
+    try: 
+        db.delete(grouping_to_delete)
+        db.commit()
+        return 1
+    except Exception as ex:
+        print(ex)    
+        return 3

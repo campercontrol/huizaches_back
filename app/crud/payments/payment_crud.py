@@ -6,6 +6,7 @@ from datetime import date
 
 from model.payments import Payment, PaymentTransactionType, PaymentMethod
 from model.campers import Camper
+from model.campers.parent import Parent
 from model.camps import Camp, CamperInCamp
 
 from utils.payments.payment_table import get_payment_table
@@ -16,6 +17,7 @@ from crud.payments.payment_transaction_type_crud import get_all_payment_transact
 from schema.payments.payment_schema import (
     PaymentCreate,
     PaymentModify,
+    MassivePaymentCreate
 )
 
 
@@ -236,3 +238,46 @@ def get_all_camper_payments(db: Session, camper_id):
     data = db.execute(query)
     data = data.mappings().all()
     return data
+
+def apply_massive_payment(db: Session, camp_id: int, massivePayment):
+    campers = massivePayment.campers
+    new_payment = dict(massivePayment.payment)
+    camp_data = db.query(Camp).filter(Camp.id == camp_id).first()
+    new_payment["currency_id"] = camp_data.currency_id
+    
+    result = True
+    for camper in campers:
+        camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper)).first()
+        camper_data = db.query(Camper.id.label("camper_id"), Parent.id.label("parent_id")).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).first()   
+        new_payment["parent_id"] = camper_data.parent_id
+        new_payment["camper_id"] = camper
+        new_payment["camp_id"] = camp_id
+        
+        try:
+            if new_payment["payment_amount"] < 0:
+                new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+            
+            if new_payment["txn_type_id"] in (1,2,9):
+                new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+            
+            db_payment = Payment(**new_payment)
+            db.add(db_payment)
+            db.commit()
+            if db_payment.txn_type_id in (1,2,9):
+                total_balance = abs(camper_in_camp.payment_balance) - abs(float(db_payment.payment_amount))
+                camper_in_camp.payment_balance = total_balance
+                db.add(camper_in_camp) 
+                db.commit()
+            else:
+                total_balance = abs(camper_in_camp.payment_balance) + abs(float(db_payment.payment_amount))
+                camper_in_camp.payment_balance = total_balance
+                db.add(camper_in_camp) 
+                db.commit()            
+            
+        except Exception as ex:
+            db.rollback()
+            result = False
+            print(f"An error ocurred while saving payment: {ex}")    
+        
+    return result
+    

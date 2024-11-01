@@ -88,3 +88,39 @@ class PaymentModify(BaseModel):
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+class MassivePayment(BaseModel):
+    id:Optional[int] = Field(
+        title="Id",
+        default=None,
+        primary_key=True
+    ) 
+    paid: Optional[bool] = Field(
+        title="Pagado",
+        default=False
+    )
+    payment_amount: condecimal(decimal_places= 2) # type: ignore
+    payment_date: date = Field(
+        title = "Fecha del pago",
+        default=datetime.now()
+    )
+    txn_number: str = Field(
+        title= "Numero de transacción",
+        max_lenght= 150       
+    )    
+    payment_method_id: int = Field(
+        title="Metodo de pago"
+    )
+    txn_type_id: int = Field(
+        title="Tipo de transacción"
+    ) 
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+    updated_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+class MassivePaymentCreate(BaseModel):
+    campers: list[int] = Field(
+        title="lista de id´s de los campers"
+    )
+    payment: MassivePayment

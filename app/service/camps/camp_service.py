@@ -51,16 +51,16 @@ from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
 from crud.mercadopago.mercadopago_crud import get_mercado_pago_payments_by_camp_id_and_camper_id
+from crud.payments.payment_crud import apply_massive_payment
 
 from schema.camps.camp_schema import CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
-from schema.payments.payment_schema import PaymentCreate
+from schema.payments.payment_schema import PaymentCreate, MassivePaymentCreate
 from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 from schema.campers.camper_extra_answer_schema import ExtraAnswerMultiple
 from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
-
 from utils.db import SessionLocal
 
 camp_router = APIRouter()
@@ -126,7 +126,7 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
                 paymentaccount_id = payment_account.id
             )
             create_new_camp_payment_account(db, new_camp_payment_account_obj)
-        
+
     if new_camp.extra_question:
         for question in new_camp.extra_question:
             new_question = CampExtraQuestionCreate(
@@ -282,7 +282,7 @@ def post_extras_camp_for_camper(
 def update_extra_answers_for_camper(
     extra_answers: "list[UpdateCamperExtraAnswer]",
     db: Session = Depends(get_db),
-):   
+):
     response = update_extra_answer_by_id(
         db, extra_answers
     )
@@ -292,8 +292,8 @@ def update_extra_answers_for_camper(
         return {"detail": {"status": 1, "msg": "Extra answers updated succesfully"}}
     if response == 0:
         return {"detail": {"status": 2, "msg": "Extra answers not found"}}
-        
-        
+
+
 
 @camp_router.get("/search/camp/{search}", tags=["Camps"])
 def get_search_camp(search: str, db: Session = Depends(get_db)):
@@ -311,19 +311,19 @@ def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depen
 @camp_router.get("/camps/{camp_id}/general_report", tags=["Camps"])
 def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
     camp_general_report = get_camp_gnl_report(db, camp_id)
-    
+
     return {"data": camp_general_report}
 
 @camp_router.get("/camps/{camp_id}/insurance_report", tags=["Camps"])
 def get_camp_insurance_report(camp_id: int, db: Session = Depends(get_db)):
     camp_insurance_general_report = get_camp_insr_report(db, camp_id)
-    
+
     return camp_insurance_general_report
 
 @camp_router.get("/camps/{camp_id}/contact_report", tags=["Camps"])
 def camp_contact_report(camp_id: int, db: Session = Depends(get_db)):
     camp_contact_report = get_camp_contact_report(db, camp_id)
-    
+
     return camp_contact_report
 
 
@@ -352,3 +352,11 @@ def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
 def mercado_pago_payments_by_camp_id_and_camper_id(camp_id: int, camper_id: int, db:Session = Depends(get_db)):
     mercadopago_payments = get_mercado_pago_payments_by_camp_id_and_camper_id(db, camp_id, camper_id)
     return mercadopago_payments
+
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/massive_payment", tags=["Camps"])
+def apply_massive_payment_to_campers_in_camp(camp_id: int, massive_payment: MassivePaymentCreate, db:Session = Depends(get_db)):
+    result = apply_massive_payment(db, camp_id, massive_payment)
+    if result == True:
+        return {"detail": {"msg": "El pago masivo se aplicó correctamente.", "status": 1}}
+    else:
+        return {"detail": {"msg": "Ocurrió un error al aplicar el pago masivo", "status": 3}}

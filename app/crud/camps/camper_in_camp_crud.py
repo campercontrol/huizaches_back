@@ -780,7 +780,8 @@ def get_campers_in_camp_and_groupings(db, camp_id: int):
             Grouping.id,
             Grouping.name,
             GroupingType.id.label("grouping_type_id"),
-            GroupingType.name.label("grouping_type_name")
+            GroupingType.name.label("grouping_type_name"),
+            GroupingCamper.id.label("grouping_camper_id")
         ).select_from(Grouping)
         .join(GroupingType, GroupingType.id == Grouping.grouping_type_id)
         .join(GroupingCamp, Grouping.id == GroupingCamp.grouping_id)
@@ -792,7 +793,6 @@ def get_campers_in_camp_and_groupings(db, camp_id: int):
         camper["groupings"] = campers_groupings
         campers_groupings_data.append(camper)
         
-    print(campers_groupings_data)
     return campers_groupings_data
 """
 Camper extra charges
