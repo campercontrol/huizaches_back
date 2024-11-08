@@ -56,7 +56,7 @@ from crud.campers.camper_crud import (
     delete_camper
 )
 from crud.campers.parent_crud import get_parent_by_uuid
-from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_parent
+from crud.campers.camper_comment_crud import get_all_camper_comments
 from crud.camps.camp_crud import get_school_camp_for_camper, get_summer_camp_for_camper
 from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
@@ -373,7 +373,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     parent = get_parent_by_uuid(db, camper_info["camper"].parent_id)
     user = get_user_by_uuid(db, parent.user_id)
-    camper_comments_parent = get_camper_comment_by_camper_for_parent(db, camper_id)
+    camper_comments = get_all_camper_comments(db, camper_id)
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
@@ -390,7 +390,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
         "camper_total_amount": total_amount,
         "parent": parent,
         "user_email": user[0].email,
-        "camper_comments_parent": camper_comments_parent,
+        "camper_comments": camper_comments,
         "camper_subscribe_camps": camper_subscribe_camps,
         "camper_cancelled_camps": camper_cancelled_camps,
         "camper_passed_camps": camper_passed_camps,
