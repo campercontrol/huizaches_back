@@ -107,3 +107,27 @@ def send_mail_template(
     except Exception as ex:
         print(ex)
         return False
+    
+    
+def send_mail_template_plain_text(
+    db,
+    send_to: str,
+    template_id: int,
+    template_content: str,
+    subject: str,
+    context: dict
+):
+
+    template_content =  (
+        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+    )
+    template_env = Environment(loader=BaseLoader).from_string(template_content)
+    html_content = template_env.render(context)
+    try:    
+        send_simple_message(
+            "", send_to, subject, html_content
+        )
+        return True
+    except Exception as ex:
+        print(ex)
+        return False

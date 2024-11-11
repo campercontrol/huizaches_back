@@ -28,7 +28,7 @@ from model.mailings import (
 from model.camps import Camp
 from schema.mailings.campaign_schema import CampaignSend, CampaignSendStaff
 
-from helper.mailing_helpers import send_mail_template
+from helper.mailing_helpers import send_mail_template, send_mail_template_plain_text
 from utils.email_tools import send_simple_message
 
 from utils.db import SessionLocal
@@ -236,6 +236,8 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
     camps = campaign_send.camps
     campaign = campaign_send.campaign
     template_id = campaign_send.campaign.template_id
+    template_subject = campaign_send.campaign.template_title
+    template_body = campaign_send.campaign.template_body
     
     default_camper_variables = {
         "name": "",
@@ -276,7 +278,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "camp_id": camp_info["id"],
                     "camper_id": camper["id"]
                 }                
-                sendmail_status = send_mail_template(db, camper["tutor_email"],template_id, email_context)
+                sendmail_status = send_mail_template_plain_text(db, camper["tutor_email"],template_id, template_body, template_subject, email_context)
                 if sendmail_status: 
                     add_camper_to_campaign(db, camper_campaign)
                 
@@ -289,7 +291,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "camp": camp_info,
                     "payment": default_payment_variables
                 }
-                send_mail_template(db, staff["staff_email"],template_id, email_context)
+                send_mail_template_plain_text(db, staff["staff_email"],template_id, template_body, template_subject, email_context)
         if school:        
             email_context = {
                 "camper": default_camper_variables,
@@ -300,7 +302,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                 "payment": default_payment_variables,
                 "camp": camp_info
             }
-            send_mail_template(db, school["email"],template_id, email_context)
+            send_mail_template_plain_text(db, school["email"],template_id, template_body, template_subject, email_context)
         
     return {"status": 1, "msg": "emails sent successfully"}
 
