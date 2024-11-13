@@ -32,11 +32,13 @@ from crud.campers.camper_extra_answer_crud import create_new_extra_answer, get_e
 from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge, get_camper_extra_charge_by_id
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id, get_extra_charge_by_camp
-from crud.campers.parent_crud import get_parent_by_camper_id
-from crud.campers.camper_crud import get_camper_by_uuid
+from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
+from crud.campers.camper_crud import get_camper_by_uuid, get_camper_info_mailing
 from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
 from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
 from helper.camper_helpers import update_record_campers
+from helper.mailing_helpers import send_mail_template
+
 from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment_and_update_balance, create_new_payment, delete_payment_and_update_balance
 
 
@@ -390,17 +392,42 @@ def get_campers_for_bracelets(db, camp_id):
     )
     return db_mapping_rows_to_dict(list_campers)
 
-#  k
+def get_camp_info_by_id_mailing(db: Session, camp_id: int):
+    query = db.query(Camp.id,
+                     Camp.name,
+                     Camp.start,
+                     Camp.end,
+                     Camp.start_registration,
+                     Camp.end_registration,
+                     Camp.registration,
+                     Camp.url,
+                     Camp.special_message,
+                     Camp.special_message,
+                     Camp.special_message_admin,
+                     Camp.public_price,
+                     Camp.insurance,
+                     Camp.venue,
+                     Camp.photo_url,
+                     Camp.photo_password,
+                     Camp.medical_report,
+                     Camp.occupancy_camp,
+                     School.name.label("school"),
+                     Location.name.label("location")
+                     ).join(School, School.id == Camp.school_id).join(Location, Location.id == Camp.location_id).filter(Camp.id == camp_id)
+    data = db.execute(query)
+    return data.mappings().first()
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     
-    
     extra_charges = []
+    camp_registration_template_id = 197
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
     camper = get_camper_by_uuid(db, camper_id)
+    camper_data_mailing = get_camper_info_mailing(db, camper_id)
+    second_parent = get_second_tutor_by_camper_id(db, camper_id)
     parent = get_parent_by_camper_id(db, camper_id)
     transaction_type = get_payment_transaction_type_by_movement(db, 1)
     for camp_id in camps_id:
-
+        camp_data_mailing = get_camp_info_by_id_mailing(db, camp_id)
         camper_in_camp = (
             db.query(CamperInCamp)
             .filter(
@@ -516,7 +543,21 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     
     update_record_campers(db, camper_id)
 
-
+    # enviamos un correo a los tutores de cuenta
+    # tutor principal
+    tutor_context = {
+        "camper": camper_data_mailing,
+        "user": parent,
+        "camp": camp_data_mailing
+    }
+    # tutor secundario
+    second_tutor_context = {
+        "camper": camper_data_mailing,
+        "user": second_parent,
+        "camp": camp_data_mailing
+    }
+    send_mail_template(db, parent['email'],camp_registration_template_id, tutor_context)
+    send_mail_template(db, second_parent['email'],camp_registration_template_id, second_tutor_context)
     # Aqui vamos a poner si ya tuvo un campamento previo o no.
 
     if prev_camper_in_camp:

@@ -109,11 +109,20 @@ def get_parent_by_camper_id(db, camper_id):
                      Parent.id,
                      Parent.tutor_lastname_father.label("lastname_father"),
                      Parent.tutor_lastname_mother.label("lastname_mother"),
+                     Parent.contact_email,
                      User.email).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)
     data = db.execute(query)
     return data.mappings().first()
  
+def get_second_tutor_by_camper_id(db, camper_id):
     
+    query = db.query(Parent.contact_name.label("name"),
+                     Parent.id,
+                     Parent.contact_lastname_father.label("lastname_father"),
+                     Parent.contact_lastname_mother.label("lastname_mother"),
+                     Parent.contact_email.label("email")).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)
+    data = db.execute(query)
+    return data.mappings().first()
 
 
 def delete_parent(db: Session, parent_id: int):
