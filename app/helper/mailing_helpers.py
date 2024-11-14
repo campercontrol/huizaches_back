@@ -94,12 +94,12 @@ def send_mail_template(
     context: dict
 ):
 
-    template_content =  (
-        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
-    )
-    template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
-    html_content = template_env.render(context)
     try:    
+        template_content =  (
+            db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+        )
+        template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
+        html_content = template_env.render(context)
         send_simple_message(
             "", send_to, template_content.title, html_content
         )

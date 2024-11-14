@@ -477,3 +477,14 @@ def delete_user_by_id(db: Session, user_id:int):
         except Exception as ex:
             return {"status": 3, "msg": "An unknown error ocurred while deleting"}
         return {"status": 1, "msg": "Medical user succesfully deleted"}
+    
+    
+def get_admin_users_for_mailing(db: Session):
+    query = db.query(Staff.name,
+                     Staff.id,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(User.is_admin == True)
+    data = db.execute(query)
+    return data.mappings().all()
+    

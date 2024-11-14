@@ -36,6 +36,7 @@ from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_b
 from crud.campers.camper_crud import get_camper_by_uuid, get_camper_info_mailing
 from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
 from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
+from crud.crud_user import get_admin_users_for_mailing
 from helper.camper_helpers import update_record_campers
 from helper.mailing_helpers import send_mail_template
 
@@ -419,12 +420,14 @@ def get_camp_info_by_id_mailing(db: Session, camp_id: int):
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     
     extra_charges = []
-    camp_registration_template_id = 197
+    camp_registration_parent_template_id = 197
+    camp_registration_staff_template_id = 10
     prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
     camper = get_camper_by_uuid(db, camper_id)
     camper_data_mailing = get_camper_info_mailing(db, camper_id)
     second_parent = get_second_tutor_by_camper_id(db, camper_id)
     parent = get_parent_by_camper_id(db, camper_id)
+    admin_users = get_admin_users_for_mailing(db)
     transaction_type = get_payment_transaction_type_by_movement(db, 1)
     for camp_id in camps_id:
         camp_data_mailing = get_camp_info_by_id_mailing(db, camp_id)
@@ -556,8 +559,19 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
         "user": second_parent,
         "camp": camp_data_mailing
     }
-    send_mail_template(db, parent['email'],camp_registration_template_id, tutor_context)
-    send_mail_template(db, second_parent['email'],camp_registration_template_id, second_tutor_context)
+
+    send_mail_template(db, parent['email'],camp_registration_parent_template_id, tutor_context)
+    send_mail_template(db, second_parent['email'],camp_registration_parent_template_id, second_tutor_context)
+    
+    # enviamos un correo a todas las cuentas admin    
+    for admin_user in admin_users:
+        admin_user_context = {
+            "camper": camper_data_mailing,
+            "user": admin_user,
+            "camp": camp_data_mailing
+        }  
+        send_mail_template(db, admin_user['email'], camp_registration_staff_template_id, admin_user_context)
+    
     # Aqui vamos a poner si ya tuvo un campamento previo o no.
 
     if prev_camper_in_camp:
