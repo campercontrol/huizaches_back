@@ -1,4 +1,3 @@
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from model.mailings import (
@@ -8,13 +7,17 @@ from model.mailings import (
     SchoolCampaign,
     EmailTemplate,
 )
+from helper.mailing_helpers import send_mail_template
 from model.campers import Camper, School
 from model.staffs import Staff
 from model.camps import Camp, Season
 from model.trainings import Training, TrainingEvent
-from schema.mailings.campaign_schema import CampaignCreate, CampaignModify
 from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case
+from crud.campers.camper_crud import get_camper_info_mailing
+from crud.camps.camp_crud import get_camp_info_by_id_mailing
+from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
+from crud.crud_user import get_admin_users_for_mailing
+
 
 
 def get_public_for_campaign(db, campaign_id: int):
@@ -188,6 +191,40 @@ def get_sent_training(db, campaign_id:int):
         "staffs": staffs,
         "campaign_info": db_mapping_rows_to_dict(campaign)[0],
     }
+    
+    
+def send_system_mail(db: Session, camper_id, camp_id, admin_template_id, parent_template_id):
+    
+    camper_data = get_camper_info_mailing(db, camper_id)
+    camp_data = get_camp_info_by_id_mailing(db, camp_id)
+    first_parent = get_parent_by_camper_id(db, camper_id)
+    second_parent = get_second_tutor_by_camper_id(db, camper_id)
+    admin_users = get_admin_users_for_mailing(db)
+        
+    tutor_context = {
+        "camper": camper_data,
+        "user": first_parent,
+        "camp": camp_data
+    }
+    # tutor secundario
+    second_tutor_context = {
+        "camper": camper_data,
+        "user": second_parent,
+        "camp": camp_data
+    }        
+    send_mail_template(db, first_parent['email'], parent_template_id, tutor_context)
+    send_mail_template(db, second_parent['email'], parent_template_id, second_tutor_context)
+    
+    for admin_user in admin_users:
+        admin_user_context = {
+            "camper": camper_data,
+            "user": admin_user,
+            "camp": camp_data
+        }  
+        send_mail_template(db, admin_user['email'],admin_template_id, admin_user_context)
+
+    
+    
 
 def get_sent_candidates(db, campaign_id:int):
 

@@ -2,11 +2,17 @@ from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
+from helper.mailing_helpers import send_mail_template_medical_visit
 from fastapi import HTTPException
 from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs.constant import Constant
 from model.campers.camper import Camper
 from schema.medical.camper_visit_schema import CamperVisitCreate
+from crud.campers.camper_crud import get_camper_info_mailing
+from crud.camps.camp_crud import get_camp_info_by_id_mailing
+from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
+from crud.crud_user import get_admin_users_for_mailing
+from crud.mailings.mailing_crud import send_system_mail
 
 
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
@@ -122,16 +128,95 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
     
     return camper_all_visits
 
+
+def get_camper_medical_visit_by_id (db: Session, camper_medical_visit_id: int):
+    medical_visit_query = (
+        db.query(
+            MedicalCamperVisit.medical_tracing,
+            MedicalCamperVisit.event_description,
+            MedicalCamperVisit.already_sent,
+            MedicalCamperVisit.doctor,
+            MedicalCamperVisit.camp_restriction,
+            MedicalCamperVisit.camper_id,
+            MedicalCamperVisit.camp_id,
+            MedicalCamperVisit.attention_date,
+            MedicalCamperVisit.administered_medications,
+            MedicalCamperVisit.attention_time,
+            MedicalCamperVisit.medical_monitoring,
+            MedicalCamperVisit.initial_visit_id,
+            MedicalCamperVisit.diagnostic,
+            MedicalCamperVisit.comment,
+            MedicalCamperVisit.created_at,
+            MedicalCamperVisit.description,
+            MedicalCamperVisit.medical_comment,
+            MedicalCamperVisit.updated_at,
+            MedicalCamperVisit.id,
+            MedicalCamperVisit.send_in_email,
+            MedicalCamperVisit.medication_authorization,
+            Constant.value.label('triage')).select_from(MedicalCamperVisit).join(Constant, Constant.id == MedicalCamperVisit.triage).filter(MedicalCamperVisit.id == camper_medical_visit_id)
+    
+    )
+    
+    medical_visit = db.execute(medical_visit_query)
+    medical_visit = medical_visit.mappings().first()
+    return medical_visit
+    
+
 def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
+    
     db_camper_visit = None
     try:
         db_camper_visit = MedicalCamperVisit(**new_camper_visit.dict())
         db.add(db_camper_visit)
         db.commit()
         db.refresh(db_camper_visit)
+        if new_camper_visit.send_in_email:
+            
+            camper_data = get_camper_info_mailing(db, new_camper_visit.camper_id)
+            camp_data = get_camp_info_by_id_mailing(db, new_camper_visit.camp_id)
+            first_parent = get_parent_by_camper_id(db, new_camper_visit.camper_id)
+            second_parent = get_second_tutor_by_camper_id(db, new_camper_visit.camper_id)
+            admin_users = get_admin_users_for_mailing(db)    
+            medical_visit_parent_template = 1984
+            medical_visit_admin_template = 1983
+            medical_visit = get_camper_medical_visit_by_id(db, db_camper_visit.id)
+            
+            
+            first_parent_context = {
+                "camper": camper_data,
+                "user": first_parent,
+                "camp": camp_data,
+                "medical_visit": medical_visit
+            }
+            second_parent_context = {
+                "camper": camper_data,
+                "user": second_parent,
+                "camp": camp_data,
+                "medical_visit": medical_visit
+            }
+            send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context)    
+            send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context)   
+            
+            for admin_user in admin_users:
+                admin_user_context = {
+                    "camper": camper_data,
+                    "user": admin_user,
+                    "camp": camp_data,
+                    "medical_visit": medical_visit
+                }  
+                send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context)
+            db_camper_visit.already_sent = True
+            db.commit()    
+            
+                      
     except SQLAlchemyError as e:
+        db.rollback()
+        print(e)
         return {"status": 2, "detail": "Can not save de medical visit"}
     except Exception as ex:
         db.rollback()
+        print(ex)
         return {"status": 3, "detail": "Internal server error"}
     return {"status": 1, "detail": "medical visit created successfully"}
+
+

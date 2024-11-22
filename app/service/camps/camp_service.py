@@ -52,6 +52,7 @@ from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff
 from crud.camps.location_crud import get_location_by_uuid
 from crud.mercadopago.mercadopago_crud import get_mercado_pago_payments_by_camp_id_and_camper_id
 from crud.payments.payment_crud import apply_massive_payment
+from crud.mailings.mailing_crud import send_system_mail
 
 from schema.camps.camp_schema import CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
@@ -187,6 +188,8 @@ def subscribe_camp(
 @camp_router.post("/unsubscribe_camp/", tags=["Camps"])
 def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)):
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+    parent_template_id_canceled_camp = 15
+    admin_template_id_canceled_camp = 1986
     new_camper_in_camp = CamperInCampModify(
         status=37,
         payment_balance=camper_in_camp.payment_balance,
@@ -196,6 +199,8 @@ def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)
     modify_camper_in_camp = update_camper_in_camp_by_id(
         db, camp_id, camper_id, new_camper_in_camp
     )
+    send_system_mail(db, camper_in_camp.camper_id, camper_in_camp.camp_id, admin_template_id_canceled_camp, parent_template_id_canceled_camp)
+    
     return modify_camper_in_camp
 
 

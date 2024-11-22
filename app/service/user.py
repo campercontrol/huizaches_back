@@ -8,7 +8,6 @@ from crud.crud_user import (
     create_new_user,
     get_user_by_uuid,
     get_users_all_info,
-    crud_update_user_by_uuid,
     get_user_by_email,
     crud_update_user_by_email,
     search_user_by_email,
