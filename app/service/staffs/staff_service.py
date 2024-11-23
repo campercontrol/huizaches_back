@@ -92,9 +92,14 @@ def get_staff(db: Session = Depends(get_db)):
 def create_prospect(
     new_prospect: ProspectCompleteCreate, db: Session = Depends(get_db)
 ):
-    prospect = create_complete_prospect(db, new_prospect)
+    result = create_complete_prospect(db, new_prospect)
+    
+    if result == 2:
+        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}} 
+    
+    if result == 1: 
+        return {"detail": {"status": 1, "msg": "El prospecto se creo correctamente"}} 
 
-    return {"data": prospect}
 
 
 @staff_routes.patch("/accept_prospect/{prospect_id}", tags=["Prospect"])

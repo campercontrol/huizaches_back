@@ -8,10 +8,11 @@ from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
 from model import User
 from utils.hash import hash_str
-from helper.mailing_helpers import send_mail_prospect
+from helper.mailing_helpers import send_mail_prospect, send_mail_template
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
 from crud.camps.season_crud import get_current_Season
+from crud.crud_user import get_admin_users_for_mailing
 
 
 def get_all_prospect(db):
@@ -84,6 +85,13 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
 def create_complete_prospect(db, new_prospect):
     season = get_current_Season(db)
     welcome_prospect_template = 1 
+    admin_new_prospect_template = 1988
+    
+    user = db.query(User).filter_by(email=new_prospect.user.email).first()
+    
+    if user:
+        return 2
+    
     try:
         prospect_user = User(
             email= new_prospect.user.email,
@@ -103,7 +111,7 @@ def create_complete_prospect(db, new_prospect):
     except Exception as ex:
         db.rollback()
         print(ex)
-        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el prospect")
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el prospect"})
 
     try:
         staff_new_record = StaffRecord(
@@ -117,7 +125,7 @@ def create_complete_prospect(db, new_prospect):
     except Exception as ex:
         db.rollback()
         print(ex)
-        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el record del prospect"})
 
     try:
         new_prospect.prospect.login_id = prospect_user.id
@@ -130,17 +138,25 @@ def create_complete_prospect(db, new_prospect):
         db.add(prospect_profile)
         db.commit()
         db.refresh(prospect_profile)
-        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+                
     except Exception as ex:
         db.delete(prospect_profile)
         db.delete(staff_new_record)
         db.delete(prospect_user)
         db.commit()
         print(ex)
-        raise HTTPException(status_code=500, detail="Ocurrio un error, no se pudo guardar el profile del prospect")
-
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el profile prospect"})
+        
+    admin_users = get_admin_users_for_mailing(db)
     
-    return prospect_profile
+    for admin_user in admin_users:
+        admin_user_context = {
+        "user": admin_user
+    }   
+        send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
+    send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+    
+    return 1
 
 def delete_prospect(db, prospect_id: int):
     prospect = db.query(Staff).filter(Staff.id == prospect_id).first()
