@@ -4,13 +4,14 @@ from model.campers import Camper
 from helper.parent_helpers import append_campers_for_parent_admin
 from schema.campers.parent_schema import ParentCreate, ParentModify
 from crud.campers.camper_crud import get_campers_from_parent
-from sqlalchemy import case, or_
+from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from utils.db import db_mapping_rows_to_dict
-from helper.mailing_helpers import send_mail_parent
+from helper.mailing_helpers import send_mail_parent, send_mail_template
 from utils.toku_payment_tools import create_customer
+from crud.crud_user import get_admin_users_for_mailing
 
 import json
 
@@ -74,7 +75,9 @@ def create_new_parent(db, new_parent: ParentCreate):
 
 def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
-    email_welcome_template = 16
+    user_email_welcome_template = 16
+    admin_email_welcome_template = 18
+   
     try:
         new_parent.user_id = user_id
         user = db.query(User).filter(User.id == user_id).first()
@@ -82,15 +85,62 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         db.add(db_parent)
         db.commit()
         db.refresh(db_parent)
-        send_mail_parent(db, [user.email, db_parent.contact_email], email_welcome_template, user, db_parent)
+        
+            # send mail to parents
+        parent = get_parent_by_id_mailing(db, db_parent.id)
+        second_parent = get_second_tutor_by_parent_id(db, db_parent.id)
+        
+        parent_context = {
+            "user": parent
+        }
+        second_parent_context = {
+            "user": second_parent
+        }
+        
+        send_mail_template(db, parent['email'], user_email_welcome_template, parent_context)
+        send_mail_template(db, second_parent['email'], user_email_welcome_template, second_parent_context)
+
+        admin_users = get_admin_users_for_mailing(db)
+
+        for admin_user in admin_users:
+            admin_user_context = {
+                "user": admin_user
+            }  
+            send_mail_template(db, admin_user["email"], admin_email_welcome_template, admin_user_context)
+        
     except Exception as e:
-        db.delete(db_parent)
-        db.delete(user)
-        db.commit()
         print(e)
-        raise HTTPException(status_code=500, detail="Ocurrió un error al crear el padre")
-    
+        if db_parent:
+            db.delete(db_parent)
+            db.commit()
+        if user:
+            db.delete(user)
+            db.commit()            
+        return None 
+            
     return db_parent
+
+def get_parent_by_id_mailing(db: Session, parent_id: int):
+    query = db.query(Parent.tutor_name.label("name"),
+             Parent.tutor_lastname_father.label("lastname_father"),
+             Parent.tutor_lastname_mother.label("lastname_mother"),
+             Parent.id,
+             User.email         
+             ).join(User, User.id == Parent.user_id).filter(Parent.id == parent_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+
+
+def get_second_tutor_by_parent_id(db: Session, parent_id: int):
+    
+    query = db.query(Parent.contact_name.label("name"),
+                     Parent.id,
+                     Parent.contact_lastname_father.label("lastname_father"),
+                     Parent.contact_lastname_mother.label("lastname_mother"),
+                     Parent.contact_email.label("email")).join(User, User.id == Parent.user_id).filter(Parent.id == parent_id)
+    data = db.execute(query)
+    return data.mappings().first()
 
 
 def update_parent_by_id(db: Session, parent_id: int, modify_parent: ParentModify):
