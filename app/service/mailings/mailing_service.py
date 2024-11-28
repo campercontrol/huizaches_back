@@ -236,8 +236,8 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
     camps = campaign_send.camps
     campaign = campaign_send.campaign
     template_id = campaign_send.campaign.template_id
-    template_subject = campaign_send.campaign.template_title
-    template_body = campaign_send.campaign.template_body
+    template_subject = campaign_send.email_subject
+    template_body = campaign_send.template_body
     
     default_camper_variables = {
         "name": "",
@@ -278,7 +278,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "camp_id": camp_info["id"],
                     "camper_id": camper["id"]
                 }                
-                sendmail_status = send_mail_template_plain_text(db, camper["tutor_email"],template_id, template_body, template_subject, email_context)
+                sendmail_status = send_mail_template_plain_text(db, camper["tutor_email"], template_body, template_subject, email_context)
                 if sendmail_status: 
                     add_camper_to_campaign(db, camper_campaign)
                 

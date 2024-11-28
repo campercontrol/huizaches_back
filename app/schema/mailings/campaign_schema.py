@@ -151,10 +151,10 @@ class CampaignSend(BaseModel):
     camps: "list[dict]" = Field(
         title = "Datos del camp"
     )
-    template_title: str = Field(
-        title = "Asunto del correo"
+    template_body: str = Field(
+        title = "Cuerpo del correo"
     )
-    email_subject: Optional[str] = Field(
+    email_subject: str = Field(
         title= "Asunto del correo"
     )
 class CampaignSendStaff(BaseModel):

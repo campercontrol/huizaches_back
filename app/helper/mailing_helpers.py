@@ -148,20 +148,24 @@ def send_mail_template_medical_visit(
 def send_mail_template_plain_text(
     db,
     send_to: str,
-    template_id: int,
     template_content: str,
     subject: str,
     context: dict
 ):
 
-    template_content =  (
-        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
-    )
+    # template_content =  (
+    #     db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+    # )
     template_env = Environment(loader=BaseLoader).from_string(template_content)
     html_content = template_env.render(context)
+    
+    template_env_title = Environment(loader=BaseLoader).from_string(subject)
+    html_content_title = template_env_title.render(context)
+    
+    
     try:    
         send_simple_message(
-            "", send_to, subject, html_content
+            "", send_to, html_content_title, html_content
         )
         return True
     except Exception as ex:
