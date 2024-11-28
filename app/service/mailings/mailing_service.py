@@ -291,7 +291,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "camp": camp_info,
                     "payment": default_payment_variables
                 }
-                send_mail_template_plain_text(db, staff["staff_email"],template_id, template_body, template_subject, email_context)
+                send_mail_template_plain_text(db, staff["staff_email"], template_body, template_subject, email_context)
         if school:        
             email_context = {
                 "camper": default_camper_variables,
@@ -302,7 +302,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                 "payment": default_payment_variables,
                 "camp": camp_info
             }
-            send_mail_template_plain_text(db, school["email"],template_id, template_body, template_subject, email_context)
+            send_mail_template_plain_text(db, school["email"], template_body, template_subject, email_context)
         
     return {"status": 1, "msg": "emails sent successfully"}
 
