@@ -31,7 +31,36 @@ class UserCreate(BaseModel):
     is_active: Optional[bool] = Field(
         title="Is active"
     )
-
+class UserCreateAdmin(BaseModel):
+    email: EmailStr = Field(
+        title="Email",
+    )
+    passw: str = Field(
+        title="Password",
+        max_length=200,
+    )
+    role_id: int = Field(
+        title="Id role",
+    )
+    is_coordinator: Optional[bool] = Field(
+        title="Is Coordinator",
+        default=False
+    )
+    is_admin: Optional[bool] = Field(
+        title="Is Admin",
+        default=False
+    )
+    is_employee: Optional[bool] = Field(
+        title="Is Employee",
+        default=False
+    )
+    is_superuser: Optional[bool] = Field(
+        title="Is superuser",
+        default=False
+    )
+    is_active: Optional[bool] = Field(
+        title="Is active"
+    )
 
 class UserModify(BaseModel):
     email: Optional[EmailStr] = Field(

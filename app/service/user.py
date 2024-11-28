@@ -6,6 +6,7 @@ from utils.hash import hash_str
 from crud.crud_user import (
     get_all_user,
     create_new_user,
+    create_new_user_admin,
     get_user_by_uuid,
     get_users_all_info,
     get_user_by_email,
@@ -17,9 +18,13 @@ from crud.crud_user import (
     get_user_info_by_email,
     get_user_delete_info
 )
-from model.user import User
-from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail, UserSendMailResetPassword
+from crud.camps.season_crud import get_current_Season
+from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail, UserSendMailResetPassword, UserCreateAdmin
 from model.staffs import Staff, StaffRecord
+from model.user import User
+from model.medical.doctor import Doctor
+from model.campers.parent import Parent
+from model.campers.school import School
 # from utils.check_role import chek_permission
 from utils.db import SessionLocal
 from utils.email_tools import send_simple_message
@@ -66,22 +71,51 @@ def get_user_info_to_delete(user_id:str, db: Session = Depends(get_db)):
 
 
 @user_routes.post("/usuario", tags=["Usuarios"], status_code=200)
-def create_user(user: UserCreate, response: Response, db: Session = Depends(get_db)):
-    NAME = "create_user"
+def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends(get_db)):
 
+    parent_role = 1
+    staff_role = 2
+    school_role = 3
+    doctor_role = 5
+    
     check_email = get_user_by_email(db, user.email)
 
     if check_email:
-        # return {"mensaje": "Correo ya existente", "data": []}
-        return {"detail": {"status": 2, "msg": "Correo existente, no se puede crear el usuario"}}
+        return {"detail": {"status": 2, "msg": "Ya existe un usuario con ese correo"}}
 
-    new_user = create_new_user(db, user)
+    new_user = create_new_user_admin(db, user)
+    
+    if new_user == None: 
+        return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
+    
     new_user_role = new_user.role_id
+    
+    if new_user_role == doctor_role:
+        try:
+            new_doctor = Doctor(
+                name = "Default doctor name",
+                lastname_father =  "Default doctor name",
+                lastname_mother = "Default doctor",
+                cellphone = "5555555555",
+                login_id = new_user.id,
+            )
+            db.add(new_doctor)
+            db.commit()
+            db.refresh(new_doctor)
+        except Exception as ex:
+            print(ex)   
+            db.rollback()
+            db.delete(new_user)
+            db.commit()
+            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
 
-    if new_user_role == 1:
-        pass
-    if new_user_role == 2:
-        current_season = 76
+        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario doctor"}}
+        
+    if new_user_role == staff_role:
+        current_season = get_current_Season(db)
+        staff_new_record = None
+        default_prospect_profile = None
+        
         try:
             staff_new_record = StaffRecord(
                 attend = 0,
@@ -92,51 +126,105 @@ def create_user(user: UserCreate, response: Response, db: Session = Depends(get_
             db.commit()
             db.refresh(staff_new_record)
 
-            default_prospect_profile = {
-                "name": "Staff",
-                "lastname_father": "default",
-                "lastname_mother": "user",
-                "photo": "media/tmp/default_user.png",
-                "birthday": "2000-01-01",
-                "curp": "CURP",
-                "bio": "",
-                "facebook": "default staff",
-                "home_phone": "5555555555",
-                "cellphone": "5555555555",
-                "cv": "media/cv/default.pdf",
-                "gender_id": 4,
-                "record_id":staff_new_record.id,
-                "season_id": current_season,
-                "login_id": new_user.id,
-                "coordinator": True,
-                "employee_email_send": False,
-                "employee": True,
-                
-            }  
-            new_default_prospect_profile = Staff(**default_prospect_profile)
-            db.add(new_default_prospect_profile)
+            default_prospect_profile = Staff(
+                name = "Default staff name",
+                lastname_father = "default",
+                lastname_mother = "user",
+                photo = "media/tmp/default_user.png",
+                birthday = "2000-01-01",
+                curp = "CURP",
+                bio = "",
+                facebook = "default staff",
+                home_phone = "5555555555",
+                cellphone = "5555555555",
+                cv = "media/cv/default.pdf",
+                gender_id = 4,
+                record_id = staff_new_record.id,
+                season_id = current_season["id"],
+                login_id = new_user.id,
+                coordinator = True,
+                employee_email_send = False,
+                employee = True    
+            )       
+            db.add(default_prospect_profile)
             db.commit()
-            db.refresh(new_default_prospect_profile)
+            db.refresh(default_prospect_profile)
         except Exception as e:
             print(e)
-            db.delete(new_default_prospect_profile)
-            db.delete(staff_new_record)
+            db.rollback()
+            if default_prospect_profile:
+                db.delete(default_prospect_profile)
+                db.commit()
+            if staff_new_record:
+                db.delete(staff_new_record)
+                db.commit()
             db.delete(new_user)
             db.commit()
-            raise HTTPException(status_code=500, detail={"status":3, "msg": "Ocurrio un error en el servidor. No se guardo correctamente el usuario"})
+            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
+        
+        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario staff"}}
+    
+    if new_user_role == parent_role:
+        try:
+            new_parent = Parent(
+                tutor_name = "Default parent name",
+                tutor_lastname_father = "Default parent name",
+                toku_id= None,
+                user_id = new_user.id,
+                tutor_cellphone = "5555555555",
+                tutor_home_phone = "5555555555",
+                tutor_work_phone = "5555555555",
+                contact_name = "Default contact name",
+                contact_lastname_father = "Default contact name",
+                contact_lastname_mother = "Default contact name",
+                contact_cellphone = "5555555555",
+                contact_home_phone = "5555555555",
+                contact_work_phone = "5555555555",
+                contact_email = "defaultparent@email.com"
+            )
+            db.add(new_parent)
+            db.commit()
+            db.refresh(new_parent)
+        except Exception as e:
+            db.rollback()
+            db.delete(new_user)
+            db.commit()
+            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
+        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario padre"}}
+    
+    if new_user_role == school_role:
+        try:
+            new_school = School(
+                login_id = new_user.id,
+                name = "Default school name",
+                address = "Default school address",
+                url = "wwww.default-school.com",
+                contact = "Default school contact",
+                phone = "555555555",
+                cellphone = "555555555",
+                email = "defaultschool@email.com",
+                contact_second_name = "Default school contact",
+                contact_second_phone = "Default school contact",
+                contact_second_cellphone = "Default school contact",
+                contact_second_email = "defaultschool@email.com",
+                contact_third_name = "Default school contact",
+                contact_third_phone = "Default school contact",
+                contact_third_cellphone = "Default school contact",
+                contact_third_email = "Default school contact",
+                verify = True,
+                active = True
+            )
+            db.add(new_school)
+            db.commit()
+            db.refresh(new_school)
+        except Exception as e:
+            print(e)
+            db.rollback()
+            db.delete(new_user)
+            db.commit()
+            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
+        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario escuela"}}
 
-        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario"}}
-
-
-    # print("#=================")
-    # print(resultado)
-    # print("#=================")
-    # if resultado is not None:
-    #     response.status_code = 200
-    #     return {"mensaje": "Exitoso", "data": resultado}
-    # else:
-    #     response.status_code = 401
-    #     return {"mensaje": "No se pudo guardar en la BD", "data": resultado}
 
 
 @user_routes.get("/usuario/{user_id}", tags=["Usuarios"])

@@ -168,6 +168,37 @@ def create_new_user(db, new_user):
     return db_user
 
 
+def create_new_user_admin(db, new_user):
+    db_user = None
+    try:
+        db_user = User(
+            email=new_user.email,
+            hashed_pass=hash_str(new_user.passw),
+            role_id=new_user.role_id,
+            is_superuser=new_user.is_superuser,
+            is_coordinator = new_user.is_coordinator,
+            is_admin = new_user.is_admin,
+            is_employee = new_user.is_employee,
+            is_active = new_user.is_active
+                            
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    except SQLAlchemyError as e:
+        db.rollback()
+        print("#=================")
+        print(e)
+        print("#=================")
+        db_user = None
+        return db_user
+    except Exception as ex:
+        db.rollback()
+        db_user = None
+        print(f"No se pudo guardar en la base de datos: {ex}")
+    return db_user
+
+
 def create_new_prospect_user(db, new_user):
     db_user = None
     try:
@@ -292,6 +323,8 @@ def get_user_info_by_email(db: Session, email: str):
     
 
 def get_profile_id_by_user_id(db, user_id:int ):
+    
+    print("user_id" + str(user_id))
 
     profile_id = ['']
     parent_role = 1
@@ -335,7 +368,8 @@ def get_profile_id_by_user_id(db, user_id:int ):
             .filter(Doctor.login_id == user_id)
             .first()
         )
-    # print(profile_id[0])
+    print("profileeeeeeeee")
+    print(profile_id)
     return profile_id[0]
 
 def search_user_by_email(db: Session, search: str):
