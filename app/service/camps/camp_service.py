@@ -308,9 +308,6 @@ def get_search_camp(search: str, db: Session = Depends(get_db)):
 @camp_router.get("/camps/{camp_id}/groupings/campers", tags=["GroupingCamp"])
 def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depends(get_db)):
     campers_groupings = get_campers_in_camp_and_groupings(db,camp_id)
-
-    if len(campers_groupings) == 0:
-        raise HTTPException(status_code=404, detail="Camp not found")
     return {"data": campers_groupings}
 
 @camp_router.get("/camps/{camp_id}/general_report", tags=["Camps"])
