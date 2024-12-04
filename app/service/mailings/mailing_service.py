@@ -231,6 +231,7 @@ def get_campaign_info(campaign_id: int, db: Session = Depends(get_db)):
     if campaign_info["campaign"] == None:
          raise HTTPException(status_code=404)
     return campaign_info
+
 @mailing_routes.post("/mailing/send/email/", tags=["Mailings"])
 def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
     camps = campaign_send.camps
@@ -241,6 +242,8 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
     
     default_camper_variables = {
         "name": "",
+        "lastname_father" : "",
+        "lastname_mother" : "",
         "fullname": "",
         "grade": "",
         "school": ""
@@ -292,17 +295,30 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     "payment": default_payment_variables
                 }
                 send_mail_template_plain_text(db, staff["staff_email"], template_body, template_subject, email_context)
-        if school:        
+        if school:              
             email_context = {
                 "camper": default_camper_variables,
-                "user": {
-                    "name": school["name"],
-                    "email": school["email"],
-                },
                 "payment": default_payment_variables,
                 "camp": camp_info
             }
-            send_mail_template_plain_text(db, school["email"], template_body, template_subject, email_context)
+            if school['email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["email"]
+                }
+                send_mail_template_plain_text(db, school["email"], template_body, template_subject, email_context)
+            if school['contact_second_email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["contact_second_email"],
+                }
+                send_mail_template_plain_text(db, school["contact_second_email"], template_body, template_subject, email_context)
+            if school['contact_third_email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["contact_third_email"],
+                } 
+                send_mail_template_plain_text(db, school["contact_third_email"], template_body, template_subject, email_context)
         
     return {"status": 1, "msg": "emails sent successfully"}
 
