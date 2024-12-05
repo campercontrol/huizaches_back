@@ -59,6 +59,25 @@ def update_extra_answer_by_id(
     print(rows_updated)
     return rows_updated
 
+def update_extra_answers(db, extra_answer):
+    try:
+        number = 0
+        for extra_answer in extra_answer:
+            number = 2
+            if number == 2:
+                raise Exception("Ocurrio un error")
+            rows_updated = (
+                db.query(CamperExtraAnswer)
+                .filter_by(id=extra_answer.id)
+                .update(extra_answer.dict(), synchronize_session="fetch")
+        )
+        db.commit()
+        return 1
+    except Exception as ex:
+        print(ex)
+        db.rollback()
+        return 3
+
 
 def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
     query = db.query(

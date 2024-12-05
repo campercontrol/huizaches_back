@@ -27,13 +27,10 @@ class CamperExtraAnswerCreate(BaseModel):
     )
 class UpdateCamperExtraAnswer(BaseModel):
     id: int = Field(
-        title="extra_answer_id"
+        title="ID de la respuesta del camper de la pregunta extra"
     ) 
     answer:str = Field(
-        title="Respuesta"
-    )
-    updated_at:Optional[datetime] = Field(
-        default=datetime.now()
+        title="Respuesta del camper a la pregunta extra"
     )
 
 class CamperExtraAnswerModify(BaseModel):
