@@ -1,8 +1,5 @@
 from sqlalchemy import case, and_
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from utils.db import db_mapping_rows_to_dict
-from datetime import date
 
 from model.payments import Payment, PaymentTransactionType, PaymentMethod
 from model.campers import Camper
@@ -17,8 +14,8 @@ from crud.payments.payment_transaction_type_crud import get_all_payment_transact
 from schema.payments.payment_schema import (
     PaymentCreate,
     PaymentModify,
-    MassivePaymentCreate
 )
+
 
 
 def get_all_payment(db):
@@ -86,6 +83,46 @@ def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
         print(f"An error ocurred while saving payment: {ex}")    
     return db_payment
 
+def create_new_payment_and_update_balance_transaction(db, new_payment: PaymentCreate):
+    camper_id = new_payment["camper_id"]
+    camp_id = new_payment["camp_id"]
+    camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)).first()
+        
+    if new_payment["payment_amount"] < 0:
+        new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+    
+    if new_payment["txn_type_id"] in (1,2,9):
+        new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+    db_payment = Payment(**new_payment)
+    print("new_payment_charged")
+    db.add(db_payment)
+    db.flush()
+    if db_payment.txn_type_id in (1,2,9):
+        total_balance = abs(camper_in_camp.payment_balance) - abs(float(db_payment.payment_amount))
+        camper_in_camp.payment_balance = total_balance
+        db.add(camper_in_camp) 
+    else:
+        total_balance = abs(camper_in_camp.payment_balance) + abs(float(db_payment.payment_amount))
+        camper_in_camp.payment_balance = total_balance
+        db.add(camper_in_camp) 
+    db.flush()
+    return db_payment
+    
+
+def delete_payment_and_update_balance_transaction(db: Session, payment_id: int, camper_id):
+    payment = get_payment_by_id(db, payment_id)
+    camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == payment.camp_id, CamperInCamp.camper_id == camper_id)).first()
+    if payment.txn_type_id in (1,2,9):
+        total_balance = abs(camper_in_camp.payment_balance) + abs(float(payment.payment_amount))
+        camper_in_camp.payment_balance = total_balance
+        db.add(camper_in_camp)
+        db.delete(payment)
+    else:
+        total_balance = abs(camper_in_camp.payment_balance) - abs(float(payment.payment_amount))
+        camper_in_camp.payment_balance = total_balance
+        db.add(camper_in_camp) 
+        db.delete(payment)        
+        
 def delete_payment_and_update_balance(db: Session, payment_id: int, camper_id):
     payment = get_payment_by_id(db, payment_id)
     camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == payment.camp_id, CamperInCamp.camper_id == camper_id)).first()

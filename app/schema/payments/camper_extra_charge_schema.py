@@ -1,9 +1,7 @@
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional
-from uuid import UUID
-from xmlrpc.client import boolean
 
-from pydantic import BaseModel, Field, AnyUrl, condecimal
+from pydantic import BaseModel, Field
 
 class CamperExtraChargeCreate(BaseModel):
    
@@ -44,6 +42,14 @@ class CamperExtraChargeModify(BaseModel):
     )
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
+    )
+
+class UpdateCamperExtraCharge(BaseModel):
+    id: int = Field(
+        title="ID del cargo extra del camper",
+    )
+    is_selected:bool = Field(
+        title= "Nombre del metodo de pago"
     )
 
 class ExtraChargeListCreate(BaseModel):

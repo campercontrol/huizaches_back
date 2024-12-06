@@ -9,13 +9,15 @@ from crud.payments.camper_extra_charge_crud import (
     update_camper_extra_charge_by_id,
     create_new_camper_extra_charge,
     get_extra_charge_by_camper_camp,
-    create_update_extra_charges
+    create_update_extra_charges,
+    update_camper_extra_charge_by_id_and_update_balance
     
 )
 from schema.payments.camper_extra_charge_schema import(
     CamperExtraChargeCreate,
     CamperExtraChargeModify,
-    CamperExtraChargeListCreate
+    CamperExtraChargeListCreate,
+    UpdateCamperExtraCharge
 )
 from utils.db import SessionLocal
 
@@ -57,6 +59,17 @@ def update_camper_extra_charge(payment_id:str,modify_camper_extra_charge:CamperE
         return {"mensaje": "Actualizado Correctamente", "data": exist_camper_extra_charge}
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
+
+@camper_extra_charge_routes.patch("/camper_extra_charges", tags=["Payments"])
+def patch_camper_extra_charges( camper_extra_charges: list[UpdateCamperExtraCharge], db: Session = Depends(get_db)):
+    result = update_camper_extra_charge_by_id_and_update_balance(db, camper_extra_charges)
+    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Se Actualizaron correctamente los cargos extras"}}
+    if result == 3:
+        return {"detail": {"status": 3, "msg": "Ocurrió un error al actualizar los cargos extras"}}  
+    
+
 
 @camper_extra_charge_routes.get("/camper_extra_charge_by_camp/{camper_id}/{camp_id}", tags=["Payments"])
 def get_camper_extra_charge_camp(camper_id:int, camp_id:int, db: Session = Depends(get_db)):

@@ -3,15 +3,13 @@ from sqlalchemy import and_
 from model.campers import CamperExtraAnswer
 from model.camps import CampExtraQuestion, Camp
 
-from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
+
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     CamperExtraAnswerModify,
     UpdateCamperExtraAnswer,
     CamperExtraAnswerListCreate,
 )
-from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case
 
 
 def get_all_extra_answer(db):
@@ -61,11 +59,7 @@ def update_extra_answer_by_id(
 
 def update_extra_answers(db, extra_answer):
     try:
-        number = 0
         for extra_answer in extra_answer:
-            number = 2
-            if number == 2:
-                raise Exception("Ocurrio un error")
             rows_updated = (
                 db.query(CamperExtraAnswer)
                 .filter_by(id=extra_answer.id)
