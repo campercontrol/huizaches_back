@@ -89,9 +89,9 @@ def camper_extra_answers(
 ):
     result = update_extra_answers(db, extra_answers)
     if result == 1:
-        return {"detail": {"status": 1, "msg": "Se agregaron los cargos extra correctamente"}}
+        return {"detail": {"status": 1, "msg": "Se Actualizaron correctamente las preguntas extra"}}
     if result == 3:
-        return {"detail": {"status": 3, "msg": "Ocurrió un error al guardar los cargos extra"}}
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error inesperado al actualizar las preguntas extra"}) 
 
 # @extra_answer_routes.get("/camper_extra_answers_by_camp/{camper_id}/{camp_id}")
 # def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):

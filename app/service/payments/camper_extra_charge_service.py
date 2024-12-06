@@ -1,5 +1,5 @@
 from xmlrpc.client import boolean
-
+from fastapi import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -67,7 +67,7 @@ def patch_camper_extra_charges( camper_extra_charges: list[UpdateCamperExtraChar
     if result == 1:
         return {"detail": {"status": 1, "msg": "Se Actualizaron correctamente los cargos extras"}}
     if result == 3:
-        return {"detail": {"status": 3, "msg": "Ocurrió un error al actualizar los cargos extras"}}  
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error inesperado al actualizar los cargos extras"}) 
     
 
 
