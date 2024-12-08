@@ -38,7 +38,7 @@ class Staff(Base):
     employee = Column(Boolean, nullable=False)
     coordinator = Column(Boolean, nullable=False)
     cv = Column(String(512))
-    facebook = Column(String(50), nullable=False)
+    facebook = Column(String(50))
     staff_contact_name = Column(String(512))
     staff_contact_relation = Column(String(512))
     staff_contact_homephone = Column(String(512))
