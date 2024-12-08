@@ -105,6 +105,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Camp.show_payment_parent,
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
+            Camp.show_payment_parent,
             CamperInCamp.payment_balance.label("camper_payment_balance"),
             Currency.symbol.label("currency_symbol"),
             Currency.acronyms.label("currency_acronyms"),
@@ -135,6 +136,7 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
             Location.name.label("location_name"),
+            Camp.show_payment_parent,
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
         )
