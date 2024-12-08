@@ -135,7 +135,7 @@ async def login_for_access_token(
 
     role = get_role_by_uuid(db, user.role_id)
 
-    menu = get_permissions_menu(db, user, form_data.lang)
+    # menu = get_permissions_menu(db, user, form_data.lang)
 
     profile_id = get_profile_id_by_user_id(db, user.id)
 
@@ -151,7 +151,6 @@ async def login_for_access_token(
             "role_name": role.name,
             "role_id": role.id,
             "profile_id": profile_id,
-            "menu": menu,
             "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
             "refresh_token_expires": str(refresh_token_expires),
