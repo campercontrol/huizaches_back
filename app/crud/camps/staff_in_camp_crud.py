@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import cast, Date
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
 from model.camps import StaffInCamp, Camp, Location
 from model.staffs import Staff, StaffRecord
 from model.catalogs import Constant, StaffRole
@@ -13,7 +12,11 @@ from schema.camps.staff_in_camp_schema import (
     StaffInCampCreate,
     StaffInCampModify,
 )
-from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status
+# from crud.staffs.staff_crud import get_staff_info_mailing
+# from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status
+# from crud.camps.camp_crud import get_camp_info_by_id_mailing
+# from crud.crud_user import get_admin_users_for_mailing
+# from crud.mailings.mailing_crud import send_mail_template
 
 
 def get_all_staff_in_camp(db: Session):
@@ -40,18 +43,40 @@ def create_new_staff_in_camp(db: Session, new_staff_in_camp: StaffInCampCreate):
 
 
 def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
-    db_staff_in_camp = None
-    try:
-        db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
-        db_staff_in_camp.confirmed_staff = False
-        db.add(db_staff_in_camp)
-        db.commit()
-        update_staff_record_status(db, new_staff_in_camp.staff_id)
-        db.refresh(db_staff_in_camp)
-    except Exception as ex:
-        db.rollback()
-        print(f"An error ocurred while saving: {ex}")
-    return db_staff_in_camp
+    pass
+#     db_staff_in_camp = None
+#     user_staff_subcribe_to_camp_template = 5
+#     admin_staff_subcribe_to_camp_template = 2
+#     try:
+#         db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+#         db_staff_in_camp.confirmed_staff = False
+#         db.add(db_staff_in_camp)
+#         db.commit()
+#         update_staff_record_status(db, new_staff_in_camp.staff_id)
+#         db.refresh(db_staff_in_camp)
+    
+        # staff_data = get_staff_info_mailing(db, new_staff_in_camp.staff_id)
+        # camp_data = get_camp_info_by_id_mailing(db, new_staff_in_camp.camp_id )
+        # # admin_users = get_admin_users_for_mailing(db)
+                
+        # staff_context = {
+        #     "user": staff_data,
+        #     "camp": camp_data     
+        # }
+        # send_mail_template(db, staff_data["email"], user_staff_subcribe_to_camp_template,staff_context)
+            
+        # for admin_user in admin_users:
+        #     admin_user_context = {
+        #     "user": admin_user,
+        #     "camp": camp_data
+        # }   
+        #     send_mail_template(db, admin_user['email'], admin_staff_subcribe_to_camp_template, admin_user_context)
+        
+        
+    # except Exception as ex:
+    #     db.rollback()
+    #     print(f"An error ocurred while saving: {ex}")
+    # return db_staff_in_camp
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
     db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
@@ -71,6 +96,7 @@ def get_staff_volunteer_in_camp(db: Session, camp_id: int):
             Staff.cellphone.label("staff_cellphone"),
             User.email.label("staff_email"),
             StaffInCamp.updated_at.label("staff_volunteer_date"),
+            StaffInCamp.id.label("staff_in_camp_id"),
             StaffRecord.attend.label("staff_attend"),
             StaffRecord.attended.label("staff_attended"),
             StaffRecord.total.label("staff_total"),
@@ -95,6 +121,7 @@ def get_staff_in_camp(db: Session, camp_id: int):
             Staff.birthday.label("staff_birthday"),
             Staff.cellphone.label("staff_cellphone"),
             User.email.label("staff_email"),
+            StaffInCamp.id.label("staff_in_camp_id"),
             StaffRecord.attend.label("staff_attend"),
             StaffRecord.attended.label("staff_attended"),
             StaffRecord.total.label("staff_total"),
