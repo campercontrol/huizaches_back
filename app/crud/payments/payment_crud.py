@@ -32,6 +32,15 @@ def get_payment_by_id(db, payment_id: int):
         .first()
     )
 
+def create_payment_controller(db: Session, new_payment):
+    try:
+        create_new_payment_and_update_balance_transaction(db, new_payment.dict())
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 def create_new_payment(db, new_payment: PaymentCreate):
     db_payment = None
     try:
@@ -154,6 +163,34 @@ def update_payment_by_id(db, payment_id: int, modify_payment: PaymentModify):
     db.commit()
     return rows_updated
 
+        
+def update_payment_controller(db, payment_id: int, modify_payment: PaymentModify):
+    
+    try:
+        current_payment = db.query(Payment).filter(Payment.id == payment_id).first()
+        camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == current_payment.camp_id, CamperInCamp.camper_id == current_payment.camper_id)).first()
+
+        if current_payment.txn_type_id in (1,2,9,11):
+            camper_in_camp.payment_balance += abs(current_payment.payment_amount)
+        else:
+            camper_in_camp.payment_balance -= abs(current_payment.payment_amount)
+        
+        if modify_payment.txn_type_id in (1,2,9):
+            total_balance = abs(camper_in_camp.payment_balance) - abs(float(modify_payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp) 
+        else:
+            total_balance = abs(camper_in_camp.payment_balance) + abs(float(modify_payment.payment_amount))
+            camper_in_camp.payment_balance = total_balance
+            db.add(camper_in_camp)
+        
+        db.query(Payment).filter_by(id=current_payment.id).update(modify_payment.dict(), synchronize_session="fetch")
+        db.commit()
+        return 1
+    except Exception as ex:
+        print(ex)
+        db.rollback()
+        return 3
 
 def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
     rows = (
@@ -294,7 +331,7 @@ def apply_massive_payment(db: Session, camp_id: int, massivePayment):
             if new_payment["payment_amount"] < 0:
                 new_payment["payment_amount"] = new_payment["payment_amount"] * -1
             
-            if new_payment["txn_type_id"] in (1,2,9):
+            if new_payment["txn_type_id"] in (1,2,9,11):
                 new_payment["payment_amount"] = new_payment["payment_amount"] * -1
             
             db_payment = Payment(**new_payment)

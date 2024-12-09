@@ -50,11 +50,6 @@ class PaymentCreate(BaseModel):
 
 class PaymentModify(BaseModel):
     
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    ) 
     paid: bool = Field(
         title="Pagado"
     )
