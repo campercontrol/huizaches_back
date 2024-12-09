@@ -30,6 +30,7 @@ def get_all_user(db, is_active):
             User.role_id.label('role_id'),
             Role.name.label('role_name'),
             User.is_admin,
+            User.is_coordinator,
             User.is_employee,
             User.is_superuser.label('is_superuser'),
             User.is_active.label('is_active'),
