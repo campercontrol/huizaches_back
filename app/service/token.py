@@ -169,7 +169,6 @@ async def login_for_access_token(
             "role_name": role.name,
             "role_id": role.id,
             "profile_id": profile_id,
-            "menu": menu,
             "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
             "refresh_token_expires": str(refresh_token_expires),
