@@ -82,16 +82,12 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
 
     if check_email:
         return {"detail": {"status": 2, "msg": "Ya existe un usuario con ese correo"}}
-
-    new_user = create_new_user_admin(db, user)
     
-    if new_user == None: 
-        return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
-    
-    new_user_role = new_user.role_id
-    
-    if new_user_role == doctor_role:
-        try:
+    try:
+        new_user = create_new_user_admin(db, user)
+        new_user_role = new_user.role_id
+        
+        if new_user_role == doctor_role:
             new_doctor = Doctor(
                 name = "Default doctor name",
                 lastname_father =  "Default doctor name",
@@ -100,31 +96,19 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 login_id = new_user.id,
             )
             db.add(new_doctor)
-            db.commit()
-            db.refresh(new_doctor)
-        except Exception as ex:
-            print(ex)   
-            db.rollback()
-            db.delete(new_user)
-            db.commit()
-            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
-
-        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario doctor"}}
-        
-    if new_user_role == staff_role:
-        current_season = get_current_Season(db)
-        staff_new_record = None
-        default_prospect_profile = None
-        
-        try:
+            
+        if new_user_role == staff_role:
+            current_season = get_current_Season(db)
+            staff_new_record = None
+            default_prospect_profile = None
+            
             staff_new_record = StaffRecord(
                 attend = 0,
                 attended = 0,
                 total = 0
             )
             db.add(staff_new_record)
-            db.commit()
-            db.refresh(staff_new_record)
+            db.flush()
 
             default_prospect_profile = Staff(
                 name = "Default staff name",
@@ -142,30 +126,14 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 record_id = staff_new_record.id,
                 season_id = current_season["id"],
                 login_id = new_user.id,
-                coordinator = True,
+                coordinator = new_user.is_coordinator,
                 employee_email_send = False,
-                employee = True    
+                employee = new_user.is_employee    
             )       
             db.add(default_prospect_profile)
-            db.commit()
-            db.refresh(default_prospect_profile)
-        except Exception as e:
-            print(e)
-            db.rollback()
-            if default_prospect_profile:
-                db.delete(default_prospect_profile)
-                db.commit()
-            if staff_new_record:
-                db.delete(staff_new_record)
-                db.commit()
-            db.delete(new_user)
-            db.commit()
-            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
+            db.flush()
         
-        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario staff"}}
-    
-    if new_user_role == parent_role:
-        try:
+        if new_user_role == parent_role:
             new_parent = Parent(
                 tutor_name = "Default parent name",
                 tutor_lastname_father = "Default parent name",
@@ -183,17 +151,8 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 contact_email = "defaultparent@email.com"
             )
             db.add(new_parent)
-            db.commit()
-            db.refresh(new_parent)
-        except Exception as e:
-            db.rollback()
-            db.delete(new_user)
-            db.commit()
-            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
-        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario padre"}}
-    
-    if new_user_role == school_role:
-        try:
+        
+        if new_user_role == school_role:
             new_school = School(
                 login_id = new_user.id,
                 name = "Default school name",
@@ -215,16 +174,12 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 active = True
             )
             db.add(new_school)
-            db.commit()
-            db.refresh(new_school)
-        except Exception as e:
-            print(e)
-            db.rollback()
-            db.delete(new_user)
-            db.commit()
-            return {"detail": {"status": 3, "msg": "Ocurrio un error al crear el usuario"}}
-        return {"detail": {"status": 1, "msg": "Se ha creado correctamente el usuario escuela"}}
-
+        db.commit()
+        return {"detail": {"status": 1, "msg": "El usuario se creo correctamente"}}
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return {"detail": {"status": 3, "msg": "Ocurrió un error al crear el usuario"}}
 
 
 @user_routes.get("/usuario/{user_id}", tags=["Usuarios"])

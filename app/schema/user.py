@@ -59,7 +59,8 @@ class UserCreateAdmin(BaseModel):
         default=False
     )
     is_active: Optional[bool] = Field(
-        title="Is active"
+        title="Is active",
+        default= False
     )
 
 class UserModify(BaseModel):
