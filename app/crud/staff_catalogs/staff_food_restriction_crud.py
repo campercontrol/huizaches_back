@@ -14,6 +14,10 @@ def get_all_staff_food_restriction(db: Session):
     rows = db.query(StaffFoodRestriction).all()
     return rows
 
+def get_all_staff_food_restriction_by_id(db: Session, staff_id: int):
+    rows = db.query(StaffFoodRestriction).filter(StaffFoodRestriction.staff_id == staff_id).all()
+    return rows
+
 
 def get_all_staff_food_restriction_id_name(db: Session):
     rows = db.query(StaffFoodRestriction.id, StaffFoodRestriction.name).all()

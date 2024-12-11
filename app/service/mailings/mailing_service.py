@@ -17,9 +17,8 @@ from crud.camps.staff_in_camp_crud import get_staff_in_camp
 from crud.training.staff_in_training_crud import get_all_staff_in_training_event
 from crud.staffs.staff_crud import get_all_prospect_by_season
 from crud.campers.parent_crud import get_parent_by_camper_id
-from crud.campers.camper_crud import get_camper_info_mailing
-from crud.camps.camp_crud import get_school_info_by_camp, get_camp_info_by_id_mailing
-from crud.staffs.staff_crud import get_staff_info_mailing
+from crud.mailings.mailing_crud import get_camper_info_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing
+from crud.camps.camp_crud import get_school_info_by_camp
 from crud.mailings.campaign_crud import get_campaign_all_info_by_id
 from crud.training.training_crud import get_training_by_id
 from model.mailings import (
@@ -321,6 +320,99 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                 send_mail_template_plain_text(db, school["contact_third_email"], template_body, template_subject, email_context)
         
     return {"status": 1, "msg": "emails sent successfully"}
+
+
+@mailing_routes.post("/mailing/send/email/multiple", tags=["Mailings"])
+def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db)):
+    camps = campaign_send.camps
+    campaign = campaign_send.campaign
+    template_id = campaign_send.campaign.template_id
+    template_subject = campaign_send.email_subject
+    template_body = campaign_send.template_body
+    
+    default_camper_variables = {
+        "name": "",
+        "lastname_father" : "",
+        "lastname_mother" : "",
+        "fullname": "",
+        "grade": "",
+        "school": ""
+    }
+    default_payment_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "txn_type": "",
+        "txn_number": "",
+    }
+    new_campaign = create_new_campaign(db, campaign)
+
+    if new_campaign == None:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while creating the campaing"})
+    
+    for camp in camps:
+        # print(camp["camp"]["id"])
+        camp_info = get_camp_info_by_id_mailing(db, camp["camp"]["id"])
+        campers = camp["camp"]["campers"]
+        staffs = camp["camp"]["staff"]
+        school = camp["camp"]["school"]
+        if len(campers) > 0:
+            for camper in campers:
+                parent_info = get_parent_by_camper_id(db, camper["id"])
+                camper_info = get_camper_info_mailing(db, camper["id"])
+                email_context = {
+                    "camper": camper_info,
+                    "user": parent_info,
+                    "camp": camp_info,
+                    "payment": default_payment_variables
+                                
+                }
+                camper_campaign = {
+                    "campaign_id": new_campaign.id,
+                    "camp_id": camp_info["id"],
+                    "camper_id": camper["id"]
+                }                
+                sendmail_status = send_mail_template_plain_text(db, camper["tutor_email"], template_body, template_subject, email_context)
+                if sendmail_status: 
+                    add_camper_to_campaign(db, camper_campaign)
+                
+        if len(staffs) > 0: 
+            for staff in staffs:
+                staff_info = get_staff_info_mailing(db, staff["staff_id"])
+                email_context = {
+                    "camper": default_camper_variables,
+                    "user": staff_info,
+                    "camp": camp_info,
+                    "payment": default_payment_variables
+                }
+                send_mail_template_plain_text(db, staff["staff_email"], template_body, template_subject, email_context)
+        if school:              
+            email_context = {
+                "camper": default_camper_variables,
+                "payment": default_payment_variables,
+                "camp": camp_info
+            }
+            if school['email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["email"]
+                }
+                send_mail_template_plain_text(db, school["email"], template_body, template_subject, email_context)
+            if school['contact_second_email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["contact_second_email"],
+                }
+                send_mail_template_plain_text(db, school["contact_second_email"], template_body, template_subject, email_context)
+            if school['contact_third_email'] != '':
+                email_context["user"] = {
+                    "name": school["name"],
+                    "email": school["contact_third_email"],
+                } 
+                send_mail_template_plain_text(db, school["contact_third_email"], template_body, template_subject, email_context)
+        
+    return {"status": 1, "msg": "emails sent successfully"}
+
+
 
 
 @mailing_routes.post("/mailing/send/email/staff_in_training", tags=["Mailings"])

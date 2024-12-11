@@ -29,6 +29,10 @@ def get_staff_vaccine_by_uuid(db: Session, staff_vaccine_id: int):
         .first()
     )
 
+def get_staff_all_vaccines_by_staff_id(db: Session, staff_id: int):    
+    rows = db.query(StaffVaccine).filter(StaffVaccine.staff_id == staff_id).all()
+    return rows
+
 
 def get_staff_vaccine_by_vaccine(db: Session, vaccine_id: int):
     return (

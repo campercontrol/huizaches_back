@@ -4,7 +4,7 @@ from model.mailings import EmailTemplate
 
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
-from utils.functions_jwt import create_user_verify_url
+# from utils.functions_jwt import create_user_verify_url
 # def send_mail_template(
 #     db,
 #     send_to: list[str],
@@ -58,7 +58,8 @@ def send_mail_parent(
         "", send_to, template_content.title, html_content
     )
     return 1
-
+def create_user_verify_url(data):
+    pass
 def send_mail_prospect(
     db,
     send_to: list[str],

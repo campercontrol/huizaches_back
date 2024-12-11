@@ -118,3 +118,19 @@ def update_staff_record_status(db: Session, staff_id):
         print(f"an error ocurred while saving {ex}")
         return False
     return True
+
+def update_staff_record_status_transaction(db: Session, staff_id):
+    staff = (db.query(Staff.id, StaffRecord.id.label("record_id")).select_from(Staff).join(StaffRecord, StaffRecord.id == Staff.record_id).filter(Staff.id == staff_id).first())
+     
+    past_camps = get_staff_past_camps(db, staff.id)
+    past_camps = get_staff_past_camps(db, staff.id)
+    new_staff_record = get_staff_record_by_id(db, staff.record_id)
+    upcoming_camps = get_staff_upcoming_camps(db, staff.id)
+    total = upcoming_camps + past_camps
+    new_staff_record.attend = upcoming_camps
+    new_staff_record.attended = past_camps
+    new_staff_record.total = total
+    db.add(new_staff_record)
+    db.flush()
+    return new_staff_record
+

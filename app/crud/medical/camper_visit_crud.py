@@ -8,11 +8,8 @@ from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs.constant import Constant
 from model.campers.camper import Camper
 from schema.medical.camper_visit_schema import CamperVisitCreate
-from crud.campers.camper_crud import get_camper_info_mailing
-from crud.camps.camp_crud import get_camp_info_by_id_mailing
+from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by_id_mailing, get_admin_users_for_mailing
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
-from crud.crud_user import get_admin_users_for_mailing
-from crud.mailings.mailing_crud import send_system_mail
 
 
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):

@@ -6,13 +6,19 @@ from datetime import date
 from fastapi import HTTPException
 from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
+from model.staffs.staff_food_restriction import StaffFoodRestriction
+from model.staffs.staff_vaccine import StaffVaccine
+from schema.staff_catalogs.staff_food_restriction_schema import StaffFoodRestrictionCreate
+from schema.staff_catalogs.staff_vaccine_schema import StaffVaccineCreate
 from model import User
 from utils.hash import hash_str
-from helper.mailing_helpers import send_mail_prospect, send_mail_template
+from helper.mailing_helpers import send_mail_template, send_mail_prospect
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
 from crud.camps.season_crud import get_current_Season
-from crud.crud_user import get_admin_users_for_mailing
+from crud.mailings.mailing_crud import get_admin_users_for_mailing
+from crud.catalogs.vaccine_crud import get_all_vaccine
+from crud.catalogs.food_restriction_crud import get_all_food_restriction
 
 
 def get_all_prospect(db):
@@ -83,16 +89,19 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     return db_prospect
 
 def create_complete_prospect(db, new_prospect):
-    season = get_current_Season(db)
-    welcome_prospect_template = 1 
-    admin_new_prospect_template = 1988
-    
-    user = db.query(User).filter_by(email=new_prospect.user.email).first()
-    
-    if user:
-        return 2
     
     try:
+        season = get_current_Season(db)
+        welcome_prospect_template = 1 
+        admin_new_prospect_template = 1988
+        vaccines = get_all_vaccine(db)
+        all_food_restriction = get_all_food_restriction(db)
+        
+        user = db.query(User).filter_by(email=new_prospect.user.email).first()
+        
+        if user:
+            return 2
+    
         prospect_user = User(
             email= new_prospect.user.email,
             hashed_pass=hash_str(new_prospect.user.passw),
@@ -105,29 +114,16 @@ def create_complete_prospect(db, new_prospect):
                  
         )
         db.add(prospect_user)
-        db.commit()
-        db.refresh(prospect_user)
+        db.flush()
 
-    except Exception as ex:
-        db.rollback()
-        print(ex)
-        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el prospect"})
-
-    try:
         staff_new_record = StaffRecord(
             attend = 0,
             attended = 0,
             total = 0
         )
         db.add(staff_new_record)
-        db.commit()
-        db.refresh(staff_new_record)
-    except Exception as ex:
-        db.rollback()
-        print(ex)
-        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el record del prospect"})
+        db.flush()
 
-    try:
         new_prospect.prospect.login_id = prospect_user.id
         prospect_profile = Staff(**new_prospect.prospect.dict())
         prospect_profile.employee = False
@@ -136,27 +132,41 @@ def create_complete_prospect(db, new_prospect):
         prospect_profile.record_id = staff_new_record.id    
 
         db.add(prospect_profile)
-        db.commit()
-        db.refresh(prospect_profile)
-                
-    except Exception as ex:
-        db.delete(prospect_profile)
-        db.delete(staff_new_record)
-        db.delete(prospect_user)
-        db.commit()
-        print(ex)
-        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error, no se pudo guardar el profile prospect"})
+        db.flush()
         
-    admin_users = get_admin_users_for_mailing(db)
+        for vaccine in vaccines:
+            staff_vaccine = StaffVaccine(
+                staff_id = prospect_profile.id,
+                vaccine_id = vaccine.id,
+                is_active= False
+            )
+            db.add(staff_vaccine)
+        
+        for food_restriction in all_food_restriction:
+            staff_food_restriction = StaffFoodRestriction(
+                staff_id = prospect_profile.id,
+                food_restriction_id = food_restriction.id,
+                is_active= False
+                 
+            )            
+            db.add(staff_food_restriction)
+
+        db.commit()
+        
+        admin_users = get_admin_users_for_mailing(db)
     
-    for admin_user in admin_users:
-        admin_user_context = {
-        "user": admin_user
-    }   
+        for admin_user in admin_users:
+            admin_user_context = {
+            "user": admin_user
+        }   
         send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
-    send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
-    
-    return 1
+        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+               
+        return 1
+    except Exception as ex:
+        db.rollback()      
+        print(ex)
+        return 3
 
 def delete_prospect(db, prospect_id: int):
     prospect = db.query(Staff).filter(Staff.id == prospect_id).first()
@@ -327,10 +337,3 @@ def get_staff_band(db, staff_id: int):
     )
     return db_mapping_rows_to_dict(staff_band)
 
-def get_staff_info_mailing(db: Session, staff_id: int):
-    query = db.query(Staff.name,
-                     Staff.lastname_father,
-                     Staff.lastname_mother,
-                     User.email).join(User, User.id == Staff.login_id).filter(Staff.id == staff_id)
-    data = db.execute(query)
-    return data.mappings().first()

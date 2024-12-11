@@ -33,10 +33,10 @@ from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charg
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
 from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id, get_extra_charge_by_camp
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
-from crud.campers.camper_crud import get_camper_by_uuid, get_camper_info_mailing
+from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
 from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
-from crud.crud_user import get_admin_users_for_mailing
+from crud.mailings.mailing_crud import get_admin_users_for_mailing, get_camper_info_mailing, get_camp_info_by_id_mailing
 from helper.camper_helpers import update_record_campers
 from helper.mailing_helpers import send_mail_template
 
@@ -396,30 +396,7 @@ def get_campers_for_bracelets(db, camp_id):
     )
     return db_mapping_rows_to_dict(list_campers)
 
-def get_camp_info_by_id_mailing(db: Session, camp_id: int):
-    query = db.query(Camp.id,
-                     Camp.name,
-                     Camp.start,
-                     Camp.end,
-                     Camp.start_registration,
-                     Camp.end_registration,
-                     Camp.registration,
-                     Camp.url,
-                     Camp.special_message,
-                     Camp.special_message,
-                     Camp.special_message_admin,
-                     Camp.public_price,
-                     Camp.insurance,
-                     Camp.venue,
-                     Camp.photo_url,
-                     Camp.photo_password,
-                     Camp.medical_report,
-                     Camp.occupancy_camp,
-                     School.name.label("school"),
-                     Location.name.label("location")
-                     ).join(School, School.id == Camp.school_id).join(Location, Location.id == Camp.location_id).filter(Camp.id == camp_id)
-    data = db.execute(query)
-    return data.mappings().first()
+
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     
     extra_charges = []

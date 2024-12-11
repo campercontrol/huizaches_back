@@ -70,6 +70,23 @@ def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
     list_parent = create_new_parent(db, new_parent)
     return {"data": list_parent}
 
+# @parent_routes.post("/parent_create/", tags=["Campers"])
+# def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
+#     user = get_user_by_email(db, new_parent_complete.user.email)
+#     if user:
+#         return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese correo"}}    
+#     user = create_new_user(db, new_parent_complete.user)
+    
+#     if user == None:
+#         return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
+#     parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
+    
+#     if parent == None:
+#         return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
+    
+#     return {"detail": {"status": 1, "msg": "Se creó correctamente la cuenta"}}
+
+
 @parent_routes.post("/parent_create/", tags=["Campers"])
 def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
     user = get_user_by_email(db, new_parent_complete.user.email)

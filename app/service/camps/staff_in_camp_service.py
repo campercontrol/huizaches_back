@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.camps.staff_in_camp_crud import (
@@ -41,8 +41,14 @@ def create_staff_in_camp(new_staff_in_camp:StaffInCampCreate,db: Session = Depen
 
 @staff_in_camp_routes.post("/staff_volunteer/", tags=["StaffInCamp"])
 def create_staff_volunteer(new_staff_in_camp:StaffInCampCreate, db: Session = Depends(get_db)):
-    staff_in_camp = volunteer_staff(db, new_staff_in_camp)
-    return {"data": staff_in_camp}
+    result = volunteer_staff(db, new_staff_in_camp)
+    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Se suscribió correctamente al prospecto."}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Se suscribió correctamente al prospecto."})
+    
+    
 
 @staff_in_camp_routes.delete("/staff_unsubscribe/{id_staff_in_camp}", tags=["StaffInCamp"])
 def unsubscribe_staff_to_camp(id_staff_in_camp:int , db: Session = Depends(get_db)):

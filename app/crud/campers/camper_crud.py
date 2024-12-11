@@ -404,20 +404,7 @@ def search_camper_by_name_user(db: Session, search: str):
         return db_mapping_rows_to_dict(campers)
     else:
         return "Data not found"
-def get_camper_info_mailing(db: Session, camper_id: int):
-    catalog_grade = aliased(Constant)
-    query = db.query(
-        Camper.name,
-        func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label('fullname'),
-        catalog_grade.value.label('grade'),
-        School.name.label("school")
-    ).join(
-        catalog_grade, Camper.grade == catalog_grade.id
-    ).join(
-        School,  School.id == Camper.school_id
-    ).filter(Camper.id == camper_id)
-    data = db.execute(query)
-    return data.mappings().first()
+
 
 
 def get_all_camper_admin(db: Session):

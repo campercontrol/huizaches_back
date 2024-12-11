@@ -586,30 +586,7 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
 def get_camp_by_id(db: Session, camp_id: int):
     return db.query(Camp).filter_by(id=camp_id).first()
 
-def get_camp_info_by_id_mailing(db: Session, camp_id: int):
-    query = db.query(Camp.id,
-                     Camp.name,
-                     Camp.start,
-                     Camp.end,
-                     Camp.start_registration,
-                     Camp.end_registration,
-                     Camp.registration,
-                     Camp.url,
-                     Camp.special_message,
-                     Camp.special_message,
-                     Camp.special_message_admin,
-                     Camp.public_price,
-                     Camp.insurance,
-                     Camp.venue,
-                     Camp.photo_url,
-                     Camp.photo_password,
-                     Camp.medical_report,
-                     Camp.occupancy_camp,
-                     School.name.label("school"),
-                     Location.name.label("location")
-                     ).join(School, School.id == Camp.school_id).join(Location, Location.id == Camp.location_id).filter(Camp.id == camp_id)
-    data = db.execute(query)
-    return data.mappings().first()
+
 def create_new_camp(db: Session, new_camp: CampCreate):
     db_camp = None
     try:

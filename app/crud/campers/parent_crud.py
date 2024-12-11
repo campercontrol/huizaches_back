@@ -1,17 +1,14 @@
 from model.campers import Parent
 from model.user import User
 from model.campers import Camper
+from model.staffs.staff import Staff
 from helper.parent_helpers import append_campers_for_parent_admin
 from schema.campers.parent_schema import ParentCreate, ParentModify
-from crud.campers.camper_crud import get_campers_from_parent
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from utils.db import db_mapping_rows_to_dict
-from helper.mailing_helpers import send_mail_parent, send_mail_template
-from utils.toku_payment_tools import create_customer
-from crud.crud_user import get_admin_users_for_mailing
+from helper.mailing_helpers import send_mail_template
 
 import json
 
@@ -119,16 +116,6 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
         return None 
             
     return db_parent
-
-def get_parent_by_id_mailing(db: Session, parent_id: int):
-    query = db.query(Parent.tutor_name.label("name"),
-             Parent.tutor_lastname_father.label("lastname_father"),
-             Parent.tutor_lastname_mother.label("lastname_mother"),
-             Parent.id,
-             User.email         
-             ).join(User, User.id == Parent.user_id).filter(Parent.id == parent_id)
-    data = db.execute(query)
-    return data.mappings().first()
 
 
 
@@ -241,3 +228,24 @@ def get_all_parent_admin(db: Session):
         possible_parents = "Data not found"
 
     return possible_parents
+# Se agrega esta función de forma temporal debido a un error de importación
+def get_admin_users_for_mailing(db: Session):
+    query = db.query(Staff.name,
+                     Staff.id,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(User.is_admin == True)
+    data = db.execute(query)
+    return data.mappings().all()
+
+
+# Se agrega esta función de forma temporal debido a un error de importación
+def get_parent_by_id_mailing(db: Session, parent_id: int):
+    query = db.query(Parent.tutor_name.label("name"),
+             Parent.tutor_lastname_father.label("lastname_father"),
+             Parent.tutor_lastname_mother.label("lastname_mother"),
+             Parent.id,
+             User.email         
+             ).join(User, User.id == Parent.user_id).filter(Parent.id == parent_id)
+    data = db.execute(query)
+    return data.mappings().first()

@@ -43,13 +43,15 @@ from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.staff_catalogs.staff_vaccine_crud import (
     get_staff_vaccine_by_vaccine,
     create_new_staff_vaccine,
-    update_staff_vaccine_by_id
+    update_staff_vaccine_by_id,
+    get_staff_all_vaccines_by_staff_id
 )
 
 from crud.staff_catalogs.staff_food_restriction_crud import (
     get_staff_food_restriction_by_food_r,
     create_new_staff_food_restriction,
-    update_staff_food_restriction_by_id
+    update_staff_food_restriction_by_id,
+    get_all_staff_food_restriction_by_id
 )
 
 from crud.camps.staff_in_camp_crud import (
@@ -96,7 +98,8 @@ def create_prospect(
     
     if result == 2:
         return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}} 
-    
+    if result == 3:
+        return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta del prospecto"}} 
     if result == 1: 
         return {"detail": {"status": 1, "msg": "El prospecto se creo correctamente"}} 
 

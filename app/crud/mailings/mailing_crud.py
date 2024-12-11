@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session, aliased
+from sqlalchemy import func
 from model.mailings import (
     Campaign,
     CamperCampaign,
@@ -10,15 +10,83 @@ from model.mailings import (
 from helper.mailing_helpers import send_mail_template
 from model.campers import Camper, School
 from model.staffs import Staff
+from model.user import User
+from model.camps import Location
+from model.catalogs import Constant
+from model.campers.parent import Parent
 from model.camps import Camp, Season
 from model.trainings import Training, TrainingEvent
-from utils.db import db_mapping_rows_to_dict
-from crud.campers.camper_crud import get_camper_info_mailing
-from crud.camps.camp_crud import get_camp_info_by_id_mailing
+
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
-from crud.crud_user import get_admin_users_for_mailing
 
 
+
+def get_parent_by_id_mailing(db: Session, parent_id: int):
+    query = db.query(Parent.tutor_name.label("name"),
+             Parent.tutor_lastname_father.label("lastname_father"),
+             Parent.tutor_lastname_mother.label("lastname_mother"),
+             Parent.id,
+             User.email         
+             ).join(User, User.id == Parent.user_id).filter(Parent.id == parent_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+def get_admin_users_for_mailing(db: Session):
+    query = db.query(Staff.name,
+                     Staff.id,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(User.is_admin == True)
+    data = db.execute(query)
+    return data.mappings().all()
+
+def get_camper_info_mailing(db: Session, camper_id: int):
+    catalog_grade = aliased(Constant)
+    query = db.query(
+        Camper.name,
+        func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label('fullname'),
+        catalog_grade.value.label('grade'),
+        School.name.label("school")
+    ).join(
+        catalog_grade, Camper.grade == catalog_grade.id
+    ).join(
+        School,  School.id == Camper.school_id
+    ).filter(Camper.id == camper_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+def get_camp_info_by_id_mailing(db: Session, camp_id: int):
+    query = db.query(Camp.id,
+                     Camp.name,
+                     Camp.start,
+                     Camp.end,
+                     Camp.start_registration,
+                     Camp.end_registration,
+                     Camp.registration,
+                     Camp.url,
+                     Camp.special_message,
+                     Camp.special_message,
+                     Camp.special_message_admin,
+                     Camp.public_price,
+                     Camp.insurance,
+                     Camp.venue,
+                     Camp.photo_url,
+                     Camp.photo_password,
+                     Camp.medical_report,
+                     Camp.occupancy_camp,
+                     School.name.label("school"),
+                     Location.name.label("location")
+                     ).join(School, School.id == Camp.school_id).join(Location, Location.id == Camp.location_id).filter(Camp.id == camp_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+def get_staff_info_mailing(db: Session, staff_id: int):
+    query = db.query(Staff.name,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(Staff.id == staff_id)
+    data = db.execute(query)
+    return data.mappings().first()
 
 def get_public_for_campaign(db, campaign_id: int):
     campers = (

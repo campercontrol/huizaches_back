@@ -12,11 +12,9 @@ from schema.camps.staff_in_camp_schema import (
     StaffInCampCreate,
     StaffInCampModify,
 )
-# from crud.staffs.staff_crud import get_staff_info_mailing
-# from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status
-# from crud.camps.camp_crud import get_camp_info_by_id_mailing
-# from crud.crud_user import get_admin_users_for_mailing
-# from crud.mailings.mailing_crud import send_mail_template
+from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status_transaction
+
+from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing
 
 
 def get_all_staff_in_camp(db: Session):
@@ -43,40 +41,26 @@ def create_new_staff_in_camp(db: Session, new_staff_in_camp: StaffInCampCreate):
 
 
 def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
-    pass
-#     db_staff_in_camp = None
-#     user_staff_subcribe_to_camp_template = 5
-#     admin_staff_subcribe_to_camp_template = 2
-#     try:
-#         db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
-#         db_staff_in_camp.confirmed_staff = False
-#         db.add(db_staff_in_camp)
-#         db.commit()
-#         update_staff_record_status(db, new_staff_in_camp.staff_id)
-#         db.refresh(db_staff_in_camp)
-    
-        # staff_data = get_staff_info_mailing(db, new_staff_in_camp.staff_id)
-        # camp_data = get_camp_info_by_id_mailing(db, new_staff_in_camp.camp_id )
-        # # admin_users = get_admin_users_for_mailing(db)
-                
-        # staff_context = {
-        #     "user": staff_data,
-        #     "camp": camp_data     
-        # }
-        # send_mail_template(db, staff_data["email"], user_staff_subcribe_to_camp_template,staff_context)
-            
-        # for admin_user in admin_users:
-        #     admin_user_context = {
-        #     "user": admin_user,
-        #     "camp": camp_data
-        # }   
-        #     send_mail_template(db, admin_user['email'], admin_staff_subcribe_to_camp_template, admin_user_context)
+    try:
+        user_staff_subcribe_to_camp_template = 5
+        db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+        db_staff_in_camp.confirmed_staff = False
+        db.add(db_staff_in_camp)
+        update_staff_record_status_transaction(db, new_staff_in_camp.staff_id)
         
-        
-    # except Exception as ex:
-    #     db.rollback()
-    #     print(f"An error ocurred while saving: {ex}")
-    # return db_staff_in_camp
+        staff_data = get_staff_info_mailing(db, new_staff_in_camp.staff_id)
+        camp_data = get_camp_info_by_id_mailing(db, new_staff_in_camp.camp_id )
+        staff_context = {
+            "user": staff_data,
+            "camp": camp_data     
+        }
+        send_mail_template(db, staff_data["email"], user_staff_subcribe_to_camp_template,staff_context)    
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
     db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
