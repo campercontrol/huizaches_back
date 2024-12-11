@@ -7,17 +7,18 @@ from crud.campers.school_crud import (
     get_all_school,
     get_school_by_uuid,
     create_new_school,
-    update_school_by_id,
     get_active_school,
     delete_school,
     school_dashboard,
+    update_school_controller,
     get_upcoming_school_camps,
     get_past_school_camps
 )    
 
 from schema.campers.school_schema import(
     SchoolCreate,
-    SchoolModify
+    SchoolModify,
+    UpdateSchool
 
 )
 from utils.db import SessionLocal
@@ -64,18 +65,15 @@ def create_school(new_school:SchoolCreate, db: Session =Depends(get_db)):
         raise HTTPException(status_code=500, detail={"status": 3, "msg": "An unknown error ocurred while saving"})
 
 @school_routes.patch("/school/{school_id}", tags=["Campers"])
-def update_school(school_id:str,modify_school:SchoolModify,db: Session = Depends(get_db)):
+def update_school(school_id:str,modify_school:UpdateSchool,db: Session = Depends(get_db)):
 
-    update_data = modify_school.dict(exclude_unset=True)
-    print(update_data)
-    school_upcdate_result = update_school_by_id(db,school_id,update_data)
+    result = update_school_controller(db,school_id, modify_school)
 
-    if school_upcdate_result != 0:
-        exist_school = get_school_by_uuid(db, school_id)
-        return {"mensaje": "Actualizado Correctamente", "data": exist_school}
-    else:
-        return {"mensaje": "Ningun registro fue afectado", "data": ""}
-    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "La escuela se ha actualizado correctamente"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrió un eror al actualizar la escuela"})
+
 @school_routes.get("/active_school/", tags=["Campers"])
 def get_all_active_school(db: Session = Depends(get_db)):
     list_school = get_active_school(db)

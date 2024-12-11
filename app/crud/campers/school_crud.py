@@ -10,7 +10,10 @@ from crud.crud_user import create_new_user, get_user_by_email
 from crud.camps.camp_crud import get_records_for_camp
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
+from model.user import User
+from utils.hash import hash_str
 from schema.user import UserCreate
+from schema.campers.school_schema import UpdateSchool
 
 def get_all_school(db):
     rows= db.query(School).all()
@@ -168,12 +171,22 @@ def create_new_school(db, new_school):
         print(f"An error ocurred while creating school{ex}")
         return 3
 
-def update_school_by_id(db, school_id, modify_school):
-    rows_updated = (
-        db.query(School).filter_by(id=school_id).update(modify_school, synchronize_session="fetch")
-    )
-    db.commit()
-    return rows_updated
+
+
+def update_school_controller(db: Session, school_id: int, modify_school: UpdateSchool):
+    try:
+        new_school = modify_school.school.dict()
+        db_school = db.query(School).filter_by(id=school_id).update(new_school, synchronize_session="fetch")
+        new_hashed_password = hash_str(modify_school.password) 
+        db_user = db.query(User).filter(User.id == new_school['login_id']).first()
+        db_user.hashed_pass = new_hashed_password
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
+
 
 def get_active_school(db):
     rows= db.query(School.id, School.name).filter_by(active=True).all()

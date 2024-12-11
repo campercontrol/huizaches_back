@@ -90,11 +90,6 @@ class SchoolCreate(BaseModel):
 
 class SchoolModify(BaseModel):
     
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    )
     login_id:Optional[int] = Field(
         title= "Usuario"
     )  
@@ -166,3 +161,10 @@ class SchoolModify(BaseModel):
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+
+class UpdateSchool(BaseModel):
+    school: SchoolModify
+    password: str = Field (
+        title="password"
+    )
+    
