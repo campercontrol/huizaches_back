@@ -6,7 +6,7 @@ from model.campers import School
 from model.camps import Camp
 from model.camps.season import Season
 from model.camps.location import Location
-from crud.crud_user import create_new_user, get_user_by_email
+from crud.crud_user import create_new_user_admin, get_user_by_email
 from crud.camps.camp_crud import get_records_for_camp
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case
@@ -126,42 +126,43 @@ def get_school_by_uuid(db, school_id):
     )
 
 def create_new_school(db, new_school):
-    db_school = None
-    
-    user_exist = get_user_by_email(db, new_school.login_email)
-    
-    if user_exist:
-        return 2
-    
-    new_user_obj = UserCreate(
-        email=new_school.login_email,
-        passw=new_school.password,
-        role_id=3,
-        is_superuser=False
-    )
-    new_school_user = create_new_user(db, new_user_obj)
-    try:
+    try:        
+        user_exist = get_user_by_email(db, new_school.login_email)
+        
+        if user_exist:
+            return 2
+        
+        new_user_obj = UserCreate(
+            email=new_school.login_email,
+            passw=new_school.password,
+            role_id=3,
+            is_superuser=False,
+            is_coordinator=False,
+            is_employee=False,
+            is_admin=False,
+        )
+        new_school_user = create_new_user_admin(db, new_user_obj)
         db_school = School(
-            id=new_school.id,
-            login_id=new_school_user.id,
-            name=new_school.name,
-            address = new_school.address,
-            url = new_school.url,
-            contact = new_school.contact,
-            phone = new_school.phone,
-            cellphone = new_school.cellphone,
-            email = new_school.contact_first_email,
-            contact_second_name = new_school.contact_second_name,
-            contact_second_phone = new_school.contact_second_phone,
-            contact_second_cellphone = new_school.contact_second_cellphone,
-            contact_second_email = new_school.contact_second_email,
-            contact_third_name = new_school.contact_third_name,
-            contact_third_phone = new_school.contact_third_phone,
-            contact_third_cellphone = new_school.contact_third_cellphone,
-            contact_third_email = new_school.contact_third_email,
-            verify = new_school.verify,
-            active = new_school.active,
-            created_at = new_school.created_at 
+                id=new_school.id,
+                login_id=new_school_user.id,
+                name=new_school.name,
+                address = new_school.address,
+                url = new_school.url,
+                contact = new_school.contact,
+                phone = new_school.phone,
+                cellphone = new_school.cellphone,
+                email = new_school.contact_first_email,
+                contact_second_name = new_school.contact_second_name,
+                contact_second_phone = new_school.contact_second_phone,
+                contact_second_cellphone = new_school.contact_second_cellphone,
+                contact_second_email = new_school.contact_second_email,
+                contact_third_name = new_school.contact_third_name,
+                contact_third_phone = new_school.contact_third_phone,
+                contact_third_cellphone = new_school.contact_third_cellphone,
+                contact_third_email = new_school.contact_third_email,
+                verify = new_school.verify,
+                active = new_school.active,
+                created_at = new_school.created_at 
         )
         db.add(db_school)
         db.commit()
@@ -177,9 +178,10 @@ def update_school_controller(db: Session, school_id: int, modify_school: UpdateS
     try:
         new_school = modify_school.school.dict()
         db_school = db.query(School).filter_by(id=school_id).update(new_school, synchronize_session="fetch")
-        new_hashed_password = hash_str(modify_school.password) 
-        db_user = db.query(User).filter(User.id == new_school['login_id']).first()
-        db_user.hashed_pass = new_hashed_password
+        if modify_school.password != '' and modify_school.password is not None:
+            new_hashed_password = hash_str(modify_school.password) 
+            db_user = db.query(User).filter(User.id == new_school['login_id']).first()
+            db_user.hashed_pass = new_hashed_password
         db.commit()
         return 1
     except Exception as ex:

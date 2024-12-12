@@ -58,11 +58,11 @@ def create_school(new_school:SchoolCreate, db: Session =Depends(get_db)):
     result = create_new_school(db, new_school)
     
     if result == 1:
-        return {"detail": {"status": 1, "msg": "School created successfully"}}
+        return {"detail": {"status": 1, "msg": "La escuela se ha creado correctamente"}}
     if result == 2:
-        return {"detail": {"status": 2, "msg": "Email account already in use"}}
+        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}}
     if result == 3:
-        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An unknown error ocurred while saving"})
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrio un error al crear la escuela"})
 
 @school_routes.patch("/school/{school_id}", tags=["Campers"])
 def update_school(school_id:str,modify_school:UpdateSchool,db: Session = Depends(get_db)):
