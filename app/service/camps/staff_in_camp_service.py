@@ -57,8 +57,11 @@ def unsubscribe_staff_to_camp(id_staff_in_camp:int , db: Session = Depends(get_d
 
 @staff_in_camp_routes.post("/accept/staff/camp/{camp_id}", tags=["StaffInCamp"])
 def accept_staff_camp(staffs_id:list[int], camp_id:int, db: Session = Depends(get_db)):
-    staff_in_camp = accept_staff_in_camp(db, camp_id, staffs_id)
-    return {"data": staff_in_camp}
+    result = accept_staff_in_camp(db, camp_id, staffs_id)
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Se aceptó correctamente al staff"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error al aceptar al staff, intente nuevamente mas tarde"}) 
 
 @staff_in_camp_routes.post("/update/staff/role/{camp_id}/{role_id}", tags=["StaffInCamp"])
 def update_role_staff(staffs_id:list[int], camp_id:int, role_id:int, db: Session = Depends(get_db)):

@@ -14,7 +14,7 @@ from schema.camps.staff_in_camp_schema import (
 )
 from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status_transaction
 
-from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing
+from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail
 
 
 def get_all_staff_in_camp(db: Session):
@@ -38,6 +38,14 @@ def create_new_staff_in_camp(db: Session, new_staff_in_camp: StaffInCampCreate):
     except Exception as ex:
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_staff_in_camp
+
+def create_new_staff_in_camp_transaction(db: Session, new_staff_in_camp: StaffInCampCreate):
+    db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+    db.add(db_staff_in_camp)
+    db.flush()
+    return db_staff_in_camp
+
+
 
 
 def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
@@ -124,29 +132,38 @@ def get_staff_in_camp(db: Session, camp_id: int):
 
 
 def accept_staff_in_camp(db: Session, camp_id: int, staffs_id: list[int]):
-    for staff_id in staffs_id:
-        staff_in_camp = (
-            db.query(StaffInCamp)
-            .filter(
-                and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+    
+    user_accept_staff_in_camp_template = 1995
+    
+    try:
+        for staff_id in staffs_id:
+            staff_in_camp = (
+                db.query(StaffInCamp)
+                .filter(
+                    and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+                )
+                .all()
             )
-            .all()
-        )
 
-        if staff_in_camp:
-            db.query(StaffInCamp).filter(
-                and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
-            ).update({"confirmed_staff": True})
+            if staff_in_camp:
+                db.query(StaffInCamp).filter(
+                    and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+                ).update({"confirmed_staff": True})
+            else:
+                new_staff_in_camp = StaffInCampCreate(
+                    confirmed_staff = True ,
+                    camp_id = camp_id,
+                    staff_id = staff_id,
+                )
+                create_new_staff_in_camp_transaction(db, new_staff_in_camp)
+            email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+            send_mail_template(db, email_context["user"]["email"], user_accept_staff_in_camp_template, email_context)        
             db.commit()
-        else:
-            new_staff_in_camp = StaffInCampCreate(
-                confirmed_staff = True ,
-                camp_id = camp_id,
-                staff_id = staff_id,
-            )
-            create_new_staff_in_camp(db, new_staff_in_camp)
-
-    return "Success"
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 
 def assign_role_staff(db: Session, camp_id:int, staffs_id: list[int], role_id:int):

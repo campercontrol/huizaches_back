@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from model.mailings import (
     Campaign,
     CamperCampaign,
@@ -12,11 +12,12 @@ from model.campers import Camper, School
 from model.staffs import Staff
 from model.user import User
 from model.camps import Location
+from model.camps.camper_in_camp import CamperInCamp
 from model.catalogs import Constant
 from model.campers.parent import Parent
 from model.camps import Camp, Season
 from model.trainings import Training, TrainingEvent
-
+from utils.db import db_mapping_rows_to_dict
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
@@ -87,6 +88,131 @@ def get_staff_info_mailing(db: Session, staff_id: int):
                      User.email).join(User, User.id == Staff.login_id).filter(Staff.id == staff_id)
     data = db.execute(query)
     return data.mappings().first()
+
+def get_parent_info_mailing_by_camper_id(db, camper_id):
+    
+    query = db.query(Parent.tutor_name.label("name"),
+                     Parent.id,
+                     Parent.tutor_lastname_father.label("lastname_father"),
+                     Parent.tutor_lastname_mother.label("lastname_mother"),
+                     Parent.contact_email,
+                     User.email).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+def get_camp_balance_mailing(db: Season, camper_id: int, camp_id: int):
+    
+    query = db.query(CamperInCamp.payment_balance).select_from(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id))
+    data = db.execute(query)
+    return data.mappings().first()
+
+def get_camper_context_mailing(db: Session, camp_id: int, camper_id):
+    
+    user_info = get_parent_info_mailing_by_camper_id(db, camper_id)
+    camp_info = get_camp_info_by_id_mailing(db, camp_id)
+    camper_info = get_camper_info_mailing(db, camper_id)
+    camp_total_balance = get_camp_balance_mailing(db, camper_id, camp_id)
+    
+    payment_default_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "amount": "",
+        "txn_type": "",
+        "txn_number": ""
+    }
+    
+    context = {
+        "camper": camper_info,
+        "user": user_info,
+        "camp": camp_info,
+        "total_balance": camp_total_balance.payment_balance, 
+        "payment": payment_default_variables,
+        "show_table_balance":""
+    }
+    return context
+
+def get_staff_context_system_mail(db: Session, staff_id):
+    
+    staff_info = get_staff_info_mailing(db, staff_id)
+    
+    default_camper_variables = {
+        "name": "",
+        "lastname_father" : "",
+        "lastname_mother" : "",
+        "fullname": "",
+        "grade": "",
+        "school": ""
+    }
+    default_camp_variables = {
+        "id": "",
+        "name": "",
+        "start": "",
+        "end": "",
+        "start_registration": "",
+        "end_registration": "",
+        "registration": "",
+        "url": "",
+        "special_message": "",
+        "special_message": "",
+        "special_message_admin": "",
+        "public_price": "",
+        "insurance": "",
+        "venue": "",
+        "photo_url": "",
+        "photo_password": "",
+        "medical_report": "",
+        "occupancy_camp": "",
+        "school": "",
+        "location": ""
+        }          
+    default_payment_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "amount": "",
+        "txn_type": "",
+        "txn_number": ""
+    }
+    context = {
+        "camper": default_camper_variables,
+        "user": staff_info,
+        "camp": default_camp_variables,
+        "total_balance": "",
+        "payment": default_payment_variables,
+        "show_table_balance":""
+    }
+    return context
+
+def get_staff_context_massive_mail(db: Session, staff_id, camp_id):
+    
+    staff_info = get_staff_info_mailing(db, staff_id)
+    camp_info = get_camp_info_by_id_mailing(db, camp_id)
+    default_camper_variables = {
+        "name": "",
+        "lastname_father" : "",
+        "lastname_mother" : "",
+        "fullname": "",
+        "grade": "",
+        "school": ""
+    }
+
+    default_payment_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "amount": "",
+        "txn_type": "",
+        "txn_number": ""
+    }
+    context = {
+        "camper": default_camper_variables,
+        "user": staff_info,
+        "camp": camp_info,
+        "total_balance": "",
+        "payment": default_payment_variables,
+        "show_table_balance":""
+    }
+    return context
+
+
 
 def get_public_for_campaign(db, campaign_id: int):
     campers = (
