@@ -14,7 +14,7 @@ from schema.camps.staff_in_camp_schema import (
 )
 from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status_transaction
 
-from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail
+from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail, get_staff_context_system_mail
 
 
 def get_all_staff_in_camp(db: Session):
@@ -71,9 +71,30 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
         return 3
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
-    db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
-    db.commit()
-    return
+    try:
+        user_unsuscribe_staff_template = 195
+        admin_unsuscribe_staff_template = 4
+        
+        db_staff_in_camp = db.query(StaffInCamp).filter_by(id=id_staff_in_camp).first()
+        staff_id = db_staff_in_camp.staff_id
+        camp_id = db_staff_in_camp.camp_id
+        
+        db.delete(db_staff_in_camp)
+        
+        email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+        send_mail_template(db, email_context["user"]["email"], user_unsuscribe_staff_template, email_context)
+        
+        admin_users = get_admin_users_for_mailing(db)
+
+        for admin_user in admin_users:
+            admin_user_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+            send_mail_template(db, admin_user["email"], admin_unsuscribe_staff_template, admin_user_context)
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 
 def get_staff_volunteer_in_camp(db: Session, camp_id: int):

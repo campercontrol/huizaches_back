@@ -8,15 +8,25 @@ from schema.staff_catalogs.staff_food_restriction_schema import (
     StaffFoodRestrictionCreate,
     StaffFoodRestrictionModify,
 )
-
+from model.staffs.staff_food_restriction import StaffFoodRestriction
+from model.catalogs import FoodRestriction
 
 def get_all_staff_food_restriction(db: Session):
     rows = db.query(StaffFoodRestriction).all()
     return rows
 
 def get_all_staff_food_restriction_by_id(db: Session, staff_id: int):
-    rows = db.query(StaffFoodRestriction).filter(StaffFoodRestriction.staff_id == staff_id).all()
-    return rows
+    rows = (
+        db.query(
+            FoodRestriction.id,
+            FoodRestriction.name,
+            StaffFoodRestriction.is_active,
+        ).select_from(StaffFoodRestriction)
+        .join(FoodRestriction, StaffFoodRestriction.food_restriction_id == FoodRestriction.id)
+        .filter(StaffFoodRestriction.staff_id == staff_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
 
 
 def get_all_staff_food_restriction_id_name(db: Session):

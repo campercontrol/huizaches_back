@@ -10,6 +10,9 @@ from model.campers.parent import Parent
 from model.user import User
 from model.payments.payment import Payment
 from model.payments.payment_method import PaymentMethod
+from model.camps.staff_in_camp import StaffInCamp
+from model.staffs.staff import Staff
+
 from model.catalogs import (
     Constant
 )
@@ -22,7 +25,8 @@ from crud.camps.camper_in_camp_crud import get_campers_for_module
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.campers_catalogs.camper_food_restriction_crud import get_camper_food_restriction
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin, get_camper_comment_by_camper_for_parent, get_camper_comment_by_camper_for_school
-
+from crud.staff_catalogs.staff_food_restriction_crud import get_all_staff_food_restriction_by_id
+from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_staff_id
 
 
 def get_camp_insr_report(db: Session, camp_id: int):
@@ -503,6 +507,65 @@ def get_camp_extras_report(db: Session, camp_id: int):
         campers_report.append(camper_dict)
         
     return campers_report
+
+
+def get_camp_gnl_staff_report(db: Session, camp_id: int):
+    
+    
+    query = (db.query(Staff.id,
+                      Staff.name,
+                      Staff.lastname_father,
+                      Staff.lastname_mother,
+                      Constant.value.label('gender'),
+                      User.email.label("email"),
+                      Staff.curp,
+                      Staff.rfc,
+                      Staff.cellphone,
+                      Staff.home_phone,
+                      Staff.birthday,
+                      Staff.affliction, 
+                      Staff.blood_type,
+                      Staff.drug_allergies,
+                      Staff.other_allergies,
+                      Staff.nocturnal_disorders,
+                      Staff.phobias,
+                      Staff.drugs,
+                      Staff.prohibited_foods,
+                      Staff.bio,
+                      Staff.coordinator,
+                      Staff.facebook,
+                      Staff.staff_contact_name,
+                      Staff.staff_contact_relation,
+                      Staff.staff_contact_homephone,
+                      Staff.staff_contact_cellphone,
+                      ).select_from(StaffInCamp)
+             .join(Staff, Staff.id == StaffInCamp.staff_id)
+             .join(Constant, Constant.id == Staff.gender_id)
+             .join(User, Staff.login_id == User.id)
+             .filter(and_(StaffInCamp.camp_id == camp_id)))
+    staffs = db.execute(query)
+    staffs = staffs.mappings().all()
+    
+    
+    staffs_report = []
+   
+    for staff in staffs:
+        staff_dict = dict(staff)
+
+        staff_vaccines = get_staff_all_vaccines_by_staff_id(db, staff.id)
+        staff_food_restriction = get_all_staff_food_restriction_by_id(db, staff.id)
+        
+        for food_restriction in staff_food_restriction:
+            print(food_restriction)
+            staff_dict[food_restriction["name"]] = food_restriction["is_active"]
+        
+        for vaccine in staff_vaccines:
+            staff_dict[vaccine["name"]] = vaccine["is_active"]
+            
+        staffs_report.append(staff_dict)
+       
+    return staffs_report
+
 
 def get_all_camp(db: Session):
     rows = db.query(Camp).all()

@@ -20,7 +20,8 @@ from crud.camps.camp_crud import (
     get_camp_food_report,
     get_camp_social_report,
     get_camp_extras_report,
-    get_camp_incomes
+    get_camp_incomes,
+    get_camp_gnl_staff_report
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -315,6 +316,13 @@ def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
     camp_general_report = get_camp_gnl_report(db, camp_id)
 
     return {"data": camp_general_report}
+
+@camp_router.get("/camps/{camp_id}/general_staff_report", tags=["Camps"])
+def camp_general_staffreport(camp_id: int, db: Session = Depends(get_db)):
+    camp_general_staff_report = get_camp_gnl_staff_report(db, camp_id)
+
+    return {"data": camp_general_staff_report}
+
 
 @camp_router.get("/camps/{camp_id}/insurance_report", tags=["Camps"])
 def get_camp_insurance_report(camp_id: int, db: Session = Depends(get_db)):

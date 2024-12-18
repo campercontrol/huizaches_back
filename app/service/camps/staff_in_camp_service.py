@@ -52,8 +52,13 @@ def create_staff_volunteer(new_staff_in_camp:StaffInCampCreate, db: Session = De
 
 @staff_in_camp_routes.delete("/staff_unsubscribe/{id_staff_in_camp}", tags=["StaffInCamp"])
 def unsubscribe_staff_to_camp(id_staff_in_camp:int , db: Session = Depends(get_db)):
-    staff_in_camp = unsubscribe_staff(db, id_staff_in_camp)
-    return {"data": staff_in_camp}
+    result = unsubscribe_staff(db, id_staff_in_camp)
+    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Se removió  correctamente al staff"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrió un error inesperado al remover al staff, intente nuevamente más tarde"})
+    
 
 @staff_in_camp_routes.post("/accept/staff/camp/{camp_id}", tags=["StaffInCamp"])
 def accept_staff_camp(staffs_id:list[int], camp_id:int, db: Session = Depends(get_db)):
