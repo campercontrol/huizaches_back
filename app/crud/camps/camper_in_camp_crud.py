@@ -209,6 +209,36 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
     )
     return db_mapping_rows_to_dict(rows)
 
+def get_past_due_camps_by_camper(db: Session, camper_id: int):
+    rows = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Camp.show_payment_parent,
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 36,
+                Camp.active == True,
+                Camp.start < date.today(),
+                CamperInCamp.payment_balance >= 0   
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
 
 def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int):
     camper_in_camp = (

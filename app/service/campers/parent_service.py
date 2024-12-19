@@ -25,7 +25,8 @@ from crud.camps.location_crud import (
 from crud.camps.camper_in_camp_crud import (
     get_camper_in_camp_by_camper_camp,
     get_camps_name_amount_camper,
-    get_past_subscribe_by_camper
+    get_past_subscribe_by_camper,
+    get_past_due_camps_by_camper
 )
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
@@ -127,13 +128,17 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
         for camp in camps_info:
             total_amount = total_amount + camp.get('camper_payment_balance')
         past_camps = get_past_subscribe_by_camper(db, camper.get('id'))
+        
+        due_past_camps = get_past_due_camps_by_camper(db, camper.get('id'))
+        
         for camp in past_camps:
             total_amount = total_amount + camp.get('camper_payment_balance') 
         info.append(
             {
                 "camper": camper,
                 "camper_balance": total_amount,
-                "camps": camps_info
+                "camps": camps_info,
+                "due_past_camps": due_past_camps
             }
         )
         parent_total_amount = parent_total_amount + total_amount

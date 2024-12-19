@@ -31,6 +31,7 @@ from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_sta
 
 def get_camp_insr_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
+    catalog_camp_enrollment = aliased(Constant)
     query = (db.query(Camper.id,
                       Camper.name,
                       Camper.lastname_father,
@@ -38,8 +39,10 @@ def get_camp_insr_report(db: Session, camp_id: int):
                       Camper.birthday,
                       func.concat(extract('year', func.age(func.current_date(), Camper.birthday)), " years ",  extract('month', func.age(func.current_date(), Camper.birthday)), " months ").label("Age"),
                       catalog_gender.value.label('gender'),
+                      catalog_camp_enrollment.value.label("enrollment")
                       ).select_from(CamperInCamp)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(catalog_gender, Camper.gender_id == catalog_gender.id)
              .filter(CamperInCamp.camp_id == camp_id))
     campers = db.execute(query)
@@ -148,39 +151,7 @@ def get_camp_incomes(db: Session, camp_id: int):
         
 def get_camp_contact_report(db: Session, camp_id: int):
     
-    query = (db.query(Camper.id,
-                      Camper.name,
-                      Camper.lastname_father,
-                      Camper.lastname_mother,
-                      Parent.tutor_name,
-                      Parent.tutor_lastname_father,
-                      Parent.tutor_lastname_mother,
-                      Parent.tutor_cellphone,
-                      Parent.tutor_home_phone,
-                      Parent.tutor_work_phone,
-                      User.email.label("tutor_email"),
-                      Parent.contact_name.label("second_tutor_name"),
-                      Parent.contact_lastname_father.label("second_tutor_mothers_lastname"),
-                      Parent.contact_lastname_mother.label("second_tutor_fathers_lastname"),
-                      Parent.contact_cellphone.label("second_tutor_cellphone"),
-                      Parent.contact_home_phone.label("second_tutor_fathers_lastname"),
-                      Parent.contact_work_phone.label("second_tutor_work_phone"),
-                      Parent.contact_email.label("second_tutor_email"),
-                      Camper.contact_name.label("emergency_contact"),
-                      Camper.contact_relation.label("emergency_contact_kinship"),
-                      Camper.contact_homephone.label("emergency_contact_phone"),
-                      Camper.contact_cellphone.label("emergency_contact_cellphone")                      
-                      ).select_from(CamperInCamp)
-             .join(Camp, CamperInCamp.camp_id == Camp.id)
-             .join(Camper, CamperInCamp.camper_id == Camper.id)
-             .join(Parent, Camper.parent_id == Parent.id)
-             .join(User, Parent.user_id == User.id)
-             .filter(CamperInCamp.camp_id == camp_id))
-    campers = db.execute(query)
-    campers = campers.mappings().all()
-    return campers
-
-def get_camp_contact_report(db: Session, camp_id: int):
+    catalog_camp_enrollment = aliased(Constant)
     
     query = (db.query(Camper.id,
                       Camper.name,
@@ -203,10 +174,12 @@ def get_camp_contact_report(db: Session, camp_id: int):
                       Camper.contact_name.label("emergency_contact"),
                       Camper.contact_relation.label("emergency_contact_kinship"),
                       Camper.contact_homephone.label("emergency_contact_phone"),
-                      Camper.contact_cellphone.label("emergency_contact_cellphone")                      
+                      Camper.contact_cellphone.label("emergency_contact_cellphone"),
+                      catalog_camp_enrollment.value.label("enrollment")                      
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
              .filter(CamperInCamp.camp_id == camp_id))
@@ -220,6 +193,7 @@ def get_camp_medical_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
     catalog_swim =  aliased(Constant)
     catalog_blood_type =  aliased(Constant)
+    catalog_camp_enrollment = aliased(Constant)
 
     query = (db.query(Camper.id,
                       Camper.name,
@@ -261,13 +235,15 @@ def get_camp_medical_report(db: Session, camp_id: int):
                       Camper.contact_name.label("emergency_contact"),
                       Camper.contact_relation.label("emergency_contact_kinship"),
                       Camper.contact_cellphone.label("emergency_contact_cellphone"),
-                      Camper.contact_homephone.label("emergency_home_phone")                      
+                      Camper.contact_homephone.label("emergency_home_phone"),
+                      catalog_camp_enrollment.value.label("enrollment")                      
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_gender, Camper.gender_id == catalog_gender.id)
              .join(catalog_swim, Camper.can_swim == catalog_swim.id)
              .join(catalog_blood_type, Camper.blood_type == catalog_blood_type.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
              .filter(CamperInCamp.camp_id == camp_id))
@@ -307,6 +283,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
     catalog_grade = aliased(Constant)
     catalog_swim =  aliased(Constant)
     catalog_blood_type =  aliased(Constant)
+    catalog_camp_enrollment = aliased(Constant)
 
 
 
@@ -356,7 +333,8 @@ def get_camp_gnl_report(db: Session, camp_id: int):
                       Camper.contact_cellphone,
                       Camper.contact_homephone,
                       CamperInCamp.payment_balance,
-                      Camper.created_at.label("registration date")
+                      Camper.created_at.label("registration date"),
+                      catalog_camp_enrollment.value.label("enrollment")
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
@@ -364,6 +342,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
              .join(catalog_grade, Camper.grade == catalog_grade.id)
              .join(catalog_swim, Camper.can_swim == catalog_swim.id)
              .join(catalog_blood_type, Camper.blood_type == catalog_blood_type.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
              .join(School, Camper.school_id== School.id)
@@ -409,15 +388,18 @@ def get_camp_gnl_report(db: Session, camp_id: int):
 
 def get_camp_food_report(db: Session, camp_id: int):
 
+    catalog_camp_enrollment = aliased(Constant)
     query = (db.query(Camper.id,
                       Camper.name,
                       Camper.lastname_father,
                       Camper.lastname_mother,
                       Camper.other_allergies,
-                      Camper.prohibited_foods
+                      Camper.prohibited_foods,
+                      catalog_camp_enrollment.value.label("enrollment")
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .filter(CamperInCamp.camp_id == camp_id))
     campers = db.execute(query)
     campers = campers.mappings().all()
@@ -440,6 +422,7 @@ def get_camp_social_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
     catalog_grade = aliased(Constant)
     catalog_swim =  aliased(Constant)
+    catalog_camp_enrollment = aliased(Constant)
 
     query = (db.query(Camper.id,
                       Camper.name,
@@ -453,13 +436,15 @@ def get_camp_social_report(db: Session, camp_id: int):
                       Camper.nocturnal_disorders,
                       Camper.phobias,
                       Camper.drugs,
-                      catalog_swim.value.label('swim')
+                      catalog_swim.value.label('swim'),
+                      catalog_camp_enrollment.value.label("enrollment")
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_gender, Camper.gender_id == catalog_gender.id)
              .join(catalog_grade, Camper.grade == catalog_grade.id)
              .join(catalog_swim, Camper.can_swim == catalog_swim.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .filter(CamperInCamp.camp_id == camp_id))
     campers = db.execute(query)
     campers = campers.mappings().all()
@@ -480,15 +465,18 @@ def get_camp_social_report(db: Session, camp_id: int):
     return campers_report
 
 def get_camp_extras_report(db: Session, camp_id: int):
-
+    
+    catalog_camp_enrollment = aliased(Constant)
     query = (db.query(Camper.id,
                       Camper.name,
                       Camper.lastname_father,
                       Camper.lastname_mother,
-                      CamperInCamp.payment_balance
+                      CamperInCamp.payment_balance,
+                      catalog_camp_enrollment.value.label("enrollment")
                       ).select_from(CamperInCamp)
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
+             .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .filter(CamperInCamp.camp_id == camp_id))
     campers = db.execute(query)
     campers = campers.mappings().all()
