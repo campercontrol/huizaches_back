@@ -139,8 +139,11 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
             Camp.show_payment_parent,
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label("currency_acronyms"),
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Constant, CamperInCamp.status == Constant.id)
         .join(Location, Camp.location_id == Location.id)
         .filter(
@@ -193,9 +196,13 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label("currency_acronyms"),
+            
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
         .join(Constant, CamperInCamp.status == Constant.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Location, Camp.location_id == Location.id)
         .filter(
             and_(
