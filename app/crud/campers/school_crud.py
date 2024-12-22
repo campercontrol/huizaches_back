@@ -182,6 +182,7 @@ def update_school_controller(db: Session, school_id: int, modify_school: UpdateS
             new_hashed_password = hash_str(modify_school.password) 
             db_user = db.query(User).filter(User.id == new_school['login_id']).first()
             db_user.hashed_pass = new_hashed_password
+            db_user.email = modify_school.email
         db.commit()
         return 1
     except Exception as ex:

@@ -167,4 +167,6 @@ class UpdateSchool(BaseModel):
     password: str = Field (
         title="password"
     )
-    
+    email: str = Field (
+        title = "login_email"
+    )
