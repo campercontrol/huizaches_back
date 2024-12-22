@@ -13,7 +13,7 @@ from model.staffs import Staff
 from model.user import User
 from model.camps import Location
 from model.camps.camper_in_camp import CamperInCamp
-from model.catalogs import Constant
+from model.catalogs import (Constant, Currency)
 from model.campers.parent import Parent
 from model.camps import Camp, Season
 from model.trainings import Training, TrainingEvent
@@ -102,7 +102,11 @@ def get_parent_info_mailing_by_camper_id(db, camper_id):
 
 def get_camp_balance_mailing(db: Season, camper_id: int, camp_id: int):
     
-    query = db.query(CamperInCamp.payment_balance).select_from(CamperInCamp).filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id))
+    query = (db.query(CamperInCamp.payment_balance, Currency.acronyms, Currency.symbol)
+             .select_from(CamperInCamp)
+             .join(Camp, Camp.id == CamperInCamp.camp_id)
+             .join(Currency, Currency.id == Camp.currency_id)
+    .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)))
     data = db.execute(query)
     return data.mappings().first()
 
@@ -120,12 +124,13 @@ def get_camper_context_mailing(db: Session, camp_id: int, camper_id):
         "txn_type": "",
         "txn_number": ""
     }
+    formated_balance = camp_total_balance.symbol + "{:,.1f}".format(abs(camp_total_balance.payment_balance)) + camp_total_balance.acronyms
     
     context = {
         "camper": camper_info,
         "user": user_info,
         "camp": camp_info,
-        "total_balance": camp_total_balance.payment_balance, 
+        "total_balance": formated_balance, 
         "payment": payment_default_variables,
         "show_table_balance":""
     }

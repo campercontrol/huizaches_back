@@ -5,11 +5,17 @@ from model.payments import Payment, PaymentTransactionType, PaymentMethod
 from model.campers import Camper
 from model.campers.parent import Parent
 from model.camps import Camp, CamperInCamp
+from model.catalogs.currency import Currency
 
-from utils.payments.payment_table import get_payment_table
+from utils.payments.payment_table import get_payment_table, create_payment_table
+from utils.db import db_mapping_rows_to_dict
+from helper.mailing_helpers import send_mail_template_payment
 
 from crud.payments.payment_method_crud import get_all_payment_method
 from crud.payments.payment_transaction_type_crud import get_all_payment_transaction_type
+
+from crud.mailings.mailing_crud import get_camper_context_mailing
+
 
 from schema.payments.payment_schema import (
     PaymentCreate,
@@ -33,14 +39,45 @@ def get_payment_by_id(db, payment_id: int):
     )
 
 def create_payment_controller(db: Session, new_payment):
+        
     try:
-        create_new_payment_and_update_balance_transaction(db, new_payment.dict())
+        user_partial_payment_template = 179
+        admin_partial_payment_template = 1997    
+        
+        camper_id = new_payment.camper_id
+        camp_id = new_payment.camp_id
+                 
+        payment_created = create_new_payment_and_update_balance_transaction(db, new_payment.dict())
         db.commit()
+        db.refresh(payment_created)
+        
+        db_payment = get_camper_payment_in_camp_by_payment_id(db, payment_created.id)
+        
+        formated_payment_amount = "{:,.1f}".format(abs(db_payment.payment_amount))
+        
+        email_context = get_camper_context_mailing(db, camp_id, camper_id)
+        email_context["payment"]["payment_date"] = db_payment.payment_date
+        email_context["payment"]["payment_method"] = db_payment.payment_method
+        email_context["payment"]["amount"] = db_payment.currency_symbol + str(formated_payment_amount) + db_payment.currency_acronym
+        email_context["payment"]["txn_type"]  = db_payment.txn_name
+        email_context["payment"]["txn_number"] = db_payment.txn_number
+        
+        camper_payments_in_camp = get_camper_payments_in_camp(db, new_payment.camper_id, new_payment.camp_id)
+        payment_table = create_payment_table(db, camper_payments_in_camp)   
+        
+        email_context["payments"] = payment_table
+        
+        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+        # email_context["payment"]["payment_date"] = db_payment.payment_date
+        # email_context["payment"]["payment_method"] = db_payment.payment_m
+            
         return 1
     except Exception as ex:
         db.rollback()
         print(ex)
         return 3
+    
+    
 def create_new_payment(db, new_payment: PaymentCreate):
     db_payment = None
     try:
@@ -103,7 +140,6 @@ def create_new_payment_and_update_balance_transaction(db, new_payment: PaymentCr
     if new_payment["txn_type_id"] in (1,2,9):
         new_payment["payment_amount"] = new_payment["payment_amount"] * -1
     db_payment = Payment(**new_payment)
-    print("new_payment_charged")
     db.add(db_payment)
     db.flush()
     if db_payment.txn_type_id in (1,2,9):
@@ -212,6 +248,58 @@ def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
     payment_table = get_payment_table(db, rows)
 
     return payment_table
+
+
+def get_camper_payment_in_camp_by_payment_id(db: Session, payment_id: int ):
+    rows = (
+        db.query(
+            Payment.id.label("id"),
+            Payment.payment_amount,
+            Payment.payment_date.label("payment_date"),
+            Payment.txn_number.label("txn_number"),
+            Payment.txn_type_id,
+            PaymentMethod.name.label("payment_method"),
+            PaymentTransactionType.name.label("txn_name"),
+            Currency.acronyms.label("currency_acronym"),
+            Currency.symbol.label("currency_symbol")
+        )
+        .select_from(Payment)
+        .join(PaymentMethod, PaymentMethod.id == Payment.payment_method_id, isouter=True)
+        .join(PaymentTransactionType, PaymentTransactionType.id == Payment.txn_type_id)
+        .join(Currency, Currency.id == Payment.currency_id)
+        .filter(Payment.id == payment_id)
+        .order_by(Payment.payment_date.asc())
+        .first()
+    )
+
+
+    return rows
+
+
+def get_camper_payments_in_camp(db, camper_id: int, camp_id: int):
+    rows = (
+        db.query(
+            Payment.id,
+            Payment.payment_amount,
+            Payment.payment_date,
+            Payment.txn_number,
+            Payment.txn_type_id,
+            PaymentMethod.name.label("payment_method"),
+            PaymentTransactionType.name.label("txn_name"),
+            Currency.acronyms.label("currency_acronym"),
+            Currency.symbol.label("currency_symbol")
+        )
+        .select_from(Payment)
+        .join(PaymentMethod, PaymentMethod.id == Payment.payment_method_id, isouter=True)
+        .join(PaymentTransactionType, PaymentTransactionType.id == Payment.txn_type_id)
+        .join(Currency, Currency.id == Payment.currency_id)
+        .filter(and_(Payment.camper_id == camper_id, Payment.camp_id == camp_id))
+        .order_by(Payment.payment_date.asc())
+        .all()
+    )
+
+
+    return rows
 
 # imported here due to a circular import
 def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int):

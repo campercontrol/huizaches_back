@@ -145,6 +145,41 @@ def send_mail_template_medical_visit(
         print(ex)
         return False
 
+
+
+def send_mail_template_payment(
+    db,
+    send_to: str,
+    template_id: int,
+    context: dict,
+):
+    try:    
+        template_content =  (
+            db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+        )
+        # Template de la tabla de pagos
+        payment_table_template_id = 1994
+        payment_table_content = (
+            db.query(EmailTemplate.template).filter(EmailTemplate.id == payment_table_template_id).first()
+        )
+        
+        template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
+        template_env_payment_table = Environment(loader=BaseLoader).from_string(str(payment_table_content.template))
+        template_env_title = Environment(loader=BaseLoader).from_string(str(template_content.title))
+        html_content_title = template_env_title.render(context)
+        html_content_payment_table = template_env_payment_table.render(context)
+        
+        context["show_table_balance"] = html_content_payment_table
+            
+        html_content = template_env.render(context)    
+        
+        send_simple_message("", send_to, html_content_title, html_content)
+        return True
+    except Exception as ex:
+        print(ex)
+        return False
+
+ 
  
 def send_mail_template_plain_text(
     db,
