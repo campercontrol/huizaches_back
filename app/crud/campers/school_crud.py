@@ -16,8 +16,31 @@ from schema.user import UserCreate
 from schema.campers.school_schema import UpdateSchool
 
 def get_all_school(db):
-    rows= db.query(School).all()
-    return rows
+    query = (db.query(School.uid,
+                    School.id, 
+                    School.login_id,
+                    School.name,
+                    School.address,
+                    School.url,
+                    School.contact,
+                    School.phone,
+                    School.cellphone,
+                    School.email,
+                    School.contact_second_name,
+                    School.contact_second_phone,
+                    School.contact_second_cellphone,
+                    School.contact_second_email,
+                    School.contact_third_name,
+                    School.contact_third_phone,
+                    School.contact_third_cellphone,
+                    School.contact_third_email,
+                    School.verify,
+                    School.active,
+                    User.email.label("login_email")
+                    ).join(User, User.id == School.login_id))
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
 
 def get_upcoming_school_camps(db: Session, school_id: int):
     query = (
