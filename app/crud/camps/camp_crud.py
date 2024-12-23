@@ -530,7 +530,7 @@ def get_camp_gnl_staff_report(db: Session, camp_id: int):
              .join(Staff, Staff.id == StaffInCamp.staff_id)
              .join(Constant, Constant.id == Staff.gender_id)
              .join(User, Staff.login_id == User.id)
-             .filter(and_(StaffInCamp.camp_id == camp_id)))
+             .filter(and_(StaffInCamp.camp_id == camp_id, StaffInCamp.confirmed_staff == True)))
     staffs = db.execute(query)
     staffs = staffs.mappings().all()
     
