@@ -7,7 +7,7 @@ from model.mailings import (
     SchoolCampaign,
     EmailTemplate,
 )
-from helper.mailing_helpers import send_mail_template
+from helper.mailing_helpers import send_mail_template, create_html_payment_table
 from model.campers import Camper, School
 from model.staffs import Staff
 from model.user import User
@@ -17,7 +17,11 @@ from model.catalogs import (Constant, Currency)
 from model.campers.parent import Parent
 from model.camps import Camp, Season
 from model.trainings import Training, TrainingEvent
+from model.payments.payment import Payment
+from model.payments.payment_method import PaymentMethod
+from model.payments.payment_transaction_type import PaymentTransactionType
 from utils.db import db_mapping_rows_to_dict
+from utils.payments.payment_table import create_payment_table
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
@@ -55,6 +59,29 @@ def get_camper_info_mailing(db: Session, camper_id: int):
     ).filter(Camper.id == camper_id)
     data = db.execute(query)
     return data.mappings().first()
+
+def get_camper_payments_in_camp(db, camper_id: int, camp_id: int):
+    rows = (
+        db.query(
+            Payment.id,
+            Payment.payment_amount,
+            Payment.payment_date,
+            Payment.txn_number,
+            Payment.txn_type_id,
+            PaymentMethod.name.label("payment_method"),
+            PaymentTransactionType.name.label("txn_name"),
+            Currency.acronyms.label("currency_acronym"),
+            Currency.symbol.label("currency_symbol")
+        )
+        .select_from(Payment)
+        .join(PaymentMethod, PaymentMethod.id == Payment.payment_method_id, isouter=True)
+        .join(PaymentTransactionType, PaymentTransactionType.id == Payment.txn_type_id)
+        .join(Currency, Currency.id == Payment.currency_id)
+        .filter(and_(Payment.camper_id == camper_id, Payment.camp_id == camp_id))
+        .order_by(Payment.payment_date.asc())
+        .all()
+    )
+    return rows
 
 def get_camp_info_by_id_mailing(db: Session, camp_id: int):
     query = db.query(Camp.id,
@@ -110,12 +137,16 @@ def get_camp_balance_mailing(db: Season, camper_id: int, camp_id: int):
     data = db.execute(query)
     return data.mappings().first()
 
-def get_camper_context_mailing(db: Session, camp_id: int, camper_id):
+def get_camper_context_massive_mail(db: Session, camp_id: int, camper_id):
     
     user_info = get_parent_info_mailing_by_camper_id(db, camper_id)
     camp_info = get_camp_info_by_id_mailing(db, camp_id)
     camper_info = get_camper_info_mailing(db, camper_id)
     camp_total_balance = get_camp_balance_mailing(db, camper_id, camp_id)
+    camper_payments_in_camp =  get_camper_payments_in_camp(db, camper_id, camp_id)
+    payment_table = create_payment_table(db, camper_payments_in_camp)    
+    payment_table_balance = create_html_payment_table(db, {"payments": payment_table})
+    
     
     payment_default_variables = {
         "payment_date": "",
@@ -132,7 +163,7 @@ def get_camper_context_mailing(db: Session, camp_id: int, camper_id):
         "camp": camp_info,
         "total_balance": formated_balance, 
         "payment": payment_default_variables,
-        "show_table_balance":""
+        "show_table_balance": payment_table_balance
     }
     return context
 
@@ -216,6 +247,7 @@ def get_staff_context_massive_mail(db: Session, staff_id, camp_id):
         "show_table_balance":""
     }
     return context
+
 
 
 

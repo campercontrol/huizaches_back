@@ -181,6 +181,27 @@ def send_mail_template_payment(
 
  
  
+def create_html_payment_table(
+    db,
+    context
+):
+    try:
+        html_content_payment_table = ''
+        # Template de la tabla de pagos
+        payment_table_template_id = 1994
+        payment_table_content = (
+            db.query(EmailTemplate.template).filter(EmailTemplate.id == payment_table_template_id).first()
+        )
+
+        template_env_payment_table = Environment(loader=BaseLoader).from_string(str(payment_table_content.template))
+        html_content_payment_table = template_env_payment_table.render(context)
+        
+        return html_content_payment_table
+
+    except Exception as ex:
+        print(ex)
+        return html_content_payment_table
+ 
 def send_mail_template_plain_text(
     db,
     send_to: str,

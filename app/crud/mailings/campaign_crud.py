@@ -69,8 +69,8 @@ def create_campaign(db, new_campaign):
         return None  
     
 def add_camper_to_campaign(db, camper_campaign):
-    new_campaign = CamperCampaign(**camper_campaign)
     try:
+        new_campaign = CamperCampaign(**camper_campaign)
         db.add(new_campaign)
         db.commit()
         db.refresh(new_campaign)

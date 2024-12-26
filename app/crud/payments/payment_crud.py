@@ -14,7 +14,7 @@ from helper.mailing_helpers import send_mail_template_payment
 from crud.payments.payment_method_crud import get_all_payment_method
 from crud.payments.payment_transaction_type_crud import get_all_payment_transaction_type
 
-from crud.mailings.mailing_crud import get_camper_context_mailing
+from crud.mailings.mailing_crud import get_camper_context_massive_mail
 
 
 from schema.payments.payment_schema import (
@@ -55,7 +55,7 @@ def create_payment_controller(db: Session, new_payment):
         
         formated_payment_amount = "{:,.1f}".format(abs(db_payment.payment_amount))
         
-        email_context = get_camper_context_mailing(db, camp_id, camper_id)
+        email_context = get_camper_context_massive_mail(db, camp_id, camper_id)
         email_context["payment"]["payment_date"] = db_payment.payment_date
         email_context["payment"]["payment_method"] = db_payment.payment_method
         email_context["payment"]["amount"] = db_payment.currency_symbol + str(formated_payment_amount) + db_payment.currency_acronym
