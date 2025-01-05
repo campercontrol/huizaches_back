@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 
@@ -42,7 +42,7 @@ from schema.campers.parent_schema import(
 
 )
 
-from crud.crud_user import create_new_user, get_user_by_email
+from crud.crud_user import create_new_user, get_user_by_email, create_parent_complete
 from utils.db import SessionLocal
 from utils.image_tools import img_to_base_64
 from utils.pdf.baucher_pago import generar_pdf_baucher
@@ -89,20 +89,17 @@ def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
 
 
 @parent_routes.post("/parent_create/", tags=["Campers"])
-def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
-    user = get_user_by_email(db, new_parent_complete.user.email)
-    if user:
-        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese correo"}}    
-    user = create_new_user(db, new_parent_complete.user)
+def parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
     
-    if user == None:
-        return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
-    parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
+    result = create_parent_complete(db, new_parent_complete)
     
-    if parent == None:
-        return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "La cuenta se creo correctamente"}}
+    if result == 2:
+        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error desconocido al crear la cuenta"})
     
-    return {"detail": {"status": 1, "msg": "Se creó correctamente la cuenta"}}
 
 @parent_routes.patch("/parent/{parent_id}", tags=["Campers"])
 def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends(get_db)):

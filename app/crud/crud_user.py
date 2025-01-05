@@ -21,6 +21,8 @@ from crud.camps.staff_in_camp_crud import get_staff_all_camps_by_staff_id
 from crud.trophies.trophy_staff_crud import get_all_staff_trophies
 from crud.training.staff_in_training_crud import get_all_staff_training
 from crud.campers.camper_crud import get_campers_in_school
+from crud.campers.parent_crud import create_new_parent_user_id, create_new_parent_user_id_transaction
+
 def get_all_user(db, is_active):
     rows = (
         db.query(
@@ -169,6 +171,34 @@ def create_new_user(db, new_user):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_user
 
+
+
+def create_new_user_transaction(db, new_user):
+    db_user = User(
+        email=new_user.email,
+        hashed_pass=hash_str(new_user.passw),
+        role_id=new_user.role_id,
+        is_superuser=new_user.is_superuser                
+    )
+    db.add(db_user)
+    db.flush()
+    return db_user
+
+def create_parent_complete(db: Session, new_parent_complete):
+   
+    try: 
+        user = get_user_by_email(db, new_parent_complete.user.email)
+
+        if user:
+            return 2
+        user = create_new_user_transaction(db, new_parent_complete.user)
+        create_new_parent_user_id_transaction(db, new_parent_complete.parent, user.id)
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 def create_new_user_admin(db, new_user):
     db_user = User(

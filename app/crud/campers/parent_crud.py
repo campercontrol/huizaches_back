@@ -117,6 +117,40 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
             
     return db_parent
 
+def create_new_parent_user_id_transaction(db, new_parent: ParentCreate, user_id: int):
+    db_parent = None
+    user_email_welcome_template = 16
+    admin_email_welcome_template = 18
+   
+    new_parent.user_id = user_id
+    user = db.query(User).filter(User.id == user_id).first()
+    db_parent = Parent(**new_parent.dict())
+    db.add(db_parent)
+    db.flush()
+    
+        # send mail to parents
+    parent = get_parent_by_id_mailing(db, db_parent.id)
+    second_parent = get_second_tutor_by_parent_id(db, db_parent.id)
+    
+    parent_context = {
+        "user": parent
+    }
+    second_parent_context = {
+        "user": second_parent
+    }
+    
+    send_mail_template(db, parent['email'], user_email_welcome_template, parent_context)
+    send_mail_template(db, second_parent['email'], user_email_welcome_template, second_parent_context)
+
+    admin_users = get_admin_users_for_mailing(db)
+
+    for admin_user in admin_users:
+        admin_user_context = {
+            "user": admin_user
+        }  
+        send_mail_template(db, admin_user["email"], admin_email_welcome_template, admin_user_context)
+    
+    return db_parent
 
 
 def get_second_tutor_by_parent_id(db: Session, parent_id: int):
