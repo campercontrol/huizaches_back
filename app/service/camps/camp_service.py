@@ -246,6 +246,8 @@ def subscrible_camper_to_multiple_camps(
     camps_id: list[int], camper_id: int, db: Session = Depends(get_db)
 ):
     data = subscribe_camper_to_camps(db, camps_id, camper_id)
+    if data["status"] == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrió un error desconocido al inscribirse"})
     if data["status"] == 1:
         return {"status": data["status"], "prev_camps": data["prev_camps"]}
     else:

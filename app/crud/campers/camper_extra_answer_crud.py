@@ -35,9 +35,15 @@ def create_new_extra_answer(db, new_extra_answer: CamperExtraAnswerCreate):
         db_extra_answer = None
         return db_extra_answer
     except Exception as e:
-        print(f"No se pudo guardar en la base de datos: {ex}")
+        print(f"No se pudo guardar en la base de datos: {e}")
     return db_extra_answer
 
+def create_new_extra_answer_transaction(db, new_extra_answer: CamperExtraAnswerCreate):
+    
+    db_extra_answer = CamperExtraAnswer(**new_extra_answer.dict())
+    db.add(db_extra_answer)
+    db.flush()
+    return db_extra_answer
 
 def update_extra_answer_by_id(
     db, extra_answers: UpdateCamperExtraAnswer

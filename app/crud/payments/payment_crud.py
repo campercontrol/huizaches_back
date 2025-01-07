@@ -96,6 +96,18 @@ def create_new_payment(db, new_payment: PaymentCreate):
         print(f"An error ocurred while saving new payment {ex}")
     return db_payment    
     
+def create_new_payment_transaction(db, new_payment: PaymentCreate):
+    if new_payment["payment_amount"] < 0:
+        new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+    
+    if new_payment["txn_type_id"] in (1,2,9):
+        new_payment["payment_amount"] = new_payment["payment_amount"] * -1
+    
+    db_payment = Payment(**new_payment)
+    db.add(db_payment)
+    db.flush()
+    return db_payment   
+    
 def create_new_payment_and_update_balance(db, new_payment: PaymentCreate):
     camper_id = new_payment["camper_id"]
     camp_id = new_payment["camp_id"]

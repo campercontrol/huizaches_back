@@ -53,6 +53,18 @@ def create_new_camper_extra_charge(
     return db_camper_extra_charge
 
 
+
+def create_new_camper_extra_charge_transaction(
+    db, new_camper_extra_charge: CamperExtraChargeCreate
+):
+
+    db_camper_extra_charge = CamperExtraCharge(**new_camper_extra_charge.dict())
+    db.add(db_camper_extra_charge)
+    db.flush()
+    return db_camper_extra_charge
+
+
+
 def update_camper_extra_charge_by_id(
     db, camper_extra_charge_id: int, modify_camper_extra_charge: CamperExtraChargeModify
 ):
