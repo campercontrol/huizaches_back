@@ -50,6 +50,8 @@ def get_camper_info_mailing(db: Session, camper_id: int):
     query = db.query(
         Camper.name,
         func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label('fullname'),
+        Camper.lastname_father,
+        Camper.lastname_mother,
         catalog_grade.value.label('grade'),
         School.name.label("school")
     ).join(
