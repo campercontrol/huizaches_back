@@ -9,3 +9,4 @@ from model.camps.camp_checkpoint import CampCheckpoint
 from model.camps.staff_in_camp import StaffInCamp
 from model.camps.camp_discount import CampDiscount
 from model.camps.tribe import Tribe
+from model.camps.camp_staff import CampStaff
