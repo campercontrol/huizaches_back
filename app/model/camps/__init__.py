@@ -12,3 +12,4 @@ from model.camps.tribe import Tribe
 from model.camps.camp_staff import CampStaff
 from model.camps.camp_staff_available import CampStaffAvailable
 from model.camps.tribe_camp import TribeCamp
+from model.camps.tribe_camper import TribeCamper
