@@ -1,6 +1,6 @@
 from sqlalchemy import Column,  Integer, ForeignKey, UniqueConstraint
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, 
+from sqlalchemy import Column, DateTime, Integer 
 from utils.db import Base
 class StaffSkills(Base):
     __tablename__ = 'staff_staff_skills'
