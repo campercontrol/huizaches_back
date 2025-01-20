@@ -13,8 +13,8 @@ class CampCampaign(Base):
     )
 
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    campaign_id = Column(ForeignKey("mailing_campaign.id", ondelete="cascade"), doc="Campaña de mail")
-    camp_id = Column(ForeignKey("camps_camp.id"), doc="Campamento")
+    campaign_id = Column(ForeignKey("mailing_campaign.id", ondelete="cascade"), nullable=False, doc="Campaña de mail")
+    camp_id = Column(ForeignKey("camps_camp.id"), nullable=False, doc="Campamento")
 
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
