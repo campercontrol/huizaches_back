@@ -19,7 +19,7 @@ class PaymentAccount(Base):
     id =Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True) 
     name = Column("name", String(150), nullable=False, default='')
     bank = Column("bank", String(30), nullable=False, default='')
-    account_number = Column("account_number", String(10), nullable=False)
+    account_number = Column("account_number", String(12), nullable=False)
     clabe_number = Column("clabe_number", String(18), nullable=False)
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
