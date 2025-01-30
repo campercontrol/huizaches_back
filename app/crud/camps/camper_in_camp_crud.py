@@ -461,7 +461,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             second_parent = get_second_tutor_by_camper_id(db, camper_id)
             parent = get_parent_by_camper_id(db, camper_id)
             admin_users = get_admin_users_for_mailing(db)
-            transaction_type = get_payment_transaction_type_by_movement(db, 1)
+            transaction_type = 1
             for camp_id in camps_id:
                 camp_data_mailing = get_camp_info_by_id_mailing(db, camp_id)
                 camper_in_camp = (
@@ -572,7 +572,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                     "camper_id": camper_id,
                     "currency_id": camp.currency_id,
                     "parent_id": parent["id"],
-                    "txn_type_id": transaction_type["id"]           
+                    "txn_type_id": transaction_type           
                 }
                 create_new_payment_transaction(db, payment)
         
@@ -638,7 +638,7 @@ def update_camper_extra_charges(
                     try:
                         camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
                         parent = get_parent_by_camper_id(db, camper_id)
-                        transaction_type = get_payment_transaction_type_by_movement(db, 6)
+                        transaction_type = 7
                         payment_extra_charge = {
                             "paid": False,
                             "payment_amount": int(extra_charge.camp_extra_charge_price),
@@ -648,7 +648,7 @@ def update_camper_extra_charges(
                             "camper_id": camper_id,
                             "currency_id": camp_extra_charge.currency_id,
                             "parent_id": parent["id"],
-                            "txn_type_id": transaction_type["id"]
+                            "txn_type_id": transaction_type
                                 
                         }
                         payment = create_new_payment_and_update_balance(db, payment_extra_charge)
@@ -736,7 +736,7 @@ def create_update_camper_extras_camps(
                 created_extra_charge = create_new_camper_extra_charge(db, extra_charge_new)
                 camp_extra_charge = get_extra_charge_by_id(db, created_extra_charge.extra_charge_id)
                 parent = get_parent_by_camper_id(db, camper_id)
-                transaction_type = get_payment_transaction_type_by_movement(db, 6)
+                transaction_type = 7
                 payment_extra_charge = {
                     "paid": False,
                     "payment_amount": extra_charge.extra_charge_price,
@@ -746,7 +746,7 @@ def create_update_camper_extras_camps(
                     "camper_id": extra_charge.camper_id,
                     "currency_id": camp_extra_charge.currency_id,
                     "parent_id": parent["id"],
-                    "txn_type_id": transaction_type["id"]
+                    "txn_type_id": transaction_type
                     
                 }
                 create_new_payment_and_update_balance(db, payment_extra_charge)
@@ -778,7 +778,7 @@ def create_update_camper_extras_camp(
                 if camper_extra_charge.payment_id == None:
                     camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
                     parent = get_parent_by_camper_id(db, camper_id)
-                    transaction_type = get_payment_transaction_type_by_movement(db, 6)
+                    transaction_type = 7
                     payment_extra_charge = {
                         "paid": False,
                         "payment_amount": int(extra_charge.camp_extra_charge_price),
@@ -788,7 +788,7 @@ def create_update_camper_extras_camp(
                         "camper_id": camper_id,
                         "currency_id": camp_extra_charge.currency_id,
                         "parent_id": parent["id"],
-                        "txn_type_id": transaction_type["id"]
+                        "txn_type_id": transaction_type
                             
                     }
                     payment = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)

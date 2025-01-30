@@ -97,8 +97,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             # camper comments
             total_camper_comments = db.query(func.count(CamperComment.id)).select_from(CamperComment).filter(CamperComment.camper_id == camper.camper_id).scalar() 
             # total_amount, and count of all payments
-            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 1)).scalar()
-            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 1)).scalar()
+            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 3)).scalar()
+            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 3)).scalar()
 
             total_payments = {
                 "amount": camper_payments_total_amount or 0,
@@ -114,8 +114,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             }
             
             #total amount of refunds
-            camper_total_refund_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 11)).scalar() 
-            camper_total_refund_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 11)).scalar()
+            camper_total_refund_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 4)).scalar() 
+            camper_total_refund_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 4)).scalar()
 
             refunds = {
                 "amount": camper_total_refund_amount or 0,

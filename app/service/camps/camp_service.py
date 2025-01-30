@@ -180,8 +180,8 @@ def subscribe_camp(
         camper_id=new_camper_in_camp.camper_id,
         currency_id=camp.currency_id,
         parent_id=camper.parent_id,
-        payment_method_id=3,
-        txn_type_id=2,
+        payment_method_id=6,
+        txn_type_id=3,
     )
     return {"camper_in_camp": camper_in_camp, "payment": payment}
 
