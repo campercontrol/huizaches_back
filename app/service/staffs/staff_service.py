@@ -86,7 +86,7 @@ def get_prospects(db: Session = Depends(get_db)):
 
 @staff_routes.get("/staff/", tags=["Staff"])
 def get_staff(db: Session = Depends(get_db)):
-    update_all_staff_record_status(db)
+    # update_all_staff_record_status(db)
     list_staff = get_all_staff(db)
     return {"data": list_staff}
 
