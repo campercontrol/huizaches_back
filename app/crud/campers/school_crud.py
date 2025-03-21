@@ -343,3 +343,4 @@ def school_dashboard(db: Session, school_id: int):
     #         "is_employee": user[1],
     #         "complete_profile": complete_profile,
     #     }
+    
