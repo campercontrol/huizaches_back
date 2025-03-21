@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 
 from model.campers import CamperFoodRestriction
+from model.catalogs import FoodRestriction
 from schema.campers_catalogs.camper_food_restriction_schema import (
     CamperFoodRestrictionCreate,
     CamperFoodRestrictionModify,
 )
+
 
 
 def get_all_camper_food_restriction(db: Session):
@@ -28,7 +30,18 @@ def get_camper_food_restriction_by_uuid(db: Session, camper_food_restriction_id:
         )
         .first()
     )
-
+def get_camper_food_restriction(db, camper_id):
+    rows = (
+        db.query(
+            FoodRestriction.id,
+            FoodRestriction.name,
+            CamperFoodRestriction.is_active,
+        ).select_from(CamperFoodRestriction)
+        .join(FoodRestriction, CamperFoodRestriction.food_restriction_id == FoodRestriction.id)
+        .filter(CamperFoodRestriction.camper_id == camper_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
 
 def create_new_camper_food_restriction(
     db: Session, new_camper_food_restriction: CamperFoodRestrictionCreate

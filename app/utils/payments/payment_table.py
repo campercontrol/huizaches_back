@@ -3,7 +3,10 @@ def get_payment_table(db, payments):
     balance = 0
     for payment in payments:
         balance = balance + payment.payment_amount
-        txn_number = payment.txn_name + " *" + payment.txn_number+"* " + "Metodo de pago: " +payment.payment_method  
+        if payment.payment_method == None:
+            txn_number = payment.txn_name + ": " + payment.txn_number +" " + "Método de pago: " + "N/A" 
+        else:
+            txn_number = payment.txn_name + " *" + payment.txn_number+"* " + "Método de pago: " +payment.payment_method  
         payment_table.append(
             {
                 "id": payment.id,
@@ -16,3 +19,39 @@ def get_payment_table(db, payments):
     return payment_table
         
     
+def create_payment_table(db, payments):
+    
+    payment_table = []
+    balance = 0
+    for payment in payments:
+        
+        
+        balance = balance + payment.payment_amount
+        if payment.payment_method == None:
+            txn_number = payment.txn_name + ": " + payment.txn_number +" " + "Método de pago: " + "N/A" 
+        else:
+            txn_number = payment.txn_name + " *" + payment.txn_number+"* " + "Método de pago: " +payment.payment_method  
+    
+        formated_amount = "{:,.1f}".format(abs(payment.payment_amount))
+        formated_balance = "{:,.1f}".format(balance)
+        
+        payment_row = {
+                "id": payment.id,
+                "payment_date": payment.payment_date,
+                "txn_number": txn_number, 
+                "charge": "",
+                "pay": "",
+                "balance": payment.currency_symbol + formated_balance + " " + payment.currency_acronym              
+            }
+        
+        if payment.txn_type_id in (3,2,5,4):
+            payment_row["pay"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
+        
+        else:
+            payment_row["charge"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
+        
+        payment_table.append(payment_row)
+        
+    return payment_table    
+
+

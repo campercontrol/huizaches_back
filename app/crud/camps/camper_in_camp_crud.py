@@ -1,18 +1,23 @@
-from sqlalchemy import case, and_
+from sqlalchemy import case, distinct, and_
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
-from datetime import date
-
+from datetime import date, datetime
+from model.groupings.grouping import Grouping
+from model.groupings.grouping_camp import GroupingCamp
+from model.groupings.grouping_camper import GroupingCamper
+from model.groupings.grouping_type import GroupingType
 from model.camps import CamperInCamp, Camp, Location, CampExtraCharge, CampExtraQuestion
 from model.campers import Camper, CamperRecord, Parent, School, CamperExtraAnswer
-from model.payments import CamperExtraCharge
+from model.payments import CamperExtraCharge, Payment
 from model.catalogs import Constant, Currency
 from model.user import User
 from schema.camps.camper_in_camp_schema import (
     CamperInCampCreate,
     CamperInCampModify,
 )
+
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     ExtraAnswerMultiple,
@@ -23,11 +28,19 @@ from schema.payments.camper_extra_charge_schema import (
 )
 from schema.payments.payment_schema import PaymentCreate
 
-from crud.campers.camper_extra_answer_crud import create_new_extra_answer
-from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge
+from crud.campers.camper_extra_answer_crud import create_new_extra_answer, get_extra_answer_by_uuid, create_new_extra_answer_transaction
+from crud.payments.camper_extra_charge_crud import create_new_camper_extra_charge, get_camper_extra_charge_by_id, create_new_camper_extra_charge_transaction, create_new_payment_and_update_balance_transaction
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin
-
+from crud.camps.camp_extra_charge_crud import get_extra_charge_by_id, get_extra_charge_by_camp
+from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
+from crud.campers.camper_crud import get_camper_by_uuid
+from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
+from crud.camps.camp_extra_question_crud import get_extra_question_by_camp
+from crud.mailings.mailing_crud import get_admin_users_for_mailing, get_camper_info_mailing, get_camp_info_by_id_mailing
 from helper.camper_helpers import update_record_campers
+from helper.mailing_helpers import send_mail_template
+
+from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment_and_update_balance, create_new_payment, create_new_payment_transaction, delete_payment_and_update_balance
 
 
 def get_all_camper_in_camp(db: Session):
@@ -61,6 +74,21 @@ def create_new_camper_in_camp(db: Session, new_camper_in_camp: CamperInCampCreat
     return db_camper_in_camp
 
 
+def create_new_camper_in_camp_transaction(db: Session, new_camper_in_camp: CamperInCampCreate):
+    camp_price = (
+        db.query(Camp.public_price).filter_by(id=new_camper_in_camp.camp_id).first()
+    )
+    db_camper_in_camp = CamperInCamp(
+        camp_id=new_camper_in_camp.camp_id,
+        status=new_camper_in_camp.status,
+        payment_balance=getattr(camp_price, "public_price"),
+        camper_id=new_camper_in_camp.camper_id,
+    )
+    db.add(db_camper_in_camp)
+    db.flush()
+    return db_camper_in_camp
+
+
 def update_camper_in_camp_by_id(
     db: Session,
     camp_id: int,
@@ -89,8 +117,10 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
+            Camp.show_payment_parent,
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
+            Camp.show_payment_parent,
             CamperInCamp.payment_balance.label("camper_payment_balance"),
             Currency.symbol.label("currency_symbol"),
             Currency.acronyms.label("currency_acronyms"),
@@ -121,10 +151,14 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
             Location.name.label("location_name"),
+            Camp.show_payment_parent,
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label("currency_acronyms"),
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Constant, CamperInCamp.status == Constant.id)
         .join(Location, Camp.location_id == Location.id)
         .filter(
@@ -173,11 +207,46 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
             Camp.name.label("camp_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
+            Camp.show_payment_parent,
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
             CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label("currency_acronyms"),
+            
         )
         .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .join(Constant, CamperInCamp.status == Constant.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
+        .join(Location, Camp.location_id == Location.id)
+        .filter(
+            and_(
+                CamperInCamp.camper_id == camper_id,
+                CamperInCamp.status == 36,
+                Camp.active == True,
+                Camp.start < date.today(),
+            )
+        )
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
+
+def get_past_due_camps_by_camper(db: Session, camper_id: int):
+    rows = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Camp.show_payment_parent,
+            Location.name.label("location_name"),
+            Camp.public_price.label("public_price"),
+            CamperInCamp.payment_balance.label("camper_payment_balance"),
+            Currency.symbol.label("currency_symbol"),
+            Currency.acronyms.label('currency_acronyms')
+        )
+        .join(Camp, CamperInCamp.camp_id == Camp.id)
+        .outerjoin(Currency, Currency.id == Camp.currency_id)
         .join(Constant, CamperInCamp.status == Constant.id)
         .join(Location, Camp.location_id == Location.id)
         .filter(
@@ -186,6 +255,7 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
                 CamperInCamp.status == 36,
                 Camp.active == True,
                 Camp.start < date.today(),
+                CamperInCamp.payment_balance >= 0   
             )
         )
         .all()
@@ -239,6 +309,7 @@ def get_camps_name_amount_camper(db: Session, camper_id: int):
                 "camper_payment_balance": getattr(camp, "camper_payment_balance"),
                 "currency_symbol": getattr(camp, "currency_symbol"),
                 "currency_acronyms": getattr(camp, "currency_acronyms"),
+                "show_payment_parent": getattr(camp, "show_payment_parent")
             }
         )
     """
@@ -332,6 +403,26 @@ def get_campers_for_camp(db: Session, camp_id: int):
     return campers_complete
 
 
+def get_campers_in_camp_mailing(db, camp_id):
+        
+    query = (
+        db.query(
+            Camper.id,
+            (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('camper_full_name'),
+            (Parent.tutor_name + ' ' + Parent.tutor_lastname_father + ' ' + Parent.tutor_lastname_mother).label('tutor_full_name'),
+            (Parent.contact_name + ' ' + Parent.contact_lastname_father + ' ' + Parent.contact_lastname_mother).label('second_tutor_full_name'),
+            Parent.contact_email.label('second_tutor_email'),
+            User.email.label('tutor_email')
+        )
+        .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+        .join(Parent, Parent.id == Camper.parent_id)
+        .join(User, User.id == Parent.user_id)
+        .filter(CamperInCamp.camp_id == camp_id)
+    )
+    
+    data = db.execute(query)
+    return data.mappings().all()
+
 def get_campers_for_bracelets(db, camp_id):
     list_campers = (
         db.query(
@@ -360,115 +451,238 @@ def get_campers_for_bracelets(db, camp_id):
 
 
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
-    extra_charges = []
-    extra_questions = []
-
-    prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
-    for camp_id in camps_id:
-        camper_in_camp = (
-            db.query(CamperInCamp)
-            .filter(
-                and_(
-                    CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
+    try:
+            extra_charges = []
+            camp_registration_parent_template_id = 197
+            camp_registration_staff_template_id = 10
+            prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
+            camper = get_camper_by_uuid(db, camper_id)
+            camper_data_mailing = get_camper_info_mailing(db, camper_id)
+            second_parent = get_second_tutor_by_camper_id(db, camper_id)
+            parent = get_parent_by_camper_id(db, camper_id)
+            admin_users = get_admin_users_for_mailing(db)
+            transaction_type = 1
+            for camp_id in camps_id:
+                camp_data_mailing = get_camp_info_by_id_mailing(db, camp_id)
+                camper_in_camp = (
+                    db.query(CamperInCamp)
+                    .filter(
+                        and_(
+                            CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
+                        )
+                    )
+                    .first()
                 )
-            )
-            .first()
-        )
-        camp = db.query(Camp).filter(Camp.id == camp_id).first()
+                # remove cancelled camp
+                if camper_in_camp:  
+                    camper_extra_answers = (
+                        db.query(CamperExtraAnswer).join(CampExtraQuestion, CamperExtraAnswer.question_id == CampExtraQuestion.id)
+                        .where(and_(CamperExtraAnswer.camper_id == camper_id, 
+                                CampExtraQuestion.camp_id == camp_id)).all())
+                    if camper_extra_answers:
+                        for camper_extra_answer in camper_extra_answers:
+                            camper_extra_answer_to_delete = db.query(CamperExtraAnswer).filter(CamperExtraAnswer.id == camper_extra_answer.id).first()
+                            db.delete(camper_extra_answer_to_delete)
+                    camper_extra_charges = (
+                        db.query(CamperExtraCharge).join(CampExtraCharge, CamperExtraCharge.extra_charge_id == CampExtraCharge.id)
+                        .where(and_(CamperExtraCharge.camper_id == camper_id,
+                                    CampExtraCharge.camp_id == camp_id)).all())
+                    if camper_extra_charges:
+                        for camper_extra_charge in camper_extra_charges:
+                            camper_extra_charge_to_delete = db.query(CamperExtraCharge).filter(CamperExtraCharge.id == camper_extra_charge.id).first()
+                            db.delete(camper_extra_charge_to_delete)
+                    
+                    camp_payments = db.query(Payment).where(and_(Payment.camp_id == camp_id, Payment.camper_id == camper_id)).all()
+                    if camp_payments:
+                        for camp_payment in camp_payments:
+                            db.delete(camp_payment) 
 
-        camp_extra_charges = (
-            db.query(
-                Camp.id.label("camp_id"),
-                Camp.name.label("camp_name"),
-                CampExtraCharge.id.label("camp_extra_charge_id"),
-                CampExtraCharge.name.label("camp_extra_charge_name"),
-                CampExtraCharge.price.label("camp_extra_charge_price"),
-                CamperExtraCharge.id.label("camper_extra_charge_id"),
-                CamperExtraCharge.is_selected.label("camp_extra_charge_is_selected"),
-            )
-            .outerjoin(
-                CamperExtraCharge,
-                CamperExtraCharge.extra_charge_id == CampExtraCharge.id,
-            )
-            .join(Camp, Camp.id == CampExtraCharge.camp_id)
-            .filter(
-                and_(
-                    CampExtraCharge.camp_id == camp_id,
-                    CamperExtraCharge.camper_id == camper_id,
+                    db.delete(camper_in_camp)                
+                    db.flush()
+                
+                camp = db.query(Camp).filter(Camp.id == camp_id).first()
+                extra_charges_camp = get_extra_charge_by_camp(db, camp.id)
+                
+                if extra_charges_camp:
+                    for extra_charge_camp in extra_charges_camp:
+                        new_camper_extra_charge_obj = CamperExtraChargeCreate(
+                            is_selected=False,
+                            camper_id=camper.id,
+                            extra_charge_id=extra_charge_camp.id
+                            
+                        )
+                        create_new_camper_extra_charge_transaction(db, new_camper_extra_charge_obj)
+                    
+                camp_extra_charges = (
+                    db.query(
+                        Camp.id.label("camp_id"),
+                        Camp.name.label("camp_name"),
+                        CampExtraCharge.id.label("camp_extra_charge_id"),
+                        CampExtraCharge.name.label("camp_extra_charge_name"),
+                        CampExtraCharge.price.label("camp_extra_charge_price"),
+                        CamperExtraCharge.id.label("camper_extra_charge_id"),
+                        CamperExtraCharge.payment_id.label("camper_extra_charge_payment_id"),
+                        CamperExtraCharge.is_selected.label("camp_extra_charge_is_selected"),
+                    )
+                    .outerjoin(
+                        CamperExtraCharge,
+                        CamperExtraCharge.extra_charge_id == CampExtraCharge.id,
+                    )
+                    .join(Camp, Camp.id == CampExtraCharge.camp_id)
+                    .filter(
+                        and_(
+                            CampExtraCharge.camp_id == camp_id,
+                            CamperExtraCharge.camper_id == camper_id,
+                        )
+                    )
+                    .all()
                 )
-            )
-            .all()
-        )
-        for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
-            extra_charges.append(camp_extra_charge)
+                for camp_extra_charge in db_mapping_rows_to_dict(camp_extra_charges):
+                    extra_charges.append(camp_extra_charge)
 
-        camp_extra_questions = (
-            db.query(
-                Camp.id.label("camp_id"),
-                Camp.name.label("camp_name"),
-                CampExtraQuestion.id.label("camp_extra_question_id"),
-                CampExtraQuestion.question.label("camp_extra_question_question"),
-                CampExtraQuestion.is_required.label("camp_extra_question_required"),
-                CamperExtraAnswer.id.label("camper_extra_answer_id"),
-                CamperExtraAnswer.answer.label("camp_extra_answer_answer"),
-            )
-            .outerjoin(
-                CamperExtraAnswer,
-                CamperExtraAnswer.question_id == CampExtraQuestion.id,
-            )
-            .join(Camp, Camp.id == CampExtraQuestion.camp_id)
-            .filter(
-                and_(
-                    CampExtraQuestion.camp_id == camp_id,
-                    CamperExtraAnswer.camper_id == camper_id,
+                camp_extra_questions = get_extra_question_by_camp(db, camp.id)
+                
+                if camp_extra_questions:
+                    for camp_extra_question in camp_extra_questions:
+                        new_camper_extra_answer_obj = CamperExtraAnswerCreate(
+                            answer= '',
+                            camper_id = camper.id,
+                            question_id = camp_extra_question.id,
+                                        
+                        )
+                    create_new_extra_answer_transaction(db, new_camper_extra_answer_obj)
+                extra_questions = get_extra_answer_by_camper_camp(db, camper.id, camp.id)
+                
+                
+                new_camper_in_camp = CamperInCampCreate(
+                    camper_id=camper_id,
+                    camp_id=camp_id,
+                    status=36,
+                    payment_balance=getattr(camp, "public_price"),
                 )
-            )
-            .all()
-        )
-        for camp_extra_question in db_mapping_rows_to_dict(camp_extra_questions):
-            extra_questions.append(camp_extra_question)
+                camper_in_camp_nw = create_new_camper_in_camp_transaction(db, new_camper_in_camp)
+                
+                # se genera el costo del camp
+                payment = {
+                    "paid": False,
+                    "payment_amount": camp.public_price,
+                    "txn_number": "Camper:" + camper.name, 
+                    "camp_id": camp_id,
+                    "payment_date": datetime.now(),
+                    "camper_id": camper_id,
+                    "currency_id": camp.currency_id,
+                    "parent_id": parent["id"],
+                    "txn_type_id": transaction_type           
+                }
+                create_new_payment_transaction(db, payment)
+        
+            update_record_campers(db, camper_id)
 
-        if camper_in_camp and getattr(camper_in_camp, "status") != 36:
-            db.query(CamperInCamp).filter(
-                and_(
-                    CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id
-                )
-            ).update({"status": 36})
-            db.commit()
-        elif not camper_in_camp:
-            new_camper_in_camp = CamperInCampCreate(
-                camper_id=camper_id,
-                camp_id=camp_id,
-                status=36,
-                payment_balance=getattr(camp, "public_price"),
-            )
-            camper_in_camp_nw = create_new_camper_in_camp(db, new_camper_in_camp)
+            # enviamos un correo a los tutores de cuenta
+            # tutor principal
+            tutor_context = {
+                "camper": camper_data_mailing,
+                "user": parent,
+                "camp": camp_data_mailing
+            }
+            # tutor secundario
+            second_tutor_context = {
+                "camper": camper_data_mailing,
+                "user": second_parent,
+                "camp": camp_data_mailing
+            }
 
-    update_record_campers(db, camper_id)
+            send_mail_template(db, parent['email'],camp_registration_parent_template_id, tutor_context)
+            send_mail_template(db, second_parent['email'],camp_registration_parent_template_id, second_tutor_context)
+            
+            # enviamos un correo a todas las cuentas admin    
+            for admin_user in admin_users:
+                admin_user_context = {
+                    "camper": camper_data_mailing,
+                    "user": admin_user,
+                    "camp": camp_data_mailing
+                }  
+                send_mail_template(db, admin_user['email'], camp_registration_staff_template_id, admin_user_context)
+            
+            # Aqui vamos a poner si ya tuvo un campamento previo o no.
 
-    # Aqui vamos a poner si ya tuvo un campamento previo o no.
+            if prev_camper_in_camp:
+                status_prev_sub = 1
+            else:
+                status_prev_sub = 0
+            if extra_charges or extra_questions:
+                return {
+                    "status": 2,
+                    "prev_camps": status_prev_sub,
+                    "extra_charges": extra_charges,
+                    "extra_questions": extra_questions,
+                }
+            else:
+                return {"status": 1, "prev_camps": status_prev_sub}
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return {"status": 3}
 
-    if prev_camper_in_camp:
-        status_prev_sub = 1
-    else:
-        status_prev_sub = 0
-    if extra_charges or extra_questions:
-        return {
-            "status": 2,
-            "prev_camps": status_prev_sub,
-            "extra_charges": extra_charges,
-            "extra_questions": extra_questions,
-        }
-    else:
-        return {"status": 1, "prev_camps": status_prev_sub}
+def update_camper_extra_charges(
+    db,
+    camper_id: int,
+    extra_charges: "list[ExtraChargeMultiple]",
+):
+    if extra_charges:
+        for extra_charge in extra_charges:
+            camper_extra_charge = get_camper_extra_charge_by_id(db, extra_charge.camper_extra_charge_id)
+
+            if extra_charge.camp_extra_charge_is_selected == True:
+                if camper_extra_charge.payment_id == None:
+                    try:
+                        camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
+                        parent = get_parent_by_camper_id(db, camper_id)
+                        transaction_type = 7
+                        payment_extra_charge = {
+                            "paid": False,
+                            "payment_amount": int(extra_charge.camp_extra_charge_price),
+                            "txn_number": "Costo extra" + " "+ extra_charge.camp_extra_charge_name,
+                            "camp_id": extra_charge.camp_id,
+                            "payment_date": datetime.now(),
+                            "camper_id": camper_id,
+                            "currency_id": camp_extra_charge.currency_id,
+                            "parent_id": parent["id"],
+                            "txn_type_id": transaction_type
+                                
+                        }
+                        payment = create_new_payment_and_update_balance(db, payment_extra_charge)
+
+                        camper_extra_charge.payment_id = payment.id
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)
+                        return 3
+                    
+            if extra_charge.camp_extra_charge_is_selected == False:
+                if camper_extra_charge.payment_id:
+                    delete_payment_and_update_balance(db, camper_extra_charge.payment_id, camper_extra_charge.camper_id)
+                    try:
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)
+                        return 3
+        return 1
+                         
 
 
-def create_update_camper_extras_camp(
+def create_update_camper_extras_camps(
     db,
     camper_id: int,
     extra_answers: list[ExtraAnswerMultiple],
     extra_charges: list[ExtraChargeMultiple],
-):
+):    
+    
     if extra_answers:
         for extra_answer in extra_answers:
             if (
@@ -510,15 +724,91 @@ def create_update_camper_extras_camp(
                     }
                 )
             ):
+                print("updated")
                 db.commit()
             else:
+                print("executing")
                 extra_charge_new = CamperExtraChargeCreate(
                     is_selected=extra_charge.camp_extra_charge_is_selected,
                     camper_id=camper_id,
                     extra_charge_id=extra_charge.camp_extra_charge_id,
                 )
-                status = create_new_camper_extra_charge(db, extra_charge_new)
+                created_extra_charge = create_new_camper_extra_charge(db, extra_charge_new)
+                camp_extra_charge = get_extra_charge_by_id(db, created_extra_charge.extra_charge_id)
+                parent = get_parent_by_camper_id(db, camper_id)
+                transaction_type = 7
+                payment_extra_charge = {
+                    "paid": False,
+                    "payment_amount": extra_charge.extra_charge_price,
+                    "txn_number": "Costo extra" + extra_charge.extra_charge_name,
+                    "camp_id": extra_charge.camp_id,
+                    "payment_date": datetime.now(),
+                    "camper_id": extra_charge.camper_id,
+                    "currency_id": camp_extra_charge.currency_id,
+                    "parent_id": parent["id"],
+                    "txn_type_id": transaction_type
+                    
+                }
+                create_new_payment_and_update_balance(db, payment_extra_charge)
+                
+    return 1
 
+def create_update_camper_extras_camp(
+    db,
+    camper_id: int,
+    extra_answers: list[ExtraAnswerMultiple],
+    extra_charges: list[ExtraChargeMultiple],
+):    
+    if extra_answers:
+        for extra_answer in extra_answers:
+            db_extra_answer = get_extra_answer_by_uuid(db, extra_answer.camper_extra_answer_id)
+            try:
+                db_extra_answer.answer = extra_answer.answer
+                db.commit()
+            except Exception as ex:
+                db.rollback()
+                print(ex)
+                
+
+    if extra_charges:
+        for extra_charge in extra_charges:
+            camper_extra_charge = get_camper_extra_charge_by_id(db, extra_charge.camper_extra_charge_id)
+
+            if extra_charge.camp_extra_charge_is_selected == True:
+                if camper_extra_charge.payment_id == None:
+                    camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
+                    parent = get_parent_by_camper_id(db, camper_id)
+                    transaction_type = 7
+                    payment_extra_charge = {
+                        "paid": False,
+                        "payment_amount": int(extra_charge.camp_extra_charge_price),
+                        "txn_number": "Costo extra" + " "+ extra_charge.camp_extra_charge_name,
+                        "camp_id": extra_charge.camp_id,
+                        "payment_date": datetime.now(),
+                        "camper_id": camper_id,
+                        "currency_id": camp_extra_charge.currency_id,
+                        "parent_id": parent["id"],
+                        "txn_type_id": transaction_type
+                            
+                    }
+                    payment = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)
+                    try:
+                        camper_extra_charge.payment_id = payment.id
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)
+                    
+            if extra_charge.camp_extra_charge_is_selected == False:
+                if camper_extra_charge.payment_id:
+                    delete_payment_and_update_balance(db, camper_extra_charge.payment_id, camper_extra_charge.camper_id)
+                    try:
+                        camper_extra_charge.is_selected = extra_charge.camp_extra_charge_is_selected;
+                        db.commit()
+                    except Exception as ex:
+                        db.rollback()
+                        print(ex)                
     return 1
 
 
@@ -526,8 +816,75 @@ def get_camper_in_camp_by_camper(db, camper_id: int):
     data = db.query(CamperInCamp).filter(CamperInCamp.camper_id == camper_id).all()
     return data
 
+# def get_campers_in_camp_and_groupings(db, camp_id: int):
+#     catalog_one = aliased(Constant)
+#     catalog_two = aliased(Constant)
+    
+#     query = (
+#         db.query(
+#             Camper.id,
+#             (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
+#             Camper.birthday,
+#             catalog_one.value.label('gender'),
+#             catalog_two.value.label('grade'),
+#             func.string_agg(Grouping.name, ',').label('groupings')
+#         )
+#         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+#         .join(catalog_one, Camper.gender_id == catalog_one.id)
+#         .join(catalog_two, Camper.grade == catalog_two.id)
+#         .outerjoin(GroupingCamper, Camper.id == GroupingCamper.camper_id)
+#         .outerjoin(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+#         .outerjoin(Grouping, GroupingCamp.grouping_id == Grouping.id)
+#         .filter(CamperInCamp.camp_id == camp_id)
+#         .group_by(Camper.id, catalog_one.value, catalog_two.value)
+#     )
+    
+#     data = db.execute(query)
+#     return data.mappings().all()
 
+def get_campers_in_camp_and_groupings(db, camp_id: int):
+    catalog_one = aliased(Constant)
+    catalog_two = aliased(Constant)
+    
+    campers_query = (
+        db.query(
+            Camper.id,
+            (Camper.name + ' ' + Camper.lastname_father + ' ' + Camper.lastname_mother).label('name'),
+            Camper.birthday,
+            catalog_one.value.label('gender'),
+            catalog_two.value.label('grade')
+        )
+        .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
+        .join(catalog_one, Camper.gender_id == catalog_one.id)
+        .join(catalog_two, Camper.grade == catalog_two.id)
+        .where(CamperInCamp.camp_id == camp_id)
 
+    )
+    campers = db.execute(campers_query)
+    campers = campers.mappings().all()
+    
+    campers_groupings_data = []
+    for camper in campers:
+        camper = dict(camper)
+        campers_groupings_query = (
+        db.query(
+            Grouping.id,
+            Grouping.name,
+            GroupingType.id.label("grouping_type_id"),
+            GroupingType.name.label("grouping_type_name"),
+            GroupingCamper.id.label("grouping_camper_id")
+        ).select_from(Grouping)
+        .join(GroupingType, GroupingType.id == Grouping.grouping_type_id)
+        .join(GroupingCamp, Grouping.id == GroupingCamp.grouping_id)
+        .join(GroupingCamper, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+        .where(and_(GroupingCamper.camper_id == camper["id"], GroupingCamp.camp_id == camp_id))
+        )
+        campers_groupings = db.execute(campers_groupings_query)
+        campers_groupings = campers_groupings.mappings().all()
+        camper["groupings"] = campers_groupings
+        campers_groupings_data.append(camper)
+        
+    return campers_groupings_data
 """
 Camper extra charges
 {

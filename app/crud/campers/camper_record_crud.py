@@ -34,13 +34,8 @@ def create_new_camper_record(db, new_camper_record: CamperRecordCreate):
         db.add(db_camper_record)
         db.commit()
         db.refresh(db_camper_record)
-    except SQLAlchemyError as e:
-        print("#=================")
-        print(e)
-        print("#=================")
-        db_camper_record = None
-        return db_camper_record
     except Exception as ex:
+        db.rollback()
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_camper_record
 

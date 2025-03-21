@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.catalogs.currency_crud import (
@@ -59,5 +59,10 @@ def modify_currency(currency_id:str,modify_currency:CurrencyModify,db: Session =
 
 @currency_routes.delete("/delete_currency/{currency_id}", tags=["Catalogs"])
 def delete_currency_by_id(currency_id:int, db: Session = Depends(get_db)):
-    status = delete_currency(db, currency_id)
-    return{"status": status}
+    response = delete_currency(db, currency_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Currency not found")
+
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response)
+    return {"detail": response}

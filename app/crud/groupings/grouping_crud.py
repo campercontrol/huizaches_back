@@ -1,12 +1,19 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
+from model.groupings.grouping_type import GroupingType
 from model.groupings.grouping import Grouping
+from model.groupings.grouping_camper import GroupingCamper
 from schema.groupings.grouping_schema import GroupingCreate, GroupingUpdate
 
 
 def get_all_groupings(db: Session):
-    return db.query(Grouping).order_by(Grouping.id).all()
+    query = db.query(Grouping.id, Grouping.name, Grouping.is_active, GroupingType.id.label('grouping_type_id'), GroupingType.name.label('grouping_type_name')).join(GroupingType, GroupingType.id == Grouping.grouping_type_id).order_by(Grouping.id)
+    groupings = db.execute(query)
+    groupings = groupings.mappings().all()
+    return groupings
+
 
 
 def get_grouping_by_id(db: Session, grouping_id: int):
@@ -26,10 +33,21 @@ def create_new_grouping(db: Session, grouping_data: GroupingCreate):
 
 
 def update_grouping(db: Session, grouping_id: int, update_data: GroupingUpdate):
-    db.query(Grouping).filter(Grouping.id == grouping_id).update(update_data.dict())
-    db.commit()
-    return db.query(Grouping).filter(Grouping.id == grouping_id).first()
-
+    grouping = db.query(Grouping).filter_by(id=grouping_id).one_or_none()
+    if grouping == None:
+        raise HTTPException(status_code=404, detail="Grouping not found")
+    try:
+        updated_grouping = (
+            db.query(Grouping)
+            .filter_by(id=grouping_id)
+            .update(update_data, synchronize_session="fetch")
+        )
+        db.commit()
+    except Exception as ex:
+        print(ex)
+        return {"status": 3, "msg": "Internal Server Error"}
+    
+    return {"status": 1, "msg": "Season updated successfully"}
 
 def delete_grouping(db: Session, grouping_id: int):
     grouping_to_delete = db.query(Grouping).filter(Grouping.id == grouping_id).first()
@@ -39,3 +57,14 @@ def delete_grouping(db: Session, grouping_id: int):
         return True
     return False
 
+def delete_grouping_camper(db: Session, grouping_id: int):
+    grouping_to_delete = db.query(GroupingCamper).filter(GroupingCamper.id == grouping_id).first()
+    if not grouping_to_delete:
+        return 2
+    try: 
+        db.delete(grouping_to_delete)
+        db.commit()
+        return 1
+    except Exception as ex:
+        print(ex)    
+        return 3

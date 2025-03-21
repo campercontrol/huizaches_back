@@ -72,7 +72,7 @@ def send_simple_message(from_user:str,to_users:list,email_subject:str,text_messa
               "o:tracking-opens":True,
               "o:tag": ["Tag1", "Tag2"]
               }
-              )
+    )
 
 def send_attachment_message(from_user:str,to_users:list,email_subject:str,text_message:str,attachments_list:list):
     """Envia correo con multiples archivos"""

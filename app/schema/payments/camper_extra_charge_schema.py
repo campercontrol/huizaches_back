@@ -1,9 +1,7 @@
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional
-from uuid import UUID
-from xmlrpc.client import boolean
 
-from pydantic import BaseModel, Field, AnyUrl, condecimal
+from pydantic import BaseModel, Field
 
 class CamperExtraChargeCreate(BaseModel):
    
@@ -46,6 +44,14 @@ class CamperExtraChargeModify(BaseModel):
         default=datetime.now()
     )
 
+class UpdateCamperExtraCharge(BaseModel):
+    id: int = Field(
+        title="ID del cargo extra del camper",
+    )
+    is_selected:bool = Field(
+        title= "Nombre del metodo de pago"
+    )
+
 class ExtraChargeListCreate(BaseModel):
     extra_charge_id:int = Field(
         title="Cargo Extra Id"
@@ -69,10 +75,33 @@ class CamperExtraChargeListCreate(BaseModel):
 
 class ExtraChargeMultiple(BaseModel):
     
+    camp_id: int = Field(
+        title= "ID del camp"
+    )
     camp_extra_charge_is_selected:bool = Field(
         title="Seleccionado"
     )
-
     camp_extra_charge_id:int = Field(
         title = "Cargo extra id"
     )
+    camp_extra_charge_name: str = Field(
+        title = "Nombre del cargo extra"
+    )
+    camp_extra_charge_price: str = Field(
+        title = "precio del cargo extra"
+    )
+    camper_extra_charge_id: int = Field(
+        title = "Id del cargo del camper"
+    )
+    # camper_extra_charge_payment_id: int = Field(
+    #     title = "ID del payment asociado al cargo extra del camper"
+    # )
+    # extra_charge_symbol: str = Field(
+    #     title = "Nombre del cargo extra"
+    # )
+    # extra_selected: boolean = Field(
+    #     title = "Cargo seleccionado"
+    # )
+    # camper_id: int = Field(
+    #     title = "ID del camper"
+    # )

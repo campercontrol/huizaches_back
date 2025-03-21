@@ -32,13 +32,13 @@ class Payment(Base):
     txn_number = Column(String(200), nullable=False)
     camp_id = Column(
         "camp", 
-        ForeignKey("camps_camp.id"), 
+        ForeignKey("camps_camp.id", ondelete="cascade"), 
         nullable=True, 
         doc="Campamento"
     )
     camper_id = Column(
         "camper",
-        ForeignKey("campers_camper.id"),
+        ForeignKey("campers_camper.id", ondelete="cascade"),
         nullable=True,
         doc="Camper",
     )
@@ -50,7 +50,7 @@ class Payment(Base):
     )
     parent_id = Column(
         "parent",
-        ForeignKey("campers_parent.id"),
+        ForeignKey("campers_parent.id", ondelete="cascade"),
         nullable=True,
         doc="Titular de la cuenta",
     )

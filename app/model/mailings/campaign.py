@@ -20,7 +20,7 @@ class Campaign(Base):
     season_id = Column(ForeignKey("camps_season.id"), doc='Temporada')
     send_type_id = Column(ForeignKey("catalogs_constant.id"), nullable=False, default=0, doc='Tipo de campaña')
     training_event_id = Column(ForeignKey("camps_training.id"), doc='Capacitación')
-    template_id = Column(ForeignKey("mailing_emailtemplate.id"), nullable=False, default=0, doc='Template')
+    template_id = Column(ForeignKey("mailing_emailtemplate.id", ondelete="cascade"), nullable=False, default=0, doc='Template')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 

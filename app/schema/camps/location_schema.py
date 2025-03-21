@@ -42,12 +42,6 @@ class LocationCreate(BaseModel):
     )
 
 class LocationModify(BaseModel):
-    
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    ) 
     name: str = Field(
         title="Nombre de la sede",
         max_lenght=150

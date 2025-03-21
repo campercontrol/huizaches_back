@@ -1,6 +1,5 @@
-from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
 
@@ -8,27 +7,37 @@ from crud.camps.camp_crud import (
     get_all_camp,
     get_all_active_camp,
     get_school_camp_for_camper,
-    get_summer_camp_for_camper,
     get_camp_by_id,
     create_new_camp,
     update_camp_by_id,
     delete_camp,
     get_camp_by_search,
+    create_new_camp_payment_account,
+    get_camp_gnl_report,
+    get_camp_insr_report,
+    get_camp_contact_report,
+    get_camp_medical_report,
+    get_camp_food_report,
+    get_camp_social_report,
+    get_camp_extras_report,
+    get_camp_incomes,
+    get_camp_gnl_staff_report
 )
-from crud.campers.camper_crud import get_camper_band, get_camper_by_uuid
+from crud.campers.camper_crud import get_camper_by_uuid
+from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
 from crud.catalogs.payment_account_crud import  get_payment_account_for_camp
+from schema.campers.camper_extra_answer_schema import UpdateCamperExtraAnswer
 
 from crud.camps.camper_in_camp_crud import (
     create_new_camper_in_camp,
     get_all_camper_in_camp,
-    get_subscribe_by_camper,
-    get_cancelled_by_camper,
-    get_past_subscribe_by_camper,
+    update_camper_extra_charges,
     get_camper_in_camp_by_camper_camp,
     update_camper_in_camp_by_id,
     get_campers_for_camp,
     subscribe_camper_to_camps,
     create_update_camper_extras_camp,
+    get_campers_in_camp_and_groupings
 )
 
 from crud.camps.camp_extra_charge_crud import (
@@ -42,15 +51,18 @@ from crud.camps.camp_extra_question_crud import (
 from crud.camps.camp_discount_crud import get_camp_discount_by_camp
 from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
 from crud.camps.location_crud import get_location_by_uuid
+from crud.mercadopago.mercadopago_crud import get_mercado_pago_payments_by_camp_id_and_camper_id
+from crud.payments.payment_crud import apply_massive_payment
+from crud.mailings.mailing_crud import send_system_mail
 
-from schema.camps.camp_schema import CampCreate, CampModify, CampComplete
+from schema.camps.camp_schema import CampComplete
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
-from schema.payments.payment_schema import PaymentCreate
+from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
+from schema.payments.payment_schema import PaymentCreate, MassivePaymentCreate
 from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 from schema.campers.camper_extra_answer_schema import ExtraAnswerMultiple
 from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
-
 from utils.db import SessionLocal
 
 camp_router = APIRouter()
@@ -68,6 +80,11 @@ def get_db():
 def get_camp(db: Session = Depends(get_db)):
     list_camp = get_all_camp(db)
     return {"data": list_camp}
+
+@camp_router.get("/camp/{camp_id}/incomes", tags=["Camps"])
+def camp_incomes(camp_id: int, db: Session = Depends(get_db)):
+    response = get_camp_incomes(db, camp_id)
+    return response
 
 
 @camp_router.get("/active_camp/", tags=["Camps"])
@@ -103,6 +120,14 @@ def get_camp_id(camp_id: int, db: Session = Depends(get_db)):
 def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
     camp = create_new_camp(db, new_camp.camp)
     new_camp_id = getattr(camp, "id")
+    payment_accounts = new_camp.payment_accounts
+    if payment_accounts:
+        for payment_account in payment_accounts:
+            new_camp_payment_account_obj = CreateCampPaymentAccount(
+                camp_id= new_camp_id,
+                paymentaccount_id = payment_account.id
+            )
+            create_new_camp_payment_account(db, new_camp_payment_account_obj)
 
     if new_camp.extra_question:
         for question in new_camp.extra_question:
@@ -155,8 +180,8 @@ def subscribe_camp(
         camper_id=new_camper_in_camp.camper_id,
         currency_id=camp.currency_id,
         parent_id=camper.parent_id,
-        payment_method_id=3,
-        txn_type_id=2,
+        payment_method_id=6,
+        txn_type_id=3,
     )
     return {"camper_in_camp": camper_in_camp, "payment": payment}
 
@@ -164,6 +189,8 @@ def subscribe_camp(
 @camp_router.post("/unsubscribe_camp/", tags=["Camps"])
 def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)):
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+    parent_template_id_canceled_camp = 15
+    admin_template_id_canceled_camp = 1986
     new_camper_in_camp = CamperInCampModify(
         status=37,
         payment_balance=camper_in_camp.payment_balance,
@@ -173,6 +200,8 @@ def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)
     modify_camper_in_camp = update_camper_in_camp_by_id(
         db, camp_id, camper_id, new_camper_in_camp
     )
+    send_system_mail(db, camper_in_camp.camper_id, camper_in_camp.camp_id, admin_template_id_canceled_camp, parent_template_id_canceled_camp)
+    
     return modify_camper_in_camp
 
 
@@ -217,6 +246,8 @@ def subscrible_camper_to_multiple_camps(
     camps_id: list[int], camper_id: int, db: Session = Depends(get_db)
 ):
     data = subscribe_camper_to_camps(db, camps_id, camper_id)
+    if data["status"] == 3:
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrió un error desconocido al inscribirse"})
     if data["status"] == 1:
         return {"status": data["status"], "prev_camps": data["prev_camps"]}
     else:
@@ -240,8 +271,104 @@ def post_extras_camp_for_camper(
     )
     return {"status": status}
 
+@camp_router.patch("/camper/extra_charges/", tags=["Camps"])
+def post_extras_camp_for_camper(
+    camper_id: int,
+    extra_charges: "list[ExtraChargeMultiple]",
+    db: Session = Depends(get_db),
+):
+    result = update_camper_extra_charges(
+        db, camper_id, extra_charges
+    )
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Camper extra charges updated succesfully"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An unknown error ocurred while updating"})
+
+
+@camp_router.patch("/camper/extra_answers/", tags=["Camps"])
+def update_extra_answers_for_camper(
+    extra_answers: "list[UpdateCamperExtraAnswer]",
+    db: Session = Depends(get_db),
+):
+    response = update_extra_answer_by_id(
+        db, extra_answers
+    )
+    if response == None:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An error ocurred while saving"})
+    if response == 1:
+        return {"detail": {"status": 1, "msg": "Extra answers updated succesfully"}}
+    if response == 0:
+        return {"detail": {"status": 2, "msg": "Extra answers not found"}}
+
+
 
 @camp_router.get("/search/camp/{search}", tags=["Camps"])
 def get_search_camp(search: str, db: Session = Depends(get_db)):
     possible_camps = get_camp_by_search(db, search)
     return {"data": possible_camps}
+
+@camp_router.get("/camps/{camp_id}/groupings/campers", tags=["GroupingCamp"])
+def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depends(get_db)):
+    campers_groupings = get_campers_in_camp_and_groupings(db,camp_id)
+    return {"data": campers_groupings}
+
+@camp_router.get("/camps/{camp_id}/general_report", tags=["Camps"])
+def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_general_report = get_camp_gnl_report(db, camp_id)
+
+    return {"data": camp_general_report}
+
+@camp_router.get("/camps/{camp_id}/general_staff_report", tags=["Camps"])
+def camp_general_staffreport(camp_id: int, db: Session = Depends(get_db)):
+    camp_general_staff_report = get_camp_gnl_staff_report(db, camp_id)
+
+    return {"data": camp_general_staff_report}
+
+
+@camp_router.get("/camps/{camp_id}/insurance_report", tags=["Camps"])
+def get_camp_insurance_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_insurance_general_report = get_camp_insr_report(db, camp_id)
+
+    return camp_insurance_general_report
+
+@camp_router.get("/camps/{camp_id}/contact_report", tags=["Camps"])
+def camp_contact_report(camp_id: int, db: Session = Depends(get_db)):
+    camp_contact_report = get_camp_contact_report(db, camp_id)
+
+    return camp_contact_report
+
+
+@camp_router.get("/camps/{camp_id}/medical_report", tags=["Camps"])
+def camp_medical_report(camp_id: int, db: Session = Depends(get_db)):
+    medical_report = get_camp_medical_report(db, camp_id)
+    return medical_report
+
+@camp_router.get("/camps/{camp_id}/food_report", tags=["Camps"])
+def camp_food_report(camp_id: int, db: Session = Depends(get_db)):
+    food_report = get_camp_food_report(db, camp_id)
+    return food_report
+
+@camp_router.get("/camps/{camp_id}/social_report", tags=["Camps"])
+def camp_social_report(camp_id: int, db: Session = Depends(get_db)):
+    social_report = get_camp_social_report(db, camp_id)
+    return social_report
+
+@camp_router.get("/camps/{camp_id}/extras_report", tags=["Camps"])
+def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
+    extras_report = get_camp_extras_report(db, camp_id)
+    return extras_report
+
+
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/mercadopago/payments", tags=["Camps"])
+def mercado_pago_payments_by_camp_id_and_camper_id(camp_id: int, camper_id: int, db:Session = Depends(get_db)):
+    mercadopago_payments = get_mercado_pago_payments_by_camp_id_and_camper_id(db, camp_id, camper_id)
+    return mercadopago_payments
+
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/massive_payment", tags=["Camps"])
+def apply_massive_payment_to_campers_in_camp(camp_id: int, massive_payment: MassivePaymentCreate, db:Session = Depends(get_db)):
+    result = apply_massive_payment(db, camp_id, massive_payment)
+    if result == True:
+        return {"detail": {"msg": "El pago masivo se aplicó correctamente.", "status": 1}}
+    else:
+        return {"detail": {"msg": "Ocurrió un error al aplicar el pago masivo", "status": 3}}

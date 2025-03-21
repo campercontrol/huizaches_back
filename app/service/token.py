@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from jose import jwt
 from sqlalchemy.orm import Session
 
@@ -33,7 +34,12 @@ def get_db():
 
 
 def authenticate_user(db, username: str, password: str):
+    print("USERNAME")
+    print(username)
     user = get_user_by_email(db, username)
+    print("USER DB")
+    print(user)
+
     if not user:
         return 2
     if not verify_str_hash(password, user.hashed_pass):
@@ -78,6 +84,8 @@ def get_permissions_menu(db, user, lang):
         )
 
     list_menu_permission = []
+    
+    print(permissions_list)
 
     for i in permissions_list:
         a = i.__dict__
@@ -112,31 +120,22 @@ async def login_for_access_token(
         - Si el detail es 3 el login fue incorrecto, la contraseña es inco-
           rrecta.
     """
-    print(form_data.username)
+    # print(form_data.username)
     user = authenticate_user(db, form_data.username, form_data.password)
-    print(user)
-    print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    # print(user)
+    # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     if user == 2:
         detail = 2
-        raise HTTPException(
-            status_code=500,
-            detail=detail,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        return JSONResponse(content={"detail": detail}, headers={"WWW-Authenticate": "Bearer"})
     elif user == 3:
         detail = 3
-        raise HTTPException(
-            status_code=500,
-            detail=detail,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+        return JSONResponse(content={"detail": detail}, headers={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
 
     role = get_role_by_uuid(db, user.role_id)
 
-    menu = get_permissions_menu(db, user, form_data.lang)
+    # menu = get_permissions_menu(db, user, form_data.lang)
 
     profile_id = get_profile_id_by_user_id(db, user.id)
 
@@ -152,7 +151,6 @@ async def login_for_access_token(
             "role_name": role.name,
             "role_id": role.id,
             "profile_id": profile_id,
-            "menu": menu,
             "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
             "refresh_token_expires": str(refresh_token_expires),
@@ -171,7 +169,6 @@ async def login_for_access_token(
             "role_name": role.name,
             "role_id": role.id,
             "profile_id": profile_id,
-            "menu": menu,
             "lang": form_data.lang,
             "access_token_expires": str(access_token_expires),
             "refresh_token_expires": str(refresh_token_expires),

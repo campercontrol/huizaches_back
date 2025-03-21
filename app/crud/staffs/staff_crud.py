@@ -3,20 +3,33 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
+from fastapi import HTTPException
 from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
+from model.staffs.staff_food_restriction import StaffFoodRestriction
+from model.staffs.staff_vaccine import StaffVaccine
+from schema.staff_catalogs.staff_food_restriction_schema import StaffFoodRestrictionCreate
+from schema.staff_catalogs.staff_vaccine_schema import StaffVaccineCreate
 from model import User
-
+from utils.hash import hash_str
+from helper.mailing_helpers import send_mail_template, send_mail_prospect
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
+from crud.camps.season_crud import get_current_Season
+from crud.mailings.mailing_crud import get_admin_users_for_mailing
+from crud.catalogs.vaccine_crud import get_all_vaccine
+from crud.catalogs.food_restriction_crud import get_all_food_restriction
 
 
 def get_all_prospect(db):
     rows = (
-        db.query(Staff, User.email, Season.name.label("season_name"))
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                    StaffRecord.attend,
+                    StaffRecord.attended,
+                    StaffRecord.total)
         .join(User, User.id == Staff.login_id)
         .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == False)
         .all()
     )
@@ -42,9 +55,13 @@ def get_all_prospect_by_season(db, season_id: int):
 
 def get_all_staff(db):
     rows = (
-        db.query(Staff, User.email, Season.name.label("season_name"))
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                 StaffRecord.attend,
+                 StaffRecord.attended,
+                 StaffRecord.total)
         .join(User, User.id == Staff.login_id)
         .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == True)
         .all()
     )
@@ -71,6 +88,85 @@ def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_prospect
 
+def create_complete_prospect(db, new_prospect):
+    
+    try:
+        season = get_current_Season(db)
+        welcome_prospect_template = 1 
+        admin_new_prospect_template = 1988
+        vaccines = get_all_vaccine(db)
+        all_food_restriction = get_all_food_restriction(db)
+        
+        user = db.query(User).filter_by(email=new_prospect.user.email).first()
+        
+        if user:
+            return 2
+    
+        prospect_user = User(
+            email= new_prospect.user.email,
+            hashed_pass=hash_str(new_prospect.user.passw),
+            role_id= 2,
+            is_active= False,
+            is_coordinator = False,
+            is_admin = False,
+            is_employee = False,
+            is_superuser = False           
+                 
+        )
+        db.add(prospect_user)
+        db.flush()
+
+        staff_new_record = StaffRecord(
+            attend = 0,
+            attended = 0,
+            total = 0
+        )
+        db.add(staff_new_record)
+        db.flush()
+
+        new_prospect.prospect.login_id = prospect_user.id
+        prospect_profile = Staff(**new_prospect.prospect.dict())
+        prospect_profile.employee = False
+        prospect_profile.coordinator = False
+        prospect_profile.season_id = season['id']
+        prospect_profile.record_id = staff_new_record.id    
+
+        db.add(prospect_profile)
+        db.flush()
+        
+        for vaccine in vaccines:
+            staff_vaccine = StaffVaccine(
+                staff_id = prospect_profile.id,
+                vaccine_id = vaccine.id,
+                is_active= False
+            )
+            db.add(staff_vaccine)
+        
+        for food_restriction in all_food_restriction:
+            staff_food_restriction = StaffFoodRestriction(
+                staff_id = prospect_profile.id,
+                food_restriction_id = food_restriction.id,
+                is_active= False
+                 
+            )            
+            db.add(staff_food_restriction)
+
+        db.commit()
+        
+        admin_users = get_admin_users_for_mailing(db)
+    
+        for admin_user in admin_users:
+            admin_user_context = {
+            "user": admin_user
+        }   
+        send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
+        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+               
+        return 1
+    except Exception as ex:
+        db.rollback()      
+        print(ex)
+        return 3
 
 def delete_prospect(db, prospect_id: int):
     prospect = db.query(Staff).filter(Staff.id == prospect_id).first()
@@ -97,6 +193,8 @@ def update_staff_by_id(db: Session, staff_id: int, modify_staff: StaffModify) ->
     db.commit()
     return rows_updated
 
+def staff_camps(db, staff_id: int):
+    pass
 
 def staff_dashboard(db, staff_id: int):
     user = (
@@ -238,3 +336,4 @@ def get_staff_band(db, staff_id: int):
         .all()
     )
     return db_mapping_rows_to_dict(staff_band)
+

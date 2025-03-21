@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
 
@@ -25,7 +25,8 @@ from crud.camps.location_crud import (
 from crud.camps.camper_in_camp_crud import (
     get_camper_in_camp_by_camper_camp,
     get_camps_name_amount_camper,
-    get_past_subscribe_by_camper
+    get_past_subscribe_by_camper,
+    get_past_due_camps_by_camper
 )
 from crud.payments.payment_crud import (
     get_payment_by_camper_camp
@@ -41,7 +42,7 @@ from schema.campers.parent_schema import(
 
 )
 
-from crud.crud_user import create_new_user
+from crud.crud_user import create_new_user, get_user_by_email, create_parent_complete
 from utils.db import SessionLocal
 from utils.image_tools import img_to_base_64
 from utils.pdf.baucher_pago import generar_pdf_baucher
@@ -70,11 +71,35 @@ def create_parent(new_parent:ParentCreate, db: Session =Depends(get_db)):
     list_parent = create_new_parent(db, new_parent)
     return {"data": list_parent}
 
+# @parent_routes.post("/parent_create/", tags=["Campers"])
+# def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
+#     user = get_user_by_email(db, new_parent_complete.user.email)
+#     if user:
+#         return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese correo"}}    
+#     user = create_new_user(db, new_parent_complete.user)
+    
+#     if user == None:
+#         return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
+#     parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
+    
+#     if parent == None:
+#         return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta"}}
+    
+#     return {"detail": {"status": 1, "msg": "Se creó correctamente la cuenta"}}
+
+
 @parent_routes.post("/parent_create/", tags=["Campers"])
-def create_parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
-    user = create_new_user(db, new_parent_complete.user)
-    parent = create_new_parent_user_id(db, new_parent_complete.parent, user.id)
-    return {"data": parent}
+def parent_complete(new_parent_complete:ParentCompleteCreate, db: Session =Depends(get_db)):
+    
+    result = create_parent_complete(db, new_parent_complete)
+    
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "La cuenta se creo correctamente"}}
+    if result == 2:
+        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error desconocido al crear la cuenta"})
+    
 
 @parent_routes.patch("/parent/{parent_id}", tags=["Campers"])
 def update_parent(parent_id:str,modify_parent:ParentModify,db: Session = Depends(get_db)):
@@ -100,13 +125,17 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
         for camp in camps_info:
             total_amount = total_amount + camp.get('camper_payment_balance')
         past_camps = get_past_subscribe_by_camper(db, camper.get('id'))
+        
+        due_past_camps = get_past_due_camps_by_camper(db, camper.get('id'))
+        
         for camp in past_camps:
             total_amount = total_amount + camp.get('camper_payment_balance') 
         info.append(
             {
                 "camper": camper,
                 "camper_balance": total_amount,
-                "camps": camps_info
+                "camps": camps_info,
+                "due_past_camps": due_past_camps
             }
         )
         parent_total_amount = parent_total_amount + total_amount

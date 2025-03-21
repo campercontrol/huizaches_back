@@ -94,3 +94,10 @@ def get_trophy_record_by_staff(db: Session, staff_id: int):
         "trophy_staff_cert" : trophy_staff_cert,
         "trophy_staff_cong" : trophy_staff_cong
     }
+def get_all_staff_trophies(db: Session, staff_id: int):
+    # query = db.query(Trophy.name).join(TrophySeason, TrophySeason.trophy_id == Trophy.id).join(TrophySeason, TrophyStaff.trophy_season_id == TrophySeason.id).filter(TrophyStaff.staff_id == staff_id)
+    query = db.query(Trophy.name).join(TrophySeason, Trophy.id == TrophySeason.trophy_id).join(TrophyStaff, TrophySeason.id == TrophyStaff.trophy_season_id).filter(TrophyStaff.staff_id == staff_id)
+
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

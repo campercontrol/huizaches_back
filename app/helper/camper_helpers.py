@@ -21,7 +21,5 @@ def update_record_campers(db, camper_id):
         "attended" : len(past_camps),
         "total" : len(future_camps) + len(past_camps)
     }
-    print("#####################################################")
-    print(camper_record_md)
     status = update_camper_record_by_id(db, camper_record_id, camper_record_md)
     return 1

@@ -30,7 +30,7 @@ class CamperExtraCharge(Base):
     id = Column("id", Integer(), primary_key=True, nullable=False, autoincrement=True)
     is_selected = Column(Boolean, nullable=False)
     camper_id = Column(
-        ForeignKey("campers_camper.id"), 
+        ForeignKey("campers_camper.id", ondelete="cascade"), 
         nullable=False, 
         default=0, 
         doc="Camper"
@@ -40,6 +40,12 @@ class CamperExtraCharge(Base):
         nullable=False,
         default=0,
         doc="Camp Extra Charge",
+    )
+    payment_id = Column(
+        ForeignKey("payments_payment.id", ondelete='SET NULL'),
+        nullable=True,
+        default=None,
+        doc="Payment id"
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(

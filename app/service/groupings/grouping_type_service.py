@@ -7,7 +7,7 @@ from crud.groupings.grouping_type_crud import (
     update_grouping_type,
     delete_grouping_type
 )
-from schema.groupings.grouping_type_schema import GroupingTypeBase, GroupingTypeCreate, GroupingTypeUpdate
+from schema.groupings.grouping_type_schema import GroupingTypeBase, GroupingTypeCreate, GroupingTypeUpdate, GroupingTypeResponse
 from utils.db import SessionLocal
 
 grouping_type_router = APIRouter()
@@ -19,27 +19,29 @@ def get_db():
     finally:
         db.close()
 
-@grouping_type_router.get("/grouping_types/", response_model=list[GroupingTypeBase], tags=["GroupingType"])
+@grouping_type_router.get("/grouping_types/", response_model=list[GroupingTypeResponse], tags=["GroupingType"])
 def list_grouping_types(db: Session = Depends(get_db)):
     return get_all_grouping_types(db)
 
-@grouping_type_router.get("/grouping_types/{grouping_type_id}", response_model=GroupingTypeCreate, tags=["GroupingType"])
+@grouping_type_router.get("/grouping_types/{grouping_type_id}", response_model=GroupingTypeResponse, tags=["GroupingType"])
 def read_grouping_type(grouping_type_id: int, db: Session = Depends(get_db)):
     db_grouping_type = get_grouping_type_by_id(db, grouping_type_id)
     if db_grouping_type is None:
         raise HTTPException(status_code=404, detail="GroupingType not found")
     return db_grouping_type
 
-@grouping_type_router.post("/grouping_types/", response_model=GroupingTypeCreate, tags=["GroupingType"])
+@grouping_type_router.post("/grouping_types/", response_model=GroupingTypeResponse, tags=["GroupingType"])
 def create_grouping_type(grouping_type: GroupingTypeCreate, db: Session = Depends(get_db)):
     return create_new_grouping_type(db, grouping_type)
 
-@grouping_type_router.put("/grouping_types/{grouping_type_id}", response_model=GroupingTypeUpdate, tags=["GroupingType"])
+@grouping_type_router.put("/grouping_types/{grouping_type_id}", tags=["GroupingType"])
 def update_grouping_type_endpoint(
     grouping_type_id: int, grouping_type: GroupingTypeUpdate, db: Session = Depends(get_db)
 ):
-    return update_grouping_type(db, grouping_type_id, grouping_type)
-
+    update_grouping_type_result = update_grouping_type(db, grouping_type_id, grouping_type)
+    if update_grouping_type_result['status'] == 3:
+        raise HTTPException(status_code=500, detail=update_grouping_type_result)
+    return {"detail": update_grouping_type_result}
 
 @grouping_type_router.delete("/grouping_types/{grouping_type_id}", tags=["GroupingType"])
 def delete_grouping_type_endpoint(grouping_type_id: int, db: Session = Depends(get_db)):

@@ -24,7 +24,7 @@ class PaymentAccountCreate(BaseModel):
     )
     account_number:str= Field(
         title='Numero de cuenta',
-        max_length=10
+        max_length=12
     )
     clabe_number:str= Field(
         title='Numero clabe',

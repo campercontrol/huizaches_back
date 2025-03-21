@@ -5,8 +5,25 @@ class GroupingCamperBase(BaseModel):
     camper_id: int
     grouping_camp_id: int
 
+    class Config:
+        orm_mode = True
+ 
+class GroupingAvailableCampers(BaseModel):
+    id: int
+    name: str
+    birthday: datetime
+    gender: str
+    class Config:
+        orm_mode = True
+
 class GroupingCamperCreate(GroupingCamperBase):
-    pass
+    camper_id: int
+    grouping_camp_id: int
 
 class GroupingCamperUpdate(GroupingCamperBase):
     pass
+
+class GroupingCamperResponse(GroupingCamperBase):
+    id:int
+    # created:datetime
+    # updated:datetime

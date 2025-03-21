@@ -43,6 +43,7 @@ from service.trophies.trophy_service import trophy_routes
 from service.trophies.trophy_season_service import trophy_season_routes
 from service.trophies.trophy_staff_service import trophy_staff_routes
 from service.medical.medical_service import medical_routes
+from service.mercadopago.mercado_pago_service import mercadopago_routes
 
 app = FastAPI()
 
@@ -125,6 +126,7 @@ app.include_router(pdf_routes) #Pdf
 app.include_router(email_routes) #email
 app.mount("/media",StaticFiles(directory="media"),name="media")
 app.include_router(toku_routes)
+app.include_router(mercadopago_routes)
 app.include_router(migrar_routes)
 app.include_router(grouping_router)
 app.include_router(grouping_type_router)

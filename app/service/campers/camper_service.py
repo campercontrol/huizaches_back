@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 #from fastapi_pagination import Page, add_pagination, paginate
 from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
@@ -56,7 +56,7 @@ from crud.campers.camper_crud import (
     delete_camper
 )
 from crud.campers.parent_crud import get_parent_by_uuid
-from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_parent
+from crud.campers.camper_comment_crud import get_all_camper_comments
 from crud.camps.camp_crud import get_school_camp_for_camper, get_summer_camp_for_camper
 from crud.camps.camper_in_camp_crud import (
     get_subscribe_by_camper,
@@ -150,63 +150,16 @@ def get_camper_by_id_complete(
 
 @camper_routes.post("/camper/", tags=["Campercamper_schema"])
 def create_camper(camper_complete: CamperComplete, db: Session = Depends(get_db)):
-    new_camper = create_new_camper(db, camper_complete.camper)
-    new_camper_id = getattr(new_camper, "id")
-    tmp_path_photo = getattr(new_camper, "photo")
+    new_camper = create_new_camper(db, camper_complete)
+    # new_camper_id = getattr(new_camper, "id")
+    # tmp_path_photo = getattr(new_camper, "photo")
     # final_path_photo = str(
     #    getattr(new_camper, "id")
     #    + getattr(new_camper, "name")
     #    + getattr(new_camper, "lastname_father")
     # )
     # rewrite_image(tmp_path_photo, final_path_photo)
-
-    if camper_complete.vaccines:
-        for vaccine in camper_complete.vaccines:
-            camper_vaccine = CamperVaccineCreate(
-                camper_id=new_camper_id, vaccine_id=vaccine.id, is_active=vaccine.is_active
-            )
-            print(camper_vaccine)
-            create_new_camper_vaccine(db, camper_vaccine)
-
-    if camper_complete.food_restrictions:
-        for food_restriction in camper_complete.food_restrictions:
-            camper_food_restriction = CamperFoodRestrictionCreate(
-                camper_id=new_camper_id,
-                food_restriction_id=food_restriction.id,
-                is_active=food_restriction.is_active,
-            )
-            create_new_camper_food_restriction(db, camper_food_restriction)
-
-    if camper_complete.licensed_medicines:
-        for licensed_medicine in camper_complete.licensed_medicines:
-            camper_licensed_medicine = CamperLicensedMedicineCreate(
-                camper_id=new_camper_id,
-                licensed_medicine_id=licensed_medicine.id,
-                is_active=licensed_medicine.is_active,
-            )
-            create_new_camper_licensed_medicine(db, camper_licensed_medicine)
-
-    if camper_complete.pathological_background:
-        for pathological_background in camper_complete.pathological_background:
-            camper_pathological_background = CamperPathologicalBackCreate(
-                camper_id=new_camper_id,
-                pathological_background_id=pathological_background.id,
-                is_active=pathological_background.is_active,
-            )
-            create_new_camper_pathological_background(db, camper_pathological_background)
-
-    if camper_complete.pathological_background_fm:
-        for pathological_background_fm in camper_complete.pathological_background_fm:
-            camper_pathological_background_fm = CamperPathologicalBackFmCreate(
-                camper_id=new_camper_id,
-                pathological_background_fm_id=pathological_background_fm.id,
-                is_active=pathological_background_fm.is_active,
-            )
-            create_new_camper_pathological_background_fm(
-                db, camper_pathological_background_fm
-            )
-
-    return {"camper_id": new_camper_id}
+    return {"camper_id": new_camper.id}
 
 
 @camper_routes.patch("/camper/{camper_id}", tags=["Campers"])
@@ -391,8 +344,8 @@ def get_camper_dashboard(camper_id: int, db: Session = Depends(get_db)):
     for camper_in_camp in camper_subscribe_camps:
         camp_ids.append(camper_in_camp["camp_id"])
 
-    for camper_in_camp in camper_cancelled_camps:
-        camp_ids.append(camper_in_camp["camp_id"])
+    # for camper_in_camp in camper_cancelled_camps:
+    #     camp_ids.append(camper_in_camp["camp_id"])
 
     for camper_in_camp in camper_passed_camps:
         camp_ids.append(camper_in_camp["camp_id"])
@@ -420,7 +373,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     parent = get_parent_by_uuid(db, camper_info["camper"].parent_id)
     user = get_user_by_uuid(db, parent.user_id)
-    camper_comments_parent = get_camper_comment_by_camper_for_parent(db, camper_id)
+    camper_comments = get_all_camper_comments(db, camper_id)
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
@@ -437,7 +390,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
         "camper_total_amount": total_amount,
         "parent": parent,
         "user_email": user[0].email,
-        "camper_comments_parent": camper_comments_parent,
+        "camper_comments": camper_comments,
         "camper_subscribe_camps": camper_subscribe_camps,
         "camper_cancelled_camps": camper_cancelled_camps,
         "camper_passed_camps": camper_passed_camps,
@@ -446,8 +399,13 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
 
 @camper_routes.delete("/delete_camper/{camper_id}", tags=["Campers"])
 def delete_camper_by_id(camper_id:int, db: Session = Depends(get_db)):
-    status = delete_camper(db, camper_id)
-    return{"status": status}
+    response = delete_camper(db, camper_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Camper not found")
+
+    if response['status'] == 3:
+         raise HTTPException(status_code=500, detail=response)
+    return {"detail": response}    
 
 @camper_routes.get("/search/camper/{search}", tags=["Campers"])
 def get_search_camper(search:str, db: Session = Depends(get_db)):

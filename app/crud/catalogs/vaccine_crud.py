@@ -1,5 +1,5 @@
 from sqlalchemy import case
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 
@@ -62,6 +62,16 @@ def update_vaccine_by_id(db: Session, vaccine_id: int, modify_vaccine: VaccineMo
 
 def delete_vaccine(db: Session, vaccine_id:int):
     vaccine = db.query(Vaccine).filter(Vaccine.id==vaccine_id).first()
-    db.delete(vaccine)
-    db.commit()
-    return {"status" : True}
+    
+    if vaccine == None:
+        return None
+    try:
+        db.delete(vaccine)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return {"status": 2, "msg": "Can not delete vaccine, referenced by other table"}
+    except:
+        db.rollback()
+        return {"status": 3, "msg": "Internal Server Error"}
+    return {"status" : 1, "msg": "Vaccine deleted successfully"}

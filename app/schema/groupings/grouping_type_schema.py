@@ -3,11 +3,6 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class GroupingTypeBase(BaseModel):
-    id: Optional[int] = Field(
-        title="Id",
-        default = None,
-        primary_key=True
-    )
     name: str = Field (
         title='Nombre de la agrupación'
     )
@@ -20,11 +15,13 @@ class GroupingTypeCreate(GroupingTypeBase):
         min_length=1
     )
 
-class GroupingTypeUpdate(BaseModel):
+class GroupingTypeUpdate(GroupingTypeBase):
     name: str = Field (
         title='Nombre de la agrupación',
         default=None
     )
-    updated_at:datetime = Field(
-        default=datetime.now()
-    )
+class GroupingTypeResponse(GroupingTypeBase):
+    name:str
+    id:int
+    updated_at:datetime
+    created_at:datetime    

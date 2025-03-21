@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.catalogs.pathological_background_crud import (
@@ -59,5 +59,12 @@ def update_pathological_background(pathological_background_id:str,modify_patholo
 
 @pathological_background_routes.delete("/delete_pathological_back/{pathological_back_id}", tags=["Catalogs"])
 def delete_pathological_back_by_id(pathological_back_id:int, db: Session = Depends(get_db)):
-    status = delete_pathological_back(db, pathological_back_id)
-    return{"status": status}
+    response = delete_pathological_back(db, pathological_back_id)
+    if response == None:
+        raise HTTPException(status_code=404, detail="Pathological background not found")
+
+    if response['status'] == 3:
+        raise HTTPException(status_code=500, detail= response)
+    return{ "detail": response } 
+
+    

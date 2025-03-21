@@ -40,6 +40,8 @@ def get_db():
 @camp_checkpoint_routes.get("/camp_checkpoint/", tags=["CampCheckpoint"])
 def get_camp_checkpoint(db: Session = Depends(get_db)):
     list_camp_checkpoint = get_all_camp_checkpoint(db)
+    if len(list_camp_checkpoint) == 0:
+        return {"data": "No hay Checkpoints"}
     return {"data": list_camp_checkpoint}
 
 

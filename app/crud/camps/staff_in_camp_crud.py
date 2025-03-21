@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import cast, Date
 from utils.db import db_mapping_rows_to_dict
 from datetime import date
-
 from model.camps import StaffInCamp, Camp, Location
 from model.staffs import Staff, StaffRecord
 from model.catalogs import Constant, StaffRole
@@ -13,6 +12,9 @@ from schema.camps.staff_in_camp_schema import (
     StaffInCampCreate,
     StaffInCampModify,
 )
+from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status_transaction
+
+from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail, get_staff_context_system_mail
 
 
 def get_all_staff_in_camp(db: Session):
@@ -37,33 +39,62 @@ def create_new_staff_in_camp(db: Session, new_staff_in_camp: StaffInCampCreate):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_staff_in_camp
 
-
-def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
-    db_staff_in_camp = None
-    try:
-        db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
-        db_staff_in_camp.confirmed_staff = False
-        db.add(db_staff_in_camp)
-        db.commit()
-        db.refresh(db_staff_in_camp)
-    except SQLAlchemyError as e:
-        print("#=================")
-        print(e)
-        print("#=================")
-        db_staff_in_camp = None
-        return db_staff_in_camp
-    except Exception as ex:
-        print(f"No se pudo guardar en la base de datos: {ex}")
+def create_new_staff_in_camp_transaction(db: Session, new_staff_in_camp: StaffInCampCreate):
+    db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+    db.add(db_staff_in_camp)
+    db.flush()
     return db_staff_in_camp
 
 
-# def assign_staff(db: Session, staff_id:int, camp_id:int):
 
+
+def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
+    try:
+        user_staff_subcribe_to_camp_template = 5
+        db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
+        db_staff_in_camp.confirmed_staff = False
+        db.add(db_staff_in_camp)
+        update_staff_record_status_transaction(db, new_staff_in_camp.staff_id)
+        
+        staff_data = get_staff_info_mailing(db, new_staff_in_camp.staff_id)
+        camp_data = get_camp_info_by_id_mailing(db, new_staff_in_camp.camp_id )
+        staff_context = {
+            "user": staff_data,
+            "camp": camp_data     
+        }
+        send_mail_template(db, staff_data["email"], user_staff_subcribe_to_camp_template,staff_context)    
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
-    db.query(StaffInCamp).filter_by(id=id_staff_in_camp).delete()
-    db.commit()
-    return
+    try:
+        user_unsuscribe_staff_template = 195
+        admin_unsuscribe_staff_template = 4
+        
+        db_staff_in_camp = db.query(StaffInCamp).filter_by(id=id_staff_in_camp).first()
+        staff_id = db_staff_in_camp.staff_id
+        camp_id = db_staff_in_camp.camp_id
+        
+        db.delete(db_staff_in_camp)
+        
+        email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+        send_mail_template(db, email_context["user"]["email"], user_unsuscribe_staff_template, email_context)
+        
+        admin_users = get_admin_users_for_mailing(db)
+
+        for admin_user in admin_users:
+            admin_user_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+            send_mail_template(db, admin_user["email"], admin_unsuscribe_staff_template, admin_user_context)
+        db.commit()
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 
 def get_staff_volunteer_in_camp(db: Session, camp_id: int):
@@ -78,6 +109,7 @@ def get_staff_volunteer_in_camp(db: Session, camp_id: int):
             Staff.cellphone.label("staff_cellphone"),
             User.email.label("staff_email"),
             StaffInCamp.updated_at.label("staff_volunteer_date"),
+            StaffInCamp.id.label("staff_in_camp_id"),
             StaffRecord.attend.label("staff_attend"),
             StaffRecord.attended.label("staff_attended"),
             StaffRecord.total.label("staff_total"),
@@ -102,6 +134,7 @@ def get_staff_in_camp(db: Session, camp_id: int):
             Staff.birthday.label("staff_birthday"),
             Staff.cellphone.label("staff_cellphone"),
             User.email.label("staff_email"),
+            StaffInCamp.id.label("staff_in_camp_id"),
             StaffRecord.attend.label("staff_attend"),
             StaffRecord.attended.label("staff_attended"),
             StaffRecord.total.label("staff_total"),
@@ -120,29 +153,38 @@ def get_staff_in_camp(db: Session, camp_id: int):
 
 
 def accept_staff_in_camp(db: Session, camp_id: int, staffs_id: list[int]):
-    for staff_id in staffs_id:
-        staff_in_camp = (
-            db.query(StaffInCamp)
-            .filter(
-                and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+    
+    user_accept_staff_in_camp_template = 1995
+    
+    try:
+        for staff_id in staffs_id:
+            staff_in_camp = (
+                db.query(StaffInCamp)
+                .filter(
+                    and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+                )
+                .all()
             )
-            .all()
-        )
 
-        if staff_in_camp:
-            db.query(StaffInCamp).filter(
-                and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
-            ).update({"confirmed_staff": True})
+            if staff_in_camp:
+                db.query(StaffInCamp).filter(
+                    and_(StaffInCamp.camp_id == camp_id, StaffInCamp.staff_id == staff_id)
+                ).update({"confirmed_staff": True})
+            else:
+                new_staff_in_camp = StaffInCampCreate(
+                    confirmed_staff = True ,
+                    camp_id = camp_id,
+                    staff_id = staff_id,
+                )
+                create_new_staff_in_camp_transaction(db, new_staff_in_camp)
+            email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
+            send_mail_template(db, email_context["user"]["email"], user_accept_staff_in_camp_template, email_context)        
             db.commit()
-        else:
-            new_staff_in_camp = StaffInCampCreate(
-                confirmed_staff = True ,
-                camp_id = camp_id,
-                staff_id = staff_id,
-            )
-            create_new_staff_in_camp(db, new_staff_in_camp)
-
-    return "Success"
+        return 1
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+        return 3
 
 
 def assign_role_staff(db: Session, camp_id:int, staffs_id: list[int], role_id:int):
@@ -182,6 +224,30 @@ def get_past_camp_confirmed_by_staff(db: Session, staff_id:int):
 
     return db_mapping_rows_to_dict(camps)
 
+def get_all_past_camp_by_staff(db: Session, staff_id:int):
+
+    camps = (
+        db.query(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Location.name.label("location"),
+            Camp.start.cast(Date).label("camp_start"),
+            Camp.end.cast(Date).label("camp_end"),
+            Camp.url.label("camp_url"),
+            StaffInCamp.confirmed_staff
+        )
+        .select_from(StaffInCamp)
+        .join(Camp, Camp.id == StaffInCamp.camp_id)
+        .join(Location, Location.id == Camp.location_id)
+        .filter(
+            StaffInCamp.staff_id == staff_id,
+            Camp.start <= date.today()
+        )
+        .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
+
 def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
 
     camps = (
@@ -205,3 +271,33 @@ def get_future_camp_confirmed_by_staff(db: Session, staff_id:int):
     )
 
     return db_mapping_rows_to_dict(camps)
+
+def get_all_future_camp_by_staff(db: Session, staff_id:int):
+
+    camps = (
+    db.query(
+        Camp.id.label("camp_id"),
+        Camp.name.label("camp_name"),
+        Location.name.label("location"),
+        Camp.start.cast(Date).label("camp_start"),
+        Camp.end.cast(Date).label("camp_end"),
+        Camp.url.label("camp_url"),
+        StaffInCamp.confirmed_staff
+    )
+    .select_from(StaffInCamp)
+    .join(Camp, Camp.id == StaffInCamp.camp_id)
+    .join(Location, Location.id == Camp.location_id)
+    .filter(
+        StaffInCamp.staff_id == staff_id,
+        Camp.start > date.today()
+    )
+    .all()
+    )
+
+    return db_mapping_rows_to_dict(camps)
+
+def get_staff_all_camps_by_staff_id(db: Session, staff_id:int):
+    query = db.query(Camp.name, Camp.id).join(StaffInCamp, StaffInCamp.camp_id== Camp.id).filter(StaffInCamp.staff_id == staff_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

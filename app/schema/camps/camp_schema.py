@@ -64,6 +64,13 @@ class CampCreate(BaseModel):
     show_payment_order: bool = Field(
         title="Mostrar orden de pago a titulares de la cuenta"
     )
+    show_mercadopago_button: bool = Field(
+        title="Mostrar botón de mercado pago para este campamento",
+        default=False
+    )
+    recommended_payment_dates: str = Field(
+        title="Fechas recomendadas de pago para este campamento"
+    )
     reminder_camp_days: int = Field(
         title="Dias antes para recordar del campamento"
     )
@@ -106,6 +113,7 @@ class CampCreate(BaseModel):
     season_id: int = Field(
         title="Temporada del campamento"
     )
+    
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
@@ -212,15 +220,7 @@ class CampModify(BaseModel):
     )
 
 class PaymentAccount(BaseModel):
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    ) 
-    name:int = Field(
-        title = "Nombre de la cuenta de banco"
-    )
-
+    id:int
 class CampDiscountCreate(BaseModel):
     id:Optional[int] = Field(
         title="Id",

@@ -18,10 +18,10 @@ class CamperComment(Base):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True, doc="id de la escuela")
     comment = Column(Text)
     is_public = Column(Boolean, nullable=False)
-    show_to = Column(ForeignKey("role.id"), nullable=True, doc="roles")
-    camp_id = Column(ForeignKey("camps_camp.id"), nullable=True, doc='Campamento')
+    show_to = Column(nullable=True, doc="roles")
+    camp_id = Column(ForeignKey("camps_camp.id", ondelete="cascade"), nullable=True, doc='Campamento')
     camper_id = Column(ForeignKey("campers_camper.id"), nullable=True, doc='Camper')
-    user_id = Column(ForeignKey('user.id'), nullable=True, doc='usuario')
+    user_id = Column(ForeignKey('user.id', ondelete="cascade"), nullable=True, doc='usuario')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 

@@ -20,7 +20,7 @@ class StaffComment(Base):
     is_public = Column(Boolean, nullable=False)
     show_to = Column(ForeignKey('catalogs_constant.id'), nullable=False, default=0, doc='mostrar a')
     staff_id = Column(ForeignKey("staff_staff.id"), nullable=False, default=0, doc='Staff')
-    user_id = Column(ForeignKey('user.id'), nullable=False, default=0, doc='usuario')
+    user_id = Column(ForeignKey('user.id', ondelete="cascade"), nullable=False, default=0, doc='usuario')
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated", 

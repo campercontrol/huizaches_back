@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.campers.camper_extra_answer_crud import (
@@ -9,12 +9,15 @@ from crud.campers.camper_extra_answer_crud import (
     create_new_extra_answer,
     update_extra_answer_by_id,
     get_extra_answer_by_camper_camp,
-    create_update_extra_answers
+    create_update_extra_answers,
+    update_extra_answers
 )
 from schema.campers.camper_extra_answer_schema import (
     CamperExtraAnswerCreate,
     CamperExtraAnswerModify,
-    CamperExtraAnswerListCreate
+    UpdateCamperExtraAnswer,
+    CamperExtraAnswerListCreate,
+    
 )
 from utils.db import SessionLocal
 
@@ -76,11 +79,28 @@ def update_camper_extra_answer(
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
-@extra_answer_routes.get("/camper_extra_answers_by_camp/{camper_id}/{camp_id}")
-def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):
-    extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
-    return {"data": extra_answers}
 
+@extra_answer_routes.patch(
+    "/camper_extra_answers/", tags=["Campers"]
+)
+def camper_extra_answers(
+    extra_answers: list[UpdateCamperExtraAnswer],
+    db: Session = Depends(get_db)
+):
+    result = update_extra_answers(db, extra_answers)
+    if result == 1:
+        return {"detail": {"status": 1, "msg": "Se Actualizaron correctamente las preguntas extra"}}
+    if result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "Ocurrió un error inesperado al actualizar las preguntas extra"}) 
+
+# @extra_answer_routes.get("/camper_extra_answers_by_camp/{camper_id}/{camp_id}")
+# def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):
+#     extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
+#     return {"data": extra_answers}
+@extra_answer_routes.get("/extra_answers_camper/{camp_id}/{camper_id}")
+def get_extra_answers_camper(camper_id:int, camp_id:int, db:Session=Depends(get_db)):
+     extra_answers =  get_extra_answer_by_camper_camp(db, camper_id, camp_id)
+     return {"data": extra_answers}
 
 @extra_answer_routes.post("/camper/extra_answers/",  tags=["Campers"])
 def set_extra_answers_camper( extra_answers:CamperExtraAnswerListCreate, db:Session=Depends(get_db)):

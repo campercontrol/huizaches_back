@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.camps.camp_crud import get_camp_by_id
@@ -13,7 +13,7 @@ from crud.medical.camper_visit_crud import (
     create_new_camper_visit
 )
 from crud.medical.staff_visit_crud import staff_visit_triage_for_camp
-from crud.campers.parent_crud import get_parent_for_admin_by_id, get_parent_by_uuid
+from crud.campers.parent_crud import get_parent_for_admin_by_id, get_parent_by_uuid, get_parent_by_camper_id
 from crud.campers.camper_crud import get_camper_by_uuid
 from service.campers.camper_service import get_camper_by_id_complete
 from crud.staffs.staff_crud import get_staff_by_id
@@ -43,9 +43,13 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
     campers_medical = []
     for camper_in_camp in campers:
         camper = get_camper_by_uuid(db, camper_in_camp["camper_id"])
+        # print("camper")
+        # print(camper.parent_id)
         tutor = get_parent_for_admin_by_id(db, camper.parent_id)
         camper_triages = camper_visit_triage_for_camp(db, camper.id, camp_id)
+
         if tutor != "Parent doesn't exist":
+        
             camper_complete = {
                 "camper_id": camper.id,
                 "camper_name": camper_in_camp["camper_full_name"],
@@ -58,6 +62,7 @@ def get_medical_camp(camp_id: int, db: Session = Depends(get_db)):
                 "second_tutor_email": camper_in_camp["second_tutor_email"],
                 "second_tutor_cellphone": tutor.contact_cellphone,
             }
+            # print(camper_complete)
             campers_medical.append(camper_complete)
     staffs_medical = []
     for staff_in_camp in staffs:
@@ -92,7 +97,8 @@ def get_medical_camp_camper(
     camper_visits = camper_visit_for_camp(db, camper_id, camp_id)
     camper_info = get_camper_by_id_complete(camper_id, "es", db)
     camper = camper_info["camper"]
-    parent_info = get_parent_by_uuid(db, camper.id)
+    camper_parent = get_parent_by_camper_id(db, camper.id)
+    parent_info = get_parent_by_uuid(db, camper_parent["id"])
     return {
         "camper_visits": camper_visits,
         "camper_info": camper_info,
@@ -122,6 +128,8 @@ def get_medical_camper_visit_form(camper_id: int, db: Session = Depends(get_db))
 
 @medical_routes.post("/medical/camper/visit/", tags=["Medical"])
 def create_medical_camper_visit(camper_visit: CamperVisitCreate, db: Session = Depends(get_db)):
-    new_camper_visit =  create_new_camper_visit(db, camper_visit)
-    
-    return new_camper_visit
+    response =  create_new_camper_visit(db, camper_visit)
+
+    if response['status'] == 3 or response['status'] == 2 :
+        raise HTTPException(status_code=500, detail= response['detail'])
+    return response

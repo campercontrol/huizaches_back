@@ -12,9 +12,12 @@ class SchoolCreate(BaseModel):
         default=None,
         primary_key=True
     )
-    login_id:Optional[int] = Field(
-        title= "Usuario"
-    ) 
+    login_email: str = Field(
+        title= "Correo"
+    )
+    password: str = Field(
+        title="contraseña"
+    )
     name:str  = Field(
         title="Nombre",
         max_lenght= 100
@@ -38,8 +41,8 @@ class SchoolCreate(BaseModel):
         title="Celular de primer contacto",
         max_lenght= 15
     ) 
-    email: Optional[str]  = Field(
-        title="Email de contacto",
+    contact_first_email: Optional[str]  = Field(
+        title="Email de primer contacto",
         max_lenght= 30
     ) 
     contact_second_name: Optional[str]  = Field(
@@ -87,11 +90,6 @@ class SchoolCreate(BaseModel):
 
 class SchoolModify(BaseModel):
     
-    id:Optional[int] = Field(
-        title="Id",
-        default=None,
-        primary_key=True
-    )
     login_id:Optional[int] = Field(
         title= "Usuario"
     )  
@@ -162,4 +160,13 @@ class SchoolModify(BaseModel):
     )
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
+    )
+
+class UpdateSchool(BaseModel):
+    school: SchoolModify
+    password: str = Field (
+        title="password"
+    )
+    email: str = Field (
+        title = "login_email"
     )

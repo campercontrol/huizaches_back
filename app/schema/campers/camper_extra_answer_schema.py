@@ -25,6 +25,13 @@ class CamperExtraAnswerCreate(BaseModel):
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+class UpdateCamperExtraAnswer(BaseModel):
+    id: int = Field(
+        title="ID de la respuesta del camper de la pregunta extra"
+    ) 
+    answer:str = Field(
+        title="Respuesta del camper a la pregunta extra"
+    )
 
 class CamperExtraAnswerModify(BaseModel):
     id:Optional[int] = Field(
@@ -69,10 +76,13 @@ class CamperExtraAnswerListCreate(BaseModel):
 
 class ExtraAnswerMultiple(BaseModel):
     
-    camp_extra_answer_answer:str = Field(
+    answer:str = Field(
         title="Respuesta"
     )
-
-    camp_extra_question_id:int = Field(
+    camper_extra_answer_id:int = Field(
+        title = "ID de la respuesta del camper"
+    )
+    question_id:int = Field(
         title = "Pregunta"
     )
+    

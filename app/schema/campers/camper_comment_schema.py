@@ -24,8 +24,9 @@ class CamperCommentCreate(BaseModel):
     user_id: int = Field(
         title= "Usuario que creo el comentario"
     )
-    camp_id: int = Field(
-        title= "Campamento id"
+    camp_id:Optional[int]  = Field(
+        title= "Campamento id",
+        default=None
     )
     camper_id: int = Field(
         title= "Camper id"

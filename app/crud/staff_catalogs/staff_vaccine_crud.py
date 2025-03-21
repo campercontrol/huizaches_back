@@ -8,7 +8,10 @@ from schema.staff_catalogs.staff_vaccine_schema import (
     StaffVaccineCreate,
     StaffVaccineModify,
 )
-
+from model.catalogs import (
+    Vaccine,
+    FoodRestriction
+)
 
 def get_all_staff_vaccine(db: Session):
     rows = db.query(StaffVaccine).all()
@@ -28,6 +31,23 @@ def get_staff_vaccine_by_uuid(db: Session, staff_vaccine_id: int):
         )
         .first()
     )
+
+# def get_staff_all_vaccines_by_staff_id(db: Session, staff_id: int):    
+#     rows = db.query(StaffVaccine).filter(StaffVaccine.staff_id == staff_id).all()
+#     return rows
+
+def get_staff_all_vaccines_by_staff_id(db: Session, staff_id: int):    
+    rows = (
+        db.query(
+            Vaccine.id,
+            Vaccine.name,
+            StaffVaccine.is_active,
+        ).select_from(StaffVaccine)
+        .join(Vaccine, StaffVaccine.vaccine_id == Vaccine.id)
+        .filter(StaffVaccine.staff_id == staff_id)
+        .all()
+    )
+    return db_mapping_rows_to_dict(rows)
 
 
 def get_staff_vaccine_by_vaccine(db: Session, vaccine_id: int):

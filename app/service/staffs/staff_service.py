@@ -7,9 +7,11 @@ from crud.staffs.staff_crud import (
     get_all_prospect,
     get_all_staff,
     create_new_prospect,
+    create_complete_prospect,
     accept_prospect,
     delete_prospect,
     staff_dashboard,
+    staff_camps,
     get_staff_by_id,
     update_staff_by_id,
     get_staff_band
@@ -36,30 +38,33 @@ from schema.staff_catalogs.staff_food_restriction_schema import (
     StaffFoodRestrictionModify
 )
 
-from crud.crud_user import create_new_user, create_new_prospect_user
-
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
 from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.staff_catalogs.staff_vaccine_crud import (
     get_staff_vaccine_by_vaccine,
     create_new_staff_vaccine,
-    update_staff_vaccine_by_id
+    update_staff_vaccine_by_id,
+    get_staff_all_vaccines_by_staff_id
 )
 
 from crud.staff_catalogs.staff_food_restriction_crud import (
     get_staff_food_restriction_by_food_r,
     create_new_staff_food_restriction,
-    update_staff_food_restriction_by_id
+    update_staff_food_restriction_by_id,
+    get_all_staff_food_restriction_by_id
 )
 
 from crud.camps.staff_in_camp_crud import (
     get_past_camp_confirmed_by_staff,
-    get_future_camp_confirmed_by_staff
+    get_future_camp_confirmed_by_staff,
+    get_all_past_camp_by_staff,
+    get_all_future_camp_by_staff
 )
 
 from crud.staffs.staff_comment_crud import (
     get_staff_comment_by_staff_for_admin
 )
+from crud.staffs.staff_record_crud import update_all_staff_record_status, update_staff_record_status
 
 from utils.db import SessionLocal
 
@@ -81,6 +86,7 @@ def get_prospects(db: Session = Depends(get_db)):
 
 @staff_routes.get("/staff/", tags=["Staff"])
 def get_staff(db: Session = Depends(get_db)):
+    # update_all_staff_record_status(db)
     list_staff = get_all_staff(db)
     return {"data": list_staff}
 
@@ -88,9 +94,15 @@ def get_staff(db: Session = Depends(get_db)):
 def create_prospect(
     new_prospect: ProspectCompleteCreate, db: Session = Depends(get_db)
 ):
-    user = create_new_prospect_user(db, new_prospect.user)
-    prospect = create_new_prospect(db, new_prospect.prospect, user.id)
-    return {"data": prospect}
+    result = create_complete_prospect(db, new_prospect)
+    
+    if result == 2:
+        return {"detail": {"status": 2, "msg": "Ya existe una cuenta con ese email"}} 
+    if result == 3:
+        return {"detail": {"status": 3, "msg": "Ocurrió un error al crear la cuenta del prospecto"}} 
+    if result == 1: 
+        return {"detail": {"status": 1, "msg": "El prospecto se creo correctamente"}} 
+
 
 
 @staff_routes.patch("/accept_prospect/{prospect_id}", tags=["Prospect"])
@@ -109,6 +121,11 @@ def delete_prospect_by_id(prospect_id: int, db: Session = Depends(get_db)):
 def get_staff_dashboard(staff_id: int, db: Session = Depends(get_db)):
     staff_dashboard_info = staff_dashboard(db, staff_id)
     return {"data": staff_dashboard_info}
+
+@staff_routes.get("/staff/{staff_id}/camps", tags=["Staff"])
+def get_staff_camps(staff_id: int, db: Session = Depends(get_db)):
+    response = staff_camps(db, staff_id)
+    return {"data": response}
 
 
 @staff_routes.get("/staff/{staff_id}", tags=["Staff"])
@@ -254,8 +271,8 @@ def get_staff_complete(staff_id: int, language: str, db: Session = Depends(get_d
 @staff_routes.get("/staff/profile/{staff_id}/{language}", tags=["Staff"])
 def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db)):
     
-    staff_past_camps = get_past_camp_confirmed_by_staff(db, staff_id)
-    staff_upcoming_camps = get_future_camp_confirmed_by_staff(db, staff_id)
+    staff_past_camps = get_all_past_camp_by_staff(db, staff_id)
+    staff_upcoming_camps = get_all_future_camp_by_staff(db, staff_id)
     staff_band = get_staff_band(db, staff_id)
     staff_profile = get_staff_by_id(db, staff_id)
     staff_comments = get_staff_comment_by_staff_for_admin(db, staff_id)
@@ -270,3 +287,10 @@ def get_staff_profile(staff_id: int, language: str, db: Session = Depends(get_db
         "staff_comments": staff_comments,
         "staff_trophies": staff_trophy
     }
+    
+    
+@staff_routes.post("/staff_record_status", tags=["Staff"])
+def staff_record_status(db: Session = Depends(get_db)):
+    result = update_staff_record_status(db, 22881)
+    return result
+    

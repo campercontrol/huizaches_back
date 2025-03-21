@@ -1,6 +1,6 @@
 from xmlrpc.client import boolean
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud.camps.season_crud import (
@@ -39,21 +39,28 @@ def get_season_by__id(season_id:str,db: Session = Depends(get_db)):
 
 @season_routes.post("/season/", tags=["Camps"])
 def create_season(new_season:SeasonCreate,db: Session = Depends(get_db)):
-    season = create_new_season(db, new_season)
+    new_season_dict = new_season.dict(exclude_unset=True)
+    season = create_new_season(db, new_season_dict)
+    if season == None:
+        raise HTTPException(status_code=500, detail="Cannot create season, an error ocurred.")
+    
     return {"data": season}
 
 @season_routes.patch("/season/{season_id}", tags=["Camps"])
 def update_season(season_id:str,modify_season:SeasonModify,db: Session = Depends(get_db)):
 
     update_data = modify_season.dict(exclude_unset=True)
-    print(update_data)
     season_update_result = update_season_by_id(db,season_id,update_data)
 
-    if season_update_result != 0:
-        exist_season = get_season_by_id(db, season_id)
-        return {"mensaje": "Actualizado Correctamente", "data": exist_season}
-    else:
-        return {"mensaje": "Ningun registro fue afectado", "data": ""}
+    if season_update_result['status'] == 3:
+        raise HTTPException(status_code=500, detail= season_update_result)
+
+    return {"detail": season_update_result}
+    # if season_update_result != 0:
+    #     exist_season = get_season_by_id(db, season_id)
+    #     return {"mensaje": "Actualizado Correctamente", "data": exist_season}
+    # else:
+    #     return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
 @season_routes.delete("/delete/season/{season_id}", tags=["Camps"])
 def delete_season_by_id(season_id:int, db: Session = Depends(get_db)):
