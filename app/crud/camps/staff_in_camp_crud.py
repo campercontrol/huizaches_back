@@ -122,6 +122,16 @@ def get_staff_volunteer_in_camp(db: Session, camp_id: int):
     )
     return db_mapping_rows_to_dict(staff_volunteer)
 
+def get_staff_volunteer_in_camp_count(db: Session, camp_id: int):
+    staff_volunteer = (
+        db.query(
+            StaffInCamp.id
+        )
+        .select_from(StaffInCamp)
+        .filter(and_(StaffInCamp.camp_id == camp_id, StaffInCamp.confirmed_staff == False))
+        .count()
+    )
+    return staff_volunteer
 
 def get_staff_in_camp(db: Session, camp_id: int):
     staff = (
@@ -150,6 +160,17 @@ def get_staff_in_camp(db: Session, camp_id: int):
     )
 
     return db_mapping_rows_to_dict(staff)
+
+def get_staff_in_camp_count(db: Session, camp_id: int):
+    staff = (
+        db.query(
+            StaffInCamp.id
+        )
+        .select_from(StaffInCamp)
+        .filter(StaffInCamp.camp_id == camp_id, StaffInCamp.confirmed_staff == True)
+        .count()
+    )
+    return staff
 
 
 def accept_staff_in_camp(db: Session, camp_id: int, staffs_id: list[int]):

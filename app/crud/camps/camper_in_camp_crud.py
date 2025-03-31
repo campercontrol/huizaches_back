@@ -295,6 +295,16 @@ def get_campers_for_module(db: Session, camp_id: int):
     )
     return db_mapping_rows_to_dict(campers)
 
+def get_campers_for_module_count(db: Session, camp_id: int):
+    campers = (
+        db.query(
+            CamperInCamp.id
+        )
+        .select_from(CamperInCamp)
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .count()
+    )
+    return campers
 
 def get_camps_name_amount_camper(db: Session, camper_id: int):
     data = []

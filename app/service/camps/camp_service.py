@@ -1,5 +1,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
 from sqlalchemy.orm import Session
 from datetime import date
 
@@ -63,6 +64,8 @@ from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 from schema.campers.camper_extra_answer_schema import ExtraAnswerMultiple
 from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 from utils.db import SessionLocal
 
 camp_router = APIRouter()
@@ -88,8 +91,8 @@ def camp_incomes(camp_id: int, db: Session = Depends(get_db)):
 
 
 @camp_router.get("/active_camp/", tags=["Camps"])
-def get__active_camp(db: Session = Depends(get_db)):
-    list_camp = get_all_active_camp(db)
+def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_camp = get_all_active_camp(db, pagination)
     return {"data": list_camp}
 
 
