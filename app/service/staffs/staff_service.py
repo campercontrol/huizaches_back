@@ -2,7 +2,7 @@ from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
+from typing import Annotated
 from crud.staffs.staff_crud import (
     get_all_prospect,
     get_all_staff,
@@ -65,8 +65,9 @@ from crud.staffs.staff_comment_crud import (
     get_staff_comment_by_staff_for_admin
 )
 from crud.staffs.staff_record_crud import update_all_staff_record_status, update_staff_record_status
-
 from utils.db import SessionLocal
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 
 staff_routes = APIRouter()
 
@@ -80,8 +81,8 @@ def get_db():
 
 
 @staff_routes.get("/prospect/", tags=["Prospect"])
-def get_prospects(db: Session = Depends(get_db)):
-    list_prospect = get_all_prospect(db)
+def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_prospect = get_all_prospect(db, pagination)
     return {"data": list_prospect}
 
 @staff_routes.get("/staff/", tags=["Staff"])
