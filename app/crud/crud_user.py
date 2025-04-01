@@ -349,7 +349,6 @@ def get_profile_id_by_user_id(db, user_id:int ):
     school_role = 3
     doctor_role = 5
     user_role = (
-    user = (
         db.query(User.role_id)
         .filter_by(id = user_id)
         .first()
