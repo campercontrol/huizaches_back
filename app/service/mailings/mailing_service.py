@@ -272,8 +272,10 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                         "camp_id": camp_info["id"],
                         "camper_id": camper["id"]
                     }                
-                    sendmail_status = send_mail_template_plain_text(db, camper["tutor_email"], template_body, template_subject, email_context)
-                    if sendmail_status: 
+                    sendmail_tutor_1_status = send_mail_template_plain_text(db, camper["tutor_email"], template_body, template_subject, email_context)
+                    sendmail_tutor_2_status = send_mail_template_plain_text(db, camper["second_tutor_email"], template_body, template_subject, email_context)
+
+                    if sendmail_tutor_1_status and sendmail_tutor_2_status: 
                         add_camper_to_campaign(db, camper_campaign)
                     
             if len(staffs) > 0: 
