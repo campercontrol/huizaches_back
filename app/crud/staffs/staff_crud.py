@@ -74,8 +74,9 @@ def get_all_prospect_by_season(db, season_id: int):
     return db_mapping_rows_to_dict(rows)
 
 
-def get_all_staff(db):
-    rows = (
+def get_all_staff(db, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
         db.query(Staff, User.email, Season.name.label("season_name"),
                  StaffRecord.attend,
                  StaffRecord.attended,
@@ -84,9 +85,26 @@ def get_all_staff(db):
         .join(Season, Staff.season_id == Season.id)
         .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == True)
-        .all()
+        .order_by(order(Staff.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+
     )
-    return db_mapping_rows_to_dict(rows)
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True).scalar()    
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data
+        }
 
 
 def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):

@@ -86,9 +86,9 @@ def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)],
     return {"data": list_prospect}
 
 @staff_routes.get("/staff/", tags=["Staff"])
-def get_staff(db: Session = Depends(get_db)):
+def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
     # update_all_staff_record_status(db)
-    list_staff = get_all_staff(db)
+    list_staff = get_all_staff(db, pagination)
     return {"data": list_staff}
 
 @staff_routes.post("/prospect/", tags=["Prospect"])
