@@ -1,9 +1,12 @@
 from xmlrpc.client import boolean
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, HTTPException
 #from fastapi_pagination import Page, add_pagination, paginate
 from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 
 from crud.catalogs.constant_crud import (
     get_all_blood_type_id_name,
@@ -413,6 +416,6 @@ def get_search_camper(search:str, db: Session = Depends(get_db)):
     return { "data": possible_campers }
 
 @camper_routes.get("/admin/camper/", tags=["Campers"])
-def get_admin_camper(db: Session = Depends(get_db)):
-    campers = get_all_camper_admin(db)
+def get_admin_camper(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    campers = get_all_camper_admin(db, pagination)
     return { "data": campers }

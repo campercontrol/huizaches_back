@@ -1,5 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlalchemy import func
+from sqlalchemy import func, desc, asc
 from sqlalchemy.orm import Session, aliased
 from model.catalogs.constant import Constant
 from sqlalchemy import or_
@@ -72,8 +72,9 @@ from crud.campers_catalogs.camper_pathological_background_fm_crud import (
 
 from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
 from schema.campers.camper_record_schema import CamperRecordCreate
+from schema.pagination.pagination_schema import SortEnum
 from crud.campers.camper_record_crud import create_new_camper_record
-
+from helper.pagination_helpers import get_number_of_pages
 
 
 def get_all_camper(db: Session) -> any:
@@ -407,8 +408,9 @@ def search_camper_by_name_user(db: Session, search: str):
 
 
 
-def get_all_camper_admin(db: Session):
-    campers = (
+def get_all_camper_admin(db: Session, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
         db.query(
             Camper.id.label("camper_id"),
             Camper.name.label("camper_name"),
@@ -430,12 +432,20 @@ def get_all_camper_admin(db: Session):
         .join(Parent, Parent.id == Camper.parent_id)
         .join(User, User.id == Parent.user_id)
         .join(School, School.id == Camper.school_id)
-        .all()
+        .order_by(order(Camper.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
     )
-    if campers:
-        return db_mapping_rows_to_dict(campers)
-    else:
-        return "Data not found"
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(Camper.id)).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).join(User, User.id == Parent.user_id).join(School, School.id == Camper.school_id).scalar()    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data
+    }
+    
 
 def get_campers_in_school(db: Session, school_id:str):
     query = db.query(func.concat(Camper.name, " ", Camper.lastname_father, " ", Camper.lastname_mother).label("fullname")).filter(Camper.school_id == school_id)
