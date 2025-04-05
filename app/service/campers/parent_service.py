@@ -3,7 +3,9 @@ from xmlrpc.client import boolean
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-
+from typing import Annotated
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 
 from crud.campers.parent_crud import (
     get_all_parent,
@@ -57,8 +59,8 @@ def get_db():
         db.close()
 
 @parent_routes.get("/parent/", tags=["Campers"])
-def get_parent(db: Session = Depends(get_db)):
-    list_parent = get_all_parent(db)
+def get_parent(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_parent = get_all_parent(db, pagination)
     return {"data": list_parent}
 
 @parent_routes.get("/parent/{parent_id}", tags=["Campers"])

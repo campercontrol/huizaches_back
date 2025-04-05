@@ -593,7 +593,8 @@ def get_all_active_camp(db: Session, pagination):
 
     return {
         "pages": pages,
-        "items": camps
+        "items": camps,
+        "total": rows_count
     }
 
 

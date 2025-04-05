@@ -53,7 +53,8 @@ def get_all_prospect(db, pagination):
 
     return {
         "pages": pages,
-        "items": data
+        "items": data,
+        "total": rows_count
         }
 
 
@@ -103,7 +104,8 @@ def get_all_staff(db, pagination):
 
     return {
         "pages": pages,
-        "items": data
+        "items": data,
+        "total": rows_count
         }
 
 

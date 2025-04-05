@@ -4,18 +4,35 @@ from model.campers import Camper
 from model.staffs.staff import Staff
 from helper.parent_helpers import append_campers_for_parent_admin
 from schema.campers.parent_schema import ParentCreate, ParentModify
-from sqlalchemy import or_
+from schema.pagination.pagination_schema import Pagination, SortEnum
+from sqlalchemy import or_, desc, asc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from helper.mailing_helpers import send_mail_template
-
+from helper.pagination_helpers import get_number_of_pages
 import json
 
 
-def get_all_parent(db: Session):
-    rows = db.query(Parent).all()
-    return rows
+def get_all_parent(db: Session, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
+        db.query(Parent).select_from(Parent)
+        .order_by(order(Parent.tutor_name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    
+    rows_count = db.query(func.count(Parent.id)).select_from(Parent).scalar()
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+    }   
 
 
 def get_parent_by_uuid(db: Session, parent_id: int):

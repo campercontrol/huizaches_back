@@ -443,7 +443,8 @@ def get_all_camper_admin(db: Session, pagination):
 
     return {
         "pages": pages,
-        "items": data
+        "items": data,
+        "total": rows_count,
     }
     
 
