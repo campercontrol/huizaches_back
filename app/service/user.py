@@ -3,6 +3,9 @@ import os
 from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session
 from utils.hash import hash_str
+from typing import Annotated
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 from crud.crud_user import (
     get_all_user,
     create_new_user,
@@ -49,10 +52,10 @@ def get_db():
 
 
 @user_routes.get("/usuario", tags=["Usuarios"])
-def get_users(is_active: boolean = True, db: Session = Depends(get_db)):
+def get_users(pagination: Annotated[Pagination, Depends(pagination_params)], is_active: boolean = True, db: Session = Depends(get_db)):
     NAME = "get_users"
 
-    list_user = get_all_user(db, is_active)
+    list_user = get_all_user(db, is_active, pagination)
 
     return {"data": list_user}
 
