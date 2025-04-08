@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from helper.mailing_helpers import send_mail_template
 from helper.pagination_helpers import get_number_of_pages
+from crud.campers.camper_crud import get_campers_from_parent
+
 import json
 
 
@@ -255,8 +257,10 @@ def search_parent_by_name_user(db: Session, search: str):
     return possible_parents
 
 
-def get_all_parent_admin(db: Session):
-    parents = (
+def get_all_parent_admin(db: Session, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    data = []
+    parents_query = (
         db.query(
             User.id.label("user_id"),
             Parent.id.label("tutor_id"),
@@ -269,16 +273,29 @@ def get_all_parent_admin(db: Session):
             User.email.label("tutor_email"),
             Parent.contact_email.label("second_tutor_email"),
         )
-        .outerjoin(User, User.id == Parent.user_id)
-        .all()
+        .join(User, User.id == Parent.user_id)
+        .order_by(order(Parent.tutor_name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset)) 
     )
+    parents_data = db.execute(parents_query)
+    parents_data = parents_data.mappings().all()
+    rows_count = db.query(func.count(Parent.id)).select_from(Parent).join(User, User.id == Parent.user_id).scalar()
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for parent in parents_data:
+        campers = get_campers_from_parent(db, parent.tutor_id)
+        parent_dict = dict(parent)
+        parent_dict["campers"] = campers
+        data.append(parent_dict)
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+    
 
-    if parents:
-        possible_parents = append_campers_for_parent_admin(db, parents)
-    else:
-        possible_parents = "Data not found"
-
-    return possible_parents
+    # return possible_parents
 # Se agrega esta función de forma temporal debido a un error de importación
 def get_admin_users_for_mailing(db: Session):
     query = db.query(Staff.name,
