@@ -557,10 +557,55 @@ def get_camp_gnl_staff_report(db: Session, camp_id: int):
     return staffs_report
 
 
-def get_all_camp(db: Session):
-    rows = db.query(Camp).all()
-    return rows
+def get_all_camp(db: Session, pagination: Pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
 
+    query = (
+        db.query(
+            Camp.id,
+            Camp.name,
+            Camp.start,
+            Camp.end,
+            Camp.start_registration,
+            Camp.end_registration,
+            Camp.registration,
+            Camp.url,
+            Camp.special_message,
+            Camp.special_message_admin,
+            Camp.public_price,
+            Camp.show_payment_parent,
+            Camp.show_rebate_parent,
+            Camp.show_paypal_button,
+            Camp.show_payment_order,
+            Camp.reminder_camp_days,
+            Camp.reminder_discount_days,                                                        
+            Camp.insurance,
+            Camp.venue,
+            Camp.photo_url,
+            Camp.photo_password,
+            Camp.medical_report,
+            Camp.occupancy_camp,
+            Camp.active,
+            Camp.general_camp,
+            Camp.show_mercadopago_button,
+            Camp.recommended_payment_dates
+        ).select_from(Camp)
+        .order_by(order(Camp.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).scalar()    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+    }
+    
+    
 
 def get_all_active_camp(db: Session, pagination):
     camps = []

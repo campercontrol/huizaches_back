@@ -80,8 +80,8 @@ def get_db():
 
 
 @camp_router.get("/camp/", tags=["Camps"])
-def get_camp(db: Session = Depends(get_db)):
-    list_camp = get_all_camp(db)
+def get_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_camp = get_all_camp(db, pagination)
     return {"data": list_camp}
 
 @camp_router.get("/camp/{camp_id}/incomes", tags=["Camps"])
