@@ -1,4 +1,4 @@
-from sqlalchemy import and_, func, extract, select, desc,asc
+from sqlalchemy import and_, func, extract, select, desc,asc, or_
 from math import ceil
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -616,10 +616,13 @@ def get_all_active_camp(db: Session, pagination):
             Camp.public_price.label("camp_public_price"),
             Camp.show_payment_parent.label("camp_show_payment_parent"),
             Location.name.label("location_name"),
+            School.name.label("school_name"),
             Camp.start.label("camp_start"),
-            Camp.end.label("camp_end")
+            Camp.end.label("camp_end"),
+        
         )
         .join(Location, Location.id == Camp.location_id)
+        .join(School, School.id == Camp.school_id)
         .filter(Camp.active==True)
         .order_by(order(Camp.name))
         .limit(pagination.perPage)
@@ -641,6 +644,61 @@ def get_all_active_camp(db: Session, pagination):
         "items": camps,
         "total": rows_count
     }
+
+def search_all_active_camp(db: Session, pagination, name, location, school):
+    camps = []
+    query = (select(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.public_price.label("camp_public_price"),
+            Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Location.name.label("location_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            School.name.label("school_name")
+        )
+        .join(Location, Location.id == Camp.location_id)
+        .join(School, School.id == Camp.school_id)
+        .filter(Camp.active==True)
+        .filter(
+            or_(
+                Camp.name.op('%')(name),
+                School.name.op('%')(location),
+                Location.name.op('%')(school),
+        ))
+        .order_by(        
+            func.similarity(Camp.name, name).desc(),
+            func.similarity(School.name, school).desc(),
+            func.similarity(Location.name, location).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).filter(Camp.active==True)
+        .filter(
+            or_(
+                Camp.name.op('%')(name),
+                School.name.op('%')(location),
+                Location.name.op('%')(school),
+        )).scalar()
+        )    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for row in data:
+        records = get_records_for_camp(db, row.camp_id)
+        row = dict(row)
+        row["records"] = records
+        camps.append(row)
+
+    return {
+        "pages": pages,
+        "items": camps,
+        "total": rows_count
+    }
+
 
 
 def get_school_camp_for_camper(db: Session, camper_id: int):
