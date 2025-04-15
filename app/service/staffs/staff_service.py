@@ -2,10 +2,11 @@ from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, Optional
 from crud.staffs.staff_crud import (
     get_all_prospect,
     get_all_staff,
+    search_all_staff,
     create_new_prospect,
     create_complete_prospect,
     accept_prospect,
@@ -90,6 +91,13 @@ def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db:
     # update_all_staff_record_status(db)
     list_staff = get_all_staff(db, pagination)
     return {"data": list_staff}
+
+@staff_routes.get("/search_staff/", tags=["Staff"])
+def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db),  name: Optional[str] = '', email: Optional[str] = ''):
+    # update_all_staff_record_status(db)
+    list_staff = search_all_staff(db, pagination, name, email)
+    return {"data": list_staff}
+
 
 @staff_routes.post("/prospect/", tags=["Prospect"])
 def create_prospect(

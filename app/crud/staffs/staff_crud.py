@@ -107,7 +107,53 @@ def get_all_staff(db, pagination):
         "items": data,
         "total": rows_count
         }
+def search_all_staff(db, pagination: Pagination, name: str, email: str):
+    query = (
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                 StaffRecord.attend,
+                 StaffRecord.attended,
+                 StaffRecord.total)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True)
+        .filter(
+           or_(
+               User.email.op('%')(email),
+               Staff.name.op('%')(name),
+            )
+        )
+        .order_by(
+            func.similarity(User.email, email).desc(),
+            func.similarity(Staff.name, name).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
 
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True)
+        .filter(
+           or_(
+               User.email.op('%')(email),
+               Staff.name.op('%')(name),
+            )
+        )
+        .scalar()    
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
 
 def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     db_prospect = None

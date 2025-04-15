@@ -255,4 +255,16 @@ class CampComplete(BaseModel):
     extra_question: Optional[list[CampExtraQuestionCreate]]
     extra_discounts: Optional[list[CampDiscountCreate]]
 
-
+class CampSearch(BaseModel):
+    name: Optional[str] = Field(
+        title="Nombre del campamento",
+        default=''
+    )
+    location: Optional[str] = Field(
+        title="Sede",
+        default=''
+    )
+    school: Optional[str] = Field(
+        title="School",
+        default=''
+    )
