@@ -446,7 +446,86 @@ def get_all_camper_admin(db: Session, pagination):
         "items": data,
         "total": rows_count,
     }
-    
+
+def search_all_camper_admin(db: Session, pagination, camper_name: str, camper_lastname_father: str , camper_lastname_mother: str, tutor_1_name: str, tutor_1_lastname_father: str, tutor_1_lastname_mother: str, tutor_1_email: str, tutor_2_name: str, tutor_2_lastname_father: str,tutor_2_lastname_mother: str, tutor_2_email: str):
+    query = (
+        db.query(
+            Camper.id.label("camper_id"),
+            Camper.name.label("camper_name"),
+            Camper.lastname_father.label("camper_lastname_father"),
+            Camper.lastname_mother.label("camper_lastname_mother"),
+            School.name.label("school"),
+            Camper.updated_at.label("updated"),
+            Parent.id.label("tutor_id"),
+            (
+                Parent.tutor_name
+                + " "
+                + Parent.tutor_lastname_father
+                + " "
+                + Parent.tutor_lastname_mother
+            ).label("tutor_fullname"),
+            User.id.label("user_id"),
+            User.email.label("tutor_email"),
+        )
+        .join(Parent, Parent.id == Camper.parent_id)
+        .join(User, User.id == Parent.user_id)
+        .join(School, School.id == Camper.school_id)
+        .filter(
+            or_(
+                Camper.name.op('%')(camper_name),
+                Camper.lastname_father.op('%')(camper_lastname_father),
+                Camper.lastname_mother.op('%')(camper_lastname_mother),
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        )
+        .order_by(
+            func.similarity(Camper.name, camper_name).desc(),
+            func.similarity(Camper.lastname_father, camper_lastname_father).desc(),
+            func.similarity(Camper.lastname_mother, camper_lastname_mother).desc(),
+            func.similarity(User.email, tutor_1_email).desc(),
+            func.similarity(Parent.tutor_name, tutor_1_name).desc(),
+            func.similarity(Parent.tutor_lastname_father, tutor_1_lastname_father).desc(),
+            func.similarity(Parent.tutor_lastname_mother, tutor_1_lastname_mother).desc(),
+            func.similarity(Parent.contact_name, tutor_2_name).desc(),
+            func.similarity(Parent.contact_lastname_father, tutor_2_lastname_father).desc(),
+            func.similarity(Parent.contact_lastname_mother, tutor_2_lastname_mother).desc(),
+            func.similarity(Parent.contact_email, tutor_2_email).desc(),
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    print(query)
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (db.query(func.count(Camper.id)).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).join(User, User.id == Parent.user_id).join(School, School.id == Camper.school_id)        .filter(
+            or_(
+                Camper.name.op('%')(camper_name),
+                Camper.lastname_father.op('%')(camper_lastname_father),
+                Camper.lastname_mother.op('%')(camper_lastname_mother),
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        ).scalar())    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count,
+    }
 
 def get_campers_in_school(db: Session, school_id:str):
     query = db.query(func.concat(Camper.name, " ", Camper.lastname_father, " ", Camper.lastname_mother).label("fullname")).filter(Camper.school_id == school_id)
