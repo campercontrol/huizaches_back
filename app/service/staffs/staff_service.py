@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated, Optional
 from crud.staffs.staff_crud import (
     get_all_prospect,
+    search_all_prospect,
     get_all_staff,
     search_all_staff,
     create_new_prospect,
@@ -84,6 +85,11 @@ def get_db():
 @staff_routes.get("/prospect/", tags=["Prospect"])
 def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
     list_prospect = get_all_prospect(db, pagination)
+    return {"data": list_prospect}
+
+@staff_routes.get("/search_prospect/", tags=["Prospect"])
+def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), name: Optional[str] = '', email: Optional[str] = ''):
+    list_prospect = search_all_prospect(db, pagination, name, email)
     return {"data": list_prospect}
 
 @staff_routes.get("/staff/", tags=["Staff"])

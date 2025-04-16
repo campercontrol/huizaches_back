@@ -57,6 +57,54 @@ def get_all_prospect(db, pagination):
         "total": rows_count
         }
 
+def search_all_prospect(db, pagination: Pagination, name: str, email: str):
+    query = (
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                    StaffRecord.attend,
+                    StaffRecord.attended,
+                    StaffRecord.total)
+        .select_from(Staff)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == False)
+        .filter(
+            or_(
+                User.email.op('%')(email),
+                Staff.name.op('%')(name),
+            )
+        )
+        .order_by(
+            func.similarity(User.email, email).desc(),
+            func.similarity(Staff.name, name).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .select_from(Staff)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == False)
+        .filter(
+            or_(
+                User.email.op('%')(email),
+                Staff.name.op('%')(name),
+            )
+        ).scalar()        
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+
 
 def get_all_prospect_by_season(db, season_id: int):
     rows = (
