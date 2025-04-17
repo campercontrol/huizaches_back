@@ -60,7 +60,52 @@ def get_all_user(db, is_active, pagination):
         "items": data,
         "total": rows_count
         }
+
+def search_all_user(db, is_active, pagination, email):
     
+    query = (
+        db.query(
+            User.id.label('id'),
+            User.email.label('email'),
+            User.hashed_pass.label('hashed_pass'),
+            User.role_id.label('role_id'),
+            Role.name.label('role_name'),
+            User.is_admin,
+            User.is_coordinator,
+            User.is_employee,
+            User.is_superuser.label('is_superuser'),
+            User.is_active.label('is_active'),
+        )
+        .join(
+            Role, Role.id == User.role_id
+        ).filter(
+            User.is_active == is_active,
+        )
+        .filter(
+            User.email.op('%')(email)
+        )
+        .order_by(
+            func.similarity(User.email, email).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (db.query(func.count(User.id))
+        .select_from(User)
+        .join(Role, Role.id == User.role_id)
+        .filter(User.is_active == is_active)
+        .filter(
+            User.email.op('%')(email)
+        ).scalar())
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
     
 
 def get_users_all_info(db, user_id):
