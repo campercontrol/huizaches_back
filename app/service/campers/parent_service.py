@@ -3,12 +3,13 @@ from xmlrpc.client import boolean
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-from typing import Annotated
+from typing import Annotated, Optional
 from schema.pagination.pagination_schema import Pagination
 from helper.pagination_helpers import pagination_params
 
 from crud.campers.parent_crud import (
     get_all_parent,
+    search_all_parent_admin,
     get_all_parent_admin,
     get_parent_by_uuid,
     create_new_parent,
@@ -214,4 +215,9 @@ def get_parent_for_admin(parent_id:str, db: Session = Depends(get_db)):
 @parent_routes.get("/admin/parent/", tags=["Campers"])
 async def get_parent_admin(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
     list_parent = get_all_parent_admin(db, pagination)
+    return {"data": list_parent}
+
+@parent_routes.get("/search_admin_parent/", tags=["Campers"])
+async def get_parent_admin(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db),  tutor_1_name: Optional[str] = '',tutor_1_lastname_father: Optional[str] = '', tutor_1_lastname_mother: Optional[str] = '', tutor_1_email: Optional[str] = '', tutor_2_name: Optional[str] = '', tutor_2_lastname_father: Optional[str] = '',tutor_2_lastname_mother: Optional[str] = '', tutor_2_email: Optional[str] = ''):
+    list_parent = search_all_parent_admin(db, pagination, tutor_1_name, tutor_1_lastname_father, tutor_1_lastname_mother, tutor_1_email, tutor_2_name, tutor_2_lastname_father,tutor_2_lastname_mother, tutor_2_email)
     return {"data": list_parent}

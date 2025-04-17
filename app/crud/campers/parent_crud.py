@@ -273,6 +273,7 @@ def get_all_parent_admin(db: Session, pagination):
             User.email.label("tutor_email"),
             Parent.contact_email.label("second_tutor_email"),
         )
+        .select_from(Parent)
         .join(User, User.id == Parent.user_id)
         .order_by(order(Parent.tutor_name))
         .limit(pagination.perPage)
@@ -294,6 +295,81 @@ def get_all_parent_admin(db: Session, pagination):
         "total": rows_count
         }
     
+def search_all_parent_admin(db: Session, pagination, tutor_1_name: str, tutor_1_lastname_father: str, tutor_1_lastname_mother: str, tutor_1_email: str, tutor_2_name: str, tutor_2_lastname_father: str,tutor_2_lastname_mother: str, tutor_2_email: str):
+    data = []
+    parents_query = (
+        db.query(
+            User.id.label("user_id"),
+            Parent.id.label("tutor_id"),
+            Parent.tutor_name.label("tutor_name"),
+            Parent.tutor_lastname_father.label("tutor_lastname_father"),
+            Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+            Parent.tutor_home_phone.label("tutor_home_phone"),
+            Parent.tutor_work_phone.label("tutor_work_phone"),
+            Parent.tutor_cellphone.label("tutor_cellphone"),
+            User.email.label("tutor_email"),
+            Parent.contact_email.label("second_tutor_email"),
+        ).select_from(Parent)
+        .join(User, User.id == Parent.user_id)
+        .filter(
+            or_(
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        )
+        .order_by(
+            func.similarity(User.email, tutor_1_email).desc(),
+            func.similarity(Parent.tutor_name, tutor_1_name).desc(),
+            func.similarity(Parent.tutor_lastname_father, tutor_1_lastname_father).desc(),
+            func.similarity(Parent.tutor_lastname_mother, tutor_1_lastname_mother).desc(),
+            func.similarity(Parent.contact_name, tutor_2_name).desc(),
+            func.similarity(Parent.contact_lastname_father, tutor_2_lastname_father).desc(),
+            func.similarity(Parent.contact_lastname_mother, tutor_2_lastname_mother).desc(),
+            func.similarity(Parent.contact_email, tutor_2_email).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset)) 
+    )
+    parents_data = db.execute(parents_query)
+    parents_data = parents_data.mappings().all()
+    rows_count = (
+        db.query(func.count(Parent.id)).select_from(Parent).join(User, User.id == Parent.user_id).filter(
+            or_(
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        ).scalar()
+                  
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for parent in parents_data:
+        campers = get_campers_from_parent(db, parent.tutor_id)
+        parent_dict = dict(parent)
+        parent_dict["campers"] = campers
+        data.append(parent_dict)
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+    
+ 
+ 
+ 
+   
 
     # return possible_parents
 # Se agrega esta función de forma temporal debido a un error de importación
