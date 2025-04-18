@@ -1,11 +1,13 @@
 
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated, Optional
 from sqlalchemy.orm import Session
 from datetime import date
 
 from crud.camps.camp_crud import (
     get_all_camp,
     get_all_active_camp,
+    search_all_active_camp,
     get_school_camp_for_camper,
     get_camp_by_id,
     create_new_camp,
@@ -55,7 +57,7 @@ from crud.mercadopago.mercadopago_crud import get_mercado_pago_payments_by_camp_
 from crud.payments.payment_crud import apply_massive_payment
 from crud.mailings.mailing_crud import send_system_mail
 
-from schema.camps.camp_schema import CampComplete
+from schema.camps.camp_schema import CampComplete, CampSearch
 from schema.camps.camper_in_camp_schema import CamperInCampCreate, CamperInCampModify
 from schema.camps.camp_payment_account_schema import CreateCampPaymentAccount
 from schema.payments.payment_schema import PaymentCreate, MassivePaymentCreate
@@ -63,6 +65,8 @@ from schema.camps.camp_extra_charge_schema import CampExtraChargeCreate
 from schema.camps.camp_extra_question_schema import CampExtraQuestionCreate
 from schema.campers.camper_extra_answer_schema import ExtraAnswerMultiple
 from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 from utils.db import SessionLocal
 
 camp_router = APIRouter()
@@ -77,8 +81,8 @@ def get_db():
 
 
 @camp_router.get("/camp/", tags=["Camps"])
-def get_camp(db: Session = Depends(get_db)):
-    list_camp = get_all_camp(db)
+def get_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_camp = get_all_camp(db, pagination)
     return {"data": list_camp}
 
 @camp_router.get("/camp/{camp_id}/incomes", tags=["Camps"])
@@ -88,9 +92,15 @@ def camp_incomes(camp_id: int, db: Session = Depends(get_db)):
 
 
 @camp_router.get("/active_camp/", tags=["Camps"])
-def get__active_camp(db: Session = Depends(get_db)):
-    list_camp = get_all_active_camp(db)
+def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_camp = get_all_active_camp(db, pagination)
     return {"data": list_camp}
+
+@camp_router.get("/search/active_camp/", tags=["Camps"])
+def get_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), name: Optional[str] = '', location: Optional[str] = '', school: Optional[str] = ''):
+    list_camp = search_all_active_camp(db, pagination,name, location, school)
+    return {"data": list_camp}
+
 
 
 @camp_router.get("/get_camps_for_camper/{camper_id}", tags=["Camps"])

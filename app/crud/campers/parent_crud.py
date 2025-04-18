@@ -4,18 +4,37 @@ from model.campers import Camper
 from model.staffs.staff import Staff
 from helper.parent_helpers import append_campers_for_parent_admin
 from schema.campers.parent_schema import ParentCreate, ParentModify
-from sqlalchemy import or_
+from schema.pagination.pagination_schema import Pagination, SortEnum
+from sqlalchemy import or_, desc, asc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
 from helper.mailing_helpers import send_mail_template
+from helper.pagination_helpers import get_number_of_pages
+from crud.campers.camper_crud import get_campers_from_parent
 
 import json
 
 
-def get_all_parent(db: Session):
-    rows = db.query(Parent).all()
-    return rows
+def get_all_parent(db: Session, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
+        db.query(Parent).select_from(Parent)
+        .order_by(order(Parent.tutor_name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    
+    rows_count = db.query(func.count(Parent.id)).select_from(Parent).scalar()
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+    }   
 
 
 def get_parent_by_uuid(db: Session, parent_id: int):
@@ -238,8 +257,10 @@ def search_parent_by_name_user(db: Session, search: str):
     return possible_parents
 
 
-def get_all_parent_admin(db: Session):
-    parents = (
+def get_all_parent_admin(db: Session, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    data = []
+    parents_query = (
         db.query(
             User.id.label("user_id"),
             Parent.id.label("tutor_id"),
@@ -252,16 +273,105 @@ def get_all_parent_admin(db: Session):
             User.email.label("tutor_email"),
             Parent.contact_email.label("second_tutor_email"),
         )
-        .outerjoin(User, User.id == Parent.user_id)
-        .all()
+        .select_from(Parent)
+        .join(User, User.id == Parent.user_id)
+        .order_by(order(Parent.tutor_name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset)) 
     )
+    parents_data = db.execute(parents_query)
+    parents_data = parents_data.mappings().all()
+    rows_count = db.query(func.count(Parent.id)).select_from(Parent).join(User, User.id == Parent.user_id).scalar()
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for parent in parents_data:
+        campers = get_campers_from_parent(db, parent.tutor_id)
+        parent_dict = dict(parent)
+        parent_dict["campers"] = campers
+        data.append(parent_dict)
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+    
+def search_all_parent_admin(db: Session, pagination, tutor_1_name: str, tutor_1_lastname_father: str, tutor_1_lastname_mother: str, tutor_1_email: str, tutor_2_name: str, tutor_2_lastname_father: str,tutor_2_lastname_mother: str, tutor_2_email: str):
+    data = []
+    parents_query = (
+        db.query(
+            User.id.label("user_id"),
+            Parent.id.label("tutor_id"),
+            Parent.tutor_name.label("tutor_name"),
+            Parent.tutor_lastname_father.label("tutor_lastname_father"),
+            Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+            Parent.tutor_home_phone.label("tutor_home_phone"),
+            Parent.tutor_work_phone.label("tutor_work_phone"),
+            Parent.tutor_cellphone.label("tutor_cellphone"),
+            User.email.label("tutor_email"),
+            Parent.contact_email.label("second_tutor_email"),
+        ).select_from(Parent)
+        .join(User, User.id == Parent.user_id)
+        .filter(
+            or_(
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        )
+        .order_by(
+            func.similarity(User.email, tutor_1_email).desc(),
+            func.similarity(Parent.tutor_name, tutor_1_name).desc(),
+            func.similarity(Parent.tutor_lastname_father, tutor_1_lastname_father).desc(),
+            func.similarity(Parent.tutor_lastname_mother, tutor_1_lastname_mother).desc(),
+            func.similarity(Parent.contact_name, tutor_2_name).desc(),
+            func.similarity(Parent.contact_lastname_father, tutor_2_lastname_father).desc(),
+            func.similarity(Parent.contact_lastname_mother, tutor_2_lastname_mother).desc(),
+            func.similarity(Parent.contact_email, tutor_2_email).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset)) 
+    )
+    parents_data = db.execute(parents_query)
+    parents_data = parents_data.mappings().all()
+    rows_count = (
+        db.query(func.count(Parent.id)).select_from(Parent).join(User, User.id == Parent.user_id).filter(
+            or_(
+                User.email.op('%')(tutor_1_email),
+                Parent.tutor_name.op('%')(tutor_1_name),
+                Parent.tutor_lastname_father.op('%')(tutor_1_lastname_father),
+                Parent.tutor_lastname_mother.op('%')(tutor_1_lastname_mother),
+                Parent.contact_name.op('%')(tutor_2_name),
+                Parent.contact_lastname_father.op('%')(tutor_2_lastname_father),
+                Parent.contact_lastname_mother.op('%')(tutor_2_lastname_mother),
+                Parent.contact_email.op('%')(tutor_2_email),
+            ) 
+        ).scalar()
+                  
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for parent in parents_data:
+        campers = get_campers_from_parent(db, parent.tutor_id)
+        parent_dict = dict(parent)
+        parent_dict["campers"] = campers
+        data.append(parent_dict)
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+    
+ 
+ 
+ 
+   
 
-    if parents:
-        possible_parents = append_campers_for_parent_admin(db, parents)
-    else:
-        possible_parents = "Data not found"
-
-    return possible_parents
+    # return possible_parents
 # Se agrega esta función de forma temporal debido a un error de importación
 def get_admin_users_for_mailing(db: Session):
     query = db.query(Staff.name,

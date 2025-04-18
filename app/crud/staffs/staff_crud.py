@@ -1,39 +1,109 @@
-from sqlalchemy import case, and_, or_
+from fastapi import HTTPException
+from sqlalchemy import case, and_, or_, desc, asc, func
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from utils.db import db_mapping_rows_to_dict
+from utils.hash import hash_str
 from datetime import date
-from fastapi import HTTPException
 from model.staffs import Staff, StaffRecord
 from model.camps import StaffInCamp, Camp, Location, Season
 from model.staffs.staff_food_restriction import StaffFoodRestriction
 from model.staffs.staff_vaccine import StaffVaccine
+from model import User
 from schema.staff_catalogs.staff_food_restriction_schema import StaffFoodRestrictionCreate
 from schema.staff_catalogs.staff_vaccine_schema import StaffVaccineCreate
-from model import User
-from utils.hash import hash_str
-from helper.mailing_helpers import send_mail_template, send_mail_prospect
+from schema.pagination.pagination_schema import Pagination, SortEnum
 from schema.staffs.staff_schema import ProspectCreate, StaffModify
 from crud.camps.camp_crud import get_records_for_camp
 from crud.camps.season_crud import get_current_Season
 from crud.mailings.mailing_crud import get_admin_users_for_mailing
 from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
+from helper.pagination_helpers import pagination_params, get_number_of_pages
+from helper.mailing_helpers import send_mail_template, send_mail_prospect
 
 
-def get_all_prospect(db):
-    rows = (
+def get_all_prospect(db, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
         db.query(Staff, User.email, Season.name.label("season_name"),
                     StaffRecord.attend,
                     StaffRecord.attended,
                     StaffRecord.total)
+        .select_from(Staff)
         .join(User, User.id == Staff.login_id)
         .join(Season, Staff.season_id == Season.id)
         .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == False)
-        .all()
+        .order_by(order(Staff.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
     )
-    return db_mapping_rows_to_dict(rows)
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .select_from(Staff)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == False).scalar()        
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+
+def search_all_prospect(db, pagination: Pagination, name: str, email: str):
+    query = (
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                    StaffRecord.attend,
+                    StaffRecord.attended,
+                    StaffRecord.total)
+        .select_from(Staff)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == False)
+        .filter(
+            or_(
+                User.email.op('%')(email),
+                Staff.name.op('%')(name),
+            )
+        )
+        .order_by(
+            func.similarity(User.email, email).desc(),
+            func.similarity(Staff.name, name).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .select_from(Staff)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == False)
+        .filter(
+            or_(
+                User.email.op('%')(email),
+                Staff.name.op('%')(name),
+            )
+        ).scalar()        
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
 
 
 def get_all_prospect_by_season(db, season_id: int):
@@ -53,8 +123,9 @@ def get_all_prospect_by_season(db, season_id: int):
     return db_mapping_rows_to_dict(rows)
 
 
-def get_all_staff(db):
-    rows = (
+def get_all_staff(db, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (
         db.query(Staff, User.email, Season.name.label("season_name"),
                  StaffRecord.attend,
                  StaffRecord.attended,
@@ -63,10 +134,74 @@ def get_all_staff(db):
         .join(Season, Staff.season_id == Season.id)
         .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == True)
-        .all()
-    )
-    return db_mapping_rows_to_dict(rows)
+        .order_by(order(Staff.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
 
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True).scalar()    
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+def search_all_staff(db, pagination: Pagination, name: str, email: str):
+    query = (
+        db.query(Staff, User.email, Season.name.label("season_name"),
+                 StaffRecord.attend,
+                 StaffRecord.attended,
+                 StaffRecord.total)
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True)
+        .filter(
+           or_(
+               User.email.op('%')(email),
+               Staff.name.op('%')(name),
+            )
+        )
+        .order_by(
+            func.similarity(User.email, email).desc(),
+            func.similarity(Staff.name, name).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Staff.id))
+        .join(User, User.id == Staff.login_id)
+        .join(Season, Staff.season_id == Season.id)
+        .join(StaffRecord, StaffRecord.id == Staff.record_id)
+        .filter(Staff.employee == True)
+        .filter(
+           or_(
+               User.email.op('%')(email),
+               Staff.name.op('%')(name),
+            )
+        )
+        .scalar()    
+    )
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
 
 def create_new_prospect(db, new_prospect: ProspectCreate, user_id: int):
     db_prospect = None

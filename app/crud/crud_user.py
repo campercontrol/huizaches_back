@@ -1,4 +1,4 @@
-from sqlalchemy import case, or_, and_
+from sqlalchemy import case, or_, and_, asc, desc
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import delete
@@ -22,9 +22,13 @@ from crud.trophies.trophy_staff_crud import get_all_staff_trophies
 from crud.training.staff_in_training_crud import get_all_staff_training
 from crud.campers.camper_crud import get_campers_in_school
 from crud.campers.parent_crud import create_new_parent_user_id, create_new_parent_user_id_transaction
+from schema.pagination.pagination_schema import Pagination, SortEnum
+from helper.pagination_helpers import get_number_of_pages
 
-def get_all_user(db, is_active):
-    rows = (
+def get_all_user(db, is_active, pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
+    
+    query = (
         db.query(
             User.id.label('id'),
             User.email.label('email'),
@@ -42,10 +46,67 @@ def get_all_user(db, is_active):
         ).filter(
             User.is_active == is_active,
         )
-        .all()
+        .order_by(order(User.email))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
     )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(User.id)).select_from(User).join(Role, Role.id == User.role_id).filter(User.is_active == is_active).scalar()
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
 
-    return db_mapping_rows_to_dict(rows)
+def search_all_user(db, is_active, pagination, email):
+    
+    query = (
+        db.query(
+            User.id.label('id'),
+            User.email.label('email'),
+            User.hashed_pass.label('hashed_pass'),
+            User.role_id.label('role_id'),
+            Role.name.label('role_name'),
+            User.is_admin,
+            User.is_coordinator,
+            User.is_employee,
+            User.is_superuser.label('is_superuser'),
+            User.is_active.label('is_active'),
+        )
+        .join(
+            Role, Role.id == User.role_id
+        ).filter(
+            User.is_active == is_active,
+        )
+        .filter(
+            User.email.op('%')(email)
+        )
+        .order_by(
+            func.similarity(User.email, email).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (db.query(func.count(User.id))
+        .select_from(User)
+        .join(Role, Role.id == User.role_id)
+        .filter(User.is_active == is_active)
+        .filter(
+            User.email.op('%')(email)
+        ).scalar())
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+        }
+    
 
 def get_users_all_info(db, user_id):
     query = db.query(
@@ -349,7 +410,6 @@ def get_profile_id_by_user_id(db, user_id:int ):
     school_role = 3
     doctor_role = 5
     user_role = (
-    user = (
         db.query(User.role_id)
         .filter_by(id = user_id)
         .first()

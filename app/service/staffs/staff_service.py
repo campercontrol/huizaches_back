@@ -2,10 +2,12 @@ from xmlrpc.client import boolean
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
+from typing import Annotated, Optional
 from crud.staffs.staff_crud import (
     get_all_prospect,
+    search_all_prospect,
     get_all_staff,
+    search_all_staff,
     create_new_prospect,
     create_complete_prospect,
     accept_prospect,
@@ -65,8 +67,9 @@ from crud.staffs.staff_comment_crud import (
     get_staff_comment_by_staff_for_admin
 )
 from crud.staffs.staff_record_crud import update_all_staff_record_status, update_staff_record_status
-
 from utils.db import SessionLocal
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 
 staff_routes = APIRouter()
 
@@ -80,15 +83,27 @@ def get_db():
 
 
 @staff_routes.get("/prospect/", tags=["Prospect"])
-def get_prospects(db: Session = Depends(get_db)):
-    list_prospect = get_all_prospect(db)
+def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_prospect = get_all_prospect(db, pagination)
+    return {"data": list_prospect}
+
+@staff_routes.get("/search_prospect/", tags=["Prospect"])
+def get_prospects(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), name: Optional[str] = '', email: Optional[str] = ''):
+    list_prospect = search_all_prospect(db, pagination, name, email)
     return {"data": list_prospect}
 
 @staff_routes.get("/staff/", tags=["Staff"])
-def get_staff(db: Session = Depends(get_db)):
+def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
     # update_all_staff_record_status(db)
-    list_staff = get_all_staff(db)
+    list_staff = get_all_staff(db, pagination)
     return {"data": list_staff}
+
+@staff_routes.get("/search_staff/", tags=["Staff"])
+def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db),  name: Optional[str] = '', email: Optional[str] = ''):
+    # update_all_staff_record_status(db)
+    list_staff = search_all_staff(db, pagination, name, email)
+    return {"data": list_staff}
+
 
 @staff_routes.post("/prospect/", tags=["Prospect"])
 def create_prospect(

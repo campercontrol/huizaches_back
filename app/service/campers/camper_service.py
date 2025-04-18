@@ -1,9 +1,12 @@
 from xmlrpc.client import boolean
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Request, HTTPException
 #from fastapi_pagination import Page, add_pagination, paginate
 from sqlalchemy.orm import Session, add_mapped_attribute
 from typing import List
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 
 from crud.catalogs.constant_crud import (
     get_all_blood_type_id_name,
@@ -53,6 +56,7 @@ from crud.campers.camper_crud import (
     get_campers_from_parent,
     get_camper_band,
     search_camper_by_name_user,
+    search_all_camper_admin,
     delete_camper
 )
 from crud.campers.parent_crud import get_parent_by_uuid
@@ -413,6 +417,12 @@ def get_search_camper(search:str, db: Session = Depends(get_db)):
     return { "data": possible_campers }
 
 @camper_routes.get("/admin/camper/", tags=["Campers"])
-def get_admin_camper(db: Session = Depends(get_db)):
-    campers = get_all_camper_admin(db)
+def get_admin_camper(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    campers = get_all_camper_admin(db, pagination)
+    return { "data": campers }
+
+
+@camper_routes.get("/admin/search_camper/", tags=["Campers"])
+def get_admin_camper(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), camper_name: Optional[str] = '', camper_lastname_father: Optional[str] = '',camper_lastname_mother: Optional[str] = '', tutor_1_name: Optional[str] = '',tutor_1_lastname_father: Optional[str] = '', tutor_1_lastname_mother: Optional[str] = '', tutor_1_email: Optional[str] = '', tutor_2_name: Optional[str] = '', tutor_2_lastname_father: Optional[str] = '',tutor_2_lastname_mother: Optional[str] = '', tutor_2_email: Optional[str] = ''):
+    campers = search_all_camper_admin(db, pagination, camper_name,camper_lastname_father, camper_lastname_mother, tutor_1_name, tutor_1_lastname_father, tutor_1_lastname_mother, tutor_1_email, tutor_2_name, tutor_2_lastname_father,tutor_2_lastname_mother, tutor_2_email)
     return { "data": campers }

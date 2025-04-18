@@ -1,4 +1,5 @@
-from sqlalchemy import and_, func, extract
+from sqlalchemy import and_, func, extract, select, desc,asc, or_
+from math import ceil
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
 from utils.db import db_mapping_rows_to_dict
@@ -12,7 +13,6 @@ from model.payments.payment import Payment
 from model.payments.payment_method import PaymentMethod
 from model.camps.staff_in_camp import StaffInCamp
 from model.staffs.staff import Staff
-
 from model.catalogs import (
     Constant
 )
@@ -20,14 +20,16 @@ from model.campers import (
     School    
 )
 from schema.camps.camp_schema import CampCreate, CampModify
+from schema.pagination.pagination_schema import Pagination, SortEnum
 from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp, get_camper_vaccines
-from crud.camps.camper_in_camp_crud import get_campers_for_module
-from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp, get_staff_in_camp
+from crud.camps.camper_in_camp_crud import get_campers_for_module_count
+from crud.camps.staff_in_camp_crud import get_staff_volunteer_in_camp_count, get_staff_in_camp_count
 from crud.campers_catalogs.camper_food_restriction_crud import get_camper_food_restriction
 from crud.campers.camper_comment_crud import get_camper_comment_by_camper_for_admin, get_camper_comment_by_camper_for_parent, get_camper_comment_by_camper_for_school
 from crud.staff_catalogs.staff_food_restriction_crud import get_all_staff_food_restriction_by_id
 from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_staff_id
 
+from helper.pagination_helpers import pagination_params, get_number_of_pages
 
 def get_camp_insr_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
@@ -555,34 +557,148 @@ def get_camp_gnl_staff_report(db: Session, camp_id: int):
     return staffs_report
 
 
-def get_all_camp(db: Session):
-    rows = db.query(Camp).all()
-    return rows
+def get_all_camp(db: Session, pagination: Pagination):
+    order = desc if pagination.order == SortEnum.DESC else asc
 
-
-def get_all_active_camp(db: Session):
-    camps = []
-    rows = (
+    query = (
         db.query(
+            Camp.id,
+            Camp.name,
+            Camp.start,
+            Camp.end,
+            Camp.start_registration,
+            Camp.end_registration,
+            Camp.registration,
+            Camp.url,
+            Camp.special_message,
+            Camp.special_message_admin,
+            Camp.public_price,
+            Camp.show_payment_parent,
+            Camp.show_rebate_parent,
+            Camp.show_paypal_button,
+            Camp.show_payment_order,
+            Camp.reminder_camp_days,
+            Camp.reminder_discount_days,                                                        
+            Camp.insurance,
+            Camp.venue,
+            Camp.photo_url,
+            Camp.photo_password,
+            Camp.medical_report,
+            Camp.occupancy_camp,
+            Camp.active,
+            Camp.general_camp,
+            Camp.show_mercadopago_button,
+            Camp.recommended_payment_dates
+        ).select_from(Camp)
+        .order_by(order(Camp.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).scalar()    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+
+    return  {
+        "pages": pages,
+        "items": data,
+        "total": rows_count
+    }
+    
+    
+
+def get_all_active_camp(db: Session, pagination):
+    camps = []
+    order = desc if pagination.order == SortEnum.DESC else asc
+    query = (select(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.public_price.label("camp_public_price"),
+            Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Location.name.label("location_name"),
+            School.name.label("school_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+        
+        )
+        .join(Location, Location.id == Camp.location_id)
+        .join(School, School.id == Camp.school_id)
+        .filter(Camp.active==True)
+        .order_by(order(Camp.name))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).filter(Camp.active == True).scalar()    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for row in data:
+        records = get_records_for_camp(db, row.camp_id)
+        row = dict(row)
+        row["records"] = records
+        camps.append(row)
+
+    return {
+        "pages": pages,
+        "items": camps,
+        "total": rows_count
+    }
+
+def search_all_active_camp(db: Session, pagination, name, location, school):
+    camps = []
+    query = (select(
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
             Camp.public_price.label("camp_public_price"),
             Camp.show_payment_parent.label("camp_show_payment_parent"),
             Location.name.label("location_name"),
             Camp.start.label("camp_start"),
-            Camp.end.label("camp_end")
+            Camp.end.label("camp_end"),
+            School.name.label("school_name")
         )
         .join(Location, Location.id == Camp.location_id)
+        .join(School, School.id == Camp.school_id)
         .filter(Camp.active==True)
-        .all()
+        .filter(
+            or_(
+                Camp.name.op('%')(name),
+                School.name.op('%')(location),
+                Location.name.op('%')(school),
+        ))
+        .order_by(        
+            func.similarity(Camp.name, name).desc(),
+            func.similarity(School.name, school).desc(),
+            func.similarity(Location.name, location).desc()
+        )
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
     )
-    for row in db_mapping_rows_to_dict(rows):
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = (
+        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).filter(Camp.active==True)
+        .filter(
+            or_(
+                Camp.name.op('%')(name),
+                School.name.op('%')(location),
+                Location.name.op('%')(school),
+        )).scalar()
+        )    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for row in data:
         records = get_records_for_camp(db, row.camp_id)
         row = dict(row)
         row["records"] = records
         camps.append(row)
 
-    return camps
+    return {
+        "pages": pages,
+        "items": camps,
+        "total": rows_count
+    }
+
 
 
 def get_school_camp_for_camper(db: Session, camper_id: int):
@@ -674,9 +790,9 @@ def delete_camp(db: Session, camp_id: int):
 
 
 def get_records_for_camp(db: Session, camp_id: int):
-    campers_record = len(get_campers_for_module(db, camp_id))
-    staff_available_record = len(get_staff_volunteer_in_camp(db, camp_id))
-    staff_record = len(get_staff_in_camp(db, camp_id))
+    campers_record = get_campers_for_module_count(db, camp_id)
+    staff_available_record = get_staff_volunteer_in_camp_count(db, camp_id)
+    staff_record = get_staff_in_camp_count(db, camp_id)
 
     return {
         "campers_recod": campers_record,

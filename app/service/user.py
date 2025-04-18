@@ -3,8 +3,12 @@ import os
 from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session
 from utils.hash import hash_str
+from typing import Annotated, Optional
+from schema.pagination.pagination_schema import Pagination
+from helper.pagination_helpers import pagination_params
 from crud.crud_user import (
     get_all_user,
+    search_all_user,
     create_new_user,
     create_new_user_admin,
     get_user_by_uuid,
@@ -49,13 +53,20 @@ def get_db():
 
 
 @user_routes.get("/usuario", tags=["Usuarios"])
-def get_users(is_active: boolean = True, db: Session = Depends(get_db)):
+def get_users(pagination: Annotated[Pagination, Depends(pagination_params)], is_active: boolean = True, db: Session = Depends(get_db)):
     NAME = "get_users"
 
-    list_user = get_all_user(db, is_active)
+    list_user = get_all_user(db, is_active, pagination)
 
     return {"data": list_user}
 
+@user_routes.get("/search_usuario", tags=["Usuarios"])
+def get_users(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), is_active: boolean = True, email: Optional[str] = ''):
+    NAME = "get_users"
+
+    list_user = search_all_user(db, is_active, pagination, email)
+
+    return {"data": list_user}
 @user_routes.get("/usuario/info", tags=["Usuarios"])
 def get_user_info(user_id: int, db: Session = Depends(get_db)):
 
