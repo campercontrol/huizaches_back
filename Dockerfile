@@ -23,8 +23,6 @@ RUN apt-get install wkhtmltopdf -y
 RUN apt install 
 
 COPY ./app /app
-COPY ./app/cert.pem /app
-COPY ./app/key.pem /app
 EXPOSE 8000
 
 #CMD ["uvicorn", "main:app" ,"--host", "0.0.0.0", "--port", "8080", "--reload"]
