@@ -5,12 +5,43 @@ services:
     build: .
     working_dir: /app
     container_name: "src_camp_container"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi.rule=Host(`migracion.campercontrol.com`)"
+      - "traefik.http.routers.fastapi.entrypoints=websecure"
+      - "traefik.http.routers.fastapi.tls.certresolver=myresolver"
+      - "traefik.http.services.fastapi.loadbalancer.server.port=8000"
     volumes:
       - ./app/:/app
-    ports:
-      - "8000:8080"
+    networks:
+      - web
     restart: on-failure:10
     #Actualizacion e instalacion
     # command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload --ssl-keyfile=./app/key.pem --ssl-certfile=./app/cert.pem"
     #Solo instalacion
     command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
+
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=dev@campercontrol.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/traefik.yml:/traefik.yml:ro"
+      - "./traefik/acme.json:/letsencrypt/acme.json"
+    networks:
+      - web
+networks:
+  web:
+    external: false
