@@ -36,3 +36,6 @@ fastapi-pagination = "^0.13.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
