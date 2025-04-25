@@ -37,12 +37,13 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--api=true"
       - "--api.insecure=true"
+      - "--log.level=DEBUG"
       - "--certificatesresolvers.godaddy.acme.email=dev@campercontol.com"
       - "--certificatesresolvers.godaddy.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.godaddy.acme.keytype=EC256"
       - "--certificatesresolvers.godaddy.acme.storage=var/traefik/certs/godaddy-acme.json"
       - "--certificatesresolvers.godaddy.acme.dnschallenge.provider=godaddy"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--certificatesresolvers.godaddy.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
 
     ports:
       - "80:80"
