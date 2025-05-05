@@ -1,62 +1,16 @@
 version: "3"
 
 services:
-  src:
+  campercontrol_back:
     build: .
     working_dir: /app
-    container_name: "src_camp_container"
-    depends_on:
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.fastapi-http.rule=Host(`app.campercontrol.com`)"
-      - "traefik.http.routers.fastapi-http.entrypoints=web"
-      - "traefik.http.routers.fastapi-https.tls.certresolver=godaddy"
-      - "traefik.http.routers.fastapi-https.tls=true"
-      - "traefik.http.routers.fastapi-https.entrypoints=websecure"
-      - "traefik.http.routers.fastapi-https.rule=Host(`app.campercontrol.com`)"
+    container_name: "campercontrol_back"
     volumes:
       - ./app/:/app
-    networks:
-      - backend
+    ports:
+      - "8080:8080"
     restart: on-failure:10
     #Actualizacion e instalacion
     # command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8080 --reload --ssl-keyfile=./app/key.pem --ssl-certfile=./app/cert.pem"
     #Solo instalacion
-    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-
-  traefik:
-    image: traefik:v3.3
-    container_name: traefik
-    restart: unless-stopped
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--entrypoints.websecure.address=:443"
-      - "--api=true"
-      - "--api.insecure=true"
-      - "--log.level=DEBUG"
-      - "--certificatesresolvers.godaddy.acme.email=dev@campercontol.com"
-      - "--certificatesresolvers.godaddy.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.godaddy.acme.keytype=EC256"
-      - "--certificatesresolvers.godaddy.acme.storage=var/traefik/certs/godaddy-acme.json"
-      - "--certificatesresolvers.godaddy.acme.dnschallenge.provider=godaddy"
-      - "--certificatesresolvers.godaddy.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
-
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik/certs/:/var/traefik/certs/:rw"
-    environment:
-      - GODADDY_API_KEY=${GODADDY_API_KEY}
-      - GODADDY_API_SECRET=${GODADDY_API_SECRET}
-    networks:
-      - backend
-networks:
-  backend:
-    external: true
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8080 --reload"
