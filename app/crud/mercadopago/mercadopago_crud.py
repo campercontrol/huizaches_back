@@ -43,7 +43,7 @@ def get_camp_info(db: Session, camp_id: int):
     query = db.query(Camp.id,
                      Camp.name,
                      Camp.currency_id,
-                     Currency.name.label("currency_name")
+                     Currency.acronyms,
                      ).select_from(Camp).join(Currency, Currency.id == Camp.currency_id).where(Camp.id == camp_id)
     data = db.execute(query)
     data = data.mappings().first()
@@ -214,14 +214,13 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
             "customer": dict(customer_info),
             "camp": dict(camp_info)
         }  
-
         request = {
             "items": [
                 {
                     "id": id,
                     "title": camp_info['name'],
                     "description": camp_info['name'] + " - " + customer_info['name'] + " " + customer_info['lastname_father'] + " " + customer_info['lastname_mother'],
-                    "currency_id": camp_info['currency_name'],
+                    "currency_id": camp_info['acronyms'],
                     "unit_price": customer_defined_amount,
                     "quantity": 1
                 }
