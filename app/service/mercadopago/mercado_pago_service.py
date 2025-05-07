@@ -19,16 +19,17 @@ def get_db():
 def create_item(camp_id : int, camper_id: int, customer_defined_amount: int, db: Session = Depends(get_db)):
     response = create_preference(db, camp_id, camper_id, customer_defined_amount)
     if response == None:
-        raise HTTPException(status_code=500, detail="An error ocurred while generating preference")
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Ocurrió un error al crear la preferencia"})
     return response
     
 
 @mercadopago_routes.post("/mercado_pago/notify", tags=["mercadopago"])
 async def mercado_pago_payment_notification(request: Request, id: Optional[int] = None, topic: Optional[str] = None, db:Session = Depends(get_db)):
     result = await process_notification(db, request)
-    if result == False:
+    if result == 3:
         raise HTTPException(status_code=500, detail={"msg": "An error ocurred"})       
-
+    if result == 2:
+        return {"status": 1, "msg": "Notification received"}
 
 
 
