@@ -13,7 +13,7 @@ from schema.campers.camper_comment_schema import (
     CamperCommentModify,
 )
 from utils.db import db_mapping_rows_to_dict
-from sqlalchemy import case, and_
+from sqlalchemy import case, and_, or_
 
 
 def get_all_camper_comment(db):
@@ -24,23 +24,229 @@ def get_all_camper_comment(db):
 def get_camper_comment_by_id(db, camper_comment_id: int):
     return db.query(CamperComment).filter_by(id=camper_comment_id).first()
 
+def get_camper_comments_by_camper_id(db, camper_id: int, role_id: int):
+    data = []
+    comments = []
+    if role_id == 1:
+        query = (
+            db.query(
+                CamperComment.id,
+                CamperComment.comment,
+                User.id.label("user_id"),
+                Role.name.label("role_name"),
+                Parent.id.label("parent_id"),
+                Parent.tutor_name.label("tutor_name"),
+                Parent.tutor_lastname_father.label("tutor_lastname_father"),
+                Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+                School.id.label("school_id"),
+                School.name.label('school_name'),
+                Staff.id.label("staff_id"),
+                Staff.name.label('staff_name'), 
+                Staff.lastname_father.label('staff_lastname_father'), 
+                Staff.lastname_mother.label('staff_lastname_mother'),
+                Doctor.id.label("doctor_id"),
+                Doctor.name.label('doctor_name'),
+                Doctor.lastname_father.label('doctor_lastname_father'),
+                Doctor.lastname_mother.label('doctor_lastname_mother')
+            )
+            .select_from(CamperComment)
+            .join(User, User.id == CamperComment.user_id)
+            .join(Role, Role.id == User.role_id)
+            .join(Parent, Parent.user_id == User.id, isouter = True)
+            .join(School, School.login_id == User.id, isouter = True)
+            .join(Staff, Staff.login_id == User.id, isouter = True)
+            .join(Doctor, Doctor.login_id == User.id, isouter = True)          
+            .filter(
+                and_(
+                    CamperComment.camper_id == camper_id,
+                    CamperComment.show_to == 1
+                )
+            )
+            
+        )
+        comments = db.execute(query)
+        comments = comments.mappings().all()
+        
+    elif role_id == 3:
+        query = (
+            db.query(
+                CamperComment.id,
+                CamperComment.comment,
+                User.id.label("user_id"),
+                Role.name.label("role_name"),
+                Parent.id.label("parent_id"),
+                Parent.tutor_name.label("tutor_name"),
+                Parent.tutor_lastname_father.label("tutor_lastname_father"),
+                Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+                School.id.label("school_id"),
+                School.name.label('school_name'),
+                Staff.id.label("staff_id"),
+                Staff.name.label('staff_name'), 
+                Staff.lastname_father.label('staff_lastname_father'), 
+                Staff.lastname_mother.label('staff_lastname_mother'),
+                Doctor.id.label("doctor_id"),
+                Doctor.name.label('doctor_name'),
+                Doctor.lastname_father.label('doctor_lastname_father'),
+                Doctor.lastname_mother.label('doctor_lastname_mother')
+            )
+            .select_from(CamperComment)
+            .join(User, User.id == CamperComment.user_id)
+            .join(Role, Role.id == User.role_id)
+            .join(Parent, Parent.user_id == User.id, isouter = True)
+            .join(School, School.login_id == User.id, isouter = True)
+            .join(Staff, Staff.login_id == User.id, isouter = True)
+            .join(Doctor, Doctor.login_id == User.id, isouter = True)          
+            .filter(
+                CamperComment.camper_id == camper_id,
+                or_(
+                    CamperComment.show_to==1,
+                    CamperComment.show_to==3,
+                )
+            )
+        ) 
+        comments = db.execute(query)
+        comments = comments.mappings().all()
+    elif role_id == 5:
+        query = (
+            db.query(
+                CamperComment.id,
+                CamperComment.comment,
+                User.id.label("user_id"),
+                Role.name.label("role_name"),
+                Parent.id.label("parent_id"),
+                Parent.tutor_name.label("tutor_name"),
+                Parent.tutor_lastname_father.label("tutor_lastname_father"),
+                Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+                School.id.label("school_id"),
+                School.name.label('school_name'),
+                Staff.id.label("staff_id"),
+                Staff.name.label('staff_name'), 
+                Staff.lastname_father.label('staff_lastname_father'), 
+                Staff.lastname_mother.label('staff_lastname_mother'),
+                Doctor.id.label("doctor_id"),
+                Doctor.name.label('doctor_name'),
+                Doctor.lastname_father.label('doctor_lastname_father'),
+                Doctor.lastname_mother.label('doctor_lastname_mother')
+            )
+            .select_from(CamperComment)
+            .join(User, User.id == CamperComment.user_id)
+            .join(Role, Role.id == User.role_id)
+            .join(Parent, Parent.user_id == User.id, isouter = True)
+            .join(School, School.login_id == User.id, isouter = True)
+            .join(Staff, Staff.login_id == User.id, isouter = True)
+            .join(Doctor, Doctor.login_id == User.id, isouter = True)          
+            .filter(
+                CamperComment.camper_id == camper_id,
+                or_(
+                    CamperComment.show_to==1,
+                    CamperComment.show_to==5,
+                )
+            )
+        ) 
+        comments = db.execute(query)
+        comments = comments.mappings().all()
+    elif role_id == 6:
+        query = (
+            db.query(
+                CamperComment.id,
+                CamperComment.comment,
+                User.id.label("user_id"),
+                Role.name.label("role_name"),
+                Parent.id.label("parent_id"),
+                Parent.tutor_name.label("tutor_name"),
+                Parent.tutor_lastname_father.label("tutor_lastname_father"),
+                Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+                School.id.label("school_id"),
+                School.name.label('school_name'),
+                Staff.id.label("staff_id"),
+                Staff.name.label('staff_name'), 
+                Staff.lastname_father.label('staff_lastname_father'), 
+                Staff.lastname_mother.label('staff_lastname_mother'),
+                Doctor.id.label("doctor_id"),
+                Doctor.name.label('doctor_name'),
+                Doctor.lastname_father.label('doctor_lastname_father'),
+                Doctor.lastname_mother.label('doctor_lastname_mother')
+            )
+            .select_from(CamperComment)
+            .join(User, User.id == CamperComment.user_id)
+            .join(Role, Role.id == User.role_id)
+            .join(Parent, Parent.user_id == User.id, isouter = True)
+            .join(School, School.login_id == User.id, isouter = True)
+            .join(Staff, Staff.login_id == User.id, isouter = True)
+            .join(Doctor, Doctor.login_id == User.id, isouter = True)          
+            .filter(
+                CamperComment.camper_id == camper_id,
+                or_(
+                    CamperComment.show_to==1,
+                    CamperComment.show_to==6,
+                )
+            )
+        ) 
+        comments = db.execute(query)
+        comments = comments.mappings().all()
+    elif role_id == 7:
+        query = (
+            db.query(
+                CamperComment.id,
+                CamperComment.comment,
+                User.id.label("user_id"),
+                Role.name.label("role_name"),
+                Parent.id.label("parent_id"),
+                Parent.tutor_name.label("tutor_name"),
+                Parent.tutor_lastname_father.label("tutor_lastname_father"),
+                Parent.tutor_lastname_mother.label("tutor_lastname_mother"),
+                School.id.label("school_id"),
+                School.name.label('school_name'),
+                Staff.id.label("staff_id"),
+                Staff.name.label('staff_name'), 
+                Staff.lastname_father.label('staff_lastname_father'), 
+                Staff.lastname_mother.label('staff_lastname_mother'),
+                Doctor.id.label("doctor_id"),
+                Doctor.name.label('doctor_name'),
+                Doctor.lastname_father.label('doctor_lastname_father'),
+                Doctor.lastname_mother.label('doctor_lastname_mother')
+            )
+            .select_from(CamperComment)
+            .join(User, User.id == CamperComment.user_id)
+            .join(Role, Role.id == User.role_id)
+            .join(Parent, Parent.user_id == User.id, isouter = True)
+            .join(School, School.login_id == User.id, isouter = True)
+            .join(Staff, Staff.login_id == User.id, isouter = True)
+            .join(Doctor, Doctor.login_id == User.id, isouter = True)          
+            .filter(
+                CamperComment.camper_id == camper_id
+            )
+        ) 
+        comments = db.execute(query)
+        comments = comments.mappings().all()
+        
+        
+    for comment in comments:
+        final_comment = {}
+        final_comment["id"] = comment["id"]
+        final_comment["comment"] = comment["comment"]
+        final_comment["author_role"] = comment["role_name"]
+        
+        if comment["parent_id"] is not None:
+            final_comment["author"] = comment["tutor_name"] + " " + comment["tutor_lastname_father"] + " " + comment["tutor_lastname_mother"]
+        if comment["staff_id"] is not None:
+            final_comment["author"] = comment["staff_name"] + " " + comment["staff_lastname_father"] + " " + comment["staff_lastname_mother"]
+        if comment["school_id"] is not None:
+            final_comment["author"] = comment["school_name"]
+        if comment["doctor_id"] is not None:
+            final_comment["author"] = comment["doctor_name"] + " " + comment["doctor_lastname_father"] + " " + comment["doctor_lastname_mother"]
+        data.append(final_comment)
+    
+    return data
 
 def create_new_camper_comment(db, new_camper_comment: CamperCommentCreate):
     try:
         db_camper_comment = CamperComment(**new_camper_comment.dict())
         db.add(db_camper_comment)
         db.commit()
-        db.refresh(db_camper_comment)
-    except SQLAlchemyError as alchemyError:
-        db.rollback()
-        print("#=================================#")
-        print(alchemyError)
-        print("#=================================#")
-        return {"status": 3, "msg": "An error ocurred while saving"} 
     except Exception as ex:
-        print(f"No se pudo guardar en la base de datos: {ex}")
-        return {"status": 3, "msg": "An error ocurred while saving"}
-    return {"status": 1, "msg": "Camper comment saved succesfully"}
+        return {"status": 3, "msg": "Internal server error"}
+    return {"status": 1, "msg": "El comentario fue creado con exito"}
 
 
 def update_camper_comment_by_id(
