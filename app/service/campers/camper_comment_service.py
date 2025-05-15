@@ -8,11 +8,13 @@ from crud.campers.camper_comment_crud import (
     get_camper_comment_by_id,
     create_new_camper_comment,
     update_camper_comment_by_id,
-    get_camper_comment_by_camper_for_parent
+    get_camper_comment_by_camper_for_parent,
+    get_camper_comments_by_camper_id
 )
 from schema.campers.camper_comment_schema import (
     CamperCommentCreate,
     CamperCommentModify,
+    CamperCommentResponse
 )
 from utils.db import SessionLocal
 
@@ -51,6 +53,11 @@ def create_camper_comment(
     if response['status'] == 3:
         raise HTTPException(status_code=500, detail= response)
     return {"detail": response}
+
+@camper_comment_router.get("/campers/{camper_id}/comments", response_model=list[CamperCommentResponse], tags=["CamperComment"])
+def camper_comments_by_camper_id(camper_id: str, role_id: int, db: Session = Depends(get_db)):
+    response = get_camper_comments_by_camper_id(db, camper_id, role_id)
+    return response
 
 
 @camper_comment_router.patch(

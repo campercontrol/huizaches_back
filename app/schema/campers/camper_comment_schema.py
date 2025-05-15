@@ -63,3 +63,11 @@ class CamperCommentModify(BaseModel):
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
     )
+    
+    
+class CamperCommentResponse(BaseModel):
+    id: int
+    comment: str
+    author_role: str
+    author: str
+    
