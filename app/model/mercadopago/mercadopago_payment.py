@@ -17,10 +17,11 @@ class MercadopagoPayment(Base):
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
+    user_id = Column(ForeignKey('user.id'), nullable=False, doc='usuario')
     payment_id = Column(BigInteger, nullable=False, unique=True)
     status = Column(String, nullable=False)
-    external_id = Column(
-        ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), nullable=False
+    preference_internal_id = Column(
+        ForeignKey("mercadopago_preference.internal_id", ondelete="cascade"), nullable=False
     )
     internal_payment_id = Column(
         ForeignKey("payments_payment.id", ondelete="cascade")
