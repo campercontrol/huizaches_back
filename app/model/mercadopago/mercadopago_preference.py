@@ -16,8 +16,9 @@ class MercadopagoPreference(Base):
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
+    user_id = Column(ForeignKey('user.id'), nullable=False, doc='usuario')
     preference_id = Column(String, nullable=False, unique=True)
-    external_id = Column(String(36), nullable=False, unique=True)
+    internal_id = Column(String(36), nullable=False, unique=True)
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
         "updated",

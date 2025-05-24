@@ -1,5 +1,6 @@
 import uuid
 import os
+import json
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from datetime import date, datetime
@@ -11,6 +12,9 @@ from model.catalogs.currency import Currency
 from model.mercadopago import MercadopagoMerchantOrder, MercadopagoPayment, MercadopagoPreference
 from utils.db import db_mapping_rows_to_dict
 from model.user import User
+from model.mercadopago.mercadopago_payment import MercadopagoPayment
+from model.mercadopago.mercadopago_merchant_order import MercadopagoMerchantOrder
+from model.mercadopago.mercadopago_preference import MercadopagoPreference
 from crud.payments.payment_crud import create_new_payment_and_update_balance_transaction
 from schema.mercadopago.mercadopago_payment_schema import MercadopagoPaymentCreate, MercadopagoPaymentUpdate
 from schema.mercadopago.mercadopago_merchant_order_schema import MercadopagoMerchantOrderCreate
@@ -32,7 +36,9 @@ def get_customer_info(db: Session, camper_id: int):
                      Parent.tutor_lastname_father,
                      Parent.tutor_lastname_mother,
                      Parent.contact_cellphone,
-                     User.email
+                     User.id.label("user_id"),
+                     User.email,
+                     User.created_at.label("user_registration_date"),
                      ).select_from(Camper).join(Parent, Parent.id == Camper.parent_id).join(User, User.id == Parent.user_id).where(Camper.id == camper_id)
     data = db.execute(query)
     data = data.mappings().first()
@@ -49,7 +55,7 @@ def get_camp_info(db: Session, camp_id: int):
     data = data.mappings().first()
     return data
 
-def get_preference(preference_id : int):
+def get_preference(preference_id : str):
     preference_response = sdk.preference().get(preference_id)
     print(preference_response)
     if preference_response["status"] == 404:
@@ -61,6 +67,15 @@ def get_preference(preference_id : int):
 
 def get_internal_preference_by_preference_id(db: Session, preference_id: int):
     preference = db.query(MercadopagoPreference).filter(MercadopagoPreference.preference_id == preference_id).first()
+    return preference
+
+
+def get_internal_preference_by_preference_id(db: Session, preference_id: int):
+    preference = db.query(MercadopagoPreference).filter(MercadopagoPreference.preference_id == preference_id).first()
+    return preference
+
+def get_internal_preference_by_internal_id(db: Session, preference_internal_id: int):
+    preference = db.query(MercadopagoPreference).filter(MercadopagoPreference.internal_id == preference_internal_id).first()
     return preference
 
 
@@ -131,10 +146,9 @@ def get_mercado_pago_payments_by_camp_id_and_camper_id(db: Session, camp_id: int
         payments.append(payment)
     return payments     
 
-async def process_notification(db: Session, request: Request):
+async def process_mp_notification(db: Session, request: Request):
     try: 
         request = await request.json()
-        print(request)
         if request["type"] == "payment":
             payment_id = request["data"]["id"]
             mercadopago_payment = get_payment(payment_id)
@@ -145,7 +159,7 @@ async def process_notification(db: Session, request: Request):
 
             new_internal_mercadopago_merchant_order = {
                 "merchant_order_id": mercadopago_merchant_order["id"],
-                "external_id": mercadopago_merchant_order["external_reference"],
+                "preference_internal_id": mercadopago_merchant_order["external_reference"],
                 "status": mercadopago_merchant_order["status"],
                 "camper_id": mercadopago_payment["metadata"]["customer"]["camper_id"],
                 "camp_id": mercadopago_payment["metadata"]["camp"]["id"]
@@ -168,13 +182,13 @@ async def process_notification(db: Session, request: Request):
                 "currency_id": mercadopago_payment["metadata"]["camp"]["currency_id"],
                 "parent_id": mercadopago_payment["metadata"]["customer"]["parent_id"],
                 "txn_type_id": 3                     
-            }
+            }                
                 
             if not internal_mercadopago_payment:
                 new_internal_mercadopago_payment = {    
                     "status" : mercadopago_payment["status"],
                     "payment_id" : mercadopago_payment["id"],
-                    "external_id" : mercadopago_payment["external_reference"],
+                    "preference_internal_id" : mercadopago_payment["external_reference"],
                     "camper_id" : mercadopago_payment["metadata"]["customer"]["camper_id"],
                     "camp_id" : mercadopago_payment["metadata"]["camp"]["id"]
                 
@@ -195,23 +209,60 @@ async def process_notification(db: Session, request: Request):
                         internal_mercadopago_payment.internal_payment_id = internal_payment_created.id
                     else:
                         internal_mercadopago_payment.status = mercadopago_payment["status"]
+                        
+            # Here we expire mercadopago preference 
+            if mercadopago_payment["status"] == "approved": 
+                new_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+                internal_preference = get_internal_preference_by_internal_id(mercadopago_payment["external_reference"])
+                sdk.preference().update(internal_preference.preference_id, {"expiration_date_to": new_date})
+                            
         db.commit()    
         return 1
     except Exception as ex:
         db.rollback()
         print(ex)
         return 3
-              
+    
+def get_mercadopago_payments_by_customer_id(db: Session, user_id: int):
+    query = db.query(MercadopagoPayment).filter(MercadopagoPayment.user_id == user_id)
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
 
+def get_customer_last_purchase_date(db: Session, user_id:int):
+    query = db.query(MercadopagoPayment).filter(MercadopagoPayment.user_id == user_id).order_by(MercadopagoPayment.created_at.desc()).first()
+    if query:
+        return query.created_at
+    return None
 
-def create_preference(db: Session, camp_id: int, camper_id: int, customer_defined_amount: int):
+# def update_mercadopago_preference(db: Session, preference_id: str):
+#     try:
+#         new_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+#         preference = sdk.preference().update(preference_id, {"expiration_date_to": new_date})
+#         print(preference)
+#     except Exception as ex:
+#         print(ex)
+#         return None
+#     return preference
+
+def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, customer_defined_amount: int):
     try:
         camp_info = get_camp_info(db, camp_id) 
-        customer_info = get_customer_info(db, camper_id)    
+        customer_info = get_customer_info(db, camper_id)
+        user_payments = get_mercadopago_payments_by_customer_id(db, customer_info['user_id'])
+        customer_last_purchase_date = get_customer_last_purchase_date(db, customer_info['user_id'])
+        
+        customer_info_dict = dict(customer_info)   
+        
+        customer_info_dict['user_registration_date'] = customer_info_dict['user_registration_date'].strftime('%Y-%m-%dT%H:%M:%S%z')
+                        
+        if customer_last_purchase_date:
+            customer_last_purchase_date = customer_last_purchase_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+
         id = uuid.uuid4()
         id = str(id)
         metadata = {
-            "customer": dict(customer_info),
+            "customer": customer_info_dict,
             "camp": dict(camp_info)
         }  
         request = {
@@ -230,11 +281,16 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
                 "name": customer_info['tutor_name'],
                 "surname": customer_info['tutor_lastname_father'] + customer_info['tutor_lastname_mother'],
                 "email": customer_info['email'],
+                "is_prime_user": False,
+                "registration_date": customer_info_dict['user_registration_date'],
+                "is_first_purchase_online": True if user_payments == [] else False,
+                "last_purchase": customer_last_purchase_date,
+                "authentication_type": "Web Nativa",
                 "phone": {
                     "number": customer_info['contact_cellphone'],
                 },
                 # "identification": {
-                #     "type": "CPF",s
+                #     "type": "CPF",
                 #     "number": "19119119100",
                 # },
                 # "address": {
@@ -242,6 +298,7 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
                 #     "street_name": "Street",
                 #     "street_number": 123,
                 # },
+
             },
             "back_urls": {
                 "success": "https://app.campercontrol.com/mercado_pago_success",
@@ -251,10 +308,10 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
             # "differential_pricing": {
             #     "id": 1,
             # },
-            "expires": False,
+            "expires": True,
             # "additional_info": "Discount: 12.00",
             "auto_return": "all",
-            "binary_mode": True,
+            "binary_mode": False,
             "external_reference": id,
             # "marketplace": "marketplace",
             "notification_url": "https://app.campercontrol.com:5050/mercado_pago/notify?source_news=webhooks",
@@ -274,14 +331,14 @@ def create_preference(db: Session, camp_id: int, camper_id: int, customer_define
                 "installments": 3,
                 "default_installments": 1,
             },
-            "metadata": metadata
-            # "statement_descriptor": "Test Store",
+            "metadata": metadata,
+            "statement_descriptor": "Kin Camp",
         }
         preference_response = sdk.preference().create(request)
         preference = preference_response["response"]
         mercadopago_internal_preference = MercadopagoPreference(
             preference_id= preference["id"],
-            external_id = preference["external_reference"],
+            internal_id = preference["external_reference"],
             camper_id = camper_id,
             camp_id = camp_id
         )

@@ -19,9 +19,10 @@ class MercadopagoMerchantOrder(Base):
     camper_id = Column(
         ForeignKey("campers_camper.id", ondelete="cascade"), nullable=False, doc='Camper'
     )
+    user_id = Column(ForeignKey('user.id'), nullable=False, doc='usuario')
     status = Column(String, nullable=False)
-    external_id = Column(
-        ForeignKey("mercadopago_preference.external_id", ondelete="cascade"), nullable=False
+    preference_internal_id = Column(
+        ForeignKey("mercadopago_preference.internal_id", ondelete="cascade"), nullable=False
     )
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
