@@ -213,7 +213,7 @@ async def process_mp_notification(db: Session, request: Request):
             # Here we expire mercadopago preference 
             if mercadopago_payment["status"] == "approved": 
                 new_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-                internal_preference = get_internal_preference_by_internal_id(mercadopago_payment["external_reference"])
+                internal_preference = get_internal_preference_by_internal_id(db, mercadopago_payment["external_reference"])
                 sdk.preference().update(internal_preference.preference_id, {"expiration_date_to": new_date})
                             
         db.commit()    
