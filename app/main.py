@@ -47,7 +47,13 @@ from service.mercadopago.mercado_pago_service import mercadopago_routes
 
 app = FastAPI()
 
-origins = ["*"]
+origins = ["http://localhost:4200",
+           "http://localhost",
+           "http://localhost:8080",
+           "http://app.campercontrol.com",
+           "https://app.campercontrol.com",
+           "http://migracion.campercontrol.com"
+           ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +61,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(prueba_routes)  # Login
