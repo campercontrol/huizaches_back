@@ -349,7 +349,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "auto_return": "all",
             "binary_mode": False,
             "external_reference": id,
-            "marketplace": f'MP-MKP-{MP_APP_ID}',
+            "marketplace": f'MP-MKP-{{{MP_APP_ID}}}',
             "notification_url": "https://app.campercontrol.com:5050/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
