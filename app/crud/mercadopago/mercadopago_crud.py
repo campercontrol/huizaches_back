@@ -22,8 +22,9 @@ from schema.payments.payment_schema import PaymentCreate
 # SDK de Mercado Pago
 import mercadopago
 # Agrega credenciales
-mp_token = os.getenv("MP_TOKEN")
-sdk = mercadopago.SDK(mp_token)
+MP_TOKEN = os.getenv("MP_TOKEN")
+MP_APP_ID = os.getenv("MP_APP_ID")
+sdk = mercadopago.SDK(MP_TOKEN)
 
 
 def get_customer_info(db: Session, camper_id: int):
@@ -245,13 +246,48 @@ def get_customer_last_purchase_date(db: Session, user_id:int):
 #         return None
 #     return preference
 
+def get_marketplace_fee(amount: int):
+    marketplace_fee = (0.15 / 100) * amount
+    IVA = (16 / 100) * marketplace_fee
+    total_marketplace_fee = round(marketplace_fee + IVA, 2)
+    return total_marketplace_fee
+
+# async def get_mercadopago_seller_credentials(request: Request, db: Session, code: str, state: str):
+    
+#     # print("=============empty request================")
+#     # print(request)    
+#     # request = await request.json()
+#     # print("=============request json================")
+#     # print(request)
+#     print(request.headers)
+#     print(request.query_params)
+#     print(request.url)
+#     print(await request.json())
+
+def get_mercadopago_seller_credentials(db: Session, code: str, state: str):
+    try:
+        print("=============CODE AND STATE================")
+        print("code: ", code)
+        print("state: ", state)
+        return 1
+    except Exception as ex:
+        print("=============EXCEPTION================")
+        print(ex)
+        return 3
+
+
+    
+
 def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, customer_defined_amount: int):
     try:
         camp_info = get_camp_info(db, camp_id) 
         customer_info = get_customer_info(db, camper_id)
         user_payments = get_mercadopago_payments_by_customer_id(db, customer_info['user_id'])
         customer_last_purchase_date = get_customer_last_purchase_date(db, customer_info['user_id'])
+        marketplace_fee = get_marketplace_fee(customer_defined_amount)
         
+        print(marketplace_fee)
+        print(type(marketplace_fee))
         customer_info_dict = dict(customer_info)   
         
         customer_info_dict['user_registration_date'] = customer_info_dict['user_registration_date'].strftime('%Y-%m-%dT%H:%M:%S%z')
@@ -276,7 +312,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
                     "quantity": 1
                 }
             ],
-            # "marketplace_fee": 0,
+            "marketplace_fee": marketplace_fee,
             "payer": {
                 "name": customer_info['tutor_name'],
                 "surname": customer_info['tutor_lastname_father'] + customer_info['tutor_lastname_mother'],
@@ -313,7 +349,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "auto_return": "all",
             "binary_mode": False,
             "external_reference": id,
-            # "marketplace": "marketplace",
+            "marketplace": f'MP-MKP-{MP_APP_ID}',
             "notification_url": "https://app.campercontrol.com:5050/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
@@ -336,6 +372,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         }
         preference_response = sdk.preference().create(request)
         preference = preference_response["response"]
+        print(preference)
         mercadopago_internal_preference = MercadopagoPreference(
             preference_id= preference["id"],
             internal_id = preference["external_reference"],

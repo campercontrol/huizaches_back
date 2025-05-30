@@ -2,7 +2,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
 from model.mercadopago import MercadopagoPayment, MercadopagoMerchantOrder
-from crud.mercadopago.mercadopago_crud import create_mercadopago_preference, get_mercadopago_merchant_order, get_payment, process_mp_notification, get_preference
+from schema.mercadopago.mercadopago_seller_credentials import MercadopagoSellerCredentials
+from crud.mercadopago.mercadopago_crud import create_mercadopago_preference, get_mercadopago_merchant_order, get_payment, process_mp_notification, get_preference, get_mercadopago_seller_credentials
 from utils.db import SessionLocal
 
 mercadopago_routes = APIRouter()
@@ -30,6 +31,23 @@ async def mercado_pago_payment_notification(request: Request, id: Optional[int] 
         raise HTTPException(status_code=500, detail={"msg": "An error ocurred"})       
     if result == 2:
         return {"status": 1, "msg": "Notification received"}
+
+# @mercadopago_routes.post("/mercado_pago/seller/credentials", tags=["mercadopago"])
+# async def mercado_pago_seller_credentials(request: Request, code: Optional[str] = None, state: Optional[str] = None, db:Session = Depends(get_db)):
+#     result = await get_mercadopago_seller_credentials(request, db, code, state)  
+#     if result == 1:
+#         return {"status": 1, "msg": "Credentials saved successfully"}
+#     if result == 3:
+#         return HTTPException(status_code=500, detail={"msg": "An error ocurred"})  
+
+@mercadopago_routes.get("/mercado_pago/seller/credentials", tags=["mercadopago"])
+def mercado_pago_seller_credentials(code: Optional[str] = None, state: Optional[str] = None, db:Session = Depends(get_db)):
+    result = get_mercadopago_seller_credentials(db, code, state)  
+    if result == 1:
+        return {"status": 1, "msg": "Credentials saved successfully"}
+    if result == 3:
+        return HTTPException(status_code=500, detail={"msg": "An error ocurred"})  
+
 
 
 # @mercadopago_routes.patch("/mercadopago/update_preferemce", tags=["mercadopago"])
