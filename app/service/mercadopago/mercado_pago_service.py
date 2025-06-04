@@ -29,7 +29,7 @@ async def mercado_pago_payment_notification(request: Request, id: Optional[int] 
     result = await process_mp_notification(db, request)
     if result == 3:
         raise HTTPException(status_code=500, detail={"msg": "An error ocurred"})       
-    if result == 2:
+    if result == 1:
         return {"status": 1, "msg": "Notification received"}
 
 # @mercadopago_routes.post("/mercado_pago/seller/credentials", tags=["mercadopago"])
