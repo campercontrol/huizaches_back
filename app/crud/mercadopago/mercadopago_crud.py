@@ -285,9 +285,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         user_payments = get_mercadopago_payments_by_customer_id(db, customer_info['user_id'])
         customer_last_purchase_date = get_customer_last_purchase_date(db, customer_info['user_id'])
         marketplace_fee = get_marketplace_fee(customer_defined_amount)
-        
-        print(marketplace_fee)
-        print(type(marketplace_fee))
+        marketplace_id = f'MP-MKP-{MP_APP_ID}'
         customer_info_dict = dict(customer_info)   
         
         customer_info_dict['user_registration_date'] = customer_info_dict['user_registration_date'].strftime('%Y-%m-%dT%H:%M:%S%z')
@@ -349,7 +347,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "auto_return": "all",
             "binary_mode": False,
             "external_reference": id,
-            "marketplace": f'MP-MKP-{{{MP_APP_ID}}}',
+            "marketplace": marketplace_id,
             "notification_url": "https://api-dev.campercontrol.com/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
