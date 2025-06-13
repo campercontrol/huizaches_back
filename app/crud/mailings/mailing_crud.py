@@ -495,3 +495,10 @@ def get_sent_candidates(db, campaign_id:int):
         "staffs": staffs,
         "campaign_info": db_mapping_rows_to_dict(campaign)[0],
     }
+    
+def get_mailing_camps(db: Session):
+    return db.query(Camp.id, Camp.name).order_by(Camp.name.asc()).all()
+    
+    # query = db.query(Camp.id, Camp.name).order_by(Camp.name.asc())
+    # data = db.execute(query)
+    # return data.mappings().all()

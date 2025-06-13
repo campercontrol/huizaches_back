@@ -11,7 +11,9 @@ from crud.mailings.mailing_crud import (
     get_sent_camps,
     get_sent_training,
     get_sent_candidates,
+    get_mailing_camps
 )
+from schema.camps.camp_schema import MailingCamps
 from crud.camps.camper_in_camp_crud import get_campers_for_camp, get_campers_in_camp_mailing
 from crud.camps.staff_in_camp_crud import get_staff_in_camp
 from crud.training.staff_in_training_crud import get_all_staff_in_training_event
@@ -59,6 +61,10 @@ def get_email_template_system(db: Session = Depends(get_db)):
 def get_campaign(db: Session = Depends(get_db)):
     list_campaign = get_all_campaign(db)
     return {"data": list_campaign}
+
+@mailing_routes.get("/mailing/camps/", response_model=list[MailingCamps], tags=["Mailing"])
+def mailing_camps(db: Session = Depends(get_db)):
+    return get_mailing_camps(db)
 
 
 @mailing_routes.get("/mailing/campaign/{campaign_id}/", tags=["Mailing"])
