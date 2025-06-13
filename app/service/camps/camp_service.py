@@ -23,7 +23,8 @@ from crud.camps.camp_crud import (
     get_camp_social_report,
     get_camp_extras_report,
     get_camp_incomes,
-    get_camp_gnl_staff_report
+    get_camp_gnl_staff_report,
+    get_camp_staff_by_camp_id
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -237,7 +238,7 @@ def delete_camp_by_id(camp_id: int, db: Session = Depends(get_db)):
 
 @camp_router.get("/staff/camp/{camp_id}", tags=["Camps"])
 def get_staff_camp(camp_id: int, db: Session = Depends(get_db)):
-    camp_info = get_camp_by_id(db, camp_id)
+    camp_info = get_camp_staff_by_camp_id(db, camp_id)
     campers = get_campers_for_camp(db, camp_id)
     staff_volunteer = get_staff_volunteer_in_camp(db, camp_id)
     staff = get_staff_in_camp(db, camp_id)
