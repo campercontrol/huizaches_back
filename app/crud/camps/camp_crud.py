@@ -19,6 +19,7 @@ from model.catalogs import (
 from model.campers import (
     School    
 )
+from model.catalogs.currency import Currency
 from schema.camps.camp_schema import CampCreate, CampModify
 from schema.pagination.pagination_schema import Pagination, SortEnum
 from crud.campers.camper_crud import get_pathological_background_by_camper, get_camper_licensed_medicine, get_extra_charge_by_camper_camp, get_camper_vaccines
@@ -619,10 +620,15 @@ def get_all_active_camp(db: Session, pagination):
             School.name.label("school_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
+            Currency.name.label("camp_currency_name"),
+            Currency.symbol.label("camp_currency_symbol"),
+            Currency.acronyms.label("camp_currency_acronym"),
+            Camp.photo_password
         
         )
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
+        .join(Currency, Currency.id == Camp.currency_id)
         .filter(Camp.active==True)
         .order_by(order(Camp.name))
         .limit(pagination.perPage)
@@ -630,7 +636,7 @@ def get_all_active_camp(db: Session, pagination):
     )
     data = db.execute(query)
     data = data.mappings().all()
-    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).filter(Camp.active == True).scalar()    
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.active == True).scalar()    
     pages = get_number_of_pages(rows_count, pagination.perPage)
     
     for row in data:
@@ -652,13 +658,18 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
             Camp.name.label("camp_name"),
             Camp.public_price.label("camp_public_price"),
             Camp.show_payment_parent.label("camp_show_payment_parent"),
-            Location.name.label("location_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
+            Camp.photo_password,
+            Currency.name.label("camp_currency_name"),
+            Currency.symbol.label("camp_currency_symbol"),
+            Currency.acronyms.label("camp_currency_acronym"),
+            Location.name.label("location_name"),
             School.name.label("school_name")
         )
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
+        .join(Currency, Currency.id == Camp.currency_id)
         .filter(Camp.active==True)
         .filter(
             or_(
@@ -677,7 +688,7 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
     data = db.execute(query)
     data = data.mappings().all()
     rows_count = (
-        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).filter(Camp.active==True)
+        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.active==True)
         .filter(
             or_(
                 Camp.name.op('%')(name),
@@ -752,6 +763,48 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
 
 def get_camp_by_id(db: Session, camp_id: int):
     return db.query(Camp).filter_by(id=camp_id).first()
+
+
+def get_camp_staff_by_camp_id(db: Session, camp_id: int):
+    query = db.query( Camp.id,
+                     Camp.name,
+                     Camp.start,
+                     Camp.end,
+                     Camp.start_registration,
+                     Camp.end_registration,
+                     Camp.registration,
+                     Camp.url,
+                     Camp.special_message,
+                     Camp.special_message_admin,
+                     Camp.public_price,
+                     Camp.show_payment_parent,
+                     Camp.show_rebate_parent,
+                     Camp.show_paypal_button,
+                     Camp.show_payment_order,
+                     Camp.reminder_camp_days,
+                     Camp.reminder_discount_days,                                                        
+                     Camp.insurance,
+                     Camp.venue,
+                     Camp.photo_url,
+                     Camp.photo_password,
+                     Camp.medical_report,
+                     Camp.occupancy_camp,
+                     Camp.active,
+                     Camp.general_camp,
+                     Camp.location_id,
+                     Camp.school_id,
+                     Currency.name.label("camp_currency_name"),
+                     Currency.symbol.label("camp_currency_symbol"),
+                     Currency.acronyms.label("camp_currency_acronyms"),
+                     Camp.recommended_payment_dates,
+                     Camp.show_mercadopago_button,
+                     Camp.created_at,
+                     Camp.updated_at
+                     ).select_from(Camp).join(Currency, Currency.id == Camp.currency_id).filter(Camp.id == camp_id)
+    
+    data = db.execute(query)
+    data = data.mappings().first()
+    return data
 
 
 def create_new_camp(db: Session, new_camp: CampCreate):
