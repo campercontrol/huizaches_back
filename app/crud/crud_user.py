@@ -312,18 +312,21 @@ def get_user_by_uuid(db, user_id):
     rows = []
     first_row = (
         db.query(
+            User.id.label('id'),
             User.email.label('email'),
             User.hashed_pass.label('hashed_pass'),
             User.role_id.label('role_id'),
             Role.name.label('role_name'),
+            User.is_admin,
+            User.is_coordinator,
+            User.is_employee,
             User.is_superuser.label('is_superuser'),
-            User.is_active.label('is_active')
-
+            User.is_active.label('is_active'),
         )
         .join(
             Role, Role.id == User.role_id
         ).filter(
-            User.id == user_id,
+            User.id == user_id
         )
         .first()
     )
