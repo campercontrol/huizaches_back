@@ -364,6 +364,7 @@ def get_campers_for_camp(db: Session, camp_id: int):
                 + " "
                 + Parent.tutor_lastname_mother
             ).label("tutor_full_name"),
+            Parent.id.label("parent_id"),
             User.email.label("tutor_email"),
             (
                 Parent.contact_name
@@ -405,6 +406,7 @@ def get_campers_for_camp(db: Session, camp_id: int):
                 "camper_birthday": camper.camper_birthday,
                 "tutor_full_name": camper.tutor_full_name,
                 "tutor_email": camper.tutor_email,
+                "parent_id": camper.parent_id,
                 "second_tutor_full_name": camper.second_tutor_full_name,
                 "second_tutor_email": camper.second_tutor_email,
             }
