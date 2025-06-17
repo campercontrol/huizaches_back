@@ -382,19 +382,19 @@ def get_user_info_by_email(db: Session, email: str):
     doctor_role = 5
     
     if user.role_id == parent_role:
-        user_info_query = db.query(User.email, Parent.tutor_name.label("name")).join(Parent, Parent.user_id == User.id)
+        user_info_query = db.query(User.email, Parent.tutor_name.label("name")).join(Parent, Parent.user_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
     if user.role_id == school_role:
-        user_info_query = db.query(User.email, School.name).join(School, School.login_id == User.id)
+        user_info_query = db.query(User.email, School.name).join(School, School.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
     if user.role_id == staff_role:
-        user_info_query = db.query(User.email, Staff.name.label("name")).join(Staff, Staff.login_id == User.id)
+        user_info_query = db.query(User.email, Staff.name.label("name")).join(Staff, Staff.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
     if user.role_id == doctor_role:
-        user_info_query = db.query(User.email, Doctor.name.label("name")).join(Doctor, Doctor.login_id == User.id)
+        user_info_query = db.query(User.email, Doctor.name.label("name")).join(Doctor, Doctor.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
     
