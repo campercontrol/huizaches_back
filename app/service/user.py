@@ -256,6 +256,7 @@ def update_user(
 def reset_password(
     user_reset: UserSendMailResetPassword, response: Response, db: Session = Depends(get_db)
 ):
+
     user = get_user_by_email(db, user_reset.email)
     template_id = 2 # Password Recover 
     if not user:
@@ -285,9 +286,9 @@ def reset_password(
 ):
     data = validate_token_general(t)
     if data[0] == 403:
-        raise HTTPException(status_code=401, detail="Token Has expired") 
+        raise HTTPException(status_code=401, detail={"status": 2, "msg": "Token Has expired"}) 
     if data[0] == 401:
-        raise HTTPException(status_code=401, detail="Invalid token") 
+        raise HTTPException(status_code=401, detail={"status": 4, "msg": "Invalid token"}) 
     try:
         account = db.query(User).filter_by(email=user_reset.email).first()
         new_hashed_password = hash_str(user_reset.password)
