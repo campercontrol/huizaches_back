@@ -532,3 +532,17 @@ def get_campers_in_school(db: Session, school_id:str):
     data = db.execute(query)
     data = data.mappings().all()
     return data
+
+def get_parent_campers_by_parent_id(db: Session, parent_id: int):
+    query = (
+        db.query(
+            Camper.id.label("id"),
+            Camper.name.label("name"),
+            Camper.lastname_father.label("lastname_father"),
+            Camper.lastname_mother.label("lastname_mother"),
+        ).select_from(Camper)
+        .filter(Camper.parent_id == parent_id)
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

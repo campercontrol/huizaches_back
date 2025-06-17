@@ -57,7 +57,8 @@ from crud.campers.camper_crud import (
     get_camper_band,
     search_camper_by_name_user,
     search_all_camper_admin,
-    delete_camper
+    delete_camper,
+    get_parent_campers_by_parent_id
 )
 from crud.campers.parent_crud import get_parent_by_uuid
 from crud.campers.camper_comment_crud import get_all_camper_comments
@@ -381,6 +382,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_subscribe_camps = get_subscribe_by_camper(db, camper_id)
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
+    siblings = get_parent_campers_by_parent_id(db, parent.id) 
     total_amount = 0
     
     for camp in camper_subscribe_camps:
@@ -393,6 +395,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
         "camper_info": camper_info,
         "camper_total_amount": total_amount,
         "parent": parent,
+        "siblings": siblings,
         "user_email": user[0].email,
         "camper_comments": camper_comments,
         "camper_subscribe_camps": camper_subscribe_camps,
