@@ -1,6 +1,6 @@
+import os
 from typing import Union
 from datetime import datetime, timedelta
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
@@ -17,8 +17,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_MINUTES = 35
 ACCESS_RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 60
-USER_VERIFY_URL_EXPIRE_MINUTES = 180
-
+VERIFICATION_URL_EXPIRE_MINUTES = 21600
+USER_VERIFY_URL_EXPIRE_MINUTES = 21600
 
 # Dependency
 def get_db():
@@ -132,11 +132,11 @@ def validate_token_general(token_data):
 
 #Crear token 
 
-def create_user_verify_url(data: dict):
-    user_verify_url_expire = timedelta(minutes=USER_VERIFY_URL_EXPIRE_MINUTES)
-    token = create_access_token(data, expires_delta=user_verify_url_expire)
-    url = f'http://migracion.campercontrol.com/user/verify?t={token}' 
-    return url
+# def create_user_verify_url(data: dict):
+#     user_verify_url_expire = timedelta(minutes=USER_VERIFY_URL_EXPIRE_MINUTES)
+#     token = create_access_token(data, expires_delta=user_verify_url_expire)
+#     url = f'http://migracion.campercontrol.com/user/verify?t={token}' 
+#     return url
     
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
@@ -183,3 +183,13 @@ def generate_access_token_reset_pass(email):
     )
 
     return access_token
+
+def create_user_verification_url(data: dict):    
+    base_url = os.getenv("PROD_URL")
+    
+    access_token_expires = timedelta(minutes=VERIFICATION_URL_EXPIRE_MINUTES)
+    
+    token = create_access_token(data, access_token_expires)
+    verification_url = f"{base_url}/verify?t={token}"
+    
+    return verification_url

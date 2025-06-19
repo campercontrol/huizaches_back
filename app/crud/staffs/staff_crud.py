@@ -10,6 +10,8 @@ from model.camps import StaffInCamp, Camp, Location, Season
 from model.staffs.staff_food_restriction import StaffFoodRestriction
 from model.staffs.staff_vaccine import StaffVaccine
 from model import User
+from model.catalogs.food_restriction import FoodRestriction
+from model.catalogs.vaccine import Vaccine
 from schema.staff_catalogs.staff_food_restriction_schema import StaffFoodRestrictionCreate
 from schema.staff_catalogs.staff_vaccine_schema import StaffVaccineCreate
 from schema.pagination.pagination_schema import Pagination, SortEnum
@@ -20,7 +22,8 @@ from crud.mailings.mailing_crud import get_admin_users_for_mailing
 from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
 from helper.pagination_helpers import pagination_params, get_number_of_pages
-from helper.mailing_helpers import send_mail_template, send_mail_prospect
+from helper.mailing_helpers import send_mail_template
+from utils.functions_jwt import create_user_verification_url
 
 
 def get_all_prospect(db, pagination):
@@ -292,10 +295,18 @@ def create_complete_prospect(db, new_prospect):
     
         for admin_user in admin_users:
             admin_user_context = {
-            "user": admin_user
-        }   
-        send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
-        send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+                "user": admin_user
+            }   
+            send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
+        verify_url = create_user_verification_url({"email": prospect_user.email})
+        
+        prospect_context = {
+            "username": prospect_profile.name,
+            "verify_url": verify_url
+        }
+        # send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
+        send_mail_template(db, [prospect_user.email], welcome_prospect_template, prospect_context)
+        
                
         return 1
     except Exception as ex:
@@ -472,3 +483,31 @@ def get_staff_band(db, staff_id: int):
     )
     return db_mapping_rows_to_dict(staff_band)
 
+def get_staff_vaccines(db: Session, staff_id):
+    query = ( db.query(
+                Vaccine.id,
+                Vaccine.name,
+                StaffVaccine.is_active)
+             .select_from(StaffVaccine)
+             .join(Vaccine, StaffVaccine.vaccine_id == Vaccine.id)
+             .join(Staff, Staff.id == StaffVaccine.staff_id)
+             .filter(Staff.id == staff_id)
+             
+            )
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data
+def get_staff_food_restriction(db: Session, staff_id):
+    query = ( db.query(
+                FoodRestriction.id,
+                FoodRestriction.name,
+                StaffFoodRestriction.is_active)
+             .select_from(StaffFoodRestriction)
+             .join(Staff, Staff.id == StaffFoodRestriction.staff_id)
+             .join(FoodRestriction, FoodRestriction.id == StaffFoodRestriction.food_restriction_id)
+             .filter(Staff.id == staff_id)
+            
+            )
+    data = db.execute(query)
+    data = data.mappings().all()
+    return data

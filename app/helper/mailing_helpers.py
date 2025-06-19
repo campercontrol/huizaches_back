@@ -58,35 +58,33 @@ def send_mail_parent(
         "", send_to, template_content.title, html_content
     )
     return 1
-def create_user_verify_url(data):
-    pass
-def send_mail_prospect(
-    db,
-    send_to: list[str],
-    template_id: int,
-    prospect_profile,
-    prospect_user
-):
+# def send_mail_prospect(
+#     db,
+#     send_to: list[str],
+#     template_id: int,
+#     prospect_profile,
+#     prospect_user
+# ):
 
-    data = {
-        "user_email": prospect_user.email
-    }
-    url = create_user_verify_url(data)
+#     data = {
+#         "user_email": prospect_user.email
+#     }
+#     url = create_user_verify_url(data)
 
-    context = {
-        "username": prospect_profile.name,
-        "verify_url": url
-    }
+#     context = {
+#         "username": prospect_profile.name,
+#         "verify_url": url
+#     }
 
-    template_content =  (
-        db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
-    )
-    template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
-    html_content = template_env.render(context)
-    send_simple_message(
-        "", send_to, template_content.title, html_content
-    )
-    return 1
+#     template_content =  (
+#         db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
+#     )
+#     template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
+#     html_content = template_env.render(context)
+#     send_simple_message(
+#         "", send_to, template_content.title, html_content
+#     )
+#     return 1
 
 def send_mail_template(
     db,
