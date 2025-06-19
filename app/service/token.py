@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from jose import jwt
 from sqlalchemy.orm import Session
