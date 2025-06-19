@@ -110,7 +110,8 @@ app.include_router(medical_routes)
 
 from service.role import role_routes
 from service.user import user_routes
-from service.token import token_routes
+# from service.token import token_routes
+from service.auth.auth_service import token_routes
 from service.image import image_routes
 from service.permission import permission_routes
 from service.generar_pdf import pdf_routes

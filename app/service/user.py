@@ -23,12 +23,16 @@ from crud.crud_user import (
     get_user_delete_info
 )
 from crud.camps.season_crud import get_current_Season
+from crud.catalogs.vaccine_crud import get_all_vaccine
+from crud.catalogs.food_restriction_crud import get_all_food_restriction
 from schema.user import UserCreate, UserModify, UserResetPassword, UserChangePassword, UserChangeEmail, UserSendMailResetPassword, UserCreateAdmin
 from model.staffs import Staff, StaffRecord
 from model.user import User
 from model.medical.doctor import Doctor
 from model.campers.parent import Parent
 from model.campers.school import School
+from model.staffs.staff_food_restriction import StaffFoodRestriction
+from model.staffs.staff_vaccine import StaffVaccine
 # from utils.check_role import chek_permission
 from utils.db import SessionLocal
 from utils.email_tools import send_simple_message
@@ -88,16 +92,16 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
     staff_role = 2
     school_role = 3
     doctor_role = 5
-    
+
     check_email = get_user_by_email(db, user.email)
 
     if check_email:
         return {"detail": {"status": 2, "msg": "Ya existe un usuario con ese correo"}}
-    
+
     try:
         new_user = create_new_user_admin(db, user)
         new_user_role = new_user.role_id
-        
+
         if new_user_role == doctor_role:
             new_doctor = Doctor(
                 name = "Default doctor name",
@@ -107,12 +111,14 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 login_id = new_user.id,
             )
             db.add(new_doctor)
-            
+
         if new_user_role == staff_role:
             current_season = get_current_Season(db)
+            catalog_vaccines = get_all_vaccine(db)
+            catalog_food_restrictions = get_all_food_restriction(db)
             staff_new_record = None
             default_prospect_profile = None
-            
+
             staff_new_record = StaffRecord(
                 attend = 0,
                 attended = 0,
@@ -139,11 +145,32 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 login_id = new_user.id,
                 coordinator = new_user.is_coordinator,
                 employee_email_send = False,
-                employee = new_user.is_employee    
-            )       
+                employee = new_user.is_employee
+            )
+            
             db.add(default_prospect_profile)
             db.flush()
-        
+            
+            for vaccine in catalog_vaccines:
+                staff_vaccine = StaffVaccine(
+                    staff_id = default_prospect_profile.id,
+                    vaccine_id = vaccine.id,
+                    is_active = False
+                     
+                )
+                db.add(staff_vaccine)
+            db.flush()
+            for food_restriction in catalog_food_restrictions:
+                staff_food_restriction = StaffFoodRestriction(
+                    staff_id = default_prospect_profile.id,
+                    food_restriction_id = food_restriction.id,
+                    is_active=False
+                )
+                db.add(staff_food_restriction)
+            db.flush()
+            
+            db.commit()
+                
         if new_user_role == parent_role:
             new_parent = Parent(
                 tutor_name = "Default parent name",
@@ -162,7 +189,7 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
                 contact_email = "defaultparent@email.com"
             )
             db.add(new_parent)
-        
+
         if new_user_role == school_role:
             new_school = School(
                 login_id = new_user.id,
@@ -258,7 +285,7 @@ def reset_password(
 ):
 
     user = get_user_by_email(db, user_reset.email)
-    template_id = 2 # Password Recover 
+    template_id = 2 # Password Recover
     if not user:
         # response.status_code = 401
         return {"detail": {"status": 2, "msg": "Email is not registered"}}
@@ -269,7 +296,7 @@ def reset_password(
         accessToken = generate_access_token_reset_pass(user_reset.email)
         user_info = get_user_info_by_email(db, user_reset.email)
         base_url = os.getenv("PROD_URL")
-        url = f'{base_url}/reset_password/?email={user_reset.email}&token={accessToken}' 
+        url = f'{base_url}/reset_password/?email={user_reset.email}&token={accessToken}'
         email_variables = {
                 "user": user_info,
                 "reset_url": url
@@ -279,42 +306,41 @@ def reset_password(
             return {"detail": {"status": 1, "msg": "Email password reset sent successfully"}}
         else:
             return {"detail": {"status": 3, "msg": "An error ocurred while sending email"}}
-        
+
 @user_routes.post("/user/reset_password", tags=["Usuarios"])
 def reset_password(
     user_reset: UserResetPassword, t: str, db: Session = Depends(get_db)
 ):
     data = validate_token_general(t)
     if data[0] == 403:
-        raise HTTPException(status_code=401, detail={"status": 2, "msg": "Token Has expired"}) 
+        raise HTTPException(status_code=401, detail={"status": 2, "msg": "Token Has expired"})
     if data[0] == 401:
-        raise HTTPException(status_code=401, detail={"status": 4, "msg": "Invalid token"}) 
+        raise HTTPException(status_code=401, detail={"status": 4, "msg": "Invalid token"})
     try:
         account = db.query(User).filter_by(email=user_reset.email).first()
         new_hashed_password = hash_str(user_reset.password)
         account.hashed_pass = new_hashed_password
         db.add(account)
-        db.commit()        
+        db.commit()
     except Exception as ex:
         db.rollback()
         print(f"An error ocurred while changing the password: {ex}")
-        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while changing the password"}) 
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while changing the password"})
     return {"detail": {
         "status": 1,
         "msg": "Password updated successfully"
     }}
-    
+
 
 @user_routes.post("/user/verify/")
 def verify_account(t: str, db: Session = Depends(get_db)):
     data = validate_token_general(t)
     if data[0] == 403:
-        raise HTTPException(status_code=401, detail="Token Has expired") 
+        raise HTTPException(status_code=401, detail={"status": 2, "msg": "Token Has expired"})
     if data[0] == 401:
-        raise HTTPException(status_code=401, detail="Invalid token") 
+        raise HTTPException(status_code=401, detail={"status": 4, "msg": "Invalid token"})
     email = data[1]["user_email"]
     try:
-        db.begin()
         account =  db.query(User).filter_by(email=email).first()
         account.is_active = True
         db.add(account)
@@ -323,10 +349,13 @@ def verify_account(t: str, db: Session = Depends(get_db)):
     except Exception as ex:
         db.rollback()
         print(ex)
-        raise HTTPException(status_code=500, detail="Internal server error") 
-    return {"detail": "The account was successfully verified"}
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "An error ocurred while verifying the account"})
+    return {"detail": {
+        "status": 1,
+        "msg": "Account verified successfully"
+    }}
 
-    
+
 @user_routes.post("/usuario/change_password/{email}", tags=["Usuarios"])
 def change_password(
     email: str,
@@ -389,7 +418,7 @@ def change_password(
                 "mensaje": "Ocurrio un error inesperado, intente de nuevo",
                 "data": "",
             }
-        
+
 @user_routes.post("/usuario/change_email/{email}", tags=["Usuarios"])
 def change_email(
     email: str,
@@ -454,7 +483,7 @@ def change_email(
             }
 
 
-        
+
 @user_routes.get("/search/user/{search}", tags=["Usuarios"])
 def get_search_user(search:str, db: Session = Depends(get_db)):
     possible_users  = search_user_by_email(db, search)
@@ -469,10 +498,10 @@ def update_all_users_pass(hash_pass:str, db: Session = Depends(get_db)):
 @user_routes.delete("/delete_usuario/{user_id}", tags=["Usuarios"])
 def delete_user(user_id:str, db: Session = Depends(get_db)):
     response = delete_user_by_id(db, user_id)
-    
+
     if response == None:
         raise HTTPException(status_code=404, detail="User not found")
 
     if response['status'] == 3:
         raise HTTPException(status_code=500, detail= response)
-    return {"detail": response}    
+    return {"detail": response}

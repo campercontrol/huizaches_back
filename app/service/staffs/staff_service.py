@@ -16,7 +16,9 @@ from crud.staffs.staff_crud import (
     staff_camps,
     get_staff_by_id,
     update_staff_by_id,
-    get_staff_band
+    get_staff_band,
+    get_staff_food_restriction,
+    get_staff_vaccines
 )
 
 from crud.catalogs.constant_crud import (
@@ -238,48 +240,15 @@ def get_staff_complete(staff_id: int, language: str, db: Session = Depends(get_d
     genders = get_all_gender_id_name(db, language)
     blood_type = get_all_blood_type_id_name(db, language)
     staff = get_staff_by_id(db, staff_id)
-    vaccines = get_all_vaccine(db)
-    vaccines_data = []
-
-    for vaccine in vaccines:
-        staff_vaccine = get_staff_vaccine_by_vaccine(db, getattr(vaccine, "id"))
-        if staff_vaccine:
-            is_active = getattr(staff_vaccine, "is_active")
-        else:
-            is_active = False
-        vaccines_data.append(
-            {
-                "id": getattr(vaccine, "id"),
-                "name": getattr(vaccine, "name"),
-                "is_active": is_active,
-            }
-        )
-
-    food_restrictions = get_all_food_restriction(db)
-    food_restrictions_data = []
-
-    for food_restriction in food_restrictions:
-        staff_food_restriction = get_staff_food_restriction_by_food_r(
-            db, getattr(food_restriction, "id")
-        )
-        if staff_food_restriction:
-            is_active = getattr(staff_food_restriction, "is_active")
-        else:
-            is_active = False
-        food_restrictions_data.append(
-            {
-                "id": getattr(food_restriction, "id"),
-                "name": getattr(food_restriction, "name"),
-                "is_active": is_active,
-            }
-        )
+    staff_vaccines = get_staff_vaccines(db, staff_id)
+    staff_food_restriction = get_staff_food_restriction(db, staff_id)
 
     return {
         "staff": staff,
         "genders": genders,
         "blood_types": blood_type,
-        "vaccines": vaccines_data,
-        "food_restrictions": food_restrictions_data,
+        "vaccines": staff_vaccines,
+        "food_restrictions": staff_food_restriction,
     }
 
 

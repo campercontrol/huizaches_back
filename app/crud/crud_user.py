@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import case, or_, and_, asc, desc
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
@@ -15,7 +16,7 @@ from model.medical import Doctor
 from model.camps import Camp
 from utils.hash import hash_str
 from utils.db import db_mapping_rows_to_dict
-from datetime import date
+from datetime import date, timedelta
 from crud.payments.payment_crud import get_all_camper_payments
 from crud.camps.staff_in_camp_crud import get_staff_all_camps_by_staff_id
 from crud.trophies.trophy_staff_crud import get_all_staff_trophies
@@ -590,5 +591,4 @@ def delete_user_by_id(db: Session, user_id:int):
         except Exception as ex:
             return {"status": 3, "msg": "An unknown error ocurred while deleting"}
         return {"status": 1, "msg": "Medical user succesfully deleted"}
-    
     
