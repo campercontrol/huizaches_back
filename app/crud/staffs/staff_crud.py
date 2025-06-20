@@ -296,17 +296,23 @@ def create_complete_prospect(db, new_prospect):
         
         admin_users = get_admin_users_for_mailing(db)
     
+
+        verify_url = create_user_verification_url({"email": prospect_user.email})
+        
+        prospect_context = {
+            "user": {
+                "name": prospect_profile.name,
+                "lastname_father": prospect_profile.lastname_father,
+                "lastname_mother": prospect_profile.lastname_mother
+            },
+            "verify_url": verify_url
+        }
         for admin_user in admin_users:
             admin_user_context = {
                 "user": admin_user
             }   
-            send_mail_template(db, admin_user['email'], admin_new_prospect_template, admin_user_context)
-        verify_url = create_user_verification_url({"email": prospect_user.email})
+            send_mail_template(db, admin_user['email'], admin_new_prospect_template, prospect_context)
         
-        prospect_context = {
-            "username": prospect_profile.name,
-            "verify_url": verify_url
-        }
         # send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
         send_mail_template(db, [prospect_user.email], welcome_prospect_template, prospect_context)
         
