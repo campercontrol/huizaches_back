@@ -6,6 +6,7 @@ from utils.db import db_mapping_rows_to_dict
 from utils.hash import hash_str
 from datetime import date
 from model.staffs import Staff, StaffRecord
+from model.catalogs.constant import Constant
 from model.camps import StaffInCamp, Camp, Location, Season
 from model.staffs.staff_food_restriction import StaffFoodRestriction
 from model.staffs.staff_vaccine import StaffVaccine
@@ -21,6 +22,8 @@ from crud.camps.season_crud import get_current_Season
 from crud.mailings.mailing_crud import get_admin_users_for_mailing
 from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
+from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_staff_id
+from crud.staff_catalogs.staff_food_restriction_crud import get_all_staff_food_restriction_by_id
 from helper.pagination_helpers import pagination_params, get_number_of_pages
 from helper.mailing_helpers import send_mail_template
 from utils.functions_jwt import create_user_verification_url
@@ -511,3 +514,56 @@ def get_staff_food_restriction(db: Session, staff_id):
     data = db.execute(query)
     data = data.mappings().all()
     return data
+
+def get_prospects_general_report(db: Session):
+    query = (db.query(Staff.id,
+                    Staff.name,
+                    Staff.lastname_father,
+                    Staff.lastname_mother,
+                    Constant.value.label('gender'),
+                    User.email.label("email"),
+                    Staff.curp,
+                    Staff.rfc,
+                    Staff.cellphone,
+                    Staff.home_phone,
+                    Staff.birthday,
+                    Staff.affliction, 
+                    Staff.blood_type,
+                    Staff.drug_allergies,
+                    Staff.other_allergies,
+                    Staff.nocturnal_disorders,
+                    Staff.phobias,
+                    Staff.drugs,
+                    Staff.prohibited_foods,
+                    Staff.bio,
+                    Staff.coordinator,
+                    Staff.facebook,
+                    Staff.staff_contact_name,
+                    Staff.staff_contact_relation,
+                    Staff.staff_contact_homephone,
+                    Staff.staff_contact_cellphone,
+                    ).select_from(Staff)
+            .join(Constant, Constant.id == Staff.gender_id)
+            .join(User, Staff.login_id == User.id)
+            .filter(User.is_employee == False))
+    staffs = db.execute(query)
+    staffs = staffs.mappings().all()
+
+
+    staffs_report = []
+
+    for staff in staffs:
+        staff_dict = dict(staff)
+
+        staff_vaccines = get_staff_all_vaccines_by_staff_id(db, staff.id)
+        staff_food_restriction = get_all_staff_food_restriction_by_id(db, staff.id)
+        
+        for food_restriction in staff_food_restriction:
+            staff_dict[food_restriction["name"]] = food_restriction["is_active"]
+        
+        for vaccine in staff_vaccines:
+            staff_dict[vaccine["name"]] = vaccine["is_active"]
+            
+        staffs_report.append(staff_dict)
+       
+    return staffs_report
