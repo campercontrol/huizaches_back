@@ -134,6 +134,7 @@ app.include_router(permission_routes) # Permission
 app.include_router(pdf_routes) #Pdf
 app.include_router(email_routes) #email
 app.mount("/media",StaticFiles(directory="media"),name="media")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(toku_routes)
 app.include_router(mercadopago_routes)
 app.include_router(migrar_routes)
