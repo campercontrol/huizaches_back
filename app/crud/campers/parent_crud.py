@@ -275,7 +275,7 @@ def get_all_parent_admin(db: Session, pagination):
         )
         .select_from(Parent)
         .join(User, User.id == Parent.user_id)
-        .order_by(order(Parent.tutor_name))
+        .order_by(order(Parent.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset)) 
     )

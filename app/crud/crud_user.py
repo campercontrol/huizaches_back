@@ -47,7 +47,7 @@ def get_all_user(db, is_active, pagination):
         ).filter(
             User.is_active == is_active,
         )
-        .order_by(order(User.email))
+        .order_by(order(User.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )
