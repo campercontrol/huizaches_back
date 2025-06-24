@@ -432,7 +432,7 @@ def get_all_camper_admin(db: Session, pagination):
         .join(Parent, Parent.id == Camper.parent_id)
         .join(User, User.id == Parent.user_id)
         .join(School, School.id == Camper.school_id)
-        .order_by(order(Camper.name))
+        .order_by(order(Camper.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )

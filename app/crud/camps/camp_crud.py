@@ -630,7 +630,7 @@ def get_all_active_camp(db: Session, pagination):
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
         .filter(Camp.active==True)
-        .order_by(order(Camp.name))
+        .order_by(order(Camp.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )

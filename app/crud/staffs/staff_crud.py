@@ -41,7 +41,7 @@ def get_all_prospect(db, pagination):
         .join(Season, Staff.season_id == Season.id)
         .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == False)
-        .order_by(order(Staff.name))
+        .order_by(order(Staff.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )
@@ -140,7 +140,7 @@ def get_all_staff(db, pagination):
         .join(Season, Staff.season_id == Season.id)
         .join(StaffRecord, StaffRecord.id == Staff.record_id)
         .filter(Staff.employee == True)
-        .order_by(order(Staff.name))
+        .order_by(order(Staff.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
 
