@@ -90,77 +90,65 @@ def create_new_camper(db: Session, camper_complete: CamperCreate) -> any:
 
     db_camper = None
     try:
-        new_camper_record = CamperRecordCreate(attend=0, attended=0, total=0)
-        camper_record = create_new_camper_record(db, new_camper_record)
-
-        if camper_record == None:
-            raise HTTPException(status_code=500, detail="Ocurrio un error al almacenar el record del camper. El camper no se creo")
-
+        new_camper_record = CamperRecord(attend=0, attended=0, total=0)
+        db.add(new_camper_record)
+        db.flush()
+        
         new_camper = camper_complete.camper
         new_camper = new_camper.dict()
-        new_camper["record_id"] = camper_record.id
+        new_camper["record_id"] = new_camper_record.id
         db_camper = Camper(**new_camper)
         db.add(db_camper)
-        db.commit()        
-        db.refresh(db_camper)
-        
-    except Exception as e:
-        db.rollback()
-        print(e)   
-        raise HTTPException(status_code=500, detail="Ocurrio un error al almacenar el camper")
-    
-    try:
+        db.flush()
+            
         if len(camper_complete.vaccines) > 0:
             for vaccine in camper_complete.vaccines:
-                camper_vaccine = CamperVaccineCreate(
+                camper_vaccine = CamperVaccine(
                     camper_id=db_camper.id, vaccine_id=vaccine.id, is_active=vaccine.is_active
                 )
-         
-                create_new_camper_vaccine(db, camper_vaccine)
-                # db.add(camper_vaccine)                
+            
+                db.add(camper_vaccine)                
 
         if len(camper_complete.food_restrictions) > 0:
             for food_restriction in camper_complete.food_restrictions:
-                camper_food_restriction = CamperFoodRestrictionCreate(
+                camper_food_restriction = CamperFoodRestriction(
                     camper_id=db_camper.id,
                     food_restriction_id=food_restriction.id,
                     is_active=food_restriction.is_active,
                 )
-                create_new_camper_food_restriction(db, camper_food_restriction)
+                db.add(camper_food_restriction)
 
         if len(camper_complete.licensed_medicines) > 0:
             for licensed_medicine in camper_complete.licensed_medicines:
-                camper_licensed_medicine = CamperLicensedMedicineCreate(
+                camper_licensed_medicine = CamperLicensedMedicine(
                     camper_id=db_camper.id,
                     licensed_medicine_id=licensed_medicine.id,
                     is_active=licensed_medicine.is_active,
                 )
-                create_new_camper_licensed_medicine(db, camper_licensed_medicine)
+                db.add(camper_licensed_medicine)
 
         if len(camper_complete.pathological_background) > 0:
             for pathological_background in camper_complete.pathological_background:
-                camper_pathological_background = CamperPathologicalBackCreate(
+                camper_pathological_background = CamperPathologicalBackground(
                     camper_id=db_camper.id,
                     pathological_background_id=pathological_background.id,
                     is_active=pathological_background.is_active,
                 )
-                create_new_camper_pathological_background(db, camper_pathological_background)
+                db.add(camper_pathological_background)
 
         if len(camper_complete.pathological_background_fm) > 0:
                 for pathological_background_fm in camper_complete.pathological_background_fm:
-                    camper_pathological_background_fm = CamperPathologicalBackFmCreate(
+                    camper_pathological_background_fm = CamperPathologicalBackgroundFamily(
                         camper_id=db_camper.id,
-                        pathological_background_fm_id=pathological_background_fm.id,
+                        pathological_background_family_id=pathological_background_fm.id,
                         is_active=pathological_background_fm.is_active,
                     )
-                    create_new_camper_pathological_background_fm(
-                        db, camper_pathological_background_fm
-                    )
-    except Exception as e:
-        db.delete(db_camper)
+                    db.add(camper_pathological_background_fm)
         db.commit()
+    except Exception as e:
+        db.rollback()
         print(e)   
-        raise HTTPException(status_code=500, detail="Ocurrio un error al almacenar el camper")
+        raise HTTPException(status_code=500, detail={"status": 3, "msg": "Internal Server Error"})
     return db_camper
 
 def update_camper_by_id(
