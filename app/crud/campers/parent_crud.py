@@ -167,7 +167,7 @@ def create_new_parent_user_id_transaction(db, new_parent: ParentCreate, user_id:
         admin_user_context = {
             "user": admin_user
         }  
-        send_mail_template(db, admin_user["email"], admin_email_welcome_template, admin_user_context)
+        send_mail_template(db, admin_user["email"], admin_email_welcome_template, parent_context )
     
     return db_parent
 
