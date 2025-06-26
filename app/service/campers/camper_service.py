@@ -383,6 +383,9 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
     camper_cancelled_camps = get_cancelled_by_camper(db, camper_id)
     camper_passed_camps = get_past_subscribe_by_camper(db, camper_id)
     siblings = get_parent_campers_by_parent_id(db, parent.id) 
+    filtered_siblings = [sibling for sibling in siblings if sibling.id != camper_id]
+    
+    
     total_amount = 0
     
     for camp in camper_subscribe_camps:
@@ -395,7 +398,7 @@ def get_camper_profile(camper_id: int, db: Session = Depends(get_db)):
         "camper_info": camper_info,
         "camper_total_amount": total_amount,
         "parent": parent,
-        "siblings": siblings,
+        "siblings": filtered_siblings,
         "user_email": user[0].email,
         "camper_comments": camper_comments,
         "camper_subscribe_camps": camper_subscribe_camps,
