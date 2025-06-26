@@ -24,6 +24,8 @@ from crud.catalogs.vaccine_crud import get_all_vaccine
 from crud.catalogs.food_restriction_crud import get_all_food_restriction
 from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_staff_id
 from crud.staff_catalogs.staff_food_restriction_crud import get_all_staff_food_restriction_by_id
+from crud.crud_role import get_role_by_uuid
+from crud.crud_user import get_profile_id_by_user_id
 from helper.pagination_helpers import pagination_params, get_number_of_pages
 from helper.mailing_helpers import send_mail_template
 from utils.functions_jwt import create_user_verification_url
@@ -292,12 +294,24 @@ def create_complete_prospect(db, new_prospect):
             )            
             db.add(staff_food_restriction)
 
-        db.commit()
-        
-        admin_users = get_admin_users_for_mailing(db)
-    
 
-        verify_url = create_user_verification_url({"email": prospect_user.email})
+        role = get_role_by_uuid(db, 2)
+
+        user_data = {
+            # "user_name": "",
+            "user_email": prospect_user.email,
+            "user_id": prospect_user.id,
+            "user_active": prospect_user.is_active,
+            "user_employee": prospect_user.is_employee,
+            "user_coordinator": prospect_user.is_coordinator,
+            "user_admin": prospect_user.is_admin,
+            "role_name": role.name,
+            "role_id": 2,
+            "profile_id": prospect_profile.id,
+            # "lang": form_data.lang,
+        }
+
+        verify_url = create_user_verification_url(user_data)
         
         prospect_context = {
             "user": {
@@ -307,6 +321,7 @@ def create_complete_prospect(db, new_prospect):
             },
             "verify_url": verify_url
         }
+        admin_users = get_admin_users_for_mailing(db)
         for admin_user in admin_users:
             admin_user_context = {
                 "user": admin_user
@@ -316,7 +331,8 @@ def create_complete_prospect(db, new_prospect):
         # send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
         send_mail_template(db, [prospect_user.email], welcome_prospect_template, prospect_context)
         
-               
+        db.commit()
+        
         return 1
     except Exception as ex:
         db.rollback()      
