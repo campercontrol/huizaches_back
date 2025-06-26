@@ -339,7 +339,7 @@ def verify_account(t: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail={"status": 2, "msg": "Token Has expired"})
     if data[0] == 401:
         raise HTTPException(status_code=401, detail={"status": 4, "msg": "Invalid token"})
-    email = data[1]["email"]
+    email = data[1]["user_email"]
     try:
         account =  db.query(User).filter_by(email=email).first()
         account.is_active = True
