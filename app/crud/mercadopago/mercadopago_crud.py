@@ -1,10 +1,12 @@
 import uuid
 import os
 import json
+import httpx
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from datetime import date, datetime
-from fastapi import Request
+from fastapi import Request, HTTPException, status
+from fastapi.responses import JSONResponse
 from crud.camps.camp_crud import get_camp_by_id
 from model.campers import Camper, Parent
 from model.camps.camp import Camp
@@ -15,9 +17,11 @@ from model.user import User
 from model.mercadopago.mercadopago_payment import MercadopagoPayment
 from model.mercadopago.mercadopago_merchant_order import MercadopagoMerchantOrder
 from model.mercadopago.mercadopago_preference import MercadopagoPreference
+from model.mercadopago.mercadopago_seller_credentials import MercadopagoSellerCredentials
 from crud.payments.payment_crud import create_new_payment_and_update_balance_transaction
 from schema.mercadopago.mercadopago_payment_schema import MercadopagoPaymentCreate, MercadopagoPaymentUpdate
 from schema.mercadopago.mercadopago_merchant_order_schema import MercadopagoMerchantOrderCreate
+from schema.mercadopago.mercadopago_seller_credentials import MercadopagoSellerCredentials
 from schema.payments.payment_schema import PaymentCreate
 # SDK de Mercado Pago
 import mercadopago
@@ -236,15 +240,6 @@ def get_customer_last_purchase_date(db: Session, user_id:int):
         return query.created_at
     return None
 
-# def update_mercadopago_preference(db: Session, preference_id: str):
-#     try:
-#         new_date = datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
-#         preference = sdk.preference().update(preference_id, {"expiration_date_to": new_date})
-#         print(preference)
-#     except Exception as ex:
-#         print(ex)
-#         return None
-#     return preference
 
 def get_marketplace_fee(amount: int):
     marketplace_fee = (0.15 / 100) * amount
@@ -252,17 +247,7 @@ def get_marketplace_fee(amount: int):
     total_marketplace_fee = round(marketplace_fee + IVA, 2)
     return total_marketplace_fee
 
-# async def get_mercadopago_seller_credentials(request: Request, db: Session, code: str, state: str):
-    
-#     # print("=============empty request================")
-#     # print(request)    
-#     # request = await request.json()
-#     # print("=============request json================")
-#     # print(request)
-#     print(request.headers)
-#     print(request.query_params)
-#     print(request.url)
-#     print(await request.json())
+
 
 def get_mercadopago_seller_credentials(db: Session, code: str, state: str):
     try:
@@ -384,3 +369,33 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         print(ex)
         return None
     return preference
+
+async def refresh_mercadopago_seller_credentials(client_secret: str, grant_type: str, refresh_token: str, db: Session):
+    try:
+        response = await httpx.AsyncClient().post("https://api.mercadopago.com/oauth/token", data={
+            "client_secret": client_secret,
+            "grant_type": grant_type,
+            "refresh_token": refresh_token
+        })
+        if response.status_code != 200:
+            return response.json()
+        else:
+            token = response.json()
+            mercadopago_seller_credentials = MercadopagoSellerCredentials(
+                access_token=token["access_token"],
+                token_type=token["token_type"],
+                expires_in=token["expires_in"],
+                scope=token["scope"],
+                user_id=token["user_id"],
+                refresh_token=token["refresh_token"],
+                public_key=token["public_key"],
+                live_mode=token["live_mode"]
+            )
+            db.commit(mercadopago_seller_credentials)
+            return mercadopago_seller_credentials
+    except Exception as ex:
+        print(ex)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

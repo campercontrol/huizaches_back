@@ -12,3 +12,9 @@ class MercadopagoSellerCredentials(BaseModel):
     refresh_token: str
     public_key: str
     live_mode: bool
+    created_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
+    updated_at:Optional[datetime] = Field(
+        default=datetime.now()
+    )
