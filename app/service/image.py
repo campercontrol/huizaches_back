@@ -28,10 +28,11 @@ def get_db():
 async def upload_image_async(
     file: UploadFile,
     response: Response,
+    file_path: str = "uploads/",
     db: Session = Depends(get_db)
 ):
     arr_image_mime_type = ["image/jpeg","image/ief"]
-    file_name = f"media/tmp/{file.filename}"
+    file_name = f"{file_path}{file.filename}"
     print(file_name)
     if file.content_type in arr_image_mime_type: 
         file_name_result = await write_image(file_name,file)
