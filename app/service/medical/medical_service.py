@@ -10,7 +10,8 @@ from crud.camps.location_crud import get_location_by_uuid
 from crud.medical.camper_visit_crud import (
     camper_visit_triage_for_camp,
     camper_visit_for_camp,
-    create_new_camper_visit
+    create_new_camper_visit,
+    update_medical_camper_visit
 )
 from crud.medical.staff_visit_crud import staff_visit_triage_for_camp
 from crud.campers.parent_crud import get_parent_for_admin_by_id, get_parent_by_uuid, get_parent_by_camper_id
@@ -19,7 +20,7 @@ from service.campers.camper_service import get_camper_by_id_complete
 from crud.staffs.staff_crud import get_staff_by_id
 from crud.catalogs.constant_crud import get_all_triage
 
-from schema.medical.camper_visit_schema import CamperVisitCreate
+from schema.medical.camper_visit_schema import CamperVisitCreate, CamperVisitModify
 
 from utils.db import SessionLocal
 
@@ -133,3 +134,8 @@ def create_medical_camper_visit(camper_visit: CamperVisitCreate, db: Session = D
     if response['status'] == 3 or response['status'] == 2 :
         raise HTTPException(status_code=500, detail= response['detail'])
     return response
+
+@medical_routes.patch("/medical/camper/visit/{visit_id}", tags=["Medical"])
+def upd_medical_camper_visit(camper_visit: CamperVisitModify, visit_id: int, db: Session = Depends(get_db)):
+    response = update_medical_camper_visit(db,camper_visit, visit_id)
+    return {"detail": {"status": 1, "msg": "Medical Visit Updated Successfully", "data": response}}

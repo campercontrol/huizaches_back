@@ -68,6 +68,10 @@ class CamperVisitCreate(BaseModel):
     initial_visit_id:Optional[int] = Field(
         title="Consulta medica principal"
     )
+    additional_photo:Optional[str] = Field(
+        title="Foto adicional de la consulta",
+        default=None   
+    )
     created_at:Optional[datetime] = Field(
         default=datetime.now()
     )
@@ -133,7 +137,8 @@ class CamperVisitModify(BaseModel):
         title="Camper"
     )
     initial_visit_id:int = Field(
-        title="Consulta medica principal"
+        title="Consulta medica principal",
+        default=None
     )
     updated_at:Optional[datetime] = Field(
         default=datetime.now()

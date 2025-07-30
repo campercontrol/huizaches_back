@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs.constant import Constant
 from model.campers.camper import Camper
-from schema.medical.camper_visit_schema import CamperVisitCreate
+from schema.medical.camper_visit_schema import CamperVisitCreate, CamperVisitModify
 from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by_id_mailing, get_admin_users_for_mailing
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
@@ -70,6 +70,7 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
                 MedicalCamperVisit.medical_comment,
                 MedicalCamperVisit.send_in_email,
                 MedicalCamperVisit.already_sent,
+                MedicalCamperVisit.additional_photo,
                 MedicalCamperVisit.camper_id)
         .select_from(MedicalCamperVisit)
         .join(Constant, Constant.id == MedicalCamperVisit.triage)
@@ -106,6 +107,7 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
             MedicalCamperVisit.medical_comment,
             MedicalCamperVisit.send_in_email,
             MedicalCamperVisit.already_sent,
+            MedicalCamperVisit.additional_photo,
             MedicalCamperVisit.camper_id)
             .select_from(MedicalCamperVisit)
             .join(Constant, Constant.id == MedicalCamperVisit.triage)
@@ -150,6 +152,7 @@ def get_camper_medical_visit_by_id (db: Session, camper_medical_visit_id: int):
             MedicalCamperVisit.id,
             MedicalCamperVisit.send_in_email,
             MedicalCamperVisit.medication_authorization,
+            MedicalCamperVisit.additional_photo,
             Constant.value.label('triage')).select_from(MedicalCamperVisit).join(Constant, Constant.id == MedicalCamperVisit.triage).filter(MedicalCamperVisit.id == camper_medical_visit_id)
     
     )
@@ -158,6 +161,20 @@ def get_camper_medical_visit_by_id (db: Session, camper_medical_visit_id: int):
     medical_visit = medical_visit.mappings().first()
     return medical_visit
     
+def update_medical_camper_visit(db: Session, camper_visit_update: CamperVisitModify, visit_id: int):
+    data = camper_visit_update.dict(exclude_unset=True)
+    try:
+        updated_data = (
+            db.query(MedicalCamperVisit)
+            .filter(MedicalCamperVisit.id == visit_id)
+            .update(data, synchronize_session="fetch")
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating camper visit: {e}")
+        raise HTTPException(status_code=500, detail={"status": 3, "detail": "Internal server error"})
+    return updated_data
 
 def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
     
@@ -183,13 +200,15 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "camper": camper_data,
                 "user": first_parent,
                 "camp": camp_data,
-                "medical_visit": medical_visit
+                "medical_visit": medical_visit,
+                "additional_photo": new_camper_visit.additional_photo
             }
             second_parent_context = {
                 "camper": camper_data,
                 "user": second_parent,
                 "camp": camp_data,
-                "medical_visit": medical_visit
+                "medical_visit": medical_visit,
+                "additional_photo": new_camper_visit.additional_photo
             }
             send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context)    
             send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context)   
@@ -199,7 +218,8 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                     "camper": camper_data,
                     "user": admin_user,
                     "camp": camp_data,
-                    "medical_visit": medical_visit
+                    "medical_visit": medical_visit,
+                    "additional_photo": new_camper_visit.additional_photo
                 }  
                 send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context)
             db_camper_visit.already_sent = True

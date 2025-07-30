@@ -23,7 +23,7 @@ class PaymentAccount(Base):
     clabe_number = Column("clabe_number", String(18), nullable=False)
     created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(
-        "update",
+        "updated",
         DateTime(timezone=True),
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
