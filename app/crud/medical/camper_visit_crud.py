@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs.constant import Constant
 from model.campers.camper import Camper
-from schema.medical.camper_visit_schema import CamperVisitCreate
+from schema.medical.camper_visit_schema import CamperVisitCreate, CamperVisitModify
 from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by_id_mailing, get_admin_users_for_mailing
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
@@ -161,6 +161,20 @@ def get_camper_medical_visit_by_id (db: Session, camper_medical_visit_id: int):
     medical_visit = medical_visit.mappings().first()
     return medical_visit
     
+def update_medical_camper_visit(db: Session, camper_visit_update: CamperVisitModify, visit_id: int):
+    data = camper_visit_update.dict(exclude_unset=True)
+    try:
+        updated_data = (
+            db.query(MedicalCamperVisit)
+            .filter(MedicalCamperVisit.id == visit_id)
+            .update(data, synchronize_session="fetch")
+        )
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating camper visit: {e}")
+        raise HTTPException(status_code=500, detail={"status": 3, "detail": "Internal server error"})
+    return updated_data
 
 def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
     

@@ -137,7 +137,8 @@ class CamperVisitModify(BaseModel):
         title="Camper"
     )
     initial_visit_id:int = Field(
-        title="Consulta medica principal"
+        title="Consulta medica principal",
+        default=None
     )
     updated_at:Optional[datetime] = Field(
         default=datetime.now()
