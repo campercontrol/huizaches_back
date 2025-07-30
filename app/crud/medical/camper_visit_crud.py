@@ -70,6 +70,7 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
                 MedicalCamperVisit.medical_comment,
                 MedicalCamperVisit.send_in_email,
                 MedicalCamperVisit.already_sent,
+                MedicalCamperVisit.additional_photo,
                 MedicalCamperVisit.camper_id)
         .select_from(MedicalCamperVisit)
         .join(Constant, Constant.id == MedicalCamperVisit.triage)
@@ -106,6 +107,7 @@ def camper_visit_for_camp(db, camper_id: int, camp_id: int):
             MedicalCamperVisit.medical_comment,
             MedicalCamperVisit.send_in_email,
             MedicalCamperVisit.already_sent,
+            MedicalCamperVisit.additional_photo,
             MedicalCamperVisit.camper_id)
             .select_from(MedicalCamperVisit)
             .join(Constant, Constant.id == MedicalCamperVisit.triage)
@@ -150,6 +152,7 @@ def get_camper_medical_visit_by_id (db: Session, camper_medical_visit_id: int):
             MedicalCamperVisit.id,
             MedicalCamperVisit.send_in_email,
             MedicalCamperVisit.medication_authorization,
+            MedicalCamperVisit.additional_photo,
             Constant.value.label('triage')).select_from(MedicalCamperVisit).join(Constant, Constant.id == MedicalCamperVisit.triage).filter(MedicalCamperVisit.id == camper_medical_visit_id)
     
     )
@@ -183,13 +186,15 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "camper": camper_data,
                 "user": first_parent,
                 "camp": camp_data,
-                "medical_visit": medical_visit
+                "medical_visit": medical_visit,
+                "additional_photo": new_camper_visit.additional_photo
             }
             second_parent_context = {
                 "camper": camper_data,
                 "user": second_parent,
                 "camp": camp_data,
-                "medical_visit": medical_visit
+                "medical_visit": medical_visit,
+                "additional_photo": new_camper_visit.additional_photo
             }
             send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context)    
             send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context)   
@@ -199,7 +204,8 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                     "camper": camper_data,
                     "user": admin_user,
                     "camp": camp_data,
-                    "medical_visit": medical_visit
+                    "medical_visit": medical_visit,
+                    "additional_photo": new_camper_visit.additional_photo
                 }  
                 send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context)
             db_camper_visit.already_sent = True

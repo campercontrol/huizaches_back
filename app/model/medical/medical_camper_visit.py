@@ -42,6 +42,11 @@ class MedicalCamperVisit(Base):
         nullable=True,
         doc="Camper",
     )
+    additional_photo = Column(
+        String(512),
+        default=None,
+        doc="Foto adicional de la consulta"
+    )
     initial_visit_id = Column(
         "medical_camper_visit",
         ForeignKey("medical_campermedicalvisit.id"),
