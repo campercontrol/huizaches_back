@@ -4,7 +4,7 @@ import json
 
 domain_name = "kincamp.com"
 mailgun_api_key = "key-de3828f749bc30729dad5eadf0620a24"
-from_user_email = "Kincamp <sistema@kincamp.com>"
+from_user_email = "Kin Camp <sistemas@kincamp.com>"
 to_user_email = ""
 
 

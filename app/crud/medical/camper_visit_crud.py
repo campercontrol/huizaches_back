@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -12,6 +13,7 @@ from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
+BASE_URL = os.getenv("PROD_URL", "http://localhost:8000")
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
         db.query(
