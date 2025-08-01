@@ -185,7 +185,7 @@ def generate_access_token_reset_pass(email):
     return access_token
 
 def create_user_verification_url(data: dict):    
-    base_url = os.getenv("PROD_URL")
+    base_url = os.getenv("FRONTEND_DEV_URL")
     
     access_token_expires = timedelta(minutes=VERIFICATION_URL_EXPIRE_MINUTES)
     

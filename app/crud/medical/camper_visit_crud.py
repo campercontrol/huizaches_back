@@ -13,7 +13,7 @@ from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
-BASE_URL = os.getenv("PROD_URL")
+BASE_URL = os.getenv("BACKEND_DEV_URL")
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
         db.query(
