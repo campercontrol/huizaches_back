@@ -295,7 +295,7 @@ def reset_password(
     else:
         accessToken = generate_access_token_reset_pass(user_reset.email)
         user_info = get_user_info_by_email(db, user_reset.email)
-        base_url = os.getenv("FRONTEND_DEV_URL")
+        base_url = os.getenv("FRONTEND_PROD_URL")
         url = f'{base_url}/reset_password/?email={user_reset.email}&token={accessToken}'
         email_variables = {
                 "user": user_info,
