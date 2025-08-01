@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -12,6 +13,7 @@ from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
+BASE_URL = os.getenv("BACKEND_DEV_URL")
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
         db.query(
@@ -184,6 +186,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
         db.add(db_camper_visit)
         db.commit()
         db.refresh(db_camper_visit)
+        additional_photo = f"{BASE_URL}/{new_camper_visit.additional_photo}"
         if new_camper_visit.send_in_email:
             
             camper_data = get_camper_info_mailing(db, new_camper_visit.camper_id)
@@ -201,14 +204,14 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "user": first_parent,
                 "camp": camp_data,
                 "medical_visit": medical_visit,
-                "additional_photo": new_camper_visit.additional_photo
+                "additional_photo": additional_photo
             }
             second_parent_context = {
                 "camper": camper_data,
                 "user": second_parent,
                 "camp": camp_data,
                 "medical_visit": medical_visit,
-                "additional_photo": new_camper_visit.additional_photo
+                "additional_photo": additional_photo
             }
             send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context)    
             send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context)   
@@ -219,7 +222,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                     "user": admin_user,
                     "camp": camp_data,
                     "medical_visit": medical_visit,
-                    "additional_photo": new_camper_visit.additional_photo
+                    "additional_photo": additional_photo
                 }  
                 send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context)
             db_camper_visit.already_sent = True
