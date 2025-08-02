@@ -97,6 +97,11 @@ def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params
     list_camp = get_all_active_camp(db, pagination)
     return {"data": list_camp}
 
+@camp_router.get("/forthcoming_active_camps/", tags=["Camps"])
+def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
+    list_camp = get_all_active_camp(db, pagination)
+    return {"data": list_camp}
+
 @camp_router.get("/search/active_camp/", tags=["Camps"])
 def get_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db), name: Optional[str] = '', location: Optional[str] = '', school: Optional[str] = ''):
     list_camp = search_all_active_camp(db, pagination,name, location, school)
