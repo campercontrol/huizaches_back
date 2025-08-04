@@ -44,7 +44,7 @@ def create_payment_table(db, payments):
                 "balance": payment.currency_symbol + formated_balance + " " + payment.currency_acronym              
             }
         
-        if payment.txn_type_id in (3,2,5,4):
+        if payment.txn_type_id in (3,2,5):
             payment_row["pay"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
         
         else:
