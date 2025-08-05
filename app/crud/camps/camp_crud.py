@@ -1,4 +1,4 @@
-from sqlalchemy import and_, func, extract, select, desc,asc, or_
+from sqlalchemy import and_, func, extract, select, desc,asc, or_, text
 from math import ceil
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -699,6 +699,7 @@ def get_all_active_camp(db: Session, pagination):
 
 def search_all_active_camp(db: Session, pagination, name, location, school):
     camps = []
+    db.execute(text('SET pg_trgm.similarity_threshold = 0.2'))
     query = (select(
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
