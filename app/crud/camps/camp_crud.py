@@ -739,8 +739,8 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
         .filter(
             or_(
                 Camp.name.op('%')(name),
-                School.name.op('%')(location),
-                Location.name.op('%')(school),
+                # School.name.op('%')(location),
+                # Location.name.op('%')(school),
         )).scalar()
         )    
     pages = get_number_of_pages(rows_count, pagination.perPage)
