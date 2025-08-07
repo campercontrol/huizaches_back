@@ -116,13 +116,13 @@ def send_mail_template_medical_visit(
     send_to: str,
     template_id: int,
     context: dict,
+    medical_visit_table_id: int
 ):
     try:    
         template_content =  (
             db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
         )
         # Template de la tabla de la visita medica
-        medical_visit_table_id = 1985
         medical_table_content = (
             db.query(EmailTemplate.template).filter(EmailTemplate.id == medical_visit_table_id).first()
         )
