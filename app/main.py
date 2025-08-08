@@ -45,7 +45,7 @@ from service.trophies.trophy_staff_service import trophy_staff_routes
 from service.medical.medical_service import medical_routes
 from service.mercadopago.mercado_pago_service import mercadopago_routes
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 origins = ["http://localhost:4200",
            "http://localhost",
