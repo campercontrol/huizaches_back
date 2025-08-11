@@ -32,7 +32,8 @@ from crud.camps.camper_in_camp_crud import (
     get_past_due_camps_by_camper
 )
 from crud.payments.payment_crud import (
-    get_payment_by_camper_camp
+    get_payment_by_camper_camp,
+    get_camper_payments_in_camp
 )
 from crud.campers.camper_crud import (
     get_campers_from_parent,
@@ -48,6 +49,7 @@ from schema.campers.parent_schema import(
 from crud.crud_user import create_new_user, get_user_by_email, create_parent_complete
 from utils.db import SessionLocal
 from utils.image_tools import img_to_base_64
+from utils.payments.payment_table import create_payment_table
 from utils.pdf.baucher_pago import generar_pdf_baucher
 
 parent_routes = APIRouter()
@@ -151,7 +153,10 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
 def parent_camper_in_camp(camper_id:int, camp_id:int,  db: Session = Depends(get_db)):
     camp= get_camp_by_id(db, camp_id)
     location = get_location_by_uuid(db, camp.location_id)
-    payments= get_payment_by_camper_camp(db, camper_id, camp_id)
+    camper_payments_in_camp =  get_camper_payments_in_camp(db, camper_id, camp_id)
+    payments = create_payment_table(db, camper_payments_in_camp)   
+    
+    # payments= get_payment_by_camper_camp(db, camper_id, camp_id)
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
 
     if camper_in_camp:

@@ -182,7 +182,23 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
     
     db_camper_visit = None
     try:
+        
+        
         db_camper_visit = MedicalCamperVisit(**new_camper_visit.dict())
+        db_camper_visit.medication_authorization = case(
+            {
+                "1": "Preautorización en sistema de registro",
+                "2": "Se contacta a tutores",
+                "3": "Por parte de la Escuela / Maestras",
+                "4": "Por parte de Camper Control (In Loco Parentis)",
+                "5": "No se administraron medicamentos",
+            },
+            value=new_camper_visit.medication_authorization,
+        )
+        parent_table_template_id = 1985
+        staff_table_template_id = 2000
+        
+        
         db.add(db_camper_visit)
         db.commit()
         db.refresh(db_camper_visit)
@@ -213,8 +229,8 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "medical_visit": medical_visit,
                 "additional_photo": additional_photo
             }
-            send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context)    
-            send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context)   
+            send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context, parent_table_template_id)    
+            send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context, parent_table_template_id)   
             
             for admin_user in admin_users:
                 admin_user_context = {
@@ -224,7 +240,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                     "medical_visit": medical_visit,
                     "additional_photo": additional_photo
                 }  
-                send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context)
+                send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context, staff_table_template_id)
             db_camper_visit.already_sent = True
             db.commit()    
             

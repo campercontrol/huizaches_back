@@ -1,4 +1,4 @@
-from sqlalchemy import and_, func, extract, select, desc,asc, or_
+from sqlalchemy import and_, func, extract, select, desc,asc, or_, text
 from math import ceil
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -608,48 +608,6 @@ def get_all_camp(db: Session, pagination: Pagination):
     
     
 
-def get_all_active_camp(db: Session, pagination):
-    camps = []
-    order = desc if pagination.order == SortEnum.DESC else asc
-    query = (select(
-            Camp.id.label("camp_id"),
-            Camp.name.label("camp_name"),
-            Camp.public_price.label("camp_public_price"),
-            Camp.show_payment_parent.label("camp_show_payment_parent"),
-            Location.name.label("location_name"),
-            School.name.label("school_name"),
-            Camp.start.label("camp_start"),
-            Camp.end.label("camp_end"),
-            Currency.name.label("camp_currency_name"),
-            Currency.symbol.label("camp_currency_symbol"),
-            Currency.acronyms.label("camp_currency_acronym"),
-            Camp.photo_password
-        
-        )
-        .join(Location, Location.id == Camp.location_id)
-        .join(School, School.id == Camp.school_id)
-        .join(Currency, Currency.id == Camp.currency_id)
-        .filter(Camp.active==True)
-        .order_by(order(Camp.created_at))
-        .limit(pagination.perPage)
-        .offset((pagination.offset))
-    )
-    data = db.execute(query)
-    data = data.mappings().all()
-    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.active == True).scalar()    
-    pages = get_number_of_pages(rows_count, pagination.perPage)
-    
-    for row in data:
-        records = get_records_for_camp(db, row.camp_id)
-        row = dict(row)
-        row["records"] = records
-        camps.append(row)
-
-    return {
-        "pages": pages,
-        "items": camps,
-        "total": rows_count
-    }
     
 
 def get_all_active_camp(db: Session, pagination):
@@ -698,7 +656,9 @@ def get_all_active_camp(db: Session, pagination):
 
 
 def search_all_active_camp(db: Session, pagination, name, location, school):
+    order = desc if pagination.order == SortEnum.DESC else asc
     camps = []
+    db.execute(text('SET pg_trgm.similarity_threshold = 0.2'))
     query = (select(
             Camp.id.label("camp_id"),
             Camp.name.label("camp_name"),
@@ -720,8 +680,8 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
         .filter(
             or_(
                 Camp.name.op('%')(name),
-                School.name.op('%')(location),
-                Location.name.op('%')(school),
+                School.name.op('%')(school),
+                Location.name.op('%')(location),
         ))
         .order_by(        
             func.similarity(Camp.name, name).desc(),
@@ -738,8 +698,8 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
         .filter(
             or_(
                 Camp.name.op('%')(name),
-                School.name.op('%')(location),
-                Location.name.op('%')(school),
+                School.name.op('%')(school),
+                Location.name.op('%')(location),
         )).scalar()
         )    
     pages = get_number_of_pages(rows_count, pagination.perPage)

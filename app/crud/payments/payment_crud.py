@@ -345,7 +345,11 @@ def get_payment_page_camper_in_camp(
         camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
         camper_in_camp_id = getattr(camper_in_camp, "id")
 
-    payment_table = get_payment_by_camper_camp(db, camper_id, camp_id)
+    # payment_table = get_payment_by_camper_camp(db, camper_id, camp_id)
+    camper_payments_in_camp =  get_camper_payments_in_camp(db, camper_id, camp_id)
+    payment_table = create_payment_table(db, camper_payments_in_camp)  
+    
+    
 
     camp_name = db.query(Camp.name).filter(Camp.id == camp_id).first()[0]
     camper = (
