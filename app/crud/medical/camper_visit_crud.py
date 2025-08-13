@@ -190,7 +190,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "1": "Preautorización en sistema de registro",
                 "2": "Se contacta a tutores",
                 "3": "Por parte de la Escuela / Maestras",
-                "4": "Por parte de Camper Control (In Loco Parentis)",
+                "4": "Por parte de Kin Camp (In Loco Parentis)",
                 "5": "No se administraron medicamentos",
             },
             value=new_camper_visit.medication_authorization,
