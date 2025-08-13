@@ -196,7 +196,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
             value=new_camper_visit.medication_authorization,
         )
         parent_table_template_id = 1985
-        staff_table_template_id = 2000
+        staff_table_template_id = 2002
         
         
         db.add(db_camper_visit)
