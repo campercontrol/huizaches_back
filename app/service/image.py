@@ -1,5 +1,5 @@
+import uuid
 from xmlrpc.client import boolean
-
 from fastapi import APIRouter, Depends,Response, BackgroundTasks,UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -32,7 +32,7 @@ async def upload_image_async(
     db: Session = Depends(get_db)
 ):
     arr_image_mime_type = ["image/jpeg","image/ief"]
-    file_name = f"{file_path}{file.filename}"
+    file_name = f"{file_path}{uuid.uuid4()}-{file.filename}"
     print(file_name)
     if file.content_type in arr_image_mime_type: 
         file_name_result = await write_image(file_name,file)
