@@ -203,10 +203,11 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
         db.commit()
         db.refresh(db_camper_visit)
         
-        if new_camper_visit.additional_photo is not None or new_camper_visit.additional_photo != "":
-            additional_photo = f"{BASE_URL}/{new_camper_visit.additional_photo}"
-        else:
+        if new_camper_visit.additional_photo is None or new_camper_visit.additional_photo == "":
             additional_photo = "No se proporcionó foto adicional"
+        else:
+            additional_photo = f"{BASE_URL}/{new_camper_visit.additional_photo}"
+
         if new_camper_visit.send_in_email:
             
             camper_data = get_camper_info_mailing(db, new_camper_visit.camper_id)
