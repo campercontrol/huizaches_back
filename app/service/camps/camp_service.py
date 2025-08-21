@@ -86,7 +86,7 @@ def get_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: 
     list_camp = get_all_camp(db, pagination)
     return {"data": list_camp}
 
-@camp_router.get("/camp/{camp_id}/incomes", tags=["Camps"])
+@camp_router.get("/camp/{camp_id}/incomes/", tags=["Camps"])
 def camp_incomes(camp_id: int, db: Session = Depends(get_db)):
     response = get_camp_incomes(db, camp_id)
     return response
@@ -324,64 +324,64 @@ def get_search_camp(search: str, db: Session = Depends(get_db)):
     possible_camps = get_camp_by_search(db, search)
     return {"data": possible_camps}
 
-@camp_router.get("/camps/{camp_id}/groupings/campers", tags=["GroupingCamp"])
+@camp_router.get("/camps/{camp_id}/groupings/campers/", tags=["GroupingCamp"])
 def get_campers_in_camp_and_groupings_endpoint(camp_id: int, db: Session = Depends(get_db)):
     campers_groupings = get_campers_in_camp_and_groupings(db,camp_id)
     return {"data": campers_groupings}
 
-@camp_router.get("/camps/{camp_id}/general_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/general_report/", tags=["Camps"])
 def get_camp_general_report(camp_id: int, db: Session = Depends(get_db)):
     camp_general_report = get_camp_gnl_report(db, camp_id)
 
     return {"data": camp_general_report}
 
-@camp_router.get("/camps/{camp_id}/general_staff_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/general_staff_report/", tags=["Camps"])
 def camp_general_staffreport(camp_id: int, db: Session = Depends(get_db)):
     camp_general_staff_report = get_camp_gnl_staff_report(db, camp_id)
 
     return {"data": camp_general_staff_report}
 
 
-@camp_router.get("/camps/{camp_id}/insurance_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/insurance_report/", tags=["Camps"])
 def get_camp_insurance_report(camp_id: int, db: Session = Depends(get_db)):
     camp_insurance_general_report = get_camp_insr_report(db, camp_id)
 
     return camp_insurance_general_report
 
-@camp_router.get("/camps/{camp_id}/contact_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/contact_report/", tags=["Camps"])
 def camp_contact_report(camp_id: int, db: Session = Depends(get_db)):
     camp_contact_report = get_camp_contact_report(db, camp_id)
 
     return camp_contact_report
 
 
-@camp_router.get("/camps/{camp_id}/medical_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/medical_report/", tags=["Camps"])
 def camp_medical_report(camp_id: int, db: Session = Depends(get_db)):
     medical_report = get_camp_medical_report(db, camp_id)
     return medical_report
 
-@camp_router.get("/camps/{camp_id}/food_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/food_report/", tags=["Camps"])
 def camp_food_report(camp_id: int, db: Session = Depends(get_db)):
     food_report = get_camp_food_report(db, camp_id)
     return food_report
 
-@camp_router.get("/camps/{camp_id}/social_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/social_report/", tags=["Camps"])
 def camp_social_report(camp_id: int, db: Session = Depends(get_db)):
     social_report = get_camp_social_report(db, camp_id)
     return social_report
 
-@camp_router.get("/camps/{camp_id}/extras_report", tags=["Camps"])
+@camp_router.get("/camps/{camp_id}/extras_report/", tags=["Camps"])
 def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
     extras_report = get_camp_extras_report(db, camp_id)
     return extras_report
 
 
-@camp_router.post("/camps/{camp_id}/campers/{camper_id}/mercadopago/payments", tags=["Camps"])
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/mercadopago/payments/", tags=["Camps"])
 def mercado_pago_payments_by_camp_id_and_camper_id(camp_id: int, camper_id: int, db:Session = Depends(get_db)):
     mercadopago_payments = get_mercado_pago_payments_by_camp_id_and_camper_id(db, camp_id, camper_id)
     return mercadopago_payments
 
-@camp_router.post("/camps/{camp_id}/campers/{camper_id}/massive_payment", tags=["Camps"])
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/massive_payment/", tags=["Camps"])
 def apply_massive_payment_to_campers_in_camp(camp_id: int, massive_payment: MassivePaymentCreate, db:Session = Depends(get_db)):
     result = apply_massive_payment(db, camp_id, massive_payment)
     if result == True:
