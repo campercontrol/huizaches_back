@@ -43,12 +43,12 @@ def get_school_by_id(school_id:str, db: Session = Depends(get_db)):
     return {"data": list_school}
 
 
-@school_routes.get("/school/{school_id}/upcoming_camps", tags=["School"])
+@school_routes.get("/school/{school_id}/upcoming_camps/", tags=["School"])
 def upcoming_school_camps(school_id:str, db: Session = Depends(get_db)):
     upcoming_camps = get_upcoming_school_camps(db, school_id)
     return {"data": upcoming_camps}
 
-@school_routes.get("/school/{school_id}/past_camps", tags=["School"])
+@school_routes.get("/school/{school_id}/past_camps/", tags=["School"])
 def past_school_camps(school_id:str, db: Session = Depends(get_db)):
     past_school = get_past_school_camps(db, school_id)
     return {"data": past_school}
