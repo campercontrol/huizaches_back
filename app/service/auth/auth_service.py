@@ -18,7 +18,7 @@ from crud.auth.auth_crud import (
     get_permissions_menu,
 )
 
-SECRET_KEY = os.getenv("SECRET_TOKEN_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY_TOKEN")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_MINUTES = 35
@@ -38,20 +38,20 @@ def get_db():
     finally:
         db.close()
 
-@token_routes.post("/token", response_model=Token, tags=["Token"])
+@token_routes.post("/token", tags=["Token"])
 async def login_for_access_token(
-    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
-):
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)
+) -> Token:
     user = authenticate_user(db, form_data.username, form_data.password)
     if user == 2:
         raise HTTPException(
-            status_code=400,
+            status_code=401,
             detail={"status": 2, "msg": "El usuario no existe"},
             headers={"WWW-Authenticate": "Bearer"})
 
     elif user == 3:
         raise HTTPException(
-            status_code=400,
+            status_code=401,
             detail={"status": 3, "msg": "La contraseña es incorrecta"},
             headers={"WWW-Authenticate": "Bearer"}
         )
@@ -65,6 +65,7 @@ async def login_for_access_token(
 
     access_token = create_access_token(data={
             "user_name": "",
+            "sub": user.email ,
             "user_email": user.email,
             "user_id": user.id,
             "user_active": user.is_active,
@@ -80,10 +81,7 @@ async def login_for_access_token(
         },
         expires_delta=access_token_expires,
     )
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return Token(access_token=access_token, token_type="bearer")
 
 
 

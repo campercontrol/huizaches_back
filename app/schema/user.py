@@ -31,6 +31,9 @@ class UserCreate(BaseModel):
     is_active: Optional[bool] = Field(
         title="Is active"
     )
+class User(BaseModel):
+    email: str
+
 class UserCreateAdmin(BaseModel):
     email: EmailStr = Field(
         title="Email",

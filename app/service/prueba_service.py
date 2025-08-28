@@ -16,7 +16,6 @@ from schema.prueba_schema import(
 from utils.db import SessionLocal
 
 from model.user import User
-from utils.functions_jwt import get_current_active_user
 
 prueba_routes = APIRouter()
 
@@ -29,20 +28,16 @@ def get_db():
         db.close()
 
 
-@prueba_routes.get("/prueba/", tags=["Demo"])
+@prueba_routes.get("/prueba_autenticacion/", tags=["Demo"])
 def get_prueba(
-        db: Session = Depends(get_db), 
-        current_user: User = Depends(get_current_active_user)
         ):
-    list_prueba = get_all_prueba(db)
-    return {"data": list_prueba}
+    return {"data": "Autenticacion Correcta"}
 
 
 @prueba_routes.get("/prueba/{prueba_id}", tags=["Demo"])
 def get_prueba_by_id(
     prueba_id:str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db)
         ):
     list_prueba = get_prueba_by_uuid(db,prueba_id)
     return {"data": list_prueba}
@@ -51,8 +46,7 @@ def get_prueba_by_id(
 @prueba_routes.post("/prueba/", tags=["Demo"])
 def create_prueba(
     new_prueba:PruebaCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db)
         ):
     list_prueba = create_new_prueba(db,new_prueba)
     return {"data": list_prueba}
@@ -61,8 +55,7 @@ def create_prueba(
 def create_prueba(
     prueba_id:str,
     modify_prueba:PruebaModify,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db)
         ):
 
     update_data = modify_prueba.dict(exclude_unset=True)
