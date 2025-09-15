@@ -334,6 +334,15 @@ def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int)
 def get_payment_page_camper_in_camp(
     db, camper_id: int, camp_id: int, camper_in_camp_id: int
 ):
+    if camper_id == 0 and camp_id == 0 and camper_in_camp_id == 0:
+        transaction_type = get_all_payment_transaction_type(db)
+        payment_methods = get_all_payment_method(db)
+        return {
+            "payment_methods": payment_methods,
+            "transaction_type": transaction_type,
+        }
+        
+        
     if (camper_id == 0 or camp_id == 0) and camper_in_camp_id != 0:
         camper_in_camp = (
             db.query(CamperInCamp).filter(CamperInCamp.id == camper_in_camp_id).first()
@@ -343,6 +352,7 @@ def get_payment_page_camper_in_camp(
 
     else:
         camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
+        print(camper_in_camp)
         camper_in_camp_id = getattr(camper_in_camp, "id")
 
     # payment_table = get_payment_by_camper_camp(db, camper_id, camp_id)
