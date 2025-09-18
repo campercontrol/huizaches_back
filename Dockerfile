@@ -1,5 +1,5 @@
 # Pull base image
-FROM python:3.9-slim-buster
+FROM python:3.9-bookworm
 
 WORKDIR /app
 # Set environment varibles

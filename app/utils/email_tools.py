@@ -1,9 +1,12 @@
 import jinja2
 import requests
 import json
+import os
 
-domain_name = "kincamp.com"
-mailgun_api_key = "key-de3828f749bc30729dad5eadf0620a24"
+domain_name = os.getenv("DOMAIN_NAME", "kincamp.com")
+MAILGUN_SENDING_KEY = os.getenv("MAILGUN_SENDING_KEY")
+
+
 from_user_email = "Kin Camp <sistemas@kincamp.com>"
 to_user_email = ""
 
@@ -28,7 +31,7 @@ Webhooks:
 def send_simple_message_test():
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={"from": from_user_email,
               "to": [to_user_email],
               "subject": "Welcome",
@@ -62,7 +65,7 @@ def send_simple_message(from_user:str,to_users:list,email_subject:str,text_messa
     html_content = template.render(context)
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={"from": from_user_email,
               "to": to_users,
               "subject": email_subject,
@@ -81,7 +84,7 @@ def send_attachment_message(from_user:str,to_users:list,email_subject:str,text_m
         attachments.append(("attachment", (element["nombre"], open(element["ruta"],"rb").read())))
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key), 
+        auth=("api", MAILGUN_SENDING_KEY), 
         files=attachments,
         data={"from": from_user_email,
               "to": to_users,
@@ -98,7 +101,7 @@ def send_html_message(from_user:str,to_users:list,email_subject:str,text_message
     #en caso de enviar los dos da prioridad al HTML y el text no lo muestra
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={"from": from_user_email,
               "to": to_users,
               "subject": email_subject,
@@ -113,7 +116,7 @@ def send_scheduled_message(from_user:str,to_users:list,email_subject:str,text_me
 
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={"from": from_user_email,
               "to": to_users,
               "subject": email_subject,
@@ -132,7 +135,7 @@ def send_create_template(template_html:str,template_name:str,template_descriptio
     """
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/templates",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={'name': template_name,
               'description': template_description,
               'template': template_html,
@@ -143,19 +146,19 @@ def send_create_template(template_html:str,template_name:str,template_descriptio
 def get_template(template_name:str):
     return requests.get(
         f"https://api.mailgun.net/v3/{domain_name}/templates/{template_name}",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         params={"active": "yes"})
 
 def update_template(template_name:str):
     return requests.put(
         f"https://api.mailgun.net/v3/{domain_name}/templates/{template_name}",
-        auth=('api', mailgun_api_key),
+        auth=('api', MAILGUN_SENDING_KEY),
         data={'description': 'Template Example only for integration modify'})
 
 def send_message_by_template_id(from_user:str,to_users:list,email_subject:str):
     return requests.post(
         f"https://api.mailgun.net/v3/{domain_name}/messages",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={"from": from_user_email,
               "to": to_users,
               "subject": email_subject,
@@ -169,7 +172,7 @@ def send_message_by_template_id(from_user:str,to_users:list,email_subject:str):
         )
     # return requests.post(
     #     f"https://api.mailgun.net/v3/{domain_name}/messages",
-    #     auth=("api", mailgun_api_key),
+    #     auth=("api", MAILGUN_SENDING_KEY),
     #     data={"from": from_user_email,
     #           "to": to_users,
     #           "subject": email_subject,
@@ -186,13 +189,13 @@ def send_message_by_template_id(from_user:str,to_users:list,email_subject:str):
 def send_get_webhook():
     return requests.get(
         f"https://api.mailgun.net/v3/domains/{domain_name}/webhooks",
-        auth=("api", mailgun_api_key))
+        auth=("api", MAILGUN_SENDING_KEY))
 
 
 def get_domain(type_webhook):
     return requests.get(
         f"https://api.mailgun.net/v3/domains/{domain_name}/webhooks/{type_webhook}",
-        auth=("api", mailgun_api_key))
+        auth=("api", MAILGUN_SENDING_KEY))
 
 
 def add_webhook(webhook_type,urls):
@@ -208,7 +211,7 @@ def add_webhook(webhook_type,urls):
     """
     return requests.post(
         f"https://api.mailgun.net/v3/domains/{domain_name}/webhooks",
-        auth=("api", mailgun_api_key),
+        auth=("api", MAILGUN_SENDING_KEY),
         data={
           'id':webhook_type,
           'url':urls
@@ -218,11 +221,11 @@ def add_webhook(webhook_type,urls):
 def update_webhook(type_webhook,arr_url):
     return requests.put(
         (f"https://api.mailgun.net/v3/domains/{domain_name}/webhooks/{type_webhook}"),
-        auth=('api', mailgun_api_key),
+        auth=('api', MAILGUN_SENDING_KEY),
         data={'url': arr_url})
 
 
 def delete_domain(type_webhook):
     return requests.delete(
         f"https://api.mailgun.net/v3/domains/{domain_name}/webhooks/{type_webhook}",
-        auth=("api", mailgun_api_key))
+        auth=("api", MAILGUN_SENDING_KEY))
