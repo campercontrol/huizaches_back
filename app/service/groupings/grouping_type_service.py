@@ -5,7 +5,8 @@ from crud.groupings.grouping_type_crud import (
     get_grouping_type_by_id,
     create_new_grouping_type,
     update_grouping_type,
-    delete_grouping_type
+    delete_grouping_type,
+    get_camp_grouping_types
 )
 from schema.groupings.grouping_type_schema import GroupingTypeBase, GroupingTypeCreate, GroupingTypeUpdate, GroupingTypeResponse
 from utils.db import SessionLocal
@@ -29,6 +30,11 @@ def read_grouping_type(grouping_type_id: int, db: Session = Depends(get_db)):
     if db_grouping_type is None:
         raise HTTPException(status_code=404, detail="GroupingType not found")
     return db_grouping_type
+
+@grouping_type_router.get("/grouping_camp_types/{camp_id}", response_model=list[GroupingTypeResponse], tags=["GroupingType"])
+def list_grouping_camp_types(camp_id: int, db: Session = Depends(get_db)):
+    return get_camp_grouping_types(db, camp_id)
+
 
 @grouping_type_router.post("/grouping_types/", response_model=GroupingTypeResponse, tags=["GroupingType"])
 def create_grouping_type(grouping_type: GroupingTypeCreate, db: Session = Depends(get_db)):

@@ -2,10 +2,21 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import update
 from model.groupings.grouping_type import GroupingType
+from model.groupings.grouping_camp import GroupingCamp
+from model.groupings.grouping import Grouping
 from schema.groupings.grouping_type_schema import GroupingTypeCreate, GroupingTypeUpdate
 
 def get_all_grouping_types(db: Session):
     return db.query(GroupingType).order_by(GroupingType.id).all()
+
+def get_camp_grouping_types(db: Session, camp_id: int):
+    return (db.query(GroupingType.id, GroupingType.name, GroupingType.created_at, GroupingType.updated_at)
+            .select_from(GroupingCamp)
+            .join(Grouping, Grouping.id == GroupingCamp.grouping_id)
+            .join(GroupingType, GroupingType.id == Grouping.grouping_type_id)
+            .filter(GroupingCamp.camp_id == camp_id).distinct().all()
+            )
+
 
 def get_grouping_type_by_id(db: Session, grouping_type_id: int):
     return db.query(GroupingType).filter(GroupingType.id == grouping_type_id).first()
