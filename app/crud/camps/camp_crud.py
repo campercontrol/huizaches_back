@@ -59,8 +59,18 @@ def get_camp_incomes(db: Session, camp_id: int):
     payment_methods = db.query(PaymentMethod).all()
     incomes_per_payment_method = []
     for payment_method in payment_methods:
-        total_payment_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
-        total_transactions_per_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
+        total_payment_amount = (
+            db.query(func.sum(func.abs(Payment.payment_amount)))
+            .select_from(Payment)
+            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+        
+        )
+        total_transactions_per_payment_method = (
+            db.query(func.count(Payment.id))
+            .select_from(Payment)
+            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+            
+        )
         income = {
             "payment_method": payment_method.name,
             "transactions": total_transactions_per_payment_method,
