@@ -48,7 +48,7 @@ def get_camp_insr_report(db: Session, camp_id: int):
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(catalog_gender, Camper.gender_id == catalog_gender.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     
@@ -204,7 +204,7 @@ def get_camp_contact_report(db: Session, camp_id: int):
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     return campers
@@ -268,7 +268,7 @@ def get_camp_medical_report(db: Session, camp_id: int):
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     
@@ -368,7 +368,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
              .join(School, Camper.school_id== School.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -422,7 +422,7 @@ def get_camp_food_report(db: Session, camp_id: int):
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -467,7 +467,7 @@ def get_camp_social_report(db: Session, camp_id: int):
              .join(catalog_grade, Camper.grade == catalog_grade.id)
              .join(catalog_swim, Camper.can_swim == catalog_swim.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -499,7 +499,7 @@ def get_camp_extras_report(db: Session, camp_id: int):
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(CamperInCamp.camp_id == camp_id))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
