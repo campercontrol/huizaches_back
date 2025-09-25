@@ -436,7 +436,7 @@ def get_campers_in_camp_mailing(db, camp_id):
     return data.mappings().all()
 
 def get_campers_for_bracelets(db, camp_id):
-    list_campers = (
+    campers_query = (
         db.query(
             Camper.id.label("camper_id"),
             (
@@ -457,9 +457,28 @@ def get_campers_for_bracelets(db, camp_id):
         .join(School, School.id == Camper.school_id)
         .join(Constant, Constant.id == Camper.blood_type)
         .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
-        .all()
     )
-    return db_mapping_rows_to_dict(list_campers)
+    campers = db.execute(campers_query)
+    campers = campers.mappings().all()
+    
+    campers_list = []
+    
+    for camper in campers:
+        camper_dict = dict(camper)
+        
+        groupings_query = (
+            db.query(Grouping.name).select_from(GroupingCamper)
+            .join(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+            .join(Grouping, Grouping.id == GroupingCamp.grouping_id)
+            .filter(GroupingCamper.camper_id == camper.camper_id)
+        )
+        groupings = db.execute(groupings_query)
+        groupings = groupings.mappings().all()
+        camper_dict["groupings"] = groupings
+        campers_list.append(camper_dict)     
+    return campers_list
+
+
 
 
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):

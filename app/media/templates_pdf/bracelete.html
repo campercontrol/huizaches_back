@@ -146,7 +146,13 @@
                                 {{i.other_alergies}}<br>
                                 <br>
                                 Comida Prohibida <br>
-                                {{i.prohibed_food}}
+                                {{i.prohibed_food}}<br>
+                                Agrupaciones <br>
+                                {%for grouping in i.groupings%}
+                                    {{grouping.name}} <br>
+                                {%endfor%}
+
+
                             </p>
                             <br>
                             <div class="logo">
