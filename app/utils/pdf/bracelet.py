@@ -13,19 +13,20 @@ def generar_pdf_bracelete(list_campers, camp_name):
 
     list_b = []
     for camper in list_campers:
-        code =  str(getattr(camper, "camper_id")).zfill(6)
+        code =  str(camper["camper_id"]).zfill(6)
         ruta1 = generate_code128_no_fotter(code) 
         barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
         context = {
-            "name":  getattr(camper, "name"),
-            "school": getattr(camper, "school"),
+            "name":  camper["name"],
+            "school": camper["school"],
             "camping": camp_name,
             "barcode_img":barcode_64,
             "barcode_code":code,        
-            "blood_type": getattr(camper, "blood_type"),
-            "alergies": getattr(camper, "alergies"),
-            "other_alergies": getattr(camper, "other_alergies"),
-            "prohibed_foo":  getattr(camper, "prohibed_foo"),
+            "blood_type": camper["blood_type"],
+            "alergies": camper["alergies"],
+            "other_alergies": camper["other_alergies"],
+            "prohibed_foo":  camper["prohibed_foo"],
+            "groupings": camper["groupings"],
             "logo_img":logo_64,
             }
         list_b.append(context)
@@ -57,7 +58,6 @@ def generar_pdf_bracelete(list_campers, camp_name):
  
     html_content = template.render(list_context) #Renderiza los datos en el html
 
-    print("//////////")
     # print(html_content)
 
     #Try para verificar paquete de libreria que permite usar la generacion de html a pdf 
