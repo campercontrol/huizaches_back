@@ -470,7 +470,7 @@ def get_campers_for_bracelets(db, camp_id):
             db.query(Grouping.name).select_from(GroupingCamper)
             .join(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
             .join(Grouping, Grouping.id == GroupingCamp.grouping_id)
-            .filter(GroupingCamper.camper_id == camper.camper_id)
+            .filter(and_(GroupingCamper.camper_id == camper.camper_id, GroupingCamp.camp_id == camp_id))
         )
         groupings = db.execute(groupings_query)
         groupings = groupings.mappings().all()
