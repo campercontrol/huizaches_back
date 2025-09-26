@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from model.groupings.grouping_camp import GroupingCamp
 from model.groupings.grouping_camper import GroupingCamper
 from model.groupings.grouping import Grouping
@@ -56,4 +56,15 @@ def get_camp_groupings_by_camp_id(db: Session, camp_id: int):
     )
     data = db.execute(query)
     return data.mappings().all()
-    
+
+def get_camper_groupings_by_camper_id_and_camp_id(db: Session, camper_id: int, camp_id: int):
+        groupings_query = (
+            db.query(Grouping.name, Grouping.id, Grouping.is_active, Grouping.grouping_type_id).select_from(GroupingCamper)
+            .join(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
+            .join(Grouping, Grouping.id == GroupingCamp.grouping_id)
+            .filter(and_(GroupingCamper.camper_id == camper_id, GroupingCamp.camp_id == camp_id))
+        )
+        groupings = db.execute(groupings_query)
+        groupings = groupings.mappings().all()
+        
+        return groupings
