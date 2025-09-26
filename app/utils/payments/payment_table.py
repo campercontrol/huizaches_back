@@ -32,8 +32,8 @@ def create_payment_table(db, payments):
         else:
             txn_number = payment.txn_name + " *" + payment.txn_number+"* " + "Método de pago: " +payment.payment_method  
     
-        formated_amount = "{:,.1f}".format(abs(payment.payment_amount))
-        formated_balance = "{:,.1f}".format(balance)
+        formated_amount = "{:,.2f}".format(abs(payment.payment_amount))
+        formated_balance = "{:,.2f}".format(balance)
         
         payment_row = {
                 "id": payment.id,
