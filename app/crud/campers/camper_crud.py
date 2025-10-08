@@ -1,7 +1,6 @@
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, desc, asc
-from sqlalchemy.orm import Session, aliased
-from model.catalogs.constant import Constant
+from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from fastapi import HTTPException
 from utils.db import db_mapping_rows_to_dict
@@ -25,57 +24,9 @@ from model.campers import (
 from model.payments import CamperExtraCharge
 from model.camps import CampExtraCharge
 
-from schema.campers_catalogs.camper_food_restriction_schema import (
-    CamperFoodRestrictionCreate,
-    CamperFoodRestrictionModify
-    )
-
-from schema.campers_catalogs.camper_licensed_medicine_schema import (
-    CamperLicensedMedicineCreate,
-    CamperLicensedMedicineModify,
-)
-from schema.campers_catalogs.camper_vaccine_schema import (
-    CamperVaccineCreate,
-    CamperVaccineModify,
-)
-from crud.campers_catalogs.camper_vaccine_crud import (
-    create_new_camper_vaccine,
-    update_camper_vaccine_by_ids,
-)
-from crud.campers_catalogs.camper_food_restriction_crud import (
-    create_new_camper_food_restriction,
-    update_camper_food_restriction_by_ids,
-)
-from crud.campers_catalogs.camper_licensed_medicine_crud import (
-    create_new_camper_licensed_medicine,
-    update_camper_licensed_medicine_by_ids,
-)
-
-from schema.campers_catalogs.camper_pathological_background_schema import (
-    CamperPathologicalBackCreate,
-    CamperPathologicalBackModify,
-)
-
-from crud.campers_catalogs.camper_pathological_background_crud import (
-    create_new_camper_pathological_background,
-    update_camper_pathological_background_by_ids,
-)
-
-from schema.campers_catalogs.camper_pathological_background_fm_schema import (
-    CamperPathologicalBackFmCreate,
-    CamperPathologicalBackFmModify,
-)
-from crud.campers_catalogs.camper_pathological_background_fm_crud import (
-    create_new_camper_pathological_background_fm,
-    update_camper_pathological_background_fm_by_ids,
-)
-
-from schema.campers.camper_schema import CamperCreate, CamperModify, CamperComplete
-from schema.campers.camper_record_schema import CamperRecordCreate
+from schema.campers.camper_schema import CamperCreate, CamperModify
 from schema.pagination.pagination_schema import SortEnum
-from crud.campers.camper_record_crud import create_new_camper_record
 from helper.pagination_helpers import get_number_of_pages
-
 
 def get_all_camper(db: Session) -> any:
     rows = db.query(Camper).all()

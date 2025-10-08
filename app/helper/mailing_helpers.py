@@ -1,7 +1,9 @@
 from jinja2 import Environment, BaseLoader
 from model.campers import Camper, Parent
 from model.mailings import EmailTemplate
-
+from model.user import User
+from model.staffs import Staff
+from sqlalchemy.orm import Session
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
 # from utils.functions_jwt import create_user_verify_url
@@ -226,3 +228,12 @@ def send_mail_template_plain_text(
     except Exception as ex:
         print(ex)
         return False
+    
+def get_admin_users_for_mailing(db: Session):
+    query = db.query(Staff.name,
+                     Staff.id,
+                     Staff.lastname_father,
+                     Staff.lastname_mother,
+                     User.email).join(User, User.id == Staff.login_id).filter(User.is_admin == True)
+    data = db.execute(query)
+    return data.mappings().all()

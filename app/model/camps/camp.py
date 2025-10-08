@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Float
 from sqlalchemy.dialects.postgresql import UUID
@@ -46,10 +46,10 @@ class Camp(Base):
     location_id = Column(ForeignKey("camps_location.id"), nullable=True, doc='Titular de la cuenta')
     school_id = Column(ForeignKey("campers_school.id"), nullable=True, doc='Titular de la cuenta')
     season_id = Column(ForeignKey("camps_season.id"), nullable=True,  doc='Titular de la cuenta')
-    created_at = Column("created", DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column("created", DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))
     updated_at = Column(
         "updated", 
         DateTime(timezone=True),
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )

@@ -1,6 +1,5 @@
 import uuid
-from datetime import datetime
-
+from datetime import datetime, timezone
 from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, Integer, String, SmallInteger, Float, Text, Date, Table
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -58,11 +57,11 @@ class Camper(Base):
 
     
 
-    created_at = Column("created",DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column("created",DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))
     updated_at = Column(
         "updated",
         DateTime(timezone=True),
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 

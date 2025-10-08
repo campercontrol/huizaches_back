@@ -1,6 +1,9 @@
+import os
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from service.prueba_service import prueba_routes
+from datetime import datetime, timezone
 from service.catalogs.currency_service import currency_routes
 from service.catalogs.vaccine_service import vaccine_routes
 from service.catalogs.food_restriction_service import food_restriction_routes
@@ -61,12 +64,30 @@ from service.groupings.grouping_camp_service import grouping_camp_router
 from service.groupings.grouping_camper_service import grouping_camper_router
 from fastapi.staticfiles import StaticFiles
 from crud.auth.auth_crud import get_current_user
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
+from cron_scripts.camper_birthday_greetings import main as send_birthday_greetings
+
+user = os.getenv("DB_USER")
+password = os.getenv("DB_PASS")
+host = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+db = os.getenv("DB_NAME")
 
 
-app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+DB_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
+app = FastAPI()
 
 auth_user = [Depends(get_current_user)]
 
+
+# Configure job store
+jobstores = {
+    "default": SQLAlchemyJobStore(url=DB_URL)
+}
+
+scheduler = BackgroundScheduler(jobstores=jobstores)
 
 origins = ["http://localhost:4200",
            "http://localhost",
@@ -145,3 +166,55 @@ app.include_router(email_routes) #email
 app.include_router(token_routes) # token
 app.mount("/media",StaticFiles(directory="media"),name="media")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.start()
+    # Schedule job if not already present
+    if not scheduler.get_job("birthday_greeting_job"):
+        print("Adding Job")
+        scheduler.add_job(
+            send_birthday_greetings,
+            trigger="cron",
+            hour="15",
+            minute="0",
+            id="birthday_greeting_job",
+            replace_existing=True,
+            misfire_grace_time=3600  # 1 hour grace period
+        )
+    print("Scheduler started at", datetime.now())
+
+
+
+@app.get("/remove_job/", tags=["Jobs"])
+def get_prospects():
+    result = scheduler.remove_job("birthday_greeting_job")
+    print("Job removed:", result)
+    
+@app.get("/jobs", tags=["Jobs"])
+def list_jobs():
+    """
+    List all scheduled jobs (for debugging).
+    Shows next run times and job IDs.
+    """
+    jobs = []
+    for job in scheduler.get_jobs():
+        jobs.append({
+            "id": job.id,
+            "next_run_time": str(job.next_run_time),
+            "trigger": str(job.trigger)
+        })
+    return {"jobs": jobs}
+
+@app.post("/run-birthday-job", tags=["Jobs"])
+def run_birthday_job():
+    """
+    Manually trigger the birthday greetings job.
+    Useful for testing without waiting for the schedule.
+    """
+    try:
+        send_birthday_greetings()
+        return {"status": "Birthday greetings job executed successfully"}
+    except Exception as e:
+        return {"status": "Error executing job", "error": str(e)}
