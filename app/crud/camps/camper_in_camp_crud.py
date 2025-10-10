@@ -450,7 +450,7 @@ def get_campers_for_bracelets(db, camp_id):
             Constant.value.label("blood_type"),
             Camper.drug_allergies.label("alergies"),
             Camper.other_allergies.label("other_alergies"),
-            Camper.prohibited_foods.label("prohibed_foo"),
+            Camper.prohibited_foods,
         )
         .select_from(CamperInCamp)
         .join(Camper, Camper.id == CamperInCamp.camper_id)

@@ -25,7 +25,7 @@ def generar_pdf_bracelete(list_campers, camp_name):
             "blood_type": camper["blood_type"],
             "alergies": camper["alergies"],
             "other_alergies": camper["other_alergies"],
-            "prohibed_foo":  camper["prohibed_foo"],
+            "prohibited_foods":  camper["prohibited_foods"],
             "groupings": camper["groupings"],
             "logo_img":logo_64,
             }
