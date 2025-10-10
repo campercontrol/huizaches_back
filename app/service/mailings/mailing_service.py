@@ -29,7 +29,7 @@ from model.mailings import (
 from model.camps import Camp
 from schema.mailings.campaign_schema import CampaignSend, CampaignSendStaff
 
-from helper.mailing_helpers import send_mail_template, send_mail_template_plain_text
+from helper.mailing_helpers import send_mail_template, send_mail_template_plain_text, get_admin_users_for_mailing
 from utils.email_tools import send_simple_message
 
 from utils.db import SessionLocal
@@ -335,6 +335,7 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
 def send_massive_email_staff_in_training(campaign_send: CampaignSendStaff, db: Session = Depends(get_db)):
     template_id = campaign_send.campaign.template_id
     staffs = campaign_send.staffs
+    admin_users = get_admin_users_for_mailing(db)
     default_camper_variables = {
         "name": "",
         "fullname": "",
@@ -378,5 +379,13 @@ def send_massive_email_staff_in_training(campaign_send: CampaignSendStaff, db: S
         }
         send_mail_template(db, staff["email"],template_id, email_context)
             
+    for admin_user in admin_users:
+        email_context = {
+            "camper": default_camper_variables,
+            "user": admin_user,
+            "camp": default_camp_info_variables,
+            "payment": default_payment_variables
+        }
+        send_mail_template(db, admin_user["email"],template_id, email_context)
     return {"status": 1, "msg": "emails sent successfully"}
 
