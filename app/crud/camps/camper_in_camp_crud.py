@@ -429,7 +429,7 @@ def get_campers_in_camp_mailing(db, camp_id):
         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
         .join(Parent, Parent.id == Camper.parent_id)
         .join(User, User.id == Parent.user_id)
-        .filter(CamperInCamp.camp_id == camp_id)
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
     )
     
     data = db.execute(query)

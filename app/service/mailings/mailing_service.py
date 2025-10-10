@@ -115,8 +115,6 @@ def get_inf_campaign_camp(
     school_info = []
     if campers:
         campers_complete = get_campers_for_camp(db, camp_id)
-        print("CAMPERS!!!!!!!!!!!!!")
-        print(campers_complete)
         for camper_c in campers_complete:
             campers_info.append(
                 {   
