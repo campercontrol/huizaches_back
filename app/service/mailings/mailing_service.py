@@ -244,6 +244,8 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
         template_subject = campaign_send.email_subject
         template_body = campaign_send.template_body
         
+        admin_users = get_admin_users_for_mailing(db)
+        
         default_camper_variables = {
             "name": "",
             "lastname_father" : "",
@@ -319,6 +321,15 @@ def send_massive_email(campaign_send: CampaignSend, db: Session = Depends(get_db
                     } 
                     send_mail_template_plain_text(db, school["contact_third_email"], template_body, template_subject, email_context)
         
+            for admin_user in admin_users:
+                email_context = {
+                    "camper": default_camper_variables,
+                    "user": admin_user,
+                    "camp": camp_info,
+                    "payment": default_payment_variables
+                }
+                send_mail_template(db, admin_user["email"],template_id, email_context)
+                
         return {"status": 1, "msg": "Los correos se enviaron correctamente."}
     
     except Exception as ex:
