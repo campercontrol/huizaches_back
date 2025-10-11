@@ -98,6 +98,9 @@
             padding: 0;
             font-size: 12px;
         }
+        .list-header {
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -115,10 +118,10 @@
                                 {{i.name}}
                             </p>
                             <p class="sub_text">
-                                Escuela<br>
+                                 <span class="list-header">Escuela</span><br>
                                 {{i.school}}<br>
                                 <br>
-                                Campamento
+                                 <span class="list-header">Campamento</span><br>
                                 {{i.camping}}
                             </p>
                             <div class="barcode" style="width: 100%;">
@@ -136,18 +139,19 @@
                                 </table>
                             </div>
                             <p class="sub_text">
-                                Tipo de sangre<br>
+                                <span class="list-header">Tipo de sangre</span><br>
                                 {{i.blood_type}}<br>
                                 <br>
-                                Alergias <br>
+                                <span class="list-header">Alergias</span> <br>
                                 {{i.alergies}}<br>
                                 <br>
-                                Otras alergias <br>
+                                <span class="list-header">Otras alergias</span><br>
                                 {{i.other_alergies}}<br>
                                 <br>
-                                Comida Prohibida <br>
-                                {{i.prohibed_food}}<br>
-                                Agrupaciones <br>
+                                <span class="list-header">Comida Prohibida</span><br>
+                                {{i.prohibited_foods}}<br>
+                                <br>
+                                <span class="list-header">Agrupaciones</span><br>
                                 {%for grouping in i.groupings%}
                                     {{grouping.name}} <br>
                                 {%endfor%}
