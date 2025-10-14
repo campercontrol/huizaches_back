@@ -24,7 +24,8 @@ from crud.camps.camp_crud import (
     get_camp_extras_report,
     get_camp_incomes,
     get_camp_gnl_staff_report,
-    get_camp_staff_by_camp_id
+    get_camp_staff_by_camp_id,
+    get_camp_medical_visit_report
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -374,6 +375,12 @@ def camp_social_report(camp_id: int, db: Session = Depends(get_db)):
 def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
     extras_report = get_camp_extras_report(db, camp_id)
     return extras_report
+
+@camp_router.get("/camps/{camp_id}/medical_visit_report", tags=["Camps"])
+def camp_extras_report(camp_id: int, db: Session = Depends(get_db)):
+    extras_report = get_camp_medical_visit_report(db, camp_id)
+    return extras_report
+
 
 
 @camp_router.post("/camps/{camp_id}/campers/{camper_id}/mercadopago/payments", tags=["Camps"])
