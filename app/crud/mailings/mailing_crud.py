@@ -48,6 +48,7 @@ def get_admin_users_for_mailing(db: Session):
 def get_camper_info_mailing(db: Session, camper_id: int):
     catalog_grade = aliased(Constant)
     query = db.query(
+        Camper.id,
         Camper.name,
         func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label('fullname'),
         Camper.lastname_father,
