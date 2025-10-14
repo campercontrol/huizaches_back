@@ -1,4 +1,5 @@
 from sqlalchemy import and_, func, extract, select, desc,asc, or_, text
+import os
 from math import ceil
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, aliased
@@ -14,6 +15,7 @@ from model.payments.payment import Payment
 from model.payments.payment_method import PaymentMethod
 from model.camps.staff_in_camp import StaffInCamp
 from model.staffs.staff import Staff
+from model.medical.medical_camper_visit import MedicalCamperVisit
 from model.catalogs import (
     Constant
 )
@@ -33,6 +35,8 @@ from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_sta
 from crud.groupings.grouping_camp_crud import get_camper_groupings_by_camper_id_and_camp_id
 
 from helper.pagination_helpers import pagination_params, get_number_of_pages
+
+BACKEND_DEV_URL = os.getenv("BACKEND_PROD_URL")
 
 def get_camp_insr_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
@@ -520,6 +524,57 @@ def get_camp_extras_report(db: Session, camp_id: int):
         campers_report.append(camper_dict)
         
     return campers_report
+
+
+def get_camp_medical_visit_report(db: Session, camp_id: int):
+    query = (db.query(
+                        func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label('Nombre del camper'),
+                        MedicalCamperVisit.id,
+                        MedicalCamperVisit.attention_date.label('Fecha de consulta'),
+                        MedicalCamperVisit.attention_time.label('Hora de consulta'),
+                        MedicalCamperVisit.diagnostic.label('Diagnostico'),
+                        MedicalCamperVisit.doctor.label('Doctor que atendió'),
+                        MedicalCamperVisit.description.label('Descripción de la lesión'),
+                        Constant.value.label('triage'),
+                        MedicalCamperVisit.medication_authorization.label('¿Quién autorizó el medicamento?'),
+                        MedicalCamperVisit.event_description.label('Descripción del evento'),
+                        MedicalCamperVisit.camp_restriction.label('Medidas durante el camp'),
+                        MedicalCamperVisit.administered_medications.label('Tratamiento'),
+                        MedicalCamperVisit.medical_monitoring.label('Seguimiento médico'),
+                        MedicalCamperVisit.send_in_email.label('Notificar a los padres'),
+                        MedicalCamperVisit.comment.label('Comentario'),
+                        MedicalCamperVisit.initial_visit_id.label('medical_camper_visit'),
+                        MedicalCamperVisit.medical_comment.label('Comentario interno'),
+                        MedicalCamperVisit.additional_photo.label('Foto adicional')
+                     
+                     )
+                      .select_from(MedicalCamperVisit)
+                      .join(Camper, MedicalCamperVisit.camper_id == Camper.id)
+                      .join(Constant, Constant.id == MedicalCamperVisit.triage)
+                      .filter(MedicalCamperVisit.camp_id == camp_id)
+             )
+    medical_visits = db.execute(query)
+    medical_visits = medical_visits.mappings().all()
+
+    medical_visits_report = []
+   
+    for visit in medical_visits:
+        
+        visit_dict = dict(visit)
+        
+        visit_dict["Foto adicional"] = f"{BACKEND_DEV_URL}/{visit_dict['Foto adicional']}" if visit_dict['Foto adicional'] else ""
+        
+        visit_dict["Notificar a los padres"] = "Sí" if visit_dict['Notificar a los padres'] else "No"
+        
+        
+        if visit.medical_camper_visit is not None:
+            current_medical_visit = next(((medical_visit) for medical_visit in medical_visits if medical_visit.medical_camper_visit == visit.medical_camper_visit),None)
+            visit_dict["Consulta de seguimiento"] = f"(seguimiento) - {current_medical_visit.Diagnostico}"
+        else:
+            visit_dict["Consulta de seguimiento"] = "Primera visita"
+        medical_visits_report.append(visit_dict)                   
+    
+    return medical_visits_report
 
 
 def get_camp_gnl_staff_report(db: Session, camp_id: int):
