@@ -1,3 +1,4 @@
+from collections import defaultdict
 from sqlalchemy import case, distinct, and_
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
@@ -462,20 +463,45 @@ def get_campers_for_bracelets(db, camp_id):
     campers = campers.mappings().all()
     
     campers_list = []
+    camp_grouping_types_query = (
+        db.query(GroupingType.id, GroupingType.name).select_from(GroupingType)
+        .join(Grouping, Grouping.grouping_type_id == GroupingType.id)
+        .join(GroupingCamp, GroupingCamp.grouping_id == Grouping.id)
+        .filter(GroupingCamp.camp_id == camp_id)
+        .order_by(GroupingType.id)
+        .distinct()
+    )
+    camp_grouping_types = db.execute(camp_grouping_types_query)
+    camp_grouping_types = camp_grouping_types.mappings().all()
+    
     
     for camper in campers:
         camper_dict = dict(camper)
-        
-        groupings_query = (
-            db.query(Grouping.name).select_from(GroupingCamper)
+        grouping_camper_query = (
+            db.query(
+                GroupingType.id.label("grouping_type_id"),
+                Grouping.name
+            ).select_from(GroupingCamper)
             .join(GroupingCamp, GroupingCamper.grouping_camp_id == GroupingCamp.id)
             .join(Grouping, Grouping.id == GroupingCamp.grouping_id)
+            .join(GroupingType, GroupingType.id == Grouping.grouping_type_id)
             .filter(and_(GroupingCamper.camper_id == camper.camper_id, GroupingCamp.camp_id == camp_id))
         )
-        groupings = db.execute(groupings_query)
-        groupings = groupings.mappings().all()
-        camper_dict["groupings"] = groupings
-        campers_list.append(camper_dict)     
+        grouping_camper = db.execute(grouping_camper_query)
+        grouping_camper = grouping_camper.mappings().all()
+        
+        type_lookup = {t["id"]: t["name"] for t in camp_grouping_types}
+
+        grouped = defaultdict(list)
+        for g in grouping_camper:
+            type_name = type_lookup.get(g["grouping_type_id"])
+            if type_name:
+                grouped[type_name].append(g["name"])
+                
+        camper_groupings = [{"name": (type_name, names)} for type_name, names in grouped.items()]
+        camper_dict['groupings'] = camper_groupings
+        campers_list.append(camper_dict)
+        
     return campers_list
 
 
