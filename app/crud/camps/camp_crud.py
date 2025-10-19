@@ -13,9 +13,11 @@ from model.campers.parent import Parent
 from model.user import User
 from model.payments.payment import Payment
 from model.payments.payment_method import PaymentMethod
+from model.payments.camper_extra_charge import CamperExtraCharge
 from model.camps.staff_in_camp import StaffInCamp
 from model.staffs.staff import Staff
 from model.medical.medical_camper_visit import MedicalCamperVisit
+from model.camps.camp_extra_charge import CampExtraCharge
 from model.catalogs import (
     Constant
 )
@@ -709,7 +711,7 @@ def get_all_active_camp(db: Session, pagination):
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
-        .filter(Camp.active==True and Camp.start >= date.today())
+        .filter(Camp.start >= date.today())
         .order_by(order(Camp.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
@@ -753,7 +755,6 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
-        .filter(Camp.active==True)
         .filter(
             or_(
                 Camp.name.op('%')(name),
@@ -916,6 +917,27 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
     )
     db.commit()
     return rows_updated
+
+# def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
+    
+#     extra_charges = modify_camp.extra_charges
+#     extra_questions = modify_camp.extra_question
+#     db.query()
+#     for extra_charge in extra_charges:
+#         current_extra_charge = db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge.id).first()
+#         if current_extra_charge is None:
+#             db_extra_charge = CampExtraCharge(**extra_charge.dict())
+#             db.add(db_extra_charge)
+#         # if current_extra_charge_price != extra_charges.price:
+#         #     db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge.id).update(
+#         #         extra_charges.dict(exclude_unset=True, synchronize_session="fetch")
+#         #     )
+#     rows_updated = (
+#         db.query(Camp)
+#         .filter_by(id=camp_id)
+#         .update(modify_camp, synchronize_session="fetch")
+#     )
+#     return rows_updated
 
 
 def delete_camp(db: Session, camp_id: int):
