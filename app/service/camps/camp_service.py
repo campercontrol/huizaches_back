@@ -170,14 +170,13 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
 
 @camp_router.patch("/camp/{camp_id}", tags=["Camps"])
 def update_camp(camp_id: int, modify_camp: CampComplete, db: Session = Depends(get_db)):
-    update_data = modify_camp.camp.dict(exclude_unset=True)
-    camp_update_result = update_camp_by_id(db, camp_id, update_data)
+    camp_update_result = update_camp_by_id(db, camp_id, modify_camp)
 
-    if camp_update_result != 0:
-        exist_camp = get_camp_by_id(db, camp_id)
-        return {"mensaje": "Actualizado Correctamente", "data": exist_camp}
-    else:
-        return {"mensaje": "Ningun registro fue afectado", "data": ""}
+    if camp_update_result == 1:
+        return {"detail": {"status": 1, "msg": "Camp updated successfully"}}
+    if camp_update_result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An unknown error ocurred while updating"})
+
 
 
 @camp_router.post("/subscribe_camp/", tags=["Camps"])
