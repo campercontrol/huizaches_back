@@ -794,14 +794,15 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
             Camp.name.label("camp_name"),
             Camp.public_price.label("camp_public_price"),
             Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Camp.active,
+            Location.name.label("location_name"),
+            School.name.label("school_name"),
             Camp.start.label("camp_start"),
             Camp.end.label("camp_end"),
-            Camp.photo_password,
             Currency.name.label("camp_currency_name"),
             Currency.symbol.label("camp_currency_symbol"),
             Currency.acronyms.label("camp_currency_acronym"),
-            Location.name.label("location_name"),
-            School.name.label("school_name")
+            Camp.photo_password
         )
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
@@ -823,7 +824,7 @@ def search_all_active_camp(db: Session, pagination, name, location, school):
     data = db.execute(query)
     data = data.mappings().all()
     rows_count = (
-        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.active==True)
+        db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(School, School.id == Camp.school_id).join(Currency, Currency.id == Camp.currency_id)
         .filter(
             or_(
                 Camp.name.op('%')(name),
