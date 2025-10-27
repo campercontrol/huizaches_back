@@ -715,14 +715,14 @@ def get_all_active_camp(db: Session, pagination):
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
-        .filter(Camp.start >= date.today())
+        .filter(and_(Camp.start >= date.today(), Camp.start >= date.today()))
         .order_by(order(Camp.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )
     data = db.execute(query)
     data = data.mappings().all()
-    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.active==True and Camp.start >= date.today()).scalar()    
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(and_(Camp.start >= date.today(), Camp.start >= date.today())).scalar()    
     pages = get_number_of_pages(rows_count, pagination.perPage)
     
     for row in data:
@@ -933,8 +933,13 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
                 .join(Camper, Camper.id == CamperInCamp.camper_id)
                 .join(Camp, Camp.id == CamperInCamp.camp_id)
                 .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)).all())
-        current_camp_extra_charges = db.query(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id).all()
+        
+        # current_camp_extra_charges = db.query(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id).all()
                 
+        # if extra_charges.length < 0:
+        #         db.query(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id).delete()
+                                
+        
         for extra_charge in extra_charges:
             extra_charge_dict = extra_charge.dict(exclude_unset=True)
             
