@@ -702,6 +702,7 @@ def get_all_active_camp(db: Session, pagination):
             Camp.name.label("camp_name"),
             Camp.public_price.label("camp_public_price"),
             Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Camp.active,
             Location.name.label("location_name"),
             School.name.label("school_name"),
             Camp.start.label("camp_start"),
@@ -715,14 +716,14 @@ def get_all_active_camp(db: Session, pagination):
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
-        .filter(and_(Camp.start >= date.today(), Camp.start >= date.today()))
+        .filter(Camp.start >= date.today())
         .order_by(order(Camp.created_at))
         .limit(pagination.perPage)
         .offset((pagination.offset))
     )
     data = db.execute(query)
     data = data.mappings().all()
-    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(and_(Camp.start >= date.today(), Camp.start >= date.today())).scalar()    
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).filter(Camp.start >= date.today()).scalar()    
     pages = get_number_of_pages(rows_count, pagination.perPage)
     
     for row in data:
