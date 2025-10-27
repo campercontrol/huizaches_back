@@ -25,7 +25,8 @@ from crud.camps.camp_crud import (
     get_camp_incomes,
     get_camp_gnl_staff_report,
     get_camp_staff_by_camp_id,
-    get_camp_medical_visit_report
+    get_camp_medical_visit_report,
+    get_forthcomming_active_camp
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -100,7 +101,7 @@ def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params
 
 @camp_router.get("/forthcoming_active_camps/", tags=["Camps"])
 def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
-    list_camp = get_all_active_camp(db, pagination)
+    list_camp = get_forthcomming_active_camp(db, pagination)
     return {"data": list_camp}
 
 @camp_router.get("/search/active_camp/", tags=["Camps"])

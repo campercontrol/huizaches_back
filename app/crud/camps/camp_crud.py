@@ -716,6 +716,50 @@ def get_all_active_camp(db: Session, pagination):
         .join(Location, Location.id == Camp.location_id)
         .join(School, School.id == Camp.school_id)
         .join(Currency, Currency.id == Camp.currency_id)
+        .order_by(order(Camp.created_at))
+        .limit(pagination.perPage)
+        .offset((pagination.offset))
+    )
+    data = db.execute(query)
+    data = data.mappings().all()
+    rows_count = db.query(func.count(Camp.id)).select_from(Camp).join(Location, Location.id == Camp.location_id).join(Currency, Currency.id == Camp.currency_id).scalar()    
+    pages = get_number_of_pages(rows_count, pagination.perPage)
+    
+    for row in data:
+        records = get_records_for_camp(db, row.camp_id)
+        row = dict(row)
+        row["records"] = records
+        camps.append(row)
+
+    return {
+        "pages": pages,
+        "items": camps,
+        "total": rows_count
+    }
+    
+def get_forthcomming_active_camp(db: Session, pagination):
+    camps = []
+    order = desc if pagination.order == SortEnum.DESC else asc
+    
+    query = (select(
+            Camp.id.label("camp_id"),
+            Camp.name.label("camp_name"),
+            Camp.public_price.label("camp_public_price"),
+            Camp.show_payment_parent.label("camp_show_payment_parent"),
+            Camp.active,
+            Location.name.label("location_name"),
+            School.name.label("school_name"),
+            Camp.start.label("camp_start"),
+            Camp.end.label("camp_end"),
+            Currency.name.label("camp_currency_name"),
+            Currency.symbol.label("camp_currency_symbol"),
+            Currency.acronyms.label("camp_currency_acronym"),
+            Camp.photo_password
+        
+        )
+        .join(Location, Location.id == Camp.location_id)
+        .join(School, School.id == Camp.school_id)
+        .join(Currency, Currency.id == Camp.currency_id)
         .filter(Camp.start >= date.today())
         .order_by(order(Camp.created_at))
         .limit(pagination.perPage)
@@ -737,6 +781,8 @@ def get_all_active_camp(db: Session, pagination):
         "items": camps,
         "total": rows_count
     }
+
+
 
 
 def search_all_active_camp(db: Session, pagination, name, location, school):
