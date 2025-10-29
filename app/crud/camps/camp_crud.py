@@ -970,11 +970,11 @@ def create_new_camp(db: Session, new_camp: CampCreate):
 #     db.commit()
 #     return rows_updated
 
-def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
+def update_camp_by_id(db: Session, camp_id: int, modify_camp):
     
     try:
-        extra_charges = modify_camp.extra_charges
-        extra_questions = modify_camp.extra_question
+        extra_charges = [extra_charge.dict(exclude_unset=True) for extra_charge in modify_camp.extra_charges]
+        extra_questions = [extra_question.dict(exclude_unset=True) for extra_question in modify_camp.extra_question]
         
         campers_in_camp = (db.query(CamperInCamp, Camper, Camp)
                 .select_from(CamperInCamp)
@@ -982,18 +982,68 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
                 .join(Camp, Camp.id == CamperInCamp.camp_id)
                 .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)).all())
         
-        # current_camp_extra_charges = db.query(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id).all()
+        current_camp_extra_charges_query = (db.query(CampExtraCharge.camp_id, 
+                                                     CampExtraCharge.id,
+                                                     CampExtraCharge.name,
+                                                     CampExtraCharge.price,
+                                                     CampExtraCharge.currency_id,
+                                                    #  CampExtraCharge.created_at,
+                                                    #  CampExtraCharge.updated_at
+                                                     ).select_from(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id))
+        current_camp_extra_charges = db.execute(current_camp_extra_charges_query)
+        current_camp_extra_charges = current_camp_extra_charges.mappings().all()
+        
+        current_camp_extra_questions_query = (db.query(CampExtraQuestion.id,
+                                                       CampExtraQuestion.camp_id,
+                                                       CampExtraQuestion.is_required,
+                                                       CampExtraQuestion.question)
+                                              .select_from(CampExtraQuestion).filter(CampExtraQuestion.camp_id == camp_id))
+        current_camp_extra_questions = db.execute(current_camp_extra_questions_query)
+        current_camp_extra_questions = current_camp_extra_questions.mappings().all()
+        
+        ids_current_extra_question = set()        
+        for item in extra_questions:
+            if "id" in item:
+                ids_current_extra_question.add(item["id"])        
+        camp_extra_questions_to_be_deleted = [item for item in current_camp_extra_questions if item["id"] not in ids_current_extra_question]
+
+
+
+        print(current_camp_extra_charges)
+
+        ids_a = set()        
+        for item in extra_charges:
+            if "id" in item:
+                ids_a.add(item["id"])        
+        camp_extra_charges_to_be_deleted = [item for item in current_camp_extra_charges if item["id"] not in ids_a]
                 
-        # if extra_charges.length < 0:
-        #         db.query(CampExtraCharge).filter(CampExtraCharge.camp_id == camp_id).delete()
-                                
+        # delete extra charges        
+        for camp_extra_charge_to_be_deleted in camp_extra_charges_to_be_deleted:
+            
+            
+            for camper_in_camp in campers_in_camp:
+                canceled_camper_extra_charge = {
+                    "paid": False,
+                    "payment_amount": camp_extra_charge_to_be_deleted.price,
+                    "txn_number": "Cancelación de cargo extra" + " " + camp_extra_charge_to_be_deleted.name,
+                    "camp_id": camp_id,
+                    "payment_date": datetime.now(),
+                    "camper_id": camper_in_camp[1].id,
+                    "currency_id": camper_in_camp[2].currency_id,
+                    "parent_id": camper_in_camp[1].parent_id,
+                    "txn_type_id": 2
+            }
+                create_new_payment_and_update_balance_transaction(db, canceled_camper_extra_charge)
+            
+            camp_extra_charge_deleted = (db.query(CampExtraCharge).filter(CampExtraCharge.id == camp_extra_charge_to_be_deleted["id"]).delete(synchronize_session='fetch'))
+
+        
         
         for extra_charge in extra_charges:
-            extra_charge_dict = extra_charge.dict(exclude_unset=True)
             
-            if not "id" in extra_charge_dict:
-                extra_charge_dict['camp_id'] = camp_id
-                db_extra_charge = CampExtraCharge(**extra_charge_dict)
+            if not "id" in extra_charge:
+                extra_charge['camp_id'] = camp_id
+                db_extra_charge = CampExtraCharge(**extra_charge)
                 db.add(db_extra_charge) 
                 db.flush()
                 for camper_in_camp in campers_in_camp:
@@ -1002,15 +1052,15 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
                     
 
             else:            
-                current_extra_charge = db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge_dict['id']).first()
+                current_extra_charge = db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge['id']).first()
 
-                if current_extra_charge.price != extra_charge_dict['price']:
-                    db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge_dict['id']).update(
-                    extra_charge_dict, synchronize_session="fetch")
+                if current_extra_charge.price != extra_charge['price']:
+                    db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge['id']).update(
+                    extra_charge, synchronize_session="fetch")
                     for camper_in_camp in campers_in_camp:
                         camper_extra_charge = (db.query(CamperExtraCharge)
                                                     .select_from(CamperExtraCharge)
-                                                    .filter(and_(CamperExtraCharge.camper_id == camper_in_camp[1].id, CamperExtraCharge.extra_charge_id == extra_charge_dict['id']))
+                                                    .filter(and_(CamperExtraCharge.camper_id == camper_in_camp[1].id, CamperExtraCharge.extra_charge_id == extra_charge['id']))
                                                     .first()
                                                 )
                         if camper_extra_charge.payment_id is not None:
@@ -1018,9 +1068,9 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
                         
                         payment_extra_charge = {
                             "paid": False,
-                            "payment_amount": extra_charge_dict['price'],
-                            "txn_number": "Costo extra" + " " + extra_charge_dict['name'],
-                            "camp_id": extra_charge_dict['camp_id'],
+                            "payment_amount": extra_charge['price'],
+                            "txn_number": "Costo extra" + " " + extra_charge['name'],
+                            "camp_id": extra_charge['camp_id'],
                             "payment_date": datetime.now(),
                             "camper_id": camper_in_camp[1].id,
                             "currency_id": camper_in_camp[2].currency_id,
@@ -1031,25 +1081,29 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
                         extra_charge_new_payment = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)
                         camper_extra_charge.payment_id = extra_charge_new_payment.id
                 else:
-                    db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge_dict['id']).update(
-                    extra_charge_dict,synchronize_session="fetch")
+                    db.query(CampExtraCharge).filter(CampExtraCharge.id == extra_charge['id']).update(
+                    extra_charge,synchronize_session="fetch")
+        
+        
+        
+        for camp_extra_question_to_be_deleted in camp_extra_questions_to_be_deleted:
+            camp_extra_question_deleted = (db.query(CampExtraQuestion).filter(CampExtraQuestion.id == camp_extra_question_to_be_deleted["id"]).delete(synchronize_session='fetch'))
+        
         
         for extra_question in extra_questions:
-            extra_question_dict = extra_question.dict(exclude_unset=True)
+
             
-            if not "id" in extra_question_dict:
-                extra_question_dict['camp_id'] = camp_id
-                new_extra_question = CampExtraQuestion(**extra_question_dict)
+            if not "id" in extra_question:
+                extra_question['camp_id'] = camp_id
+                new_extra_question = CampExtraQuestion(**extra_question)
                 db.add(new_extra_question) 
                 db.flush()
                 for camper_in_camp in campers_in_camp:
                     new_camper_extra_question = CamperExtraAnswer(**{"camper_id": camper_in_camp[1].id, "question_id": new_extra_question.id, "answer":""})
                     db.add(new_camper_extra_question)
-                
-
             else:
-                updated_extra_question = db.query(CampExtraQuestion).filter(CampExtraQuestion.id == extra_question_dict['id']).update(
-                    extra_question_dict, synchronize_session="fetch")
+                updated_extra_question = db.query(CampExtraQuestion).filter(CampExtraQuestion.id == extra_question['id']).update(
+                    extra_question, synchronize_session="fetch")
 
         updated_camp= (
             db.query(Camp)
@@ -1057,6 +1111,8 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp: CampModify):
             .update(modify_camp.camp.dict(exclude_unset=True), synchronize_session="fetch")
         )
         db.commit()
+        
+        
         return 1
 
     
