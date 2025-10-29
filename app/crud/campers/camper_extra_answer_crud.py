@@ -40,7 +40,7 @@ def create_new_extra_answer(db, new_extra_answer: CamperExtraAnswerCreate):
 
 def create_new_extra_answer_transaction(db, new_extra_answer: CamperExtraAnswerCreate):
     
-    db_extra_answer = CamperExtraAnswer(**new_extra_answer.dict())
+    db_extra_answer = CamperExtraAnswer(**new_extra_answer.dict(exclude_unset=True))
     db.add(db_extra_answer)
     db.flush()
     return db_extra_answer
