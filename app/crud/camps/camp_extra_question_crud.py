@@ -59,7 +59,7 @@ def update_extra_question_by_id(db, extra_question_id: int, modify_extra_questio
 def get_extra_question_by_camp(db, camp_id: int):
     rows = (
         db.query(CampExtraQuestion)
-        .join(Camp, Camp.id == camp_id)
+        .select_from(CampExtraQuestion)
         .filter(CampExtraQuestion.camp_id == camp_id)
         .all()
     )
