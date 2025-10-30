@@ -25,7 +25,8 @@ from crud.camps.camp_crud import (
     get_camp_incomes,
     get_camp_gnl_staff_report,
     get_camp_staff_by_camp_id,
-    get_camp_medical_visit_report
+    get_camp_medical_visit_report,
+    get_forthcomming_active_camp
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -100,7 +101,7 @@ def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params
 
 @camp_router.get("/forthcoming_active_camps/", tags=["Camps"])
 def get__active_camp(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db)):
-    list_camp = get_all_active_camp(db, pagination)
+    list_camp = get_forthcomming_active_camp(db, pagination)
     return {"data": list_camp}
 
 @camp_router.get("/search/active_camp/", tags=["Camps"])
@@ -170,14 +171,13 @@ def create_camp(new_camp: CampComplete, db: Session = Depends(get_db)):
 
 @camp_router.patch("/camp/{camp_id}", tags=["Camps"])
 def update_camp(camp_id: int, modify_camp: CampComplete, db: Session = Depends(get_db)):
-    update_data = modify_camp.camp.dict(exclude_unset=True)
-    camp_update_result = update_camp_by_id(db, camp_id, update_data)
+    camp_update_result = update_camp_by_id(db, camp_id, modify_camp)
 
-    if camp_update_result != 0:
-        exist_camp = get_camp_by_id(db, camp_id)
-        return {"mensaje": "Actualizado Correctamente", "data": exist_camp}
-    else:
-        return {"mensaje": "Ningun registro fue afectado", "data": ""}
+    if camp_update_result == 1:
+        return {"detail": {"status": 1, "msg": "Camp updated successfully"}}
+    if camp_update_result == 3:
+        raise HTTPException(status_code=500, detail= {"status": 3, "msg": "An unknown error ocurred while updating"})
+
 
 
 @camp_router.post("/subscribe_camp/", tags=["Camps"])

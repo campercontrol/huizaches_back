@@ -80,6 +80,7 @@
         .logo {
             /* border: 1px solid #000000; */
             height: 80px;
+            margin-top: 20px;
         }
 
         img.img_logo {
@@ -100,6 +101,13 @@
         }
         .list-header {
             font-weight: bold;
+        }
+        .list-sub-header {
+            text-decoration: underline;
+            font-size: 8px;
+        }
+        .grouping-item{
+            font-size: 7px;
         }
     </style>
 </head>
@@ -152,10 +160,13 @@
                                 {{i.prohibited_foods}}<br>
                                 <br>
                                 <span class="list-header">Agrupaciones</span><br>
-                                {%for grouping in i.groupings%}
-                                    {{grouping.name}} <br>
+                                {%for groupingtype in i.groupings%}
+                                    <span class="list-sub-header">{{groupingtype.name[0]}}</span><br>
+                                    
+                                    {%for grouping in groupingtype.name[1]%}
+                                        <span class="grouping-item">{{ grouping }}</span><br>
+                                    {%endfor%}
                                 {%endfor%}
-
 
                             </p>
                             <br>
@@ -163,13 +174,13 @@
                                 <img class="img_logo" src="{{i.logo_img}}">
                             </div>
                             <p class="sub_text_minor">
-                                En caso de emergencia o <br>
-                                extravío favor de <br>
-                                comunicarse al <br>
-                                55·2574·937 ó <br>
-                                01·800·700·2267 <br>
-                                KinCamp <br>
-                                http://www.kincamp.com
+                                EN CASO DE EMERGENCIA O <br>
+                                EXTRAVÍO FAVOR DE <br>
+                                COMUNICARSE AL <br>
+                                55·5257·4937 ó <br>
+                                55·5564·5358 <br>
+                                 <br>
+                                www.kincamp.com
                             </p>
                             <br>
                             <p class="calibrador">

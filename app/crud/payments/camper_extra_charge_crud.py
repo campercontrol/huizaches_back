@@ -58,7 +58,7 @@ def create_new_camper_extra_charge_transaction(
     db, new_camper_extra_charge: CamperExtraChargeCreate
 ):
 
-    db_camper_extra_charge = CamperExtraCharge(**new_camper_extra_charge.dict())
+    db_camper_extra_charge = CamperExtraCharge(**new_camper_extra_charge.dict(exclude_unset=True))
     db.add(db_camper_extra_charge)
     db.flush()
     return db_camper_extra_charge

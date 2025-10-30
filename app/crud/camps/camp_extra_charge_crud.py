@@ -59,7 +59,7 @@ def update_extra_charge_by_id(db, extra_charge_id: int, modify_extra_charge: Cam
 def get_extra_charge_by_camp(db, camp_id: int):
     rows = (
         db.query(CampExtraCharge)
-        .join(Camp, Camp.id == camp_id)
+        .select_from(CampExtraCharge)
         .filter(CampExtraCharge.camp_id == camp_id)
         .all()
     )

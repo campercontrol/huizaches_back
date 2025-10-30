@@ -40,7 +40,7 @@ def create_new_extra_answer(db, new_extra_answer: CamperExtraAnswerCreate):
 
 def create_new_extra_answer_transaction(db, new_extra_answer: CamperExtraAnswerCreate):
     
-    db_extra_answer = CamperExtraAnswer(**new_extra_answer.dict())
+    db_extra_answer = CamperExtraAnswer(**new_extra_answer.dict(exclude_unset=True))
     db.add(db_extra_answer)
     db.flush()
     return db_extra_answer
@@ -80,7 +80,7 @@ def update_extra_answers(db, extra_answer):
 
 
 def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
-    query = db.query(
+    query = (db.query(
         CampExtraQuestion.id.label("question_id"),
         CampExtraQuestion.question.label("question"),
         CampExtraQuestion.is_required.label("is_required"),
@@ -88,7 +88,11 @@ def get_extra_answer_by_camper_camp(db, camper_id: int, camp_id: int):
         Camp.name.label("camp_name"),
         CamperExtraAnswer.answer.label("answer"),
         CamperExtraAnswer.id.label("camper_extra_answer_id"),
-        CamperExtraAnswer.camper_id).join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id).join(Camp, Camp.id == CampExtraQuestion.camp_id).filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id))
+        CamperExtraAnswer.camper_id)
+             .select_from(CampExtraQuestion)
+             .join(CamperExtraAnswer, CampExtraQuestion.id == CamperExtraAnswer.question_id)
+             .join(Camp, Camp.id == CampExtraQuestion.camp_id)
+             .filter(and_(CampExtraQuestion.camp_id == camp_id, CamperExtraAnswer.camper_id == camper_id)))
     
     data = db.execute(query)
     data = data.mappings().all()
