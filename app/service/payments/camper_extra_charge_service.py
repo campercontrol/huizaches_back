@@ -60,7 +60,7 @@ def update_camper_extra_charge(payment_id:str,modify_camper_extra_charge:CamperE
     else:
         return {"mensaje": "Ningun registro fue afectado", "data": ""}
 
-@camper_extra_charge_routes.patch("/camper_extra_charges", tags=["Payments"])
+@camper_extra_charge_routes.patch("/camper_extra_charges/", tags=["Payments"])
 def patch_camper_extra_charges( camper_extra_charges: list[UpdateCamperExtraCharge], db: Session = Depends(get_db)):
     result = update_camper_extra_charge_by_id_and_update_balance(db, camper_extra_charges)
     
