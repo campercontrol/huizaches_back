@@ -1022,18 +1022,25 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp):
             
             
             for camper_in_camp in campers_in_camp:
-                canceled_camper_extra_charge = {
-                    "paid": False,
-                    "payment_amount": camp_extra_charge_to_be_deleted.price,
-                    "txn_number": "Cancelación de cargo extra" + " " + camp_extra_charge_to_be_deleted.name,
-                    "camp_id": camp_id,
-                    "payment_date": datetime.now(),
-                    "camper_id": camper_in_camp[1].id,
-                    "currency_id": camper_in_camp[2].currency_id,
-                    "parent_id": camper_in_camp[1].parent_id,
-                    "txn_type_id": 2
-            }
-                create_new_payment_and_update_balance_transaction(db, canceled_camper_extra_charge)
+                camper_extra_charge_is_selected = (db.query(CamperExtraCharge.payment_id)
+                                                .select_from(CamperExtraCharge)
+                                                .filter(and_(CamperExtraCharge.camper_id == camper_in_camp[1].id, CamperExtraCharge.extra_charge_id == camp_extra_charge_to_be_deleted["id"])).first())
+                
+                if camper_extra_charge_is_selected.payment_id is not None:
+                    
+                    canceled_camper_extra_charge = {
+                        "paid": False,
+                        "payment_amount": camp_extra_charge_to_be_deleted.price,
+                        "txn_number": "Cancelación de cargo extra" + " " + camp_extra_charge_to_be_deleted.name,
+                        "camp_id": camp_id,
+                        "payment_date": datetime.now(),
+                        "camper_id": camper_in_camp[1].id,
+                        "currency_id": camper_in_camp[2].currency_id,
+                        "parent_id": camper_in_camp[1].parent_id,
+                        "txn_type_id": 2
+                }
+
+                    create_new_payment_and_update_balance_transaction(db, canceled_camper_extra_charge)
             
             camp_extra_charge_deleted = (db.query(CampExtraCharge).filter(CampExtraCharge.id == camp_extra_charge_to_be_deleted["id"]).delete(synchronize_session='fetch'))
 
