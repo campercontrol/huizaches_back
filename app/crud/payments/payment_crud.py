@@ -1,6 +1,6 @@
 from sqlalchemy import case, and_
 from sqlalchemy.orm import Session
-
+import traceback
 from model.payments import Payment, PaymentTransactionType, PaymentMethod
 from model.campers import Camper
 from model.campers.parent import Parent
@@ -14,8 +14,8 @@ from helper.mailing_helpers import send_mail_template_payment
 from crud.payments.payment_method_crud import get_all_payment_method
 from crud.payments.payment_transaction_type_crud import get_all_payment_transaction_type
 
-from crud.mailings.mailing_crud import get_camper_context_massive_mail
-
+from crud.mailings.mailing_crud import get_camper_context_massive_mail, get_second_parent_info_mailing_by_camper_id
+from crud.campers.parent_crud import get_second_tutor_by_parent_id, get_parent_by_id_mailing
 
 from schema.payments.payment_schema import (
     PaymentCreate,
@@ -43,13 +43,15 @@ def create_payment_controller(db: Session, new_payment):
     try:
         user_partial_payment_template = 179
         admin_partial_payment_template = 1997    
-        
+        user_total_payment_template = 17   
         camper_id = new_payment.camper_id
         camp_id = new_payment.camp_id
-                 
-        payment_created = create_new_payment_and_update_balance_transaction(db, new_payment.dict())
+                   
+        payment_created = create_new_payment_and_update_balance_transaction(db, new_payment.dict(exclude_unset=True))
         db.commit()
         db.refresh(payment_created)
+        
+        camper_balance = (db.query(CamperInCamp.payment_balance).select_from(CamperInCamp).filter(and_(CamperInCamp.camper_id == camper_id, CamperInCamp.camp_id == camp_id)).first())
         
         db_payment = get_camper_payment_in_camp_by_payment_id(db, payment_created.id)
         
@@ -67,15 +69,23 @@ def create_payment_controller(db: Session, new_payment):
         
         email_context["payments"] = payment_table
         
-        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
-        # email_context["payment"]["payment_date"] = db_payment.payment_date
-        # email_context["payment"]["payment_method"] = db_payment.payment_m
+        if camper_balance.payment_balance <= 0:       
+            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db, camper_id)
+            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
             
+        else :
+            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db, camper_id)
+            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+        
         return 1
     except Exception as ex:
         db.rollback()
-        print(ex)
+        print(f"An error occurred: {type(ex).__name__} – {ex}")
+        traceback.print_exc()
         return 3
+
     
     
 def create_new_payment(db, new_payment: PaymentCreate):

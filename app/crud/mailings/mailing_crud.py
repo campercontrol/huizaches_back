@@ -130,6 +130,19 @@ def get_parent_info_mailing_by_camper_id(db, camper_id):
     data = db.execute(query)
     return data.mappings().first()
 
+def get_second_parent_info_mailing_by_camper_id(db, camper_id):
+    
+    query = db.query(Parent.contact_name.label("name"),
+                     Parent.id,
+                     Parent.contact_name,
+                     Parent.contact_lastname_father.label("lastname_father"),
+                     Parent.contact_lastname_mother.label("lastname_mother"),
+                     Parent.contact_email.label("email")
+                     ).join(User, User.id == Parent.user_id).join(Camper, Camper.parent_id == Parent.id).filter(Camper.id == camper_id)
+    data = db.execute(query)
+    return data.mappings().first()
+
+
 def get_camp_balance_mailing(db: Season, camper_id: int, camp_id: int):
     
     query = (db.query(CamperInCamp.payment_balance, Currency.acronyms, Currency.symbol)
@@ -169,6 +182,38 @@ def get_camper_context_massive_mail(db: Session, camp_id: int, camper_id):
         "show_table_balance": payment_table_balance
     }
     return context
+
+def get_camper_context_second_parent_massive_mail(db: Session, camp_id: int, camper_id):
+    
+    user_info = get_second_parent_info_mailing_by_camper_id(db, camper_id)
+    camp_info = get_camp_info_by_id_mailing(db, camp_id)
+    camper_info = get_camper_info_mailing(db, camper_id)
+    camp_total_balance = get_camp_balance_mailing(db, camper_id, camp_id)
+    camper_payments_in_camp =  get_camper_payments_in_camp(db, camper_id, camp_id)
+    payment_table = create_payment_table(db, camper_payments_in_camp)    
+    payment_table_balance = create_html_payment_table(db, {"payments": payment_table})
+    
+    
+    payment_default_variables = {
+        "payment_date": "",
+        "payment_method": "",
+        "amount": "",
+        "txn_type": "",
+        "txn_number": ""
+    }
+    formated_balance = camp_total_balance.symbol + "{:,.1f}".format(abs(camp_total_balance.payment_balance)) + camp_total_balance.acronyms
+    
+    context = {
+        "camper": camper_info,
+        "user": user_info,
+        "camp": camp_info,
+        "total_balance": formated_balance, 
+        "payment": payment_default_variables,
+        "show_table_balance": payment_table_balance
+    }
+    return context
+
+
 
 def get_staff_context_system_mail(db: Session, staff_id):
     
