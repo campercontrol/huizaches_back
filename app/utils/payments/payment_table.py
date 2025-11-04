@@ -23,17 +23,18 @@ def create_payment_table(db, payments):
     
     payment_table = []
     balance = 0
+    
     for payment in payments:
+        payment_amount = abs(payment.payment_amount)
         
+        formated_amount = "{:,.2f}".format(abs(payment.payment_amount))
+
         
-        balance = balance + payment.payment_amount
         if payment.payment_method == None:
             txn_number = payment.txn_name + ": " + payment.txn_number +" " + "Método de pago: " + "N/A" 
         else:
             txn_number = payment.txn_name + " *" + payment.txn_number+"* " + "Método de pago: " +payment.payment_method  
     
-        formated_amount = "{:,.2f}".format(abs(payment.payment_amount))
-        formated_balance = "{:,.2f}".format(balance)
         
         payment_row = {
                 "id": payment.id,
@@ -41,15 +42,21 @@ def create_payment_table(db, payments):
                 "txn_number": txn_number, 
                 "charge": "",
                 "pay": "",
-                "balance": payment.currency_symbol + formated_balance + " " + payment.currency_acronym              
+                "balance": ""             
             }
         
         if payment.txn_type_id in (3,2,5):
             payment_row["pay"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
-        
+            balance = balance - payment_amount
+            formated_balance = "{:,.2f}".format(balance)
+            payment_row["balance"] = payment.currency_symbol + formated_balance + " " + payment.currency_acronym  
+            
         else:
             payment_row["charge"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
-        
+            balance = balance + payment_amount
+            formated_balance = "{:,.2f}".format(balance)
+            payment_row["balance"] = payment.currency_symbol + formated_balance + " " + payment.currency_acronym  
+            
         payment_table.append(payment_row)
         
     return payment_table    

@@ -224,6 +224,11 @@ def update_payment_by_id(db, payment_id: int, modify_payment: PaymentModify):
         
 def update_payment_controller(db, payment_id: int, modify_payment: PaymentModify):
     
+    user_partial_payment_template = 179
+    admin_partial_payment_template = 1997    
+    user_total_payment_template = 17   
+    
+    
     try:
         current_payment = db.query(Payment).filter(Payment.id == payment_id).first()
         camper_in_camp = db.query(CamperInCamp).filter(and_(CamperInCamp.camp_id == current_payment.camp_id, CamperInCamp.camper_id == current_payment.camper_id)).first()
@@ -242,12 +247,44 @@ def update_payment_controller(db, payment_id: int, modify_payment: PaymentModify
             camper_in_camp.payment_balance = total_balance
             db.add(camper_in_camp)
         
-        db.query(Payment).filter_by(id=current_payment.id).update(modify_payment.dict(), synchronize_session="fetch")
+        db.query(Payment).filter_by(id=current_payment.id).update(modify_payment.dict(exclude_unset=True), synchronize_session="fetch")
         db.commit()
+        db.refresh(camper_in_camp)
+        
+        payment_updated = get_camper_payment_in_camp_by_payment_id(db, payment_id)
+                
+        formated_payment_amount = "{:,.1f}".format(abs(payment_updated.payment_amount))
+        
+        email_context = get_camper_context_massive_mail(db, modify_payment.camp_id, modify_payment.camper_id)
+        
+        email_context["payment"]["payment_date"] = payment_updated.payment_date
+        email_context["payment"]["payment_method"] = payment_updated.payment_method
+        email_context["payment"]["amount"] = payment_updated.currency_symbol + str(formated_payment_amount) + payment_updated.currency_acronym
+        email_context["payment"]["txn_type"]  = payment_updated.txn_name
+        email_context["payment"]["txn_number"] = payment_updated.txn_number
+        
+        camper_payments_in_camp = get_camper_payments_in_camp(db, modify_payment.camper_id, modify_payment.camp_id)
+        payment_table = create_payment_table(db, camper_payments_in_camp)   
+        
+        email_context["payments"] = payment_table
+        
+        
+        if camper_in_camp.payment_balance <= 0:       
+            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db, modify_payment.camper_id)
+            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+    
+        else :
+            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db, modify_payment.camper_id)
+            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+        
+        
         return 1
     except Exception as ex:
-        print(ex)
         db.rollback()
+        print(f"An error occurred: {type(ex).__name__} – {ex}")
+        traceback.print_exc()
         return 3
 
 def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
