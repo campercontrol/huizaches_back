@@ -403,9 +403,9 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
 
             },
             "back_urls": {
-                "success": "https://sistema.kincamp.com/mercado_pago_success",
-                "failure": "https://sistema.kincamp.com/mercado_pago_failure",
-                "pending": "https://sistema.kincamp.com/mercado_pago_pending",
+                "success": "https://app.kincamp.com/mercado_pago_success",
+                "failure": "https://app.kincamp.com/mercado_pago_failure",
+                "pending": "https://app.kincamp.com/mercado_pago_pending",
             },
             # "differential_pricing": {
             #     "id": 1,
@@ -416,7 +416,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "binary_mode": False,
             "external_reference": id,
             "marketplace": marketplace_id,
-            "notification_url": "https://api.kincamp.com/mercado_pago/notify?source_news=webhooks",
+            "notification_url": "https://api-dev.kincamp.com/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
                 # "default_payment_method_id": "master",
@@ -449,7 +449,8 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         db.commit()
     except Exception as ex:
         db.rollback()
-        print(ex)
+        print(f"An error occurred: {type(ex).__name__} – {ex}")
+        traceback.print_exc()
         return None
     return preference
 
