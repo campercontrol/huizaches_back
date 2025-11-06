@@ -126,7 +126,7 @@ def get_camp_checkpoint_module(camp_id: int, db: Session = Depends(get_db)):
                 all_checks.append(
                     {
                         "checkpoint_id": camp_check.id,
-                        "checkpoint_date": camper_check_case.checkin_date,
+                        "checkpoint_date": camper_check_case.checkin_date.strftime("%Y-%m-%d %H:%M:%S"),
                         "checkpoint_check": True,
                     }
                 )
