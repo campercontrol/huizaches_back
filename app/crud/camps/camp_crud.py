@@ -15,6 +15,7 @@ from model.campers import Camper
 from model.campers.parent import Parent
 from model.user import User
 from model.payments.payment import Payment
+from model.payments.payment_transaction_type import PaymentTransactionType
 from model.payments.payment_method import PaymentMethod
 from model.payments.camper_extra_charge import CamperExtraCharge
 from model.camps.staff_in_camp import StaffInCamp
@@ -592,6 +593,64 @@ def get_camp_medical_visit_report(db: Session, camp_id: int):
         medical_visits_report.append(visit_dict)                   
     
     return medical_visits_report
+
+
+def get_camp_payments_report(db: Session, camp_id: int):
+        
+    camp_payments_query = (
+        db.query(
+            Payment.id.label("payment_id"),
+            Payment.payment_amount,
+            Payment.payment_date,
+            Payment.txn_number.label("transaction"),
+            Payment.txn_type_id,
+            PaymentMethod.name.label("payment_method"),
+            Currency.acronyms.label("currency_acronym"),
+            Currency.symbol.label("currency_symbol"),
+            func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label("camper_fullname"),
+            Camper.id.label("camper_id"),     
+        ).select_from(Payment)
+        .join(PaymentMethod, Payment.payment_method_id == PaymentMethod.id)
+        .join(Currency, Currency.id == Payment.currency_id)
+        .join(Camper, Camper.id == Payment.camper_id)
+        .filter(Payment.camp_id == camp_id)
+        .order_by(Camper.name)
+    )
+    
+    camp_payments = db.execute(camp_payments_query)
+    camp_payments = camp_payments.mappings().all()
+    
+    payments_report = []
+    for payment in camp_payments:
+        payment_dict = dict(payment)
+        
+        payment_amount = "{:,.2f}".format(abs(payment.payment_amount))
+
+        payment_dict["payment_amount"] = payment_amount
+        payment_dict["charge"] = ""
+        payment_dict["pay"] = ""
+        payment_dict["discount"] = ""
+        
+        formated_amount = payment_dict["currency_symbol"] + payment_amount + " " + payment_dict["currency_acronym"]
+        
+        if payment_dict["txn_type_id"] in (3,2,5):
+            if payment_dict["txn_type_id"] == 2:
+                payment_dict["discount"] = formated_amount
+            else:
+                payment_dict["pay"] = formated_amount        
+        else:
+            payment_dict["charge"] = formated_amount
+        
+        del payment_dict["currency_acronym"]
+        del payment_dict["currency_symbol"]
+        del payment_dict["txn_type_id"]
+        del payment_dict["payment_id"]
+        del payment_dict["payment_amount"]
+        payments_report.append(payment_dict)
+
+    return payments_report
+
+
 
 
 def get_camp_gnl_staff_report(db: Session, camp_id: int):
