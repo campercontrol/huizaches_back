@@ -288,6 +288,7 @@ def update_payment_controller(db, payment_id: int, modify_payment: PaymentModify
         return 3
 
 def get_payment_by_camper_camp(db, camper_id: int, camp_id: int):
+    #Todo: Refactor to use create_payment_table
     rows = (
         db.query(
             Payment.id.label("id"),

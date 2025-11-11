@@ -15,6 +15,7 @@ from model.campers import Camper
 from model.campers.parent import Parent
 from model.user import User
 from model.payments.payment import Payment
+from model.payments.payment_transaction_type import PaymentTransactionType
 from model.payments.payment_method import PaymentMethod
 from model.payments.camper_extra_charge import CamperExtraCharge
 from model.camps.staff_in_camp import StaffInCamp
@@ -106,7 +107,18 @@ def get_camp_incomes(db: Session, camp_id: int):
         "transactions": total_transactions_per_discount,
         "total_amount": format_numbers_commas_currency(total_discount_amount or 0, camp_info.symbol, camp_info.acronyms)
     }
-    incomes_per_payment_method.append(discount_income)
+    
+    total_refunds_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 4)).scalar()   
+    total_transactions_per_refunds = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()
+    
+    total_refunds = {
+        "payment_method": "Reembolsos",
+        "transactions": total_transactions_per_refunds,
+        "total_amount": format_numbers_commas_currency(total_refunds_amount or 0, camp_info.symbol, camp_info.acronyms)
+    }
+    
+    
+    incomes_per_payment_method.append(total_refunds)
     
     campers_in_camp = db.query(CamperInCamp.id, CamperInCamp.payment_balance, CamperInCamp.camp_id, CamperInCamp.camper_id, Constant.value).select_from(CamperInCamp).join(Constant, Constant.id == CamperInCamp.status).filter(CamperInCamp.camp_id == camp_id).all()
     if campers_in_camp:
@@ -118,8 +130,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             payment_info = {}
             camper_info = db.query(Camper).select_from(Camper).filter(Camper.id == camper.camper_id).first()
             for payment_method in payment_methods:
-                camper_payments_by_payment_method_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
-                camper_total_transactions_by_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id)).scalar()
+                camper_payments_by_payment_method_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+                camper_total_transactions_by_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
                 camper_payment_by_method_id = {
                     "id": payment_method.id,
                     "payment_method": payment_method.name,
@@ -130,8 +142,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             # camper comments
             total_camper_comments = db.query(func.count(CamperComment.id)).select_from(CamperComment).filter(CamperComment.camper_id == camper.camper_id).scalar() 
             # total_amount, and count of all payments
-            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 3)).scalar()
-            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.txn_type_id == 3)).scalar()
+            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7))).scalar()
 
             total_payments = {
                 "amount": format_numbers_commas_currency(camper_payments_total_amount or 0, camp_info.symbol, camp_info.acronyms),
@@ -581,6 +593,64 @@ def get_camp_medical_visit_report(db: Session, camp_id: int):
         medical_visits_report.append(visit_dict)                   
     
     return medical_visits_report
+
+
+def get_camp_payments_report(db: Session, camp_id: int):
+        
+    camp_payments_query = (
+        db.query(
+            Payment.id.label("payment_id"),
+            Payment.payment_amount,
+            Payment.payment_date,
+            Payment.txn_number.label("transaction"),
+            Payment.txn_type_id,
+            PaymentMethod.name.label("payment_method"),
+            Currency.acronyms.label("currency_acronym"),
+            Currency.symbol.label("currency_symbol"),
+            func.concat(Camper.name, ' ', Camper.lastname_father, ' ', Camper.lastname_mother).label("camper_fullname"),
+            Camper.id.label("camper_id"),     
+        ).select_from(Payment)
+        .join(PaymentMethod, Payment.payment_method_id == PaymentMethod.id)
+        .join(Currency, Currency.id == Payment.currency_id)
+        .join(Camper, Camper.id == Payment.camper_id)
+        .filter(Payment.camp_id == camp_id)
+        .order_by(Camper.name)
+    )
+    
+    camp_payments = db.execute(camp_payments_query)
+    camp_payments = camp_payments.mappings().all()
+    
+    payments_report = []
+    for payment in camp_payments:
+        payment_dict = dict(payment)
+        
+        payment_amount = "{:,.2f}".format(abs(payment.payment_amount))
+
+        payment_dict["payment_amount"] = payment_amount
+        payment_dict["charge"] = ""
+        payment_dict["pay"] = ""
+        payment_dict["discount"] = ""
+        
+        formated_amount = payment_dict["currency_symbol"] + payment_amount + " " + payment_dict["currency_acronym"]
+        
+        if payment_dict["txn_type_id"] in (3,2,5):
+            if payment_dict["txn_type_id"] == 2:
+                payment_dict["discount"] = formated_amount
+            else:
+                payment_dict["pay"] = formated_amount        
+        else:
+            payment_dict["charge"] = formated_amount
+        
+        del payment_dict["currency_acronym"]
+        del payment_dict["currency_symbol"]
+        del payment_dict["txn_type_id"]
+        del payment_dict["payment_id"]
+        del payment_dict["payment_amount"]
+        payments_report.append(payment_dict)
+
+    return payments_report
+
+
 
 
 def get_camp_gnl_staff_report(db: Session, camp_id: int):

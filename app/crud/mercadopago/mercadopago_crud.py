@@ -2,16 +2,22 @@ import uuid
 import os
 import json
 import httpx
+import traceback
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from crud.camps.camp_crud import get_camp_by_id
+from crud.payments.payment_crud import get_camper_payment_in_camp_by_payment_id, get_camper_payments_in_camp
+from utils.payments.payment_table import get_payment_table, create_payment_table
+from crud.mailings.mailing_crud import get_camper_context_massive_mail, get_second_parent_info_mailing_by_camper_id
+from helper.mailing_helpers import send_mail_template_payment
 from model.campers import Camper, Parent
 from model.camps.camp import Camp
 from model.catalogs.currency import Currency
 from model.mercadopago import MercadopagoMerchantOrder, MercadopagoPayment, MercadopagoPreference
+from model.camps.camper_in_camp import CamperInCamp
 from utils.db import db_mapping_rows_to_dict
 from model.user import User
 from model.mercadopago.mercadopago_payment import MercadopagoPayment
@@ -152,6 +158,10 @@ def get_mercado_pago_payments_by_camp_id_and_camper_id(db: Session, camp_id: int
     return payments     
 
 async def process_mp_notification(db: Session, request: Request):
+    user_partial_payment_template = 179
+    admin_partial_payment_template = 1997    
+    user_total_payment_template = 17    
+    
     try: 
         request = await request.json()
         if request["type"] == "payment":
@@ -174,6 +184,8 @@ async def process_mp_notification(db: Session, request: Request):
             else:
                 internal_mercadopago_merchant_order.status = mercadopago_merchant_order["status"]
                 
+            email_context = get_camper_context_massive_mail(db, mercadopago_payment["metadata"]["camp"]["id"], mercadopago_payment["metadata"]["customer"]["camper_id"])
+            
             internal_payment = {
                 
                 "paid": True,
@@ -203,8 +215,42 @@ async def process_mp_notification(db: Session, request: Request):
                     internal_payment_created = create_new_payment_and_update_balance_transaction(db, internal_payment)
                     new_internal_mercadopago_payment["internal_payment_id"] = internal_payment_created.id
                     create_internal_mercadopago_payment(db, new_internal_mercadopago_payment)
+                    db.commit()
+
+                    camper_balance = (
+                        db.query(CamperInCamp.payment_balance)
+                        .select_from(CamperInCamp)
+                        .filter(and_(CamperInCamp.camper_id == mercadopago_payment["metadata"]["customer"]["camper_id"], CamperInCamp.camp_id == mercadopago_payment["metadata"]["camp"]["id"])).first())
+
+                       
+                    db_payment = get_camper_payment_in_camp_by_payment_id(db, internal_payment_created.id)
+                    
+                    formated_payment_amount = "{:,.1f}".format(abs(db_payment.payment_amount))
+                    
+                    email_context["payment"]["payment_date"] = db_payment.payment_date
+                    email_context["payment"]["payment_method"] = db_payment.payment_method
+                    email_context["payment"]["amount"] = db_payment.currency_symbol + str(formated_payment_amount) + db_payment.currency_acronym
+                    email_context["payment"]["txn_type"]  = db_payment.txn_name
+                    email_context["payment"]["txn_number"] = db_payment.txn_number
+                    
+                    camper_payments_in_camp = get_camper_payments_in_camp(db, mercadopago_payment["metadata"]["customer"]["camper_id"], mercadopago_payment["metadata"]["camp"]["id"])
+                    payment_table = create_payment_table(db, camper_payments_in_camp)   
+                    
+                    email_context["payments"] = payment_table
+                    
+                    if camper_balance.payment_balance <= 0:       
+                        send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                        email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
+                        send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                        
+                    else:
+                        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                        email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
+                        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                
                 else:
                     create_internal_mercadopago_payment(db, new_internal_mercadopago_payment)
+                    db.commit()
                     
             else:
                 if mercadopago_payment["status"] == "approved":
@@ -212,8 +258,42 @@ async def process_mp_notification(db: Session, request: Request):
                         internal_payment_created = create_new_payment_and_update_balance_transaction(db, internal_payment)
                         internal_mercadopago_payment.status = mercadopago_payment["status"]
                         internal_mercadopago_payment.internal_payment_id = internal_payment_created.id
+                        db.commit()
+                        
+                        camper_balance = (
+                            db.query(CamperInCamp.payment_balance)
+                            .select_from(CamperInCamp)
+                            .filter(and_(CamperInCamp.camper_id == mercadopago_payment["metadata"]["customer"]["camper_id"], CamperInCamp.camp_id == mercadopago_payment["metadata"]["camp"]["id"])).first())
+
+                        
+                        db_payment = get_camper_payment_in_camp_by_payment_id(db, internal_payment_created.id)
+                        
+                        formated_payment_amount = "{:,.1f}".format(abs(db_payment.payment_amount))
+                        
+                        email_context["payment"]["payment_date"] = db_payment.payment_date
+                        email_context["payment"]["payment_method"] = db_payment.payment_method
+                        email_context["payment"]["amount"] = db_payment.currency_symbol + str(formated_payment_amount) + db_payment.currency_acronym
+                        email_context["payment"]["txn_type"]  = db_payment.txn_name
+                        email_context["payment"]["txn_number"] = db_payment.txn_number
+                        
+                        camper_payments_in_camp = get_camper_payments_in_camp(db, mercadopago_payment["metadata"]["customer"]["camper_id"], mercadopago_payment["metadata"]["camp"]["id"])
+                        payment_table = create_payment_table(db, camper_payments_in_camp)   
+                        
+                        email_context["payments"] = payment_table
+                        
+                        if camper_balance.payment_balance <= 0:       
+                            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
+                            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                            
+                        else:
+                            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                            email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
+                            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                
                     else:
                         internal_mercadopago_payment.status = mercadopago_payment["status"]
+                        db.commit()
                         
             # Here we expire mercadopago preference 
             if mercadopago_payment["status"] == "approved": 
@@ -221,11 +301,12 @@ async def process_mp_notification(db: Session, request: Request):
                 internal_preference = get_internal_preference_by_internal_id(db, mercadopago_payment["external_reference"])
                 sdk.preference().update(internal_preference.preference_id, {"expiration_date_to": new_date})
                             
-        db.commit()    
+
         return 1
     except Exception as ex:
         db.rollback()
-        print(ex)
+        print(f"An error occurred: {type(ex).__name__} – {ex}")
+        traceback.print_exc()
         return 3
     
 def get_mercadopago_payments_by_customer_id(db: Session, user_id: int):
@@ -368,7 +449,8 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         db.commit()
     except Exception as ex:
         db.rollback()
-        print(ex)
+        print(f"An error occurred: {type(ex).__name__} – {ex}")
+        traceback.print_exc()
         return None
     return preference
 
