@@ -189,7 +189,7 @@ async def process_mp_notification(db: Session, request: Request):
             internal_payment = {
                 
                 "paid": True,
-                "payment_amount": int(mercadopago_payment["transaction_details"]["total_paid_amount"]),
+                "payment_amount": int(mercadopago_payment["transaction_amount"]),
                 "txn_number": "Pago de campamento (Mercadopago)"  + " " + mercadopago_payment["metadata"]["customer"]["name"] + " " +
                 mercadopago_payment["metadata"]["customer"]["lastname_father"] + " " + mercadopago_payment["metadata"]["customer"]["lastname_mother"],
                 "camp_id": mercadopago_payment["metadata"]["camp"]["id"],
