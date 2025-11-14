@@ -184,7 +184,6 @@ async def process_mp_notification(db: Session, request: Request):
             else:
                 internal_mercadopago_merchant_order.status = mercadopago_merchant_order["status"]
                 
-            email_context = get_camper_context_massive_mail(db, mercadopago_payment["metadata"]["camp"]["id"], mercadopago_payment["metadata"]["customer"]["camper_id"])
             
             internal_payment = {
                 
@@ -217,6 +216,7 @@ async def process_mp_notification(db: Session, request: Request):
                     create_internal_mercadopago_payment(db, new_internal_mercadopago_payment)
                     db.commit()
 
+                    email_context = get_camper_context_massive_mail(db, mercadopago_payment["metadata"]["camp"]["id"], mercadopago_payment["metadata"]["customer"]["camper_id"])
                     camper_balance = (
                         db.query(CamperInCamp.payment_balance)
                         .select_from(CamperInCamp)
@@ -260,6 +260,7 @@ async def process_mp_notification(db: Session, request: Request):
                         internal_mercadopago_payment.internal_payment_id = internal_payment_created.id
                         db.commit()
                         
+                        email_context = get_camper_context_massive_mail(db, mercadopago_payment["metadata"]["camp"]["id"], mercadopago_payment["metadata"]["customer"]["camper_id"])
                         camper_balance = (
                             db.query(CamperInCamp.payment_balance)
                             .select_from(CamperInCamp)
