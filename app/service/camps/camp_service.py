@@ -27,7 +27,8 @@ from crud.camps.camp_crud import (
     get_camp_staff_by_camp_id,
     get_camp_medical_visit_report,
     get_forthcomming_active_camp,
-    get_camp_payments_report
+    get_camp_payments_report,
+    create_camp_camper_paypal_link
 )
 from crud.campers.camper_crud import get_camper_by_uuid
 from crud.campers.camper_extra_answer_crud import update_extra_answer_by_id
@@ -400,3 +401,9 @@ def apply_massive_payment_to_campers_in_camp(camp_id: int, massive_payment: Mass
         return {"detail": {"msg": "El pago masivo se aplicó correctamente.", "status": 1}}
     else:
         return {"detail": {"msg": "Ocurrió un error al aplicar el pago masivo", "status": 3}}
+    
+    
+@camp_router.post("/camps/{camp_id}/campers/{camper_id}/paypal_link", tags=["Camps"])
+def get_camp_camper_paypal_link(camp_id: int, camper_id: int, db: Session = Depends(get_db)):
+    data = create_camp_camper_paypal_link(db, camp_id, camper_id)
+    return data

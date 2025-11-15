@@ -44,6 +44,7 @@ from crud.payments.payment_crud import delete_payment_and_update_balance_transac
 from helper.pagination_helpers import pagination_params, get_number_of_pages
 
 BACKEND_DEV_URL = os.getenv("BACKEND_DEV_URL")
+PAYPAL_LINK_URL = os.getenv("PAYPAL_LINK_URL")
 
 def get_camp_insr_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
@@ -1273,4 +1274,14 @@ def create_new_camp_payment_account(db: Session, new_camp_payment_account):
         print(f"No se pudo guardar en la base de datos: {ex}")
     return db_camp_payment_account
 
-
+def create_camp_camper_paypal_link(db: Session, camp_id: int, camper_id: int ):
+    camper_in_camp = (db.query(CamperInCamp)
+                        .select_from(CamperInCamp)
+                        .filter(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)
+                        .first()
+    )
+    amount_to_pay = camper_in_camp.payment_balance * 1.05
+        
+    paypal_link = f"{PAYPAL_LINK_URL}/{amount_to_pay}"
+    
+    return {"data": paypal_link}
