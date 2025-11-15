@@ -163,7 +163,7 @@ def get_all_staff(db, pagination):
         "items": data,
         "total": rows_count
         }
-def search_all_staff(db, pagination: Pagination, name: str, email: str):
+def search_all_staff(db, pagination: Pagination, name: str, lastname_father: str, lastname_mother: str, email: str):
     query = (
         db.query(Staff, User.email, Season.name.label("season_name"),
                  StaffRecord.attend,
@@ -177,11 +177,15 @@ def search_all_staff(db, pagination: Pagination, name: str, email: str):
            or_(
                User.email.op('%')(email),
                Staff.name.op('%')(name),
+               Staff.lastname_father.op('%')(lastname_father),
+               Staff.lastname_mother.op('%')(lastname_mother),
             )
         )
         .order_by(
             func.similarity(User.email, email).desc(),
-            func.similarity(Staff.name, name).desc()
+            func.similarity(Staff.name, name).desc(),
+            func.similarity(Staff.lastname_father, lastname_father).desc(),
+            func.similarity(Staff.lastname_mother, lastname_mother).desc(),
         )
         .limit(pagination.perPage)
         .offset((pagination.offset))
@@ -199,6 +203,8 @@ def search_all_staff(db, pagination: Pagination, name: str, email: str):
            or_(
                User.email.op('%')(email),
                Staff.name.op('%')(name),
+               Staff.lastname_father.op('%')(lastname_father),
+               Staff.lastname_mother.op('%')(lastname_mother),
             )
         )
         .scalar()    
