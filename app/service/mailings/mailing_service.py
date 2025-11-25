@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -35,6 +36,11 @@ from utils.email_tools import send_simple_message
 from utils.db import SessionLocal
 
 mailing_routes = APIRouter()
+
+SEND_TYPE_CAMP_PARTICIPANTS_ID= os.getenv("SEND_TYPE_CAMP_PARTICIPANTS_ID")
+SEND_TYPE_TRAINING_PARTICIPANTS_ID= os.getenv("SEND_TYPE_TRAINING_PARTICIPANTS_ID")
+SEND_TYPE_CAMPS_PARTICIPANTS_ID= os.getenv("SEND_TYPE_CAMPS_PARTICIPANTS_ID")
+SEND_TYPE_SEASON_CANDIDATES_ID= os.getenv("SEND_TYPE_SEASON_CANDIDATES_ID")
 
 
 def get_db():
@@ -84,13 +90,13 @@ def get_campaign_by_id(campaign_id: int, db: Session = Depends(get_db)):
         db.query(Campaign.send_type_id).filter(Campaign.id == campaign_id).first()
     )
     send_type = campaign_type[0]
-    if send_type == 80:
+    if send_type == SEND_TYPE_CAMP_PARTICIPANTS_ID:
         data = get_sent_camp(db, campaign_id)
-    elif send_type == 81:
+    elif send_type == SEND_TYPE_TRAINING_PARTICIPANTS_ID:
         data = get_sent_training(db, campaign_id)
-    elif send_type == 82:
+    elif send_type == SEND_TYPE_CAMPS_PARTICIPANTS_ID:
         data = get_sent_camps(db, campaign_id)
-    elif send_type == 83:
+    elif send_type == SEND_TYPE_SEASON_CANDIDATES_ID:
         data = get_sent_candidates(db, campaign_id)
 
     return data

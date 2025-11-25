@@ -1,3 +1,11 @@
+import os
+
+TRANSACTION_TYPE_CAMP_PAYMENT_ID = os.getenv("TRANSACTION_TYPE_CAMP_PAYMENT_ID")
+TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID = os.getenv("TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID")
+TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID = os.getenv("TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID")
+
+
+
 def get_payment_table(db, payments):
     payment_table = []    
     balance = 0
@@ -45,7 +53,7 @@ def create_payment_table(db, payments):
                 "balance": ""             
             }
         
-        if payment.txn_type_id in (3,2,5):
+        if payment.txn_type_id in (TRANSACTION_TYPE_CAMP_PAYMENT_ID,TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID,TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID):
             payment_row["pay"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
             balance = balance - payment_amount
             formated_balance = "{:,.2f}".format(balance)

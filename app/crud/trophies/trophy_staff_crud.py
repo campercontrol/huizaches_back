@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -5,6 +6,11 @@ from utils.db import db_mapping_rows_to_dict
 
 from model.trophies import TrophyStaff, Trophy, TrophySeason
 from schema.trophies.trophy_schema import TrophyStaffCreate, TrophyStaffModify
+
+
+TROPHY_TYPE_CERTIFICATION_ID = os.getenv("TROPHY_TYPE_CERTIFICATION_ID")
+TROPHY_TYPE_ACKNOWLEDGEMENT_ID = os.getenv("TROPHY_TYPE_ACKNOWLEDGEMENT_ID")
+
 
 
 def get_all_trophy_staff(db: Session):
@@ -77,7 +83,7 @@ def get_trophy_record_by_staff(db: Session, staff_id: int):
         db.query(TrophyStaff)
         .join(TrophySeason, TrophySeason.id == TrophyStaff.trophy_season_id)
         .join(Trophy, Trophy.id == TrophySeason.trophy_id)
-        .filter(and_(TrophyStaff.staff_id == staff_id, Trophy.trophy_type == 85))
+        .filter(and_(TrophyStaff.staff_id == staff_id, Trophy.trophy_type == TROPHY_TYPE_CERTIFICATION_ID))
         .count()
     )
 
@@ -85,7 +91,7 @@ def get_trophy_record_by_staff(db: Session, staff_id: int):
         db.query(TrophyStaff)
         .join(TrophySeason, TrophySeason.id == TrophyStaff.trophy_season_id)
         .join(Trophy, Trophy.id == TrophySeason.trophy_id)
-        .filter(and_(TrophyStaff.staff_id == staff_id, Trophy.trophy_type == 84))
+        .filter(and_(TrophyStaff.staff_id == staff_id, Trophy.trophy_type == TROPHY_TYPE_ACKNOWLEDGEMENT_ID))
         .count()
     )
     

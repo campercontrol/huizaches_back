@@ -34,7 +34,17 @@ import mercadopago
 # Agrega credenciales
 MP_TOKEN = os.getenv("MP_TOKEN")
 MP_APP_ID = os.getenv("MP_APP_ID")
+USER_PARTIAL_PAYMENT_TEMPLATE_ID = os.getenv("USER_PARTIAL_PAYMENT_TEMPLATE_ID")
+USER_TOTAL_PAYMENT_TEMPLATE_ID = os.getenv("USER_TOTAL_PAYMENT_TEMPLATE_ID")
+PAYMENT_METHOD_MERCADO_PAGO_ID  = os.getenv("PAYMENT_METHOD_MERCADO_PAGO_ID")
+MERCADOPAGO_STATEMENT_DESCRIPTOR = os.getenv("MERCADOPAGO_STATEMENT_DESCRIPTOR")
+FRONTEND_DEV_URL = os.getenv("FRONTEND_DEV_URL")
+BACKEND_DEV_URL = os.getenv("BACKEND_DEV_URL")
+TRANSACTION_TYPE_CAMP_PAYMENT_ID = os.getenv("TRANSACTION_TYPE_CAMP_PAYMENT_ID")
+
 sdk = mercadopago.SDK(MP_TOKEN)
+
+
 
 
 def get_customer_info(db: Session, camper_id: int):
@@ -158,9 +168,6 @@ def get_mercado_pago_payments_by_camp_id_and_camper_id(db: Session, camp_id: int
     return payments     
 
 async def process_mp_notification(db: Session, request: Request):
-    user_partial_payment_template = 179
-    admin_partial_payment_template = 1997    
-    user_total_payment_template = 17    
     
     try: 
         request = await request.json()
@@ -193,11 +200,11 @@ async def process_mp_notification(db: Session, request: Request):
                 mercadopago_payment["metadata"]["customer"]["lastname_father"] + " " + mercadopago_payment["metadata"]["customer"]["lastname_mother"],
                 "camp_id": mercadopago_payment["metadata"]["camp"]["id"],
                 "payment_date": datetime.now(),
-                "payment_method_id": 10,
+                "payment_method_id": PAYMENT_METHOD_MERCADO_PAGO_ID,
                 "camper_id": mercadopago_payment["metadata"]["customer"]["camper_id"],
                 "currency_id": mercadopago_payment["metadata"]["camp"]["currency_id"],
                 "parent_id": mercadopago_payment["metadata"]["customer"]["parent_id"],
-                "txn_type_id": 3                     
+                "txn_type_id": TRANSACTION_TYPE_CAMP_PAYMENT_ID                    
             }                
                 
             if not internal_mercadopago_payment:
@@ -239,14 +246,14 @@ async def process_mp_notification(db: Session, request: Request):
                     email_context["payments"] = payment_table
                     
                     if camper_balance.payment_balance <= 0:       
-                        send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                        send_mail_template_payment(db, email_context["user"]["email"], USER_TOTAL_PAYMENT_TEMPLATE_ID, email_context)
                         email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
-                        send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                        send_mail_template_payment(db, email_context["user"]["email"], USER_TOTAL_PAYMENT_TEMPLATE_ID, email_context)
                         
                     else:
-                        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                        send_mail_template_payment(db, email_context["user"]["email"], USER_PARTIAL_PAYMENT_TEMPLATE_ID, email_context)
                         email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
-                        send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                        send_mail_template_payment(db, email_context["user"]["email"], USER_PARTIAL_PAYMENT_TEMPLATE_ID, email_context)
                 
                 else:
                     create_internal_mercadopago_payment(db, new_internal_mercadopago_payment)
@@ -283,14 +290,14 @@ async def process_mp_notification(db: Session, request: Request):
                         email_context["payments"] = payment_table
                         
                         if camper_balance.payment_balance <= 0:       
-                            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                            send_mail_template_payment(db, email_context["user"]["email"], USER_TOTAL_PAYMENT_TEMPLATE_ID, email_context)
                             email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
-                            send_mail_template_payment(db, email_context["user"]["email"], user_total_payment_template, email_context)
+                            send_mail_template_payment(db, email_context["user"]["email"], USER_TOTAL_PAYMENT_TEMPLATE_ID, email_context)
                             
                         else:
-                            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                            send_mail_template_payment(db, email_context["user"]["email"], USER_PARTIAL_PAYMENT_TEMPLATE_ID, email_context)
                             email_context["user"] = get_second_parent_info_mailing_by_camper_id(db,  mercadopago_payment["metadata"]["customer"]["camper_id"])
-                            send_mail_template_payment(db, email_context["user"]["email"], user_partial_payment_template, email_context)
+                            send_mail_template_payment(db, email_context["user"]["email"], USER_PARTIAL_PAYMENT_TEMPLATE_ID, email_context)
                 
                     else:
                         internal_mercadopago_payment.status = mercadopago_payment["status"]
@@ -404,9 +411,9 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
 
             },
             "back_urls": {
-                "success": "https://app.kincamp.com/mercado_pago_success",
-                "failure": "https://app.kincamp.com/mercado_pago_failure",
-                "pending": "https://app.kincamp.com/mercado_pago_pending",
+                "success": f"{FRONTEND_DEV_URL}/mercado_pago_success",
+                "failure": f"{FRONTEND_DEV_URL}/mercado_pago_failure",
+                "pending": f"{FRONTEND_DEV_URL}/mercado_pago_pending",
             },
             # "differential_pricing": {
             #     "id": 1,
@@ -417,7 +424,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "binary_mode": False,
             "external_reference": id,
             "marketplace": marketplace_id,
-            "notification_url": "https://api-dev.kincamp.com/mercado_pago/notify?source_news=webhooks",
+            "notification_url": f"{BACKEND_DEV_URL}/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
                 # "default_payment_method_id": "master",
@@ -435,7 +442,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
                 "default_installments": 1,
             },
             "metadata": metadata,
-            "statement_descriptor": "Kin Camp",
+            "statement_descriptor": MERCADOPAGO_STATEMENT_DESCRIPTOR,
         }
         preference_response = sdk.preference().create(request)
         preference = preference_response["response"]

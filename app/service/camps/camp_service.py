@@ -1,4 +1,5 @@
 
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated, Optional
 from sqlalchemy.orm import Session
@@ -73,6 +74,12 @@ from schema.payments.camper_extra_charge_schema import ExtraChargeMultiple
 from schema.pagination.pagination_schema import Pagination
 from helper.pagination_helpers import pagination_params
 from utils.db import SessionLocal
+
+PAYMENT_METHOD_UNDEFINED_ID = os.getenv("PAYMENT_METHOD_UNDEFINED_ID")
+CAMP_CANCELED_CAMP_PARENT_TEMPLATE_ID = os.getenv("CAMP_CANCELED_CAMP_PARENT_TEMPLATE_ID")
+CAMP_STATUS_CANCELLED_ID = os.getenv("CAMP_STATUS_CANCELLED_ID")
+CAMP_CANCELED_CAMP_ADMIN_TEMPLATE_ID = os.getenv("CAMP_CANCELED_CAMP_ADMIN_TEMPLATE_ID")
+TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID")
 
 camp_router = APIRouter()
 
@@ -199,8 +206,8 @@ def subscribe_camp(
         camper_id=new_camper_in_camp.camper_id,
         currency_id=camp.currency_id,
         parent_id=camper.parent_id,
-        payment_method_id=6,
-        txn_type_id=3,
+        payment_method_id=PAYMENT_METHOD_UNDEFINED_ID,
+        txn_type_id=TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID,
     )
     return {"camper_in_camp": camper_in_camp, "payment": payment}
 
@@ -208,10 +215,8 @@ def subscribe_camp(
 @camp_router.post("/unsubscribe_camp/", tags=["Camps"])
 def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)):
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
-    parent_template_id_canceled_camp = 15
-    admin_template_id_canceled_camp = 1986
     new_camper_in_camp = CamperInCampModify(
-        status=37,
+        status=CAMP_STATUS_CANCELLED_ID,
         payment_balance=camper_in_camp.payment_balance,
         camp_id=camp_id,
         camper_id=camper_id,
@@ -219,7 +224,7 @@ def unsubscribe_camp(camp_id: int, camper_id: int, db: Session = Depends(get_db)
     modify_camper_in_camp = update_camper_in_camp_by_id(
         db, camp_id, camper_id, new_camper_in_camp
     )
-    send_system_mail(db, camper_in_camp.camper_id, camper_in_camp.camp_id, admin_template_id_canceled_camp, parent_template_id_canceled_camp)
+    send_system_mail(db, camper_in_camp.camper_id, camper_in_camp.camp_id, CAMP_CANCELED_CAMP_ADMIN_TEMPLATE_ID, CAMP_CANCELED_CAMP_PARENT_TEMPLATE_ID)
     
     return modify_camper_in_camp
 

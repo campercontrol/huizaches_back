@@ -45,6 +45,18 @@ from helper.pagination_helpers import pagination_params, get_number_of_pages
 
 BACKEND_DEV_URL = os.getenv("BACKEND_DEV_URL")
 PAYPAL_LINK_URL = os.getenv("PAYPAL_LINK_URL")
+CAMP_STATUS_ENROLLED_ID = os.getenv("CAMP_STATUS_ENROLLED_ID")
+TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID = os.getenv("TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID")
+TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID") 
+TRANSACTION_TYPE_CAMP_PRICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_PRICE_ID")
+TRANSACTION_TYPE_CAMP_PAYMENT_ID = os.getenv("TRANSACTION_TYPE_CAMP_PAYMENT_ID")
+TRANSACTION_TYPE_CAMP_REFUND_ID = os.getenv("TRANSACTION_TYPE_CAMP_REFUND_ID")
+TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID = os.getenv("TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID")
+TRANSACTION_TYPE_CAMP_STORE_PAYMENT = os.getenv("TRANSACTION_TYPE_CAMP_STORE_PAYMENT")
+
+
+
+
 
 def get_camp_insr_report(db: Session, camp_id: int):
     catalog_gender = aliased(Constant)
@@ -61,7 +73,7 @@ def get_camp_insr_report(db: Session, camp_id: int):
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(catalog_gender, Camper.gender_id == catalog_gender.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     
@@ -82,13 +94,13 @@ def get_camp_incomes(db: Session, camp_id: int):
         total_payment_amount = (
             db.query(func.sum(func.abs(Payment.payment_amount)))
             .select_from(Payment)
-            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id ==TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID)).scalar()
         
         )
         total_transactions_per_payment_method = (
             db.query(func.count(Payment.id))
             .select_from(Payment)
-            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+            .filter(Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID)).scalar()
             
         )
 
@@ -100,8 +112,8 @@ def get_camp_incomes(db: Session, camp_id: int):
         }
         incomes_per_payment_method.append(income)
     
-    total_discount_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()   
-    total_transactions_per_discount = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()
+    total_discount_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID)).scalar()   
+    total_transactions_per_discount = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID)).scalar()
 
     discount_income = {
         "payment_method": "Descuentos",
@@ -109,8 +121,8 @@ def get_camp_incomes(db: Session, camp_id: int):
         "total_amount": format_numbers_commas_currency(total_discount_amount or 0, camp_info.symbol, camp_info.acronyms)
     }
     
-    total_refunds_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 4)).scalar()   
-    total_transactions_per_refunds = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == 2)).scalar()
+    total_refunds_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_REFUND_ID)).scalar()   
+    total_transactions_per_refunds = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID)).scalar()
     
     total_refunds = {
         "payment_method": "Reembolsos",
@@ -131,8 +143,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             payment_info = {}
             camper_info = db.query(Camper).select_from(Camper).filter(Camper.id == camper.camper_id).first()
             for payment_method in payment_methods:
-                camper_payments_by_payment_method_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
-                camper_total_transactions_by_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
+                camper_payments_by_payment_method_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID)).scalar()
+                camper_total_transactions_by_payment_method = db.query(func.count(Payment.id)).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, Payment.payment_method_id == payment_method.id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID)).scalar()
                 camper_payment_by_method_id = {
                     "id": payment_method.id,
                     "payment_method": payment_method.name,
@@ -143,16 +155,16 @@ def get_camp_incomes(db: Session, camp_id: int):
             # camper comments
             total_camper_comments = db.query(func.count(CamperComment.id)).select_from(CamperComment).filter(CamperComment.camper_id == camper.camper_id).scalar() 
             # total_amount, and count of all payments
-            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7)).scalar()
-            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == 3, Payment.txn_type_id == 6, Payment.txn_type_id ==7))).scalar()
+            camper_payments_total_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID)).scalar()
+            camper_payments_total_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camper_id == camper.camper_id, Payment.camp_id == camp_id, or_(Payment.txn_type_id == TRANSACTION_TYPE_CAMP_PAYMENT_ID, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_STORE_PAYMENT, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID))).scalar()
 
             total_payments = {
                 "amount": format_numbers_commas_currency(camper_payments_total_amount or 0, camp_info.symbol, camp_info.acronyms),
                 "number_of_payments": camper_payments_total_transactions or 0
             }
             #total amount of discounts by camper
-            camper_total_discount_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 2)).scalar()   
-            camper_total_transactions_per_discount = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 2)).scalar()
+            camper_total_discount_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID)).scalar()   
+            camper_total_transactions_per_discount = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID)).scalar()
 
             discounts = {
                 "amount": format_numbers_commas_currency(camper_total_discount_amount or 0, camp_info.symbol, camp_info.acronyms), 
@@ -160,8 +172,8 @@ def get_camp_incomes(db: Session, camp_id: int):
             }
             
             #total amount of refunds
-            camper_total_refund_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 4)).scalar() 
-            camper_total_refund_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == 4)).scalar()
+            camper_total_refund_amount = db.query(func.sum(func.abs(Payment.payment_amount))).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_REFUND_ID)).scalar() 
+            camper_total_refund_transactions = db.query(func.count(Payment.id)).select_from(Payment).filter(and_(Payment.camp_id == camp_id, Payment.camper_id == camper.camper_id, Payment.txn_type_id == TRANSACTION_TYPE_CAMP_REFUND_ID)).scalar()
 
             refunds = {
                 "amount": format_numbers_commas_currency(camper_total_refund_amount or 0, camp_info.symbol, camp_info.acronyms),
@@ -228,7 +240,7 @@ def get_camp_contact_report(db: Session, camp_id: int):
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     return campers
@@ -292,7 +304,7 @@ def get_camp_medical_report(db: Session, camp_id: int):
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
     
@@ -392,7 +404,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
              .join(Parent, Camper.parent_id == Parent.id)
              .join(User, Parent.user_id == User.id)
              .join(School, Camper.school_id== School.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -448,7 +460,7 @@ def get_camp_food_report(db: Session, camp_id: int):
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -493,7 +505,7 @@ def get_camp_social_report(db: Session, camp_id: int):
              .join(catalog_grade, Camper.grade == catalog_grade.id)
              .join(catalog_swim, Camper.can_swim == catalog_swim.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -525,7 +537,7 @@ def get_camp_extras_report(db: Session, camp_id: int):
              .join(Camp, CamperInCamp.camp_id == Camp.id)
              .join(Camper, CamperInCamp.camper_id == Camper.id)
              .join(catalog_camp_enrollment, CamperInCamp.status == catalog_camp_enrollment.id)
-             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)))
+             .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)))
     campers = db.execute(query)
     campers = campers.mappings().all()
 
@@ -634,8 +646,8 @@ def get_camp_payments_report(db: Session, camp_id: int):
         
         formated_amount = payment_dict["currency_symbol"] + payment_amount + " " + payment_dict["currency_acronym"]
         
-        if payment_dict["txn_type_id"] in (3,2,5):
-            if payment_dict["txn_type_id"] == 2:
+        if payment_dict["txn_type_id"] in (TRANSACTION_TYPE_CAMP_PAYMENT_ID,TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID,TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID):
+            if payment_dict["txn_type_id"] == TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID:
                 payment_dict["discount"] = formated_amount
             else:
                 payment_dict["pay"] = formated_amount        
@@ -1051,7 +1063,7 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp):
                 .select_from(CamperInCamp)
                 .join(Camper, Camper.id == CamperInCamp.camper_id)
                 .join(Camp, Camp.id == CamperInCamp.camp_id)
-                .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36)).all())
+                .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID)).all())
         
         current_camp_extra_charges_query = (db.query(CampExtraCharge.camp_id, 
                                                      CampExtraCharge.id,
@@ -1108,7 +1120,7 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp):
                         "camper_id": camper_in_camp[1].id,
                         "currency_id": camper_in_camp[2].currency_id,
                         "parent_id": camper_in_camp[1].parent_id,
-                        "txn_type_id": 2
+                        "txn_type_id": TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID
                 }
 
                     create_new_payment_and_update_balance_transaction(db, canceled_camper_extra_charge)
@@ -1153,7 +1165,7 @@ def update_camp_by_id(db: Session, camp_id: int, modify_camp):
                             "camper_id": camper_in_camp[1].id,
                             "currency_id": camper_in_camp[2].currency_id,
                             "parent_id": camper_in_camp[1].parent_id,
-                            "txn_type_id": 7
+                            "txn_type_id": TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID
                                 
                         }
                         extra_charge_new_payment = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)

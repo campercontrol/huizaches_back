@@ -43,6 +43,13 @@ from utils.image_tools import write_image
 
 # from utils.functions_jwt import get_current_active_user
 
+ROLE_PARENT_ID = os.getenv("ROLE_PARENT_ID")
+ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
+ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID")
+ROLE_DOCTOR_ID = os.getenv("ROLE_DOCTOR_ID")
+
+
+
 user_routes = APIRouter()
 
 # Dependency
@@ -88,11 +95,6 @@ def get_user_info_to_delete(user_id:str, db: Session = Depends(get_db)):
 @user_routes.post("/usuario", tags=["Usuarios"], status_code=200)
 def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends(get_db)):
 
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    doctor_role = 5
-
     check_email = get_user_by_email(db, user.email)
 
     if check_email:
@@ -102,7 +104,7 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
         new_user = create_new_user_admin(db, user)
         new_user_role = new_user.role_id
 
-        if new_user_role == doctor_role:
+        if new_user_role == ROLE_DOCTOR_ID:
             new_doctor = Doctor(
                 name = "Default doctor name",
                 lastname_father =  "Default doctor name",
@@ -112,7 +114,7 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
             )
             db.add(new_doctor)
 
-        if new_user_role == staff_role:
+        if new_user_role == ROLE_STAFF_ID:
             current_season = get_current_Season(db)
             catalog_vaccines = get_all_vaccine(db)
             catalog_food_restrictions = get_all_food_restriction(db)
@@ -171,7 +173,7 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
             
             db.commit()
                 
-        if new_user_role == parent_role:
+        if new_user_role == ROLE_PARENT_ID:
             new_parent = Parent(
                 tutor_name = "Default parent name",
                 tutor_lastname_father = "Default parent name",
@@ -190,7 +192,7 @@ def create_user(user: UserCreateAdmin, response: Response, db: Session = Depends
             )
             db.add(new_parent)
 
-        if new_user_role == school_role:
+        if new_user_role == ROLE_SCHOOL_ID:
             new_school = School(
                 login_id = new_user.id,
                 name = "Default school name",

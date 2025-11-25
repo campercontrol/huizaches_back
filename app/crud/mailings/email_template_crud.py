@@ -1,3 +1,4 @@
+import os
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,9 @@ from schema.mailings.email_template_schema import (
 )
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case, and_
+
+TEMPLATE_TYPE_MASSIVE_EMAIL_ID = os.getenv("TEMPLATE_TYPE_MASSIVE_EMAIL_ID")
+
 
 
 def get_all_email_template(db):
@@ -88,7 +92,7 @@ def get_all_massive_template(db: Session):
     return db_mapping_rows_to_dict(
         (
             db.query(EmailTemplate.id, EmailTemplate.title)
-            .filter(EmailTemplate.template_type == 41)
+            .filter(EmailTemplate.template_type == TEMPLATE_TYPE_MASSIVE_EMAIL_ID)
             .all()
         )
     )
@@ -100,7 +104,7 @@ def get_all_system_template(db: Session):
             db.query(EmailTemplate.id.label("id"), Constant.value.label("title"))
             .join(Constant, EmailTemplate.template_type == Constant.id)
             .filter(
-                EmailTemplate.template_type!=41
+                EmailTemplate.template_type!=TEMPLATE_TYPE_MASSIVE_EMAIL_ID
             )
             .all()
         )

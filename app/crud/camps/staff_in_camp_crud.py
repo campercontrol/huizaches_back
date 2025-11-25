@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -15,6 +16,11 @@ from schema.camps.staff_in_camp_schema import (
 from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_record_by_id, get_staff_record_by_id, update_staff_record_status_transaction
 
 from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail, get_staff_context_system_mail
+
+USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID = os.getenv("USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID")
+USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = os.getenv("USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID")  
+USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID = os.getenv("USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID")
+ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = os.getenv("ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID")
 
 
 def get_all_staff_in_camp(db: Session):
@@ -50,7 +56,6 @@ def create_new_staff_in_camp_transaction(db: Session, new_staff_in_camp: StaffIn
 
 def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
     try:
-        user_staff_subcribe_to_camp_template = 5
         db_staff_in_camp = StaffInCamp(**new_staff_in_camp.dict())
         db_staff_in_camp.confirmed_staff = False
         db.add(db_staff_in_camp)
@@ -62,7 +67,7 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
             "user": staff_data,
             "camp": camp_data     
         }
-        send_mail_template(db, staff_data["email"], user_staff_subcribe_to_camp_template,staff_context)    
+        send_mail_template(db, staff_data["email"], USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID,staff_context)    
         db.commit()
         return 1
     except Exception as ex:
@@ -72,8 +77,6 @@ def volunteer_staff(db: Session, new_staff_in_camp: StaffInCampCreate):
 
 def unsubscribe_staff(db: Session, id_staff_in_camp: int):
     try:
-        user_unsuscribe_staff_template = 195
-        admin_unsuscribe_staff_template = 4
         
         db_staff_in_camp = db.query(StaffInCamp).filter_by(id=id_staff_in_camp).first()
         staff_id = db_staff_in_camp.staff_id
@@ -82,13 +85,13 @@ def unsubscribe_staff(db: Session, id_staff_in_camp: int):
         db.delete(db_staff_in_camp)
         
         email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
-        send_mail_template(db, email_context["user"]["email"], user_unsuscribe_staff_template, email_context)
+        send_mail_template(db, email_context["user"]["email"], USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID, email_context)
         
         admin_users = get_admin_users_for_mailing(db)
 
         for admin_user in admin_users:
             admin_user_context = get_staff_context_massive_mail(db, staff_id, camp_id)
-            send_mail_template(db, admin_user["email"], admin_unsuscribe_staff_template, admin_user_context)
+            send_mail_template(db, admin_user["email"], ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID, admin_user_context)
         db.commit()
         return 1
     except Exception as ex:
@@ -175,7 +178,6 @@ def get_staff_in_camp_count(db: Session, camp_id: int):
 
 def accept_staff_in_camp(db: Session, camp_id: int, staffs_id: list[int]):
     
-    user_accept_staff_in_camp_template = 1995
     
     try:
         for staff_id in staffs_id:
@@ -199,7 +201,7 @@ def accept_staff_in_camp(db: Session, camp_id: int, staffs_id: list[int]):
                 )
                 create_new_staff_in_camp_transaction(db, new_staff_in_camp)
             email_context = get_staff_context_massive_mail(db, staff_id, camp_id)
-            send_mail_template(db, email_context["user"]["email"], user_accept_staff_in_camp_template, email_context)        
+            send_mail_template(db, email_context["user"]["email"], USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID, email_context)        
             db.commit()
         return 1
     except Exception as ex:

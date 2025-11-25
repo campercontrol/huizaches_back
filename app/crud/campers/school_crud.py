@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -14,6 +15,10 @@ from model.user import User
 from utils.hash import hash_str
 from schema.user import UserCreate
 from schema.campers.school_schema import UpdateSchool
+
+
+ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID")
+
 
 def get_all_school(db):
     query = (db.query(School.uid,
@@ -158,7 +163,7 @@ def create_new_school(db, new_school):
         new_user_obj = UserCreate(
             email=new_school.login_email,
             passw=new_school.password,
-            role_id=3,
+            role_id=ROLE_SCHOOL_ID,
             is_superuser=False,
             is_coordinator=False,
             is_employee=False,
