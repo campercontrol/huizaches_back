@@ -1,3 +1,4 @@
+import os
 from model.campers import Parent
 from model.user import User
 from model.campers import Camper
@@ -14,6 +15,9 @@ from helper.pagination_helpers import get_number_of_pages
 from crud.campers.camper_crud import get_campers_from_parent
 
 import json
+
+USER_EMAIL_WELCOME_TEMPLATE_ID = os.getenv("USER_EMAIL_WELCOME_TEMPLATE_ID")
+ADMIN_EMAIL_WELCOME_TEMPLATE_ID = os.getenv("ADMIN_EMAIL_WELCOME_TEMPLATE_ID")
 
 
 def get_all_parent(db: Session, pagination):
@@ -91,8 +95,6 @@ def create_new_parent(db, new_parent: ParentCreate):
 
 def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
-    user_email_welcome_template = 16
-    admin_email_welcome_template = 18
    
     try:
         new_parent.user_id = user_id
@@ -113,8 +115,8 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
             "user": second_parent
         }
         
-        send_mail_template(db, parent['email'], user_email_welcome_template, parent_context)
-        send_mail_template(db, second_parent['email'], user_email_welcome_template, second_parent_context)
+        send_mail_template(db, parent['email'], USER_EMAIL_WELCOME_TEMPLATE_ID, parent_context)
+        send_mail_template(db, second_parent['email'], USER_EMAIL_WELCOME_TEMPLATE_ID, second_parent_context)
 
         admin_users = get_admin_users_for_mailing(db)
 
@@ -122,7 +124,7 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
             admin_user_context = {
                 "user": admin_user
             }  
-            send_mail_template(db, admin_user["email"], admin_email_welcome_template, admin_user_context)
+            send_mail_template(db, admin_user["email"], ADMIN_EMAIL_WELCOME_TEMPLATE_ID, admin_user_context)
         
     except Exception as e:
         print(e)
@@ -138,9 +140,6 @@ def create_new_parent_user_id(db, new_parent: ParentCreate, user_id: int):
 
 def create_new_parent_user_id_transaction(db, new_parent: ParentCreate, user_id: int):
     db_parent = None
-    user_email_welcome_template = 16
-    admin_email_welcome_template = 18
-   
     new_parent.user_id = user_id
     user = db.query(User).filter(User.id == user_id).first()
     db_parent = Parent(**new_parent.dict())
@@ -158,8 +157,8 @@ def create_new_parent_user_id_transaction(db, new_parent: ParentCreate, user_id:
         "user": second_parent
     }
     
-    send_mail_template(db, parent['email'], user_email_welcome_template, parent_context)
-    send_mail_template(db, second_parent['email'], user_email_welcome_template, second_parent_context)
+    send_mail_template(db, parent['email'], USER_EMAIL_WELCOME_TEMPLATE_ID, parent_context)
+    send_mail_template(db, second_parent['email'], USER_EMAIL_WELCOME_TEMPLATE_ID, second_parent_context)
 
     admin_users = get_admin_users_for_mailing(db)
 
@@ -167,7 +166,7 @@ def create_new_parent_user_id_transaction(db, new_parent: ParentCreate, user_id:
         admin_user_context = {
             "user": admin_user
         }  
-        send_mail_template(db, admin_user["email"], admin_email_welcome_template, parent_context )
+        send_mail_template(db, admin_user["email"], ADMIN_EMAIL_WELCOME_TEMPLATE_ID, parent_context )
     
     return db_parent
 

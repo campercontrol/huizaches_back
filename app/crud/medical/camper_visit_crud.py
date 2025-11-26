@@ -13,7 +13,14 @@ from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
-BASE_URL = os.getenv("BACKEND_PROD_URL")
+BASE_URL = os.getenv("BACKEND_DEV_URL")
+MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID = os.getenv("MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID")
+MEDICAL_VISIT_STAFF_TABLE_TEMPLATE_ID = os.getenv("MEDICAL_VISIT_STAFF_TABLE_TEMPLATE_ID")
+MEDICAL_VISIT_PARENT_TEMPLATE = os.getenv("MEDICAL_VISIT_PARENT_TEMPLATE")
+MEDICAL_VISIT_ADMIN_TEMPLATE = os.getenv("MEDICAL_VISIT_ADMIN_TEMPLATE")
+CAMP_NAME = os.getenv("CAMP_NAME")
+
+
 def camper_visit_triage_for_camp(db, camper_id: int, camp_id: int):
     camper_triages = (
         db.query(
@@ -190,13 +197,11 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "1": "Preautorización en sistema de registro",
                 "2": "Se contacta a tutores",
                 "3": "Por parte de la Escuela / Maestras",
-                "4": "Por parte de Kin Camp (In Loco Parentis)",
+                "4": f"Por parte de {CAMP_NAME} (In Loco Parentis)",
                 "5": "No se administraron medicamentos",
             },
             value=new_camper_visit.medication_authorization,
         )
-        parent_table_template_id = 1985
-        staff_table_template_id = 2002
         
         
         db.add(db_camper_visit)
@@ -215,8 +220,6 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
             first_parent = get_parent_by_camper_id(db, new_camper_visit.camper_id)
             second_parent = get_second_tutor_by_camper_id(db, new_camper_visit.camper_id)
             admin_users = get_admin_users_for_mailing(db)    
-            medical_visit_parent_template = 1984
-            medical_visit_admin_template = 1983
             medical_visit = get_camper_medical_visit_by_id(db, db_camper_visit.id)
             
             
@@ -234,8 +237,8 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                 "medical_visit": medical_visit,
                 "additional_photo": additional_photo
             }
-            send_mail_template_medical_visit(db, first_parent["email"], medical_visit_parent_template, first_parent_context, parent_table_template_id)    
-            send_mail_template_medical_visit(db, second_parent["email"], medical_visit_parent_template, second_parent_context, parent_table_template_id)   
+            send_mail_template_medical_visit(db, first_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, first_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
+            send_mail_template_medical_visit(db, second_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, second_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)   
             
             for admin_user in admin_users:
                 admin_user_context = {
@@ -245,7 +248,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
                     "medical_visit": medical_visit,
                     "additional_photo": additional_photo
                 }  
-                send_mail_template_medical_visit(db, admin_user['email'], medical_visit_admin_template, admin_user_context, staff_table_template_id)
+                send_mail_template_medical_visit(db, admin_user['email'], MEDICAL_VISIT_ADMIN_TEMPLATE, admin_user_context, MEDICAL_VISIT_STAFF_TABLE_TEMPLATE_ID)
             db_camper_visit.already_sent = True
             db.commit()    
             

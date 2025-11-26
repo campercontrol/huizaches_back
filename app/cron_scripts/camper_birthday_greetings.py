@@ -12,18 +12,16 @@ from model.user import User
 from datetime import date
 from helper.mailing_helpers import send_mail_template, get_admin_users_for_mailing
 
+BIRTHDAY_CAMPER_IS_IN_CAMP_PARENT_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_IS_IN_CAMP_PARENT_TEMPLATE_ID")
+BIRTHDAY_CAMPER_UPCOMING_CAMP_PARENT_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_UPCOMING_CAMP_PARENT_TEMPLATE_ID")
+BIRTHDAY_CAMPER_PAST_CAMP_PARENT_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_PAST_CAMP_PARENT_TEMPLATE_ID")
+BIRTHDAY_CAMPER_IS_IN_CAMP_ADMIN_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_IS_IN_CAMP_ADMIN_TEMPLATE_ID")
+BIRTHDAY_CAMPER_UPCOMING_CAMP_ADMIN_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_UPCOMING_CAMP_ADMIN_TEMPLATE_ID")
+BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID = os.getenv("BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID")
+CAMP_STATUS_ENROLLED_ID = os.getenv("CAMP_STATUS_ENROLLED_ID")
 
-        
 def main():
     db = SessionLocal()
-    # parent templates
-    camper_is_in_camp_parent_template = 249
-    camper_upcoming_camp_parent_template = 250
-    camper_past_camp_parent_template = 246
-    # Admin templates 
-    camper_is_in_camp_admin_template = 247
-    camper_upcoming_camp_admin_template = 248
-    camper_past_camp_admin_template = 245
     
     admin_users = get_admin_users_for_mailing(db)
     
@@ -44,7 +42,7 @@ def main():
                     .join(Camp, Camp.id == CamperInCamp.camp_id)
                     .filter(
                         CamperInCamp.camper_id == camper[0].id,
-                        CamperInCamp.status == 36,  # enrolled
+                        CamperInCamp.status == CAMP_STATUS_ENROLLED_ID,  # enrolled
                     )
                     .order_by(desc(Camp.created_at))
                     .all()
@@ -70,24 +68,24 @@ def main():
                     } 
                 if current_camp:
                     context["camp"] = current_camp[1]
-                    send_mail_template(db, camper[2].email, camper_is_in_camp_parent_template, context)
+                    send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_IS_IN_CAMP_PARENT_TEMPLATE_ID, context)
                     for admin_user in admin_users:
                         context["user"] = admin_user
-                        send_mail_template(db, [admin_user.email], camper_is_in_camp_admin_template, context)
+                        send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_IS_IN_CAMP_ADMIN_TEMPLATE_ID, context)
                     
                 elif forthcoming_camp:
                     context["camp"] = forthcoming_camp[1]
-                    send_mail_template(db, camper[2].email, camper_upcoming_camp_parent_template, context)
+                    send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_UPCOMING_CAMP_PARENT_TEMPLATE_ID, context)
                     for admin_user in admin_users:
                         context["user"] = admin_user
-                        send_mail_template(db, [admin_user.email], camper_upcoming_camp_admin_template, context)
+                        send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_UPCOMING_CAMP_ADMIN_TEMPLATE_ID, context)
 
                 elif past_camp:
                     context["camp"] = past_camp[1]
-                    send_mail_template(db, camper[2].email, camper_past_camp_parent_template, context)
+                    send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_PAST_CAMP_PARENT_TEMPLATE_ID, context)
                     for admin_user in admin_users:
                         context["user"] = admin_user
-                        send_mail_template(db, [admin_user.email], camper_past_camp_admin_template, context)
+                        send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID, context)
 
                 print("Birthday email sent successfully!")
                 return {"status": 1, "msg": "Birthday emails sent successfully!"}

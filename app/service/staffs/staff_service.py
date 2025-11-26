@@ -102,9 +102,9 @@ def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db:
     return {"data": list_staff}
 
 @staff_routes.get("/search_staff/", tags=["Staff"])
-def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db),  name: Optional[str] = '', email: Optional[str] = ''):
+def get_staff(pagination: Annotated[Pagination, Depends(pagination_params)], db: Session = Depends(get_db),  name: Optional[str] = '', lastname_mother: Optional[str] = '', lastname_father: Optional[str] = '', email: Optional[str] = ''):
     # update_all_staff_record_status(db)
-    list_staff = search_all_staff(db, pagination, name, email)
+    list_staff = search_all_staff(db, pagination, name, lastname_father, lastname_mother, email)
     return {"data": list_staff}
 
 

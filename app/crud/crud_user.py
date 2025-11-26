@@ -26,6 +26,14 @@ from crud.campers.parent_crud import create_new_parent_user_id, create_new_paren
 from schema.pagination.pagination_schema import Pagination, SortEnum
 from helper.pagination_helpers import get_number_of_pages
 
+
+ROLE_PARENT_ID = os.getenv("ROLE_PARENT_ID")
+ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
+ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID")
+ROLE_TEACHER_ID =  os.getenv("ROLE_TEACHER_ID")
+ROLE_DOCTOR_ID = os.getenv("ROLE_DOCTOR_ID")  
+
+
 def get_all_user(db, is_active, pagination):
     order = desc if pagination.order == SortEnum.DESC else asc
     
@@ -142,12 +150,8 @@ def get_user_delete_info(db, user_id):
     if not user:
         return None 
     
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    doctor_role = 5
     
-    if user.role_id == parent_role:
+    if user.role_id == ROLE_PARENT_ID:
         parent = db.query(Parent).filter_by(user_id=user.id).first()
         
         campers = db.query(Camper).filter_by(parent_id = parent.id).all()
@@ -168,7 +172,7 @@ def get_user_delete_info(db, user_id):
             "campers": campers_info
         }
         return parent_info             
-    if user.role_id == staff_role:
+    if user.role_id == ROLE_STAFF_ID:
         staff = db.query(Staff).filter_by(login_id=user.id).first()
         staff_camps = get_staff_all_camps_by_staff_id(db, staff.id)
         trophies = get_all_staff_trophies(db, staff.id)
@@ -184,7 +188,7 @@ def get_user_delete_info(db, user_id):
         }
         return staff_info
     
-    if user.role_id == doctor_role:
+    if user.role_id == ROLE_DOCTOR_ID:
         doctor = db.query(Doctor).filter_by(login_id=user.id).first()
 
         doctor_info = {
@@ -194,7 +198,7 @@ def get_user_delete_info(db, user_id):
         }
         return doctor_info
         
-    if user.role_id == school_role:
+    if user.role_id == ROLE_SCHOOL_ID:
         school = db.query(School).filter_by(login_id=user.id).first()
         school_camps = get_all_school_camps(db, school.id)
         school_campers = get_campers_in_school(db, school.id)
@@ -285,7 +289,7 @@ def create_new_prospect_user(db, new_user):
         db_user = User(
             email=new_user.email,
             hashed_pass=hash_str(new_user.passw),
-            role_id= 2,
+            role_id= ROLE_STAFF_ID,
             is_active= False,
             is_coordinator = False,
             is_admin = False,
@@ -377,24 +381,20 @@ def get_user_by_email(db, email):
 
 def get_user_info_by_email(db: Session, email: str):
     user = db.query(User).filter_by(email=email).first()
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    doctor_role = 5
     
-    if user.role_id == parent_role:
+    if user.role_id == ROLE_PARENT_ID:
         user_info_query = db.query(User.email, Parent.tutor_name.label("name")).join(Parent, Parent.user_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
-    if user.role_id == school_role:
+    if user.role_id == ROLE_SCHOOL_ID:
         user_info_query = db.query(User.email, School.name).join(School, School.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
-    if user.role_id == staff_role:
+    if user.role_id == ROLE_STAFF_ID:
         user_info_query = db.query(User.email, Staff.name.label("name")).join(Staff, Staff.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
-    if user.role_id == doctor_role:
+    if user.role_id == ROLE_DOCTOR_ID:
         user_info_query = db.query(User.email, Doctor.name.label("name")).join(Doctor, Doctor.login_id == User.id).filter(User.email == email)
         user_info = db.execute(user_info_query)
         user_info = user_info.mappings().first()
@@ -409,10 +409,6 @@ def get_profile_id_by_user_id(db, user_id:int ):
     
 
     profile_id = ['']
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    doctor_role = 5
     user_role = (
         db.query(User.role_id)
         .filter_by(id = user_id)
@@ -421,7 +417,7 @@ def get_profile_id_by_user_id(db, user_id:int ):
     # print("get profile ===============")
     # print(user_role[0])
     
-    if user_role[0] == parent_role:
+    if user_role[0] == ROLE_PARENT_ID:
         profile_id = (
             db.query(Parent.id)
             .join(User, User.id == Parent.user_id)
@@ -429,21 +425,21 @@ def get_profile_id_by_user_id(db, user_id:int ):
             .first()
         )
 
-    if user_role[0] == staff_role:
+    if user_role[0] == ROLE_STAFF_ID:
         profile_id = (
             db.query(Staff.id)
             .join(User, User.id == Staff.login_id)
             .filter( Staff.login_id == user_id)
             .first()
         )
-    if user_role[0] == school_role:
+    if user_role[0] == ROLE_SCHOOL_ID:
         profile_id = (
             db.query(School.id)
             .join(User, User.id == School.login_id)
             .filter(School.login_id == user_id)
             .first()
         )
-    if user_role[0] == doctor_role:
+    if user_role[0] == ROLE_DOCTOR_ID:
         profile_id = (
             db.query(Doctor.id)
             .join(User, User.id == Doctor.login_id)
@@ -529,13 +525,8 @@ def delete_user_by_id(db: Session, user_id:int):
 
     user = db.query(User).filter(User.id==user_id).first()
     
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    teacher_role = 4
-    doctor_role = 5
     
-    if user.role_id == parent_role:
+    if user.role_id == ROLE_PARENT_ID:
         try:
             parent_user = db.query(Parent).filter(Parent.user_id == user.id).first()
             stmt_delete_user = delete(User).where(User.id == user.id)
@@ -551,7 +542,7 @@ def delete_user_by_id(db: Session, user_id:int):
             return {"status": 3, "msg": "An unknown error ocurred while deleting"}
         return {"status": 1, "msg": "Parent user succesfully deleted"}
         
-    if user.role_id == staff_role:
+    if user.role_id == ROLE_STAFF_ID:
         try:
             stmt_delete_user = delete(User).where(User.id == user.id)
             db.execute(stmt_delete_user)
@@ -566,7 +557,7 @@ def delete_user_by_id(db: Session, user_id:int):
             return {"status": 3, "msg": "An unknown error ocurred while deleting"}
         return {"status": 1, "msg": "Staff user succesfully deleted"}
         
-    if user.role_id == school_role:
+    if user.role_id == ROLE_SCHOOL_ID:
         try: 
             stmt_delete_user = delete(User).where(User.id == user.id)
             db.execute(stmt_delete_user)
@@ -579,7 +570,7 @@ def delete_user_by_id(db: Session, user_id:int):
             return {"status": 3, "msg": "An unknown error ocurred while deleting"}
         return {"status": 1, "msg": "School user succesfully deleted"}
     
-    if user.role_id == doctor_role:
+    if user.role_id == ROLE_DOCTOR_ID:
         try:
             stmt_delete_user = delete(User).where(User.id == user.id)
             db.execute(stmt_delete_user)

@@ -1,3 +1,4 @@
+import os
 from jinja2 import Environment, BaseLoader
 from model.campers import Camper, Parent
 from model.mailings import EmailTemplate
@@ -6,6 +7,10 @@ from model.staffs import Staff
 from sqlalchemy.orm import Session
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
+
+PAYMENT_TABLE_TEMPLATE_ID = os.getenv("PAYMENT_TABLE_TEMPLATE_ID")
+
+
 # from utils.functions_jwt import create_user_verify_url
 # def send_mail_template(
 #     db,
@@ -158,9 +163,8 @@ def send_mail_template_payment(
             db.query(EmailTemplate.title, EmailTemplate.template).filter(EmailTemplate.id == template_id).first()
         )
         # Template de la tabla de pagos
-        payment_table_template_id = 1994
         payment_table_content = (
-            db.query(EmailTemplate.template).filter(EmailTemplate.id == payment_table_template_id).first()
+            db.query(EmailTemplate.template).filter(EmailTemplate.id == PAYMENT_TABLE_TEMPLATE_ID).first()
         )
         
         template_env = Environment(loader=BaseLoader).from_string(str(template_content.template))
@@ -188,9 +192,8 @@ def create_html_payment_table(
     try:
         html_content_payment_table = ''
         # Template de la tabla de pagos
-        payment_table_template_id = 1994
         payment_table_content = (
-            db.query(EmailTemplate.template).filter(EmailTemplate.id == payment_table_template_id).first()
+            db.query(EmailTemplate.template).filter(EmailTemplate.id == PAYMENT_TABLE_TEMPLATE_ID).first()
         )
 
         template_env_payment_table = Environment(loader=BaseLoader).from_string(str(payment_table_content.template))

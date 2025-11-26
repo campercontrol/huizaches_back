@@ -1,3 +1,4 @@
+import os
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from model.campers import CamperComment
@@ -14,6 +15,13 @@ from schema.campers.camper_comment_schema import (
 )
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case, and_, or_
+
+
+ROLE_PARENT_ID = os.getenv("ROLE_PARENT_ID")
+ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
+ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID") 
+ROLE_TEACHER_ID = os.getenv("ROLE_TEACHER_ID")
+ROLE_DOCTOR_ID = os.getenv("ROLE_DOCTOR_ID")
 
 
 def get_all_camper_comment(db):
@@ -276,10 +284,6 @@ def get_camper_comment_by_camper_for_parent(db, camper_id: int):
     return rows
 
 def get_all_camper_comments(db, camper_id: int):
-    parent_role = 1
-    staff_role = 2
-    school_role = 3
-    doctor_role = 5    
     
     comments_query = (
         db.query(
@@ -310,19 +314,19 @@ def get_all_camper_comments(db, camper_id: int):
         
         user_info = None
         
-        if user.role_id == parent_role:
+        if user.role_id == ROLE_PARENT_ID:
             user_info_query = (db.query(Parent.id, func.concat(Parent.tutor_name, ' ', Parent.tutor_lastname_father, ' ', Parent.tutor_lastname_mother).label('fullname'), Role.name.label("role")).select_from(Parent).join(User, User.id == Parent.user_id).join(Role, Role.id == User.role_id).filter(User.id == user.id))
             user_info = db.execute(user_info_query)
             user_info = user_info.mappings().first()
-        if user.role_id == staff_role:
+        if user.role_id == ROLE_STAFF_ID:
             user_info_query = (db.query(Staff.id, func.concat(Staff.name, ' ', Staff.lastname_father, ' ', Staff.lastname_mother).label('fullname'), Role.name.label("role"), Staff.coordinator).select_from(Staff).join(User, User.id == Staff.login_id).join(Role, Role.id == User.role_id).filter(User.id == user.id))
             user_info = db.execute(user_info_query)
             user_info = user_info.mappings().first()
-        if user.role_id == school_role:
+        if user.role_id == ROLE_SCHOOL_ID:
             user_info_query = (db.query(School.id, School.name.label('fullname'), Role.name.label("role")).select_from(School).join(User, User.id == School.login_id).join(Role, Role.id == User.role_id).filter(User.id == user.id))
             user_info = db.execute(user_info_query)
             user_info = user_info.mappings().first()
-        if user.role_id == doctor_role:
+        if user.role_id == ROLE_DOCTOR_ID:
             user_info_query = (db.query(Doctor.id,  func.concat(Doctor.name, ' ', Doctor.lastname_father, ' ', Doctor.lastname_mother).label('fullname'), Role.name.label("role")).select_from(Doctor).join(User, User.id == Doctor.login_id).join(Role, Role.id == User.role_id).filter(User.id == user.id))
             user_info = db.execute(user_info_query)
             user_info = user_info.mappings().first()
@@ -340,7 +344,7 @@ def get_camper_comment_by_camper_for_admin(db, camper_id: int):
             and_(
                 CamperComment.camper_id == camper_id,
                 CamperComment.is_public == True,
-                CamperComment.show_to == 2,
+                CamperComment.show_to == ROLE_STAFF_ID,
             )
         )
         .all()
@@ -353,7 +357,7 @@ def get_camper_comment_by_camper_for_school(db, camper_id: int):
             and_(
                 CamperComment.camper_id == camper_id,
                 CamperComment.is_public == True,
-                CamperComment.show_to == 3,
+                CamperComment.show_to == ROLE_SCHOOL_ID,
             )
         )
         .all()

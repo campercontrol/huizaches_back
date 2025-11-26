@@ -1,3 +1,4 @@
+import os
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -16,7 +17,7 @@ from schema.payments.camper_extra_charge_schema import (
 )
 from crud.payments.payment_crud import create_new_payment_and_update_balance_transaction, delete_payment_and_update_balance_transaction
 
-
+TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID")
 
 def get_all_camper_extra_charge(db):
     rows = db.query(CamperExtraCharge).all()
@@ -95,7 +96,7 @@ def update_camper_extra_charge_by_id_and_update_balance(db: Session, camper_extr
                         "camper_id": db_camper_extra_charge.camper_id,
                         "currency_id": db_camp.currency_id,
                         "parent_id": db_parent.id,
-                        "txn_type_id": 7
+                        "txn_type_id": TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID
                     }
                     db_payment_extra_charge = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)                        
                     new_camper_extra_charge['payment_id'] = db_payment_extra_charge.id

@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from sqlalchemy import case, distinct, and_
 from sqlalchemy import func
@@ -42,6 +43,13 @@ from helper.camper_helpers import update_record_campers
 from helper.mailing_helpers import send_mail_template
 
 from crud.payments.payment_crud import get_payment_transaction_type_by_movement, create_new_payment_and_update_balance, create_new_payment, create_new_payment_transaction, delete_payment_and_update_balance
+
+CAMP_STATUS_ENROLLED_ID = os.getenv("CAMP_STATUS_ENROLLED_ID")
+CAMP_STATUS_CANCELLED_ID = os.getenv("CAMP_STATUS_CANCELLED_ID")
+TRANSACTION_TYPE_CAMP_PRICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_PRICE_ID")
+TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID")
+CAMP_REGISTRATION_PARENT_TEMPLATE_ID = os.getenv("CAMP_REGISTRATION_PARENT_TEMPLATE_ID")
+CAMP_REGISTRATION_STAFF_TEMPLATE_ID = os.getenv("CAMP_REGISTRATION_STAFF_TEMPLATE_ID")
 
 
 def get_all_camper_in_camp(db: Session):
@@ -134,7 +142,7 @@ def get_subscribe_by_camper(db: Session, camper_id: int):
         .filter(
             and_(
                 CamperInCamp.camper_id == camper_id,
-                CamperInCamp.status == 36,
+                CamperInCamp.status == CAMP_STATUS_ENROLLED_ID,
                 Camp.active == True,
                 Camp.start >= date.today(),
             )
@@ -165,7 +173,7 @@ def get_cancelled_by_camper(db: Session, camper_id: int):
         .filter(
             and_(
                 CamperInCamp.camper_id == camper_id,
-                CamperInCamp.status == 37,
+                CamperInCamp.status == CAMP_STATUS_CANCELLED_ID,
                 Camp.active == True,
                 Camp.start >= date.today(),
             )
@@ -192,7 +200,7 @@ def get_all_cancelled_by_camper(db: Session, camper_id: int):
         .filter(
             and_(
                 CamperInCamp.camper_id == camper_id,
-                CamperInCamp.status == 37,
+                CamperInCamp.status == CAMP_STATUS_CANCELLED_ID,
                 Camp.active == True,
             )
         )
@@ -223,7 +231,7 @@ def get_past_subscribe_by_camper(db: Session, camper_id: int):
         .filter(
             and_(
                 CamperInCamp.camper_id == camper_id,
-                CamperInCamp.status == 36,
+                CamperInCamp.status == CAMP_STATUS_ENROLLED_ID,
                 Camp.active == True,
                 Camp.start < date.today(),
             )
@@ -253,7 +261,7 @@ def get_past_due_camps_by_camper(db: Session, camper_id: int):
         .filter(
             and_(
                 CamperInCamp.camper_id == camper_id,
-                CamperInCamp.status == 36,
+                CamperInCamp.status == CAMP_STATUS_ENROLLED_ID,
                 Camp.active == True,
                 Camp.start < date.today(),
                 CamperInCamp.payment_balance >= 0   
@@ -271,7 +279,7 @@ def get_camper_in_camp_by_camper_camp(db: Session, camper_id: int, camp_id: int)
             and_(
                 CamperInCamp.camper_id == camper_id,
                 CamperInCamp.camp_id == camp_id,
-                CamperInCamp.status == 36,
+                CamperInCamp.status == CAMP_STATUS_ENROLLED_ID,
             )
         )
         .first()
@@ -291,7 +299,7 @@ def get_campers_for_module(db: Session, camp_id: int):
             Camper.lastname_mother.label("camper_lastname_mother"),
         )
         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
-        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
         .all()
     )
     return db_mapping_rows_to_dict(campers)
@@ -302,7 +310,7 @@ def get_campers_for_module_count(db: Session, camp_id: int):
             CamperInCamp.id
         )
         .select_from(CamperInCamp)
-        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
         .count()
     )
     return campers
@@ -380,7 +388,7 @@ def get_campers_for_camp(db: Session, camp_id: int):
         .join(Parent, Camper.parent_id == Parent.id)
         .join(CamperRecord, Camper.record_id == CamperRecord.id)
         .join(User, Parent.user_id == User.id)
-        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
         .all()
     )
     campers_complete = []
@@ -430,7 +438,7 @@ def get_campers_in_camp_mailing(db, camp_id):
         .join(CamperInCamp, CamperInCamp.camper_id == Camper.id)
         .join(Parent, Parent.id == Camper.parent_id)
         .join(User, User.id == Parent.user_id)
-        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
     )
     
     data = db.execute(query)
@@ -457,7 +465,7 @@ def get_campers_for_bracelets(db, camp_id):
         .join(Camper, Camper.id == CamperInCamp.camper_id)
         .join(School, School.id == Camper.school_id)
         .join(Constant, Constant.id == Camper.blood_type)
-        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == 36))
+        .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
     )
     campers = db.execute(campers_query)
     campers = campers.mappings().all()
@@ -510,15 +518,13 @@ def get_campers_for_bracelets(db, camp_id):
 def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
     try:
         extra_charges = []
-        camp_registration_parent_template_id = 197
-        camp_registration_staff_template_id = 10
+
         prev_camper_in_camp = get_camper_in_camp_by_camper(db, camper_id)
         camper = get_camper_by_uuid(db, camper_id)
         camper_data_mailing = get_camper_info_mailing(db, camper_id)
         second_parent = get_second_tutor_by_camper_id(db, camper_id)
         parent = get_parent_by_camper_id(db, camper_id)
         admin_users = get_admin_users_for_mailing(db)
-        transaction_type = 1
         for camp_id in camps_id:
             camp_data_mailing = get_camp_info_by_id_mailing(db, camp_id)
             camper_in_camp = (
@@ -614,7 +620,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             new_camper_in_camp = CamperInCampCreate(
                 camper_id=camper_id,
                 camp_id=camp_id,
-                status=36,
+                status=CAMP_STATUS_ENROLLED_ID,
                 payment_balance=getattr(camp, "public_price"),
             )
             camper_in_camp_nw = create_new_camper_in_camp_transaction(db, new_camper_in_camp)
@@ -629,7 +635,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 "camper_id": camper_id,
                 "currency_id": camp.currency_id,
                 "parent_id": parent["id"],
-                "txn_type_id": transaction_type           
+                "txn_type_id": TRANSACTION_TYPE_CAMP_PRICE_ID           
             }
             create_new_payment_transaction(db, payment)
     
@@ -649,8 +655,8 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
             "camp": camp_data_mailing
         }
 
-        send_mail_template(db, parent['email'],camp_registration_parent_template_id, tutor_context)
-        send_mail_template(db, second_parent['email'],camp_registration_parent_template_id, second_tutor_context)
+        send_mail_template(db, parent['email'],CAMP_REGISTRATION_PARENT_TEMPLATE_ID, tutor_context)
+        send_mail_template(db, second_parent['email'],CAMP_REGISTRATION_PARENT_TEMPLATE_ID, second_tutor_context)
         
         # enviamos un correo a todas las cuentas admin    
         for admin_user in admin_users:
@@ -659,7 +665,7 @@ def subscribe_camper_to_camps(db, camps_id: list[int], camper_id: int):
                 "user": admin_user,
                 "camp": camp_data_mailing
             }  
-            send_mail_template(db, admin_user['email'], camp_registration_staff_template_id, admin_user_context)
+            send_mail_template(db, admin_user['email'], CAMP_REGISTRATION_STAFF_TEMPLATE_ID, admin_user_context)
         
         # Aqui vamos a poner si ya tuvo un campamento previo o no.
 
@@ -695,7 +701,6 @@ def update_camper_extra_charges(
                     try:
                         camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
                         parent = get_parent_by_camper_id(db, camper_id)
-                        transaction_type = 7
                         payment_extra_charge = {
                             "paid": False,
                             "payment_amount": int(extra_charge.camp_extra_charge_price),
@@ -705,7 +710,7 @@ def update_camper_extra_charges(
                             "camper_id": camper_id,
                             "currency_id": camp_extra_charge.currency_id,
                             "parent_id": parent["id"],
-                            "txn_type_id": transaction_type
+                            "txn_type_id": TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID
                                 
                         }
                         payment = create_new_payment_and_update_balance(db, payment_extra_charge)
@@ -793,7 +798,6 @@ def create_update_camper_extras_camps(
                 created_extra_charge = create_new_camper_extra_charge(db, extra_charge_new)
                 camp_extra_charge = get_extra_charge_by_id(db, created_extra_charge.extra_charge_id)
                 parent = get_parent_by_camper_id(db, camper_id)
-                transaction_type = 7
                 payment_extra_charge = {
                     "paid": False,
                     "payment_amount": extra_charge.extra_charge_price,
@@ -803,7 +807,7 @@ def create_update_camper_extras_camps(
                     "camper_id": extra_charge.camper_id,
                     "currency_id": camp_extra_charge.currency_id,
                     "parent_id": parent["id"],
-                    "txn_type_id": transaction_type
+                    "txn_type_id": TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID    
                     
                 }
                 create_new_payment_and_update_balance(db, payment_extra_charge)
@@ -835,7 +839,6 @@ def create_update_camper_extras_camp(
                 if camper_extra_charge.payment_id == None:
                     camp_extra_charge = get_extra_charge_by_id(db, camper_extra_charge.extra_charge_id)
                     parent = get_parent_by_camper_id(db, camper_id)
-                    transaction_type = 7
                     payment_extra_charge = {
                         "paid": False,
                         "payment_amount": int(extra_charge.camp_extra_charge_price),
@@ -845,7 +848,7 @@ def create_update_camper_extras_camp(
                         "camper_id": camper_id,
                         "currency_id": camp_extra_charge.currency_id,
                         "parent_id": parent["id"],
-                        "txn_type_id": transaction_type
+                        "txn_type_id": TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID
                             
                     }
                     payment = create_new_payment_and_update_balance_transaction(db, payment_extra_charge)

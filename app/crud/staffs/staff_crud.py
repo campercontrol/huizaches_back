@@ -1,3 +1,4 @@
+import os
 from fastapi import HTTPException
 from sqlalchemy import case, and_, or_, desc, asc, func
 from sqlalchemy.exc import SQLAlchemyError
@@ -29,6 +30,10 @@ from crud.crud_user import get_profile_id_by_user_id
 from helper.pagination_helpers import pagination_params, get_number_of_pages
 from helper.mailing_helpers import send_mail_template
 from utils.functions_jwt import create_user_verification_url
+
+ADMIN_NEW_PROSPECT_TEMPLATE = os.getenv("ADMIN_NEW_PROSPECT_TEMPLATE")
+WELCOME_PROSPECT_TEMPLATE = os.getenv("WELCOME_PROSPECT_TEMPLATE")
+ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
 
 
 def get_all_prospect(db, pagination):
@@ -163,7 +168,7 @@ def get_all_staff(db, pagination):
         "items": data,
         "total": rows_count
         }
-def search_all_staff(db, pagination: Pagination, name: str, email: str):
+def search_all_staff(db, pagination: Pagination, name: str, lastname_father: str, lastname_mother: str, email: str):
     query = (
         db.query(Staff, User.email, Season.name.label("season_name"),
                  StaffRecord.attend,
@@ -177,11 +182,15 @@ def search_all_staff(db, pagination: Pagination, name: str, email: str):
            or_(
                User.email.op('%')(email),
                Staff.name.op('%')(name),
+               Staff.lastname_father.op('%')(lastname_father),
+               Staff.lastname_mother.op('%')(lastname_mother),
             )
         )
         .order_by(
             func.similarity(User.email, email).desc(),
-            func.similarity(Staff.name, name).desc()
+            func.similarity(Staff.name, name).desc(),
+            func.similarity(Staff.lastname_father, lastname_father).desc(),
+            func.similarity(Staff.lastname_mother, lastname_mother).desc(),
         )
         .limit(pagination.perPage)
         .offset((pagination.offset))
@@ -199,6 +208,8 @@ def search_all_staff(db, pagination: Pagination, name: str, email: str):
            or_(
                User.email.op('%')(email),
                Staff.name.op('%')(name),
+               Staff.lastname_father.op('%')(lastname_father),
+               Staff.lastname_mother.op('%')(lastname_mother),
             )
         )
         .scalar()    
@@ -235,8 +246,6 @@ def create_complete_prospect(db, new_prospect):
     
     try:
         season = get_current_Season(db)
-        welcome_prospect_template = 1 
-        admin_new_prospect_template = 1988
         vaccines = get_all_vaccine(db)
         all_food_restriction = get_all_food_restriction(db)
         
@@ -248,7 +257,7 @@ def create_complete_prospect(db, new_prospect):
         prospect_user = User(
             email= new_prospect.user.email,
             hashed_pass=hash_str(new_prospect.user.passw),
-            role_id= 2,
+            role_id= ROLE_STAFF_ID,
             is_active= False,
             is_coordinator = False,
             is_admin = False,
@@ -295,7 +304,7 @@ def create_complete_prospect(db, new_prospect):
             db.add(staff_food_restriction)
 
 
-        role = get_role_by_uuid(db, 2)
+        role = get_role_by_uuid(db, ROLE_STAFF_ID)
 
         user_data = {
             # "user_name": "",
@@ -306,7 +315,7 @@ def create_complete_prospect(db, new_prospect):
             "user_coordinator": prospect_user.is_coordinator,
             "user_admin": prospect_user.is_admin,
             "role_name": role.name,
-            "role_id": 2,
+            "role_id": ROLE_STAFF_ID,
             "profile_id": prospect_profile.id,
             # "lang": form_data.lang,
         }
@@ -326,10 +335,10 @@ def create_complete_prospect(db, new_prospect):
             admin_user_context = {
                 "user": admin_user
             }   
-            send_mail_template(db, admin_user['email'], admin_new_prospect_template, prospect_context)
+            send_mail_template(db, admin_user['email'], ADMIN_NEW_PROSPECT_TEMPLATE, prospect_context)
         
-        # send_mail_prospect(db, [prospect_user.email], welcome_prospect_template, prospect_profile, prospect_user)
-        send_mail_template(db, [prospect_user.email], welcome_prospect_template, prospect_context)
+        # send_mail_prospect(db, [prospect_user.email], WELCOME_PROSPECT_TEMPLATE, prospect_profile, prospect_user)
+        send_mail_template(db, [prospect_user.email], WELCOME_PROSPECT_TEMPLATE, prospect_context)
         
         db.commit()
         
