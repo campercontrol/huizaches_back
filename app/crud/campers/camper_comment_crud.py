@@ -17,11 +17,11 @@ from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case, and_, or_
 
 
-ROLE_PARENT_ID = os.getenv("ROLE_PARENT_ID")
-ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
-ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID") 
-ROLE_TEACHER_ID = os.getenv("ROLE_TEACHER_ID")
-ROLE_DOCTOR_ID = os.getenv("ROLE_DOCTOR_ID")
+ROLE_PARENT_ID = int(os.getenv("ROLE_PARENT_ID"))
+ROLE_STAFF_ID = int(os.getenv("ROLE_STAFF_ID"))
+ROLE_SCHOOL_ID = int(os.getenv("ROLE_SCHOOL_ID")) 
+ROLE_TEACHER_ID = int(os.getenv("ROLE_TEACHER_ID"))
+ROLE_DOCTOR_ID = int(os.getenv("ROLE_DOCTOR_ID"))
 
 
 def get_all_camper_comment(db):

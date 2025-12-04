@@ -17,7 +17,7 @@ from schema.payments.camper_extra_charge_schema import (
 )
 from crud.payments.payment_crud import create_new_payment_and_update_balance_transaction, delete_payment_and_update_balance_transaction
 
-TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID")
+TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID = int(os.getenv("TRANSACTION_TYPE_CAMP_ADDITIONAL_SERVICE_ID"))
 
 def get_all_camper_extra_charge(db):
     rows = db.query(CamperExtraCharge).all()

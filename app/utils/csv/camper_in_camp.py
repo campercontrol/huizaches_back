@@ -9,7 +9,7 @@ from model.camps import CamperInCamp, Camp
 from model.campers import Camper, Parent
 from model.user import User
 
-CAMP_STATUS_ENROLLED_ID = os.getenv("CAMP_STATUS_ENROLLED_ID")
+CAMP_STATUS_ENROLLED_ID = int(os.getenv("CAMP_STATUS_ENROLLED_ID"))
 
 
 def export_csv_camper_in_camp(db, camp_id:int):

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from utils.email_tools import send_simple_message
 from utils.db import db_mapping_rows_to_dict
 
-PAYMENT_TABLE_TEMPLATE_ID = os.getenv("PAYMENT_TABLE_TEMPLATE_ID")
+PAYMENT_TABLE_TEMPLATE_ID = int(os.getenv("PAYMENT_TABLE_TEMPLATE_ID"))
 
 
 # from utils.functions_jwt import create_user_verify_url

@@ -17,10 +17,10 @@ from crud.staffs.staff_record_crud import get_record_by_staff_id, update_staff_r
 
 from crud.mailings.mailing_crud import send_mail_template, get_admin_users_for_mailing, get_staff_info_mailing, get_camp_info_by_id_mailing, get_staff_context_massive_mail, get_staff_context_system_mail
 
-USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID = os.getenv("USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID")
-USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = os.getenv("USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID")  
-USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID = os.getenv("USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID")
-ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = os.getenv("ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID")
+USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID = int(os.getenv("USER_ACCEPT_STAFF_IN_CAMP_TEMPLATE_ID"))
+USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = int(os.getenv("USER_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID"))  
+USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID = int(os.getenv("USER_STAFF_SUBSCRIBE_TO_CAMP_TEMPLATE_ID"))
+ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID = int(os.getenv("ADMIN_UNSUSCRIBE_STAFF_FROM_CAMP_TEMPLATE_ID"))
 
 
 def get_all_staff_in_camp(db: Session):
