@@ -8,8 +8,8 @@ from model.trophies import TrophyStaff, Trophy, TrophySeason
 from schema.trophies.trophy_schema import TrophyStaffCreate, TrophyStaffModify
 
 
-TROPHY_TYPE_CERTIFICATION_ID = os.getenv("TROPHY_TYPE_CERTIFICATION_ID")
-TROPHY_TYPE_ACKNOWLEDGEMENT_ID = os.getenv("TROPHY_TYPE_ACKNOWLEDGEMENT_ID")
+TROPHY_TYPE_CERTIFICATION_ID = int(os.getenv("TROPHY_TYPE_CERTIFICATION_ID"))
+TROPHY_TYPE_ACKNOWLEDGEMENT_ID = int(os.getenv("TROPHY_TYPE_ACKNOWLEDGEMENT_ID"))
 
 
 

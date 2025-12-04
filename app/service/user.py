@@ -43,10 +43,10 @@ from utils.image_tools import write_image
 
 # from utils.functions_jwt import get_current_active_user
 
-ROLE_PARENT_ID = os.getenv("ROLE_PARENT_ID")
-ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
-ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID")
-ROLE_DOCTOR_ID = os.getenv("ROLE_DOCTOR_ID")
+ROLE_PARENT_ID = int(os.getenv("ROLE_PARENT_ID"))
+ROLE_STAFF_ID = int(os.getenv("ROLE_STAFF_ID"))
+ROLE_SCHOOL_ID = int(os.getenv("ROLE_SCHOOL_ID"))
+ROLE_DOCTOR_ID = int(os.getenv("ROLE_DOCTOR_ID"))
 
 
 

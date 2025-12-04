@@ -11,7 +11,7 @@ from schema.mailings.email_template_schema import (
 from utils.db import db_mapping_rows_to_dict
 from sqlalchemy import case, and_
 
-TEMPLATE_TYPE_MASSIVE_EMAIL_ID = os.getenv("TEMPLATE_TYPE_MASSIVE_EMAIL_ID")
+TEMPLATE_TYPE_MASSIVE_EMAIL_ID = int(os.getenv("TEMPLATE_TYPE_MASSIVE_EMAIL_ID"))
 
 
 

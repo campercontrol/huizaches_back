@@ -31,9 +31,9 @@ from helper.pagination_helpers import pagination_params, get_number_of_pages
 from helper.mailing_helpers import send_mail_template
 from utils.functions_jwt import create_user_verification_url
 
-ADMIN_NEW_PROSPECT_TEMPLATE = os.getenv("ADMIN_NEW_PROSPECT_TEMPLATE")
-WELCOME_PROSPECT_TEMPLATE = os.getenv("WELCOME_PROSPECT_TEMPLATE")
-ROLE_STAFF_ID = os.getenv("ROLE_STAFF_ID")
+ADMIN_NEW_PROSPECT_TEMPLATE = int(os.getenv("ADMIN_NEW_PROSPECT_TEMPLATE"))
+WELCOME_PROSPECT_TEMPLATE = int(os.getenv("WELCOME_PROSPECT_TEMPLATE"))
+ROLE_STAFF_ID = int(os.getenv("ROLE_STAFF_ID"))
 
 
 def get_all_prospect(db, pagination):

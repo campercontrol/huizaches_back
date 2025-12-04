@@ -16,8 +16,8 @@ from crud.campers.camper_crud import get_campers_from_parent
 
 import json
 
-USER_EMAIL_WELCOME_TEMPLATE_ID = os.getenv("USER_EMAIL_WELCOME_TEMPLATE_ID")
-ADMIN_EMAIL_WELCOME_TEMPLATE_ID = os.getenv("ADMIN_EMAIL_WELCOME_TEMPLATE_ID")
+USER_EMAIL_WELCOME_TEMPLATE_ID = int(os.getenv("USER_EMAIL_WELCOME_TEMPLATE_ID"))
+ADMIN_EMAIL_WELCOME_TEMPLATE_ID = int(os.getenv("ADMIN_EMAIL_WELCOME_TEMPLATE_ID"))
 
 
 def get_all_parent(db: Session, pagination):

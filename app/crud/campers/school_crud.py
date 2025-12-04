@@ -17,7 +17,7 @@ from schema.user import UserCreate
 from schema.campers.school_schema import UpdateSchool
 
 
-ROLE_SCHOOL_ID = os.getenv("ROLE_SCHOOL_ID")
+ROLE_SCHOOL_ID = int(os.getenv("ROLE_SCHOOL_ID"))
 
 
 def get_all_school(db):
