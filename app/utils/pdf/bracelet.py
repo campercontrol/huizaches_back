@@ -1,15 +1,18 @@
+import os
 import jinja2
 import pdfkit
 from utils.barcode_tools import generate_code128, generate_code128_no_fotter
 from utils.image_tools import img_to_base_64
 #from fastapi.templating impor Jin
 
+CAMP_LOGO_BLACK_FILE_NAME = os.getenv("CAMP_LOGO_BLACK_FILE_NAME")
+
 def generar_pdf_bracelete(list_campers, camp_name):
     
     #code = "200798"
     #ruta1 = generate_code128_no_fotter(code) 
     #barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
 
     list_b = []
     for camper in list_campers:
@@ -86,7 +89,7 @@ def generar_pdf_bracelete_multiple(list_campers, camp_name):
     code = "200798"
     ruta1 = generate_code128_no_fotter(code) 
     barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
 
     list_b = []
     for camper in list_campers:
