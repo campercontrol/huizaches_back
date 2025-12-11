@@ -6,32 +6,6 @@ from utils.image_tools import img_to_base_64
 
 def generar_pdf_baucher(context):
 
-    #logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
-
-    #context = {
-    #    "name_camping": "Ailyn Rosalé Calderón",
-    #    "camping_name": "Prueba 1",
-    #    "amount_total":"$11,000.00",
-    #    "logo":logo_64,
-    #    "information_accounts":[
-    #        {
-    #        "bank":"BBVA",
-    #        "name_reference":"Angela Patricia Avila Rojas",
-    #        "account_number":"0199909435",
-    #        "clabe":"012180001999094351",
-    #        },
-    #         {
-    #        "bank":"BBVA",
-    #        "name_reference":"Angela Patricia Avila Rojas",
-    #        "account_number":"0199909435",
-    #        "clabe":"012180001999094351",
-    #        }
-    #    ],
-    #    "pay_reference":"0044448",
-    #    "more_info":"patito.com",
-    #    "email":"pagos@kincamp.com"
-    #    }
-    
     template_loader = jinja2.FileSystemLoader('media/templates_pdf/')
     template_env= jinja2.Environment(loader = template_loader)
 
@@ -40,9 +14,6 @@ def generar_pdf_baucher(context):
     template = template_env.get_template(html_info_camper)
  
     html_content = template.render(context) #Renderiza los datos en el html
-
-    print("//////////")
-    print(html_content)
 
     #Try para verificar paquete de libreria que permite usar la generacion de html a pdf 
     try:

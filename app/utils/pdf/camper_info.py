@@ -1,3 +1,4 @@
+import os
 import jinja2
 import pdfkit
 from datetime import datetime
@@ -8,6 +9,7 @@ from PyPDF2 import PdfMerger
 
 #from fastapi.templating impor Jin
 
+CAMP_LOGO_BLACK_FILE_NAME = os.getenv("CAMP_LOGO_BLACK_FILE_NAME")
 def generar_pdf_info_camping():
 
     ruta1 = generate_code128("200798") #Generar codigo de barras
@@ -15,7 +17,7 @@ def generar_pdf_info_camping():
 
     #Traer imagen en base64
     barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
 
     context = {
         "logo": logo_64,
@@ -114,7 +116,7 @@ def generar_pdf_info_camping_multiple():
 
     #Traer imagen en base64
     barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}.png").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo.png").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
 
     context = {
         "logo": logo_64,
@@ -213,7 +215,7 @@ def generar_pdf_info_camping_multiple_merge_files():
 
     #Traer imagen en base64
     barcode_64 = "data:image/png;base64," + img_to_base_64(f"{ruta1}").decode("utf-8")
-    logo_64 = "data:image/png;base64," + img_to_base_64("media/templates_pdf/logo/kincamp_logo_color.png").decode("utf-8")
+    logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
 
     context = {
         "logo": logo_64,
