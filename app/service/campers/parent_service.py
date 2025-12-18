@@ -51,8 +51,11 @@ from utils.db import SessionLocal
 from utils.image_tools import img_to_base_64
 from utils.payments.payment_table import create_payment_table
 from utils.pdf.baucher_pago import generar_pdf_baucher
+from utils.formatters import format_numbers_commas_currency
 from model.catalogs.payment_account import PaymentAccount
-
+from model.catalogs.currency import Currency
+from model.camps.camp_payments_accounts import CampPaymentAccount
+from model.camps.camp import Camp
 
 CAMP_LOGO_BLACK_FILE_NAME = os.getenv("CAMP_LOGO_BLACK_FILE_NAME")
 PAYMENT_REFERENCE_EMAIL = os.getenv("PAYMENT_REFERENCE_EMAIL")
@@ -190,21 +193,30 @@ def get_payment_boucher(camper_id:int, camp_id:int, db:Session= Depends(get_db))
     camper = get_camper_by_uuid(db, camper_id)
     camper_in_camp = get_camper_in_camp_by_camper_camp(db, camper_id, camp_id)
     
-    payment_accounts = db.query(
-        PaymentAccount.bank,
-        PaymentAccount.name.label("name_reference"),
-        PaymentAccount.account_number,
-        PaymentAccount.clabe_number.label("clabe"),
-    ).select_from(PaymentAccount).all()
+    
+    payment_accounts = (
+            db.query(
+            PaymentAccount.bank,
+            PaymentAccount.name.label("name_reference"),
+            PaymentAccount.account_number,
+            PaymentAccount.clabe_number.label("clabe"),
+        ).select_from(PaymentAccount)
+        .join(CampPaymentAccount, CampPaymentAccount.paymentaccount_id == PaymentAccount.id)
+        .join(Camp, Camp.id == CampPaymentAccount.camp_id)
+        .filter(Camp.id == camp_id).all()
+    )
+    camp_currency = (db.query(Currency).select_from(Currency)
+                     .join(Camp, Camp.currency_id == Currency.id).filter(Camp.id == camp_id).first())
+    
     
     logo_64 = "data:image/png;base64," + img_to_base_64(f"media/assets/logos/{CAMP_LOGO_BLACK_FILE_NAME}").decode("utf-8")
     context = {
     "name_camping": getattr(camper, "name") + " " + getattr(camper, "lastname_father"),
     "camping_name":  getattr(camp, "name"),
-    "amount_total": "$" + str(getattr(camp, "public_price")),
+    "amount_total": format_numbers_commas_currency(camp.public_price, camp_currency.symbol, camp_currency.acronyms),
     "logo":logo_64,
     "information_accounts": payment_accounts,
-    "pay_reference": str(getattr(camper_in_camp, "id")).zfill(6),
+    "pay_reference": camper_in_camp.camper_id,
     "more_info": getattr(camp,"url"),
     "email": PAYMENT_REFERENCE_EMAIL
     }   
