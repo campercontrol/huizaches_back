@@ -1292,8 +1292,8 @@ def create_camp_camper_paypal_link(db: Session, camp_id: int, camper_id: int ):
                         .filter(CamperInCamp.camp_id == camp_id, CamperInCamp.camper_id == camper_id)
                         .first()
     )
-    amount_to_pay = camper_in_camp.payment_balance * 1.05
-        
+    amount_to_pay = f"{camper_in_camp.payment_balance * 1.05:.2f}"
+      
     paypal_link = f"{PAYPAL_LINK_URL}/{amount_to_pay}"
     
     return {"data": paypal_link}
