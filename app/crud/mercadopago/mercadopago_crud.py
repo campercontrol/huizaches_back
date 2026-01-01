@@ -38,8 +38,8 @@ USER_PARTIAL_PAYMENT_TEMPLATE_ID = int(os.getenv("USER_PARTIAL_PAYMENT_TEMPLATE_
 USER_TOTAL_PAYMENT_TEMPLATE_ID = int(os.getenv("USER_TOTAL_PAYMENT_TEMPLATE_ID"))
 PAYMENT_METHOD_MERCADO_PAGO_ID  = int(os.getenv("PAYMENT_METHOD_MERCADO_PAGO_ID"))
 MERCADOPAGO_STATEMENT_DESCRIPTOR = os.getenv("MERCADOPAGO_STATEMENT_DESCRIPTOR")
-FRONTEND_DEV_URL = os.getenv("FRONTEND_DEV_URL")
-BACKEND_DEV_URL = os.getenv("BACKEND_DEV_URL")
+FRONTEND_PROD_URL = os.getenv("FRONTEND_PROD_URL")
+BACKEND_PROD_URL = os.getenv("BACKEND_PROD_URL")
 TRANSACTION_TYPE_CAMP_PAYMENT_ID = int(os.getenv("TRANSACTION_TYPE_CAMP_PAYMENT_ID"))
 
 sdk = mercadopago.SDK(MP_TOKEN)
@@ -411,9 +411,9 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
 
             },
             "back_urls": {
-                "success": f"{FRONTEND_DEV_URL}/mercado_pago_success",
-                "failure": f"{FRONTEND_DEV_URL}/mercado_pago_failure",
-                "pending": f"{FRONTEND_DEV_URL}/mercado_pago_pending",
+                "success": f"{FRONTEND_PROD_URL}/mercado_pago_success",
+                "failure": f"{FRONTEND_PROD_URL}/mercado_pago_failure",
+                "pending": f"{FRONTEND_PROD_URL}/mercado_pago_pending",
             },
             # "differential_pricing": {
             #     "id": 1,
@@ -424,7 +424,7 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
             "binary_mode": False,
             "external_reference": id,
             "marketplace": marketplace_id,
-            "notification_url": f"{BACKEND_DEV_URL}/mercado_pago/notify?source_news=webhooks",
+            "notification_url": f"{BACKEND_PROD_URL}/mercado_pago/notify?source_news=webhooks",
             # "operation_type": "regular_payment",
             "payment_methods": {
                 # "default_payment_method_id": "master",
