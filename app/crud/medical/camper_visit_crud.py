@@ -13,7 +13,7 @@ from crud.mailings.mailing_crud import get_camper_info_mailing, get_camp_info_by
 from crud.campers.parent_crud import get_parent_by_camper_id, get_second_tutor_by_camper_id
 
 
-BASE_URL = os.getenv("BACKEND_DEV_URL")
+BACKEND_PROD_URL = os.getenv("BACKEND_PROD_URL")
 MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID = int(os.getenv("MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID"))
 MEDICAL_VISIT_STAFF_TABLE_TEMPLATE_ID = int(os.getenv("MEDICAL_VISIT_STAFF_TABLE_TEMPLATE_ID"))
 MEDICAL_VISIT_PARENT_TEMPLATE = int(os.getenv("MEDICAL_VISIT_PARENT_TEMPLATE"))
@@ -211,7 +211,7 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
         if new_camper_visit.additional_photo is None or new_camper_visit.additional_photo == "":
             additional_photo = "No se proporcionó foto adicional"
         else:
-            additional_photo = f"{BASE_URL}/{new_camper_visit.additional_photo}"
+            additional_photo = f"{BACKEND_PROD_URL}/{new_camper_visit.additional_photo}"
 
         if new_camper_visit.send_in_email:
             
