@@ -21,22 +21,23 @@ BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID = int(os.getenv("BIRTHDAY_CAMPER_PAS
 CAMP_STATUS_ENROLLED_ID = int(os.getenv("CAMP_STATUS_ENROLLED_ID"))
 
 def main():
+    print("===============BIRTHDAY SCRIPT IS EXECUTING===============")
     db = SessionLocal()
     
     admin_users = get_admin_users_for_mailing(db)
     
     today = date.today()
-
+    print("===============QUERYING THE DATABASE FOR CAMPER BIRTHDAYS===============")
     birthday_campers = (db.query(Camper, Parent, User).select_from(Camper)
                         .join(Parent, Parent.id == Camper.parent_id)
                         .join(User, User.id == Parent.user_id)
                         .filter(func.date(Camper.birthday) == today).all())
 
     if birthday_campers:
-
+        print("===============THERE ARE CAMPERS CELEBRATING THEIR BIRTHDAYS===============")
         for camper in birthday_campers:
             try:
-            
+                print("===============SENDING EMAILS...===============")
                 camper_camps = (
                     db.query(CamperInCamp, Camp)
                     .join(Camp, Camp.id == CamperInCamp.camp_id)
@@ -87,18 +88,15 @@ def main():
                         context["user"] = admin_user
                         send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID, context)
 
-                print("Birthday email sent successfully!")
+                print("===============BIRTHDAY EMAILS SENT SUCCESSFULLY!===============")
                 return {"status": 1, "msg": "Birthday emails sent successfully!"}
             except Exception as e:
                 print(e)
-                print("Error sending birthday email....")
+                print("!!!!!!!!!!!!!!!AN ERROR OCURRED WHILE SENDIND BIRTHDAY EMAILS!!!!!!!!!!!!!!!")
                 return {"status": 3, "msg": "Internal Server Error"}
     else:
-        print("No campers with birthday today, nothing to send.")
+        print("===============NO CAMPERS WITH BIRTHDAY TODAY, NOTHING TO SEND.===============")
         return {"status": 2, "msg": "No campers with birthday today, nothing to send."}
-
-
     
-
 if __name__ == "__main__":
     main()
