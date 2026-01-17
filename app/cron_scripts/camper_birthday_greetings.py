@@ -1,6 +1,6 @@
 # birthday_greetings.py
 import os
-from sqlalchemy import text, desc, and_, or_, func
+from sqlalchemy import text, desc, and_, or_, func, extract
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from utils.db import SessionLocal
@@ -31,7 +31,7 @@ def main():
     birthday_campers = (db.query(Camper, Parent, User).select_from(Camper)
                         .join(Parent, Parent.id == Camper.parent_id)
                         .join(User, User.id == Parent.user_id)
-                        .filter(func.date(Camper.birthday) == today).all())
+                        .filter(extract('month', Camper.birthday) == extract('month', func.current_date()), extract('day', Camper.birthday) == extract('day', func.current_date())).all())
 
     if birthday_campers:
         print("===============THERE ARE CAMPERS CELEBRATING THEIR BIRTHDAYS===============")
