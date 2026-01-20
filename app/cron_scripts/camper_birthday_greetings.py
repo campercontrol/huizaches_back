@@ -35,11 +35,12 @@ def main():
 
     if birthday_campers:
         print("===============THERE ARE CAMPERS CELEBRATING THEIR BIRTHDAYS===============")
+        print("===============SENDING EMAILS...===============")
         for camper in birthday_campers:
             try:
-                print("===============SENDING EMAILS...===============")
                 camper_camps = (
                     db.query(CamperInCamp, Camp)
+                    .select_from(CamperInCamp)
                     .join(Camp, Camp.id == CamperInCamp.camp_id)
                     .filter(
                         CamperInCamp.camper_id == camper[0].id,
@@ -50,7 +51,7 @@ def main():
                 )
 
                 current_camp = next(
-                    ((cic, camp) for cic, camp in camper_camps if camp.start.date() <= today <= camp.end.date()),
+                    ((cic, camp) for cic, camp in camper_camps if camp.start.date() <= today and today <= camp.end.date()),
                     None
                 )
                 forthcoming_camp = next(
@@ -61,42 +62,66 @@ def main():
                     ((cic, camp) for cic, camp in camper_camps if camp.end.date() < today),
                     None
                 )
+                tutor_1_context = {
+                    "name": camper[1].tutor_name,
+                    "lastname_father": camper[1].tutor_lastname_father,
+                    "lastname_mother": camper[1].tutor_lastname_mother,
+                    "email": camper[2].email
+                }
+                tutor_2_context = {
+                    "name": camper[1].contact_name,
+                    "lastname_father": camper[1].contact_lastname_father,
+                    "lastname_mother": camper[1].contact_lastname_mother,
+                    "email": camper[1].contact_email
+                }
                 
                 context = {
                             "camper": camper[0],
-                            "user": camper[1],
-
-                    } 
+                            "user": tutor_1_context
+                } 
                 if current_camp:
                     context["camp"] = current_camp[1]
                     send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_IS_IN_CAMP_PARENT_TEMPLATE_ID, context)
+                    # send mail to second tutor
+                    context["user"] = tutor_2_context
+                    send_mail_template(db, tutor_2_context["email"], BIRTHDAY_CAMPER_IS_IN_CAMP_PARENT_TEMPLATE_ID, context)
+                    
+                    
                     for admin_user in admin_users:
                         context["user"] = admin_user
                         send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_IS_IN_CAMP_ADMIN_TEMPLATE_ID, context)
                     
                 elif forthcoming_camp:
                     context["camp"] = forthcoming_camp[1]
+                    context["user"] = tutor_1_context
                     send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_UPCOMING_CAMP_PARENT_TEMPLATE_ID, context)
+                    # send mail to second tutor
+                    context["user"] = tutor_2_context
+                    send_mail_template(db, tutor_2_context["email"], BIRTHDAY_CAMPER_UPCOMING_CAMP_PARENT_TEMPLATE_ID, context)
+
                     for admin_user in admin_users:
                         context["user"] = admin_user
                         send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_UPCOMING_CAMP_ADMIN_TEMPLATE_ID, context)
 
                 elif past_camp:
                     context["camp"] = past_camp[1]
+                    context["user"] = tutor_1_context
                     send_mail_template(db, camper[2].email, BIRTHDAY_CAMPER_PAST_CAMP_PARENT_TEMPLATE_ID, context)
+                    
+                    # send mail to second tutor
+                    context["user"] = tutor_2_context
+                    send_mail_template(db, tutor_2_context["email"], BIRTHDAY_CAMPER_PAST_CAMP_PARENT_TEMPLATE_ID, context)
+                    
+                    
                     for admin_user in admin_users:
                         context["user"] = admin_user
                         send_mail_template(db, [admin_user.email], BIRTHDAY_CAMPER_PAST_CAMP_ADMIN_TEMPLATE_ID, context)
-
-                print("===============BIRTHDAY EMAILS SENT SUCCESSFULLY!===============")
-                return {"status": 1, "msg": "Birthday emails sent successfully!"}
+                print(f"===============BIRTHDAY EMAILS SENT FOR CAMPER ID {camper[0].id}===============")
             except Exception as e:
+                print(f"!!!!!!!!!!!!!!!AN ERROR OCURRED WHILE SENDIND BIRTHDAY EMAILS FOR CAMPER {camper[0].id}!!!!!!!!!!!!!!!")
                 print(e)
-                print("!!!!!!!!!!!!!!!AN ERROR OCURRED WHILE SENDIND BIRTHDAY EMAILS!!!!!!!!!!!!!!!")
-                return {"status": 3, "msg": "Internal Server Error"}
+        print("===============BIRTHDAY EMAILS SCRIPT EXECUTED===============")
     else:
         print("===============NO CAMPERS WITH BIRTHDAY TODAY, NOTHING TO SEND.===============")
-        return {"status": 2, "msg": "No campers with birthday today, nothing to send."}
-    
 if __name__ == "__main__":
     main()
