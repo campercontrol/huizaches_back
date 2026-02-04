@@ -59,7 +59,7 @@ def main():
                     None
                 )
                 past_camp = next(
-                    ((cic, camp) for cic, camp in camper_camps if camp.end.date() < today),
+                    ((cic, camp) for cic, camp in camper_camps if camp.end.date() < today and camp.end.date().year >= (int(today.year) - 5)),
                     None
                 )
                 tutor_1_context = {
