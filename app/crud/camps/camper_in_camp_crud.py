@@ -466,6 +466,7 @@ def get_campers_for_bracelets(db, camp_id):
         .join(School, School.id == Camper.school_id)
         .join(Constant, Constant.id == Camper.blood_type)
         .filter(and_(CamperInCamp.camp_id == camp_id, CamperInCamp.status == CAMP_STATUS_ENROLLED_ID))
+        .order_by(Camper.lastname_father.asc())
     )
     campers = db.execute(campers_query)
     campers = campers.mappings().all()
