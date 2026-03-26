@@ -941,6 +941,7 @@ def get_school_camp_for_camper(db: Session, camper_id: int):
             Camp.end.label("camp_end"),
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
+            Camp.registration
         )
         .join(Location, Location.id == Camp.location_id)
         .filter(
@@ -948,8 +949,7 @@ def get_school_camp_for_camper(db: Session, camper_id: int):
                 Camp.general_camp == False,
                 Camp.school_id == school_id[0],
                 Camp.active == True,
-                Camp.start >= date.today(),
-                Camp.registration == True,
+                Camp.start >= date.today()
             )
         )
         .all()
@@ -966,14 +966,14 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
             Camp.end.label("camp_end"),
             Location.name.label("location_name"),
             Camp.public_price.label("public_price"),
+            Camp.registration
         )
         .join(Location, Location.id == Camp.location_id)
         .filter(
             and_(
                 Camp.general_camp == True,
                 Camp.active == True,
-                Camp.start >= date.today(),
-                Camp.registration == True,
+                Camp.start >= date.today()
             )
         )
     )
