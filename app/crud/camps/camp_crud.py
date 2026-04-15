@@ -42,6 +42,8 @@ from crud.staff_catalogs.staff_vaccine_crud import get_staff_all_vaccines_by_sta
 from crud.groupings.grouping_camp_crud import get_camper_groupings_by_camper_id_and_camp_id
 from crud.payments.payment_crud import delete_payment_and_update_balance_transaction, create_new_payment_and_update_balance_transaction
 from helper.pagination_helpers import pagination_params, get_number_of_pages
+from crud.campers.camper_extra_answer_crud import get_extra_answer_by_camper_camp
+
 
 BACKEND_DEV_URL = os.getenv("BACKEND_DEV_URL")
 PAYPAL_LINK_URL = os.getenv("PAYPAL_LINK_URL")
@@ -421,6 +423,8 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_school_comments = get_camper_comment_by_camper_for_school(db, camper.id)
         camper_admin_comments = get_camper_comment_by_camper_for_admin(db, camper.id)
         camper_groupings = get_camper_groupings_by_camper_id_and_camp_id(db, camper.id, camp_id)
+        camper_extra_answers = get_extra_answer_by_camper_camp(db, camper.id, camp_id)
+        
         
         for pathological_background in camper_pathological_background:
             camper_dict[pathological_background["name"]] = pathological_background["is_active"]
@@ -442,6 +446,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_dict["Comments (Staff)"] = camper_admin_comments
         camper_dict["Comments (School)"] = camper_school_comments
         camper_dict["Groupings"] = camper_groupings
+        camper_dict["Camper extra questions"] = camper_extra_answers
         campers_report.append(camper_dict)
         
     return campers_report
