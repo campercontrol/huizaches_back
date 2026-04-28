@@ -3,7 +3,7 @@ import requests
 import json
 import os
 
-domain_name = os.getenv("DOMAIN_NAME", "cc.camploshuizaches.mx")
+domain_name = "cc.camploshuizaches.mx"
 MAILGUN_SENDING_KEY = os.getenv("MAILGUN_SENDING_KEY")
 
 
