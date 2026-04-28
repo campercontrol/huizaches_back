@@ -7,7 +7,7 @@ domain_name = "cc.camploshuizaches.mx"
 MAILGUN_SENDING_KEY = os.getenv("MAILGUN_SENDING_KEY")
 
 
-from_user_email = "Los Huizaches Camp <info@cc.camploshuizaches.mx>"
+from_user_email = "Camp Los Huizaches <info@cc.camploshuizaches.mx>"
 to_user_email = ""
 
 
