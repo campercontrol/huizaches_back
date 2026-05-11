@@ -405,7 +405,7 @@ def staff_dashboard(db, staff_id: int):
                     Camp.active == True,
                     Camp.end >= date.today(),
                 )
-            )
+            ).order_by(Camp.start.asc(), Camp.end.asc())
             .all()
         )
         available_camps = db_mapping_rows_to_dict(available_camps)
@@ -437,7 +437,7 @@ def staff_dashboard(db, staff_id: int):
                     Camp.active == True,
                     Camp.end >= date.today(),
                 )
-            )
+            ).order_by(Camp.start.asc(), Camp.end.asc())
             .all()
         )
 
@@ -467,6 +467,7 @@ def staff_dashboard(db, staff_id: int):
                     Camp.end >= date.today(),
                 )
             )
+            .order_by(Camp.start.asc(), Camp.end.asc())
             .all()
         )
 

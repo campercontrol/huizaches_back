@@ -956,7 +956,7 @@ def get_school_camp_for_camper(db: Session, camper_id: int):
                 Camp.active == True,
                 Camp.start >= date.today()
             )
-        )
+        ).order_by(Camp.start.asc(), Camp.end.asc())
         .all()
     )
     return db_mapping_rows_to_dict(rows)
@@ -980,7 +980,7 @@ def get_summer_camp_for_camper(db: Session, camper_id: int):
                 Camp.active == True,
                 Camp.start >= date.today()
             )
-        )
+        ).order_by(Camp.start.asc(), Camp.end.asc())
     )
     return db_mapping_rows_to_dict(rows)
 
