@@ -17,9 +17,7 @@ def main():
     db = SessionLocal()
    
     medical_visits = (db.query(MedicalCamperVisit).filter(
-        extract('month', MedicalCamperVisit.attention_date) == extract('month', func.current_date()),
-        extract('day', MedicalCamperVisit.attention_date) == extract('day', func.current_date()),
-        extract('year', MedicalCamperVisit.attention_date) == extract('year', func.current_date())
+        func.date(MedicalCamperVisit.created_at) == func.current_date()
     ).all())
 
    
@@ -28,30 +26,34 @@ def main():
         print("===============SENDING EMAILS...===============")
         for visit in medical_visits:
             try:
-                first_parent = get_parent_by_camper_id(db, visit.camper_id)
-                second_parent = get_second_tutor_by_camper_id(db, visit.camper_id)
-                camper_data = get_camper_info_mailing(db, visit.camper_id)
-                camp_data = get_camp_info_by_id_mailing(db, visit.camp_id)
- 
- 
-                # Send email to the parents               
-                first_parent_context = {
-                "camper": camper_data,
-                "user": first_parent,
-                "camp": camp_data,
-                "medical_visit": visit,
-                "additional_photo": visit.additional_photo
-                }
-                second_parent_context = {
+                if visit.send_in_email:
+                    
+                    first_parent = get_parent_by_camper_id(db, visit.camper_id)
+                    second_parent = get_second_tutor_by_camper_id(db, visit.camper_id)
+                    camper_data = get_camper_info_mailing(db, visit.camper_id)
+                    camp_data = get_camp_info_by_id_mailing(db, visit.camp_id)
+    
+    
+                    # Send email to the parents               
+                    first_parent_context = {
                     "camper": camper_data,
-                    "user": second_parent,
+                    "user": first_parent,
                     "camp": camp_data,
                     "medical_visit": visit,
                     "additional_photo": visit.additional_photo
-                }
-                send_mail_template_medical_visit(db, first_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, first_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
-                send_mail_template_medical_visit(db, second_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, second_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
-                print(f"Email sent for medical visit ID {visit.id}")
+                    }
+                    second_parent_context = {
+                        "camper": camper_data,
+                        "user": second_parent,
+                        "camp": camp_data,
+                        "medical_visit": visit,
+                        "additional_photo": visit.additional_photo
+                    }
+                    send_mail_template_medical_visit(db, first_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, first_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
+                    send_mail_template_medical_visit(db, second_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, second_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
+                    print(f"Email sent for medical visit ID {visit.id}")
+                else:
+                    print(f"Medical visit ID {visit.id} is not marked to be sent in email.")
             except Exception as e:
                 print(f"Error sending email for medical visit ID {visit.id}: {e}")    
     else:

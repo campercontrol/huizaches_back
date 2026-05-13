@@ -78,8 +78,7 @@ db = os.getenv("DB_NAME")
 
 
 DB_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
-# app = FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
-app = FastAPI()
+app = FastAPI(docs_url=None,redoc_url=None,openapi_url=None)
 auth_user = [Depends(get_current_user)]
 
 
