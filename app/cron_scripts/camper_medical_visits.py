@@ -17,9 +17,9 @@ def main():
     db = SessionLocal()
    
     medical_visits = (db.query(MedicalCamperVisit).filter(
-        extract('month', MedicalCamperVisit.created_at) == extract('month', func.current_date()),
-        extract('day', MedicalCamperVisit.created_at) == extract('day', func.current_date()),
-        extract('year', MedicalCamperVisit.created_at) == extract('year', func.current_date())
+        extract('month', MedicalCamperVisit.attention_date) == extract('month', func.current_date()),
+        extract('day', MedicalCamperVisit.attention_date) == extract('day', func.current_date()),
+        extract('year', MedicalCamperVisit.attention_date) == extract('year', func.current_date())
     ).all())
 
    
