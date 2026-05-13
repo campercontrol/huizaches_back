@@ -68,6 +68,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 from cron_scripts.camper_birthday_greetings import main as send_birthday_greetings
+from cron_scripts.camper_medical_visits import main as send_camper_medical_visits
 
 user = os.getenv("DB_USER")
 password = os.getenv("DB_PASS")
@@ -83,11 +84,11 @@ auth_user = [Depends(get_current_user)]
 
 
 # Configure job store
-# jobstores = {
-#     "default": SQLAlchemyJobStore(url=DB_URL)
-# }
+jobstores = {
+    "default": SQLAlchemyJobStore(url=DB_URL)
+}
 
-# scheduler = BackgroundScheduler(jobstores=jobstores)
+scheduler = BackgroundScheduler(jobstores=jobstores)
 
 origins = ["http://localhost:4200",
            "http://localhost",
@@ -168,53 +169,76 @@ app.mount("/media",StaticFiles(directory="media"),name="media")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
-# @app.on_event("startup")
-# def start_scheduler():
-#     scheduler.start()
-#     # Schedule job if not already present
-#     if not scheduler.get_job("birthday_greeting_job"):
-#         print("Adding Job")
-#         scheduler.add_job(
-#             send_birthday_greetings,
-#             trigger="cron",
-#             hour="15",
-#             minute="0",
-#             id="birthday_greeting_job",
-#             replace_existing=True,
-#             misfire_grace_time=3600  # 1 hour grace period
-#         )
-#     print("Scheduler started at", datetime.now())
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.start()
+    # Schedule job if not already present
+    if not scheduler.get_job("birthday_greeting_job"):
+        print("Adding Job")
+        scheduler.add_job(
+            send_birthday_greetings,
+            trigger="cron",
+            hour="15",
+            minute="0",
+            id="birthday_greeting_job",
+            replace_existing=True,
+            misfire_grace_time=3600  # 1 hour grace period
+        )
+    if not scheduler.get_job("camper_medical_visits_job"):
+        print("Adding Medical Visits Job")
+        scheduler.add_job(
+            send_camper_medical_visits,
+            trigger="cron",
+            hour="1",
+            minute="0",
+            id="camper_medical_visits_job",
+            replace_existing=True,
+            misfire_grace_time=3600  # 1 hour grace period
+        )
+    print("Scheduler started at", datetime.now())
 
 
 
-# @app.get("/remove_job/", tags=["Jobs"])
-# def get_prospects():
-#     result = scheduler.remove_job("birthday_greeting_job")
-#     print("Job removed:", result)
+@app.get("/remove_job/", tags=["Jobs"])
+def get_prospects():
+    result = scheduler.remove_job("birthday_greeting_job")
+    print("Job removed:", result)
     
-# @app.get("/jobs", tags=["Jobs"])
-# def list_jobs():
-#     """
-#     List all scheduled jobs (for debugging).
-#     Shows next run times and job IDs.
-#     """
-#     jobs = []
-#     for job in scheduler.get_jobs():
-#         jobs.append({
-#             "id": job.id,
-#             "next_run_time": str(job.next_run_time),
-#             "trigger": str(job.trigger)
-#         })
-#     return {"jobs": jobs}
+@app.get("/jobs", tags=["Jobs"])
+def list_jobs():
+    """
+    List all scheduled jobs (for debugging).
+    Shows next run times and job IDs.
+    """
+    jobs = []
+    for job in scheduler.get_jobs():
+        jobs.append({
+            "id": job.id,
+            "next_run_time": str(job.next_run_time),
+            "trigger": str(job.trigger)
+        })
+    return {"jobs": jobs}
 
-# @app.post("/run-birthday-job", tags=["Jobs"])
-# def run_birthday_job():
-#     """
-#     Manually trigger the birthday greetings job.
-#     Useful for testing without waiting for the schedule.
-#     """
-#     try:
-#         send_birthday_greetings()
-#         return {"status": "Birthday greetings job executed successfully"}
-#     except Exception as e:
-#         return {"status": "Error executing job", "error": str(e)}
+@app.post("/run-birthday-job", tags=["Jobs"])
+def run_birthday_job():
+    """
+    Manually trigger the birthday greetings job.
+    Useful for testing without waiting for the schedule.
+    """
+    try:
+        send_birthday_greetings()
+        return {"status": "Birthday greetings job executed successfully"}
+    except Exception as e:
+        return {"status": "Error executing job", "error": str(e)}
+
+@app.post("/run-camper-medical-visits-job", tags=["Jobs"])
+def run_camper_medical_visits_job():
+    """
+    Manually trigger the camper medical visits job.
+    Useful for testing without waiting for the schedule.
+    """
+    try:
+        send_camper_medical_visits()
+        return {"status": "Camper medical visits job executed successfully"}
+    except Exception as e:
+        return {"status": "Error executing job", "error": str(e)}

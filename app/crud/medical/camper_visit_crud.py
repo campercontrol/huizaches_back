@@ -217,29 +217,10 @@ def create_new_camper_visit(db: Session, new_camper_visit: CamperVisitCreate):
             
             camper_data = get_camper_info_mailing(db, new_camper_visit.camper_id)
             camp_data = get_camp_info_by_id_mailing(db, new_camper_visit.camp_id)
-            first_parent = get_parent_by_camper_id(db, new_camper_visit.camper_id)
-            second_parent = get_second_tutor_by_camper_id(db, new_camper_visit.camper_id)
             admin_users = get_admin_users_for_mailing(db)    
             medical_visit = get_camper_medical_visit_by_id(db, db_camper_visit.id)
-            
-            
-            first_parent_context = {
-                "camper": camper_data,
-                "user": first_parent,
-                "camp": camp_data,
-                "medical_visit": medical_visit,
-                "additional_photo": additional_photo
-            }
-            second_parent_context = {
-                "camper": camper_data,
-                "user": second_parent,
-                "camp": camp_data,
-                "medical_visit": medical_visit,
-                "additional_photo": additional_photo
-            }
-            send_mail_template_medical_visit(db, first_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, first_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)    
-            send_mail_template_medical_visit(db, second_parent["email"], MEDICAL_VISIT_PARENT_TEMPLATE, second_parent_context, MEDICAL_VISIT_PARENT_TABLE_TEMPLATE_ID)   
-            
+                        
+
             for admin_user in admin_users:
                 admin_user_context = {
                     "camper": camper_data,
