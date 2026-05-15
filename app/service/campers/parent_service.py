@@ -1,6 +1,5 @@
 import os
 from xmlrpc.client import boolean
-from app.utils.payments import payment_table
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
