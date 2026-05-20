@@ -360,7 +360,6 @@ def create_mercadopago_preference(db: Session, camp_id: int, camper_id: int, cus
         customer_last_purchase_date = get_customer_last_purchase_date(db, customer_info['user_id'])
         # Set marketplace fee to 0 due to kincamp tax issue
         marketplace_fee = get_marketplace_fee(customer_defined_amount)
-        marketplace_fee = 0
         marketplace_id = f'MP-MKP-{MP_APP_ID}'
         customer_info_dict = dict(customer_info)   
         
