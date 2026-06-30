@@ -352,9 +352,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
     catalog_camp_enrollment = aliased(Constant)
 
     general_report = {};
-    camper_parent_comments = [];
-    camper_staff_comments = [];
-    camper_school_comments = [];
+
     
 
     camp_groupings_query = (
@@ -473,7 +471,9 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_comments = get_all_camper_comments_by_camper_id(db, camper.id)
         camper_groupings = get_camper_groupings_by_camper_id_and_camp_id(db, camper.id, camp_id)
         camper_extra_answers = get_extra_answer_by_camper_camp(db, camper.id, camp_id)
-        
+        camper_parent_comments = [];
+        camper_staff_comments = [];
+        camper_school_comments = [];
 
         for camper_comment in camper_comments:
             if camper_comment["role_id"] == ROLE_PARENT_ID:
