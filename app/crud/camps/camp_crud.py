@@ -32,6 +32,10 @@ from model.campers import (
 from model.groupings.grouping import Grouping
 from model.groupings.grouping_camp import GroupingCamp
 from model.groupings.grouping_type import GroupingType
+from model.catalogs.vaccine import Vaccine
+from model.catalogs.licensed_medicine import LicensedMedicine
+from model.catalogs.pathological_background import PathologicalBackground
+from model.catalogs.food_restriction import FoodRestriction
 
 from model.catalogs.currency import Currency
 from schema.camps.camp_schema import CampCreate, CampModify
@@ -353,6 +357,20 @@ def get_camp_gnl_report(db: Session, camp_id: int):
 
     general_report = {};
 
+    licensed_medicines_catalog_query = (
+        db.query(LicensedMedicine.id, LicensedMedicine.name)
+        .select_from(LicensedMedicine)
+    )
+    licensed_medicines_catalog = db.execute(licensed_medicines_catalog_query)
+    licensed_medicines_catalog = licensed_medicines_catalog.mappings().all()
+    
+    vaccines_catalog_query = (
+        db.query(Vaccine.id, Vaccine.name)
+        .select_from(Vaccine)
+    )
+    vaccines_catalog = db.execute(vaccines_catalog_query)
+    vaccines_catalog = vaccines_catalog.mappings().all()
+
     
 
     camp_groupings_query = (
@@ -360,7 +378,8 @@ def get_camp_gnl_report(db: Session, camp_id: int):
             Grouping.id,
             Grouping.name.label('grouping'),
             GroupingCamp.maximum_capacity,      
-            GroupingType.name.label('type')
+            GroupingType.name.label('type'),
+            GroupingType.id.label('grouping_type_id')
         ).select_from(Grouping)
         .join(GroupingCamp, GroupingCamp.grouping_id == Grouping.id)
         .join(GroupingType, Grouping.grouping_type_id == GroupingType.id)
@@ -504,6 +523,10 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         camper_dict["Camper extra charges"] = camper_extra_charges
         campers_data.append(camper_dict)
         
+    general_report["licensed_medicines_catalog"] = licensed_medicines_catalog
+    general_report["vaccines_catalog"] = vaccines_catalog
+    general_report["pathological_background_catalog"] = get_pathological_background_by_camper(db, None)
+    general_report["food_restriction_catalog"] = get_camper_food_restriction(db, None)
     general_report["camp_groupings"] = camp_groupings
     general_report["camp_questions"] = camp_questions
     general_report["camp_extra_charges"] = camp_extra_charges
