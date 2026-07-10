@@ -78,7 +78,7 @@ def create_payment_table_unformatted(db, payments):
     for payment in payments:
         payment_amount = abs(payment.payment_amount)
         
-        formated_amount = "{:,.2f}".format(abs(payment.payment_amount))
+        formated_amount = "{:.2f}".format(abs(payment.payment_amount))
 
         
         if payment.payment_method == None:
@@ -99,13 +99,14 @@ def create_payment_table_unformatted(db, payments):
         if payment.txn_type_id in (TRANSACTION_TYPE_CAMP_PAYMENT_ID,TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID,TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID):
             payment_row["pay"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
             balance = balance - payment_amount
-            formated_balance = "{:,.2f}".format(balance)
+            formated_balance = "{:.2f}".format(balance)
             payment_row["balance"] = formated_balance
             
         else:
             payment_row["charge"] = payment.currency_symbol + formated_amount + " " + payment.currency_acronym
             balance = balance + payment_amount
-            formated_balance = "{:,.2f}".format(balance)
+            formated_balance = "{:.2f}".format(balance)
+            print(formated_balance)
             payment_row["balance"] = formated_balance
             
         payment_table.append(payment_row)
