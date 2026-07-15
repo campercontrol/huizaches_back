@@ -139,10 +139,17 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
 
         past_camps = get_past_subscribe_by_camper(db, camper.get('id'))
         
+        for index, camp_info in enumerate(camps_info):
+            camp_info_dict = dict(camp_info)
+            balance = get_camper_balance_per_camp(db, camper.get('id'), camp_info.get('camp_id'))
+            camp_info_dict["camper_payment_balance"] = balance
+            camps_info[index] = camp_info_dict
+        
+        
         for index, past_camp in enumerate(past_camps):
             past_camp_dict = dict(past_camp)
             balance = get_camper_balance_per_camp(db, camper.get('id'), past_camp.get('camp_id'))
-            past_camp_dict["balance"] = balance
+            past_camp_dict["camper_payment_balance"] = balance
             past_camps[index] = past_camp_dict
  
        
@@ -151,7 +158,7 @@ def parent_dashboard(parent_id:int, db: Session = Depends(get_db)):
         for index, due_past_camp in enumerate(due_past_camps):
             due_past_camp_dict = dict(due_past_camp)
             balance = get_camper_balance_per_camp(db, camper.get('id'), due_past_camp.get('camp_id'))
-            due_past_camp_dict["balance"] = balance
+            due_past_camp_dict["camper_payment_balance"] = balance
             due_past_camps[index] = due_past_camp_dict
 
 
