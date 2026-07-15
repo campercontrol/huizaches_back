@@ -1,4 +1,6 @@
 import os
+from model.payments import Payment
+
 
 TRANSACTION_TYPE_CAMP_PAYMENT_ID = int(os.getenv("TRANSACTION_TYPE_CAMP_PAYMENT_ID"))
 TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID = int(os.getenv("TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID"))
@@ -114,3 +116,44 @@ def create_payment_table_unformatted(db, payments):
     return payment_table    
 
 
+def get_camper_balance_per_camp(db, camper_id, camp_id):
+    payments = (
+        db.query(Payment)
+        .filter(Payment.camper_id == camper_id, Payment.camp_id == camp_id)
+        .order_by(Payment.payment_date.asc()).all()
+        )
+    balance = 0
+    for payment in payments:
+        payment_amount = abs(payment.payment_amount)
+        
+        if payment.txn_type_id in (TRANSACTION_TYPE_CAMP_PAYMENT_ID,TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID,TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID):
+            balance = balance - payment_amount
+                   
+        else:
+            balance = balance + payment_amount
+
+    balance = round(balance, 2)
+    
+    return balance
+
+def get_camper_total_balance(db, camper_id):
+    payments = (
+        db.query(Payment)
+        .filter(Payment.camper_id == camper_id)
+        .order_by(Payment.payment_date.asc()).all()
+        )
+    balance = 0
+    for payment in payments:
+        payment_amount = abs(payment.payment_amount)
+        
+        
+        if payment.txn_type_id in (TRANSACTION_TYPE_CAMP_PAYMENT_ID,TRANSACTION_TYPE_CAMP_MANUAL_DISCOUNT_ID,TRANSACTION_TYPE_CAMP_DISCOUNT_UPFRONT_PAYMENT_ID):
+            balance = balance - payment_amount
+            
+                   
+        else:
+            balance = balance + payment_amount
+
+    balance = round(balance, 2)
+        
+    return balance
