@@ -35,6 +35,7 @@ from model.groupings.grouping_type import GroupingType
 from model.catalogs.vaccine import Vaccine
 from model.catalogs.licensed_medicine import LicensedMedicine
 from model.catalogs.pathological_background import PathologicalBackground
+from model.catalogs.pathological_background_family import PathologicalBackgroundFamily
 from model.catalogs.food_restriction import FoodRestriction
 
 from model.catalogs.currency import Currency
@@ -371,7 +372,28 @@ def get_camp_gnl_report(db: Session, camp_id: int):
     vaccines_catalog = db.execute(vaccines_catalog_query)
     vaccines_catalog = vaccines_catalog.mappings().all()
 
+    food_restriction_catalog_query = (
+        db.query(FoodRestriction.id, FoodRestriction.name)
+        .select_from(FoodRestriction)
+    )
+    food_restriction_catalog = db.execute(food_restriction_catalog_query)
+    food_restriction_catalog = food_restriction_catalog.mappings().all()
+
+    pathological_background_catalog_query = (
+        db.query(PathologicalBackground.id, PathologicalBackground.name)
+        .select_from(PathologicalBackground)
+    )
+    pathological_background_catalog = db.execute(pathological_background_catalog_query)
+    pathological_background_catalog = pathological_background_catalog.mappings().all()
     
+    pathological_background_family_catalog_query = (
+        db.query(PathologicalBackgroundFamily.id, PathologicalBackgroundFamily.name)
+        .select_from(PathologicalBackgroundFamily)
+    )
+    pathological_background_family_catalog = db.execute(pathological_background_family_catalog_query)
+    pathological_background_family_catalog = pathological_background_family_catalog.mappings().all()
+
+
 
     camp_groupings_query = (
         db.query(
@@ -525,8 +547,9 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         
     general_report["licensed_medicines_catalog"] = licensed_medicines_catalog
     general_report["vaccines_catalog"] = vaccines_catalog
-    general_report["pathological_background_catalog"] = get_pathological_background_by_camper(db, None)
-    general_report["food_restriction_catalog"] = get_camper_food_restriction(db, None)
+    general_report["pathological_background_catalog"] = pathological_background_catalog
+    general_report["pathological_background_family_catalog"] = pathological_background_family_catalog
+    general_report["food_restriction_catalog"] = food_restriction_catalog
     general_report["camp_groupings"] = camp_groupings
     general_report["camp_questions"] = camp_questions
     general_report["camp_extra_charges"] = camp_extra_charges
