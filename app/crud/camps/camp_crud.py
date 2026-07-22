@@ -433,12 +433,12 @@ def get_camp_gnl_report(db: Session, camp_id: int):
     camp_extra_charges = camp_extra_charges.mappings().all()
 
 
-    campers_query = (db.query(Camper.id.label("ID"),
-                      Camper.name.label('Nombre')
-                      Camper.lastname_father.label('Apellido Paterno')
-                      Camper.lastname_mother.label('Apellido Materno')
+    campers_query = (db.query(Camper.id,
+                      Camper.name.label('Nombre'),
+                      Camper.lastname_father.label('Apellido Paterno'),
+                      Camper.lastname_mother.label('Apellido Materno'),
                       catalog_gender.value.label('Género'),
-                      Camper.birthday.label('Fecha de Nacimiento')
+                      Camper.birthday.label('Fecha de Nacimiento'),
                       func.concat(extract('year', func.age(func.current_date(), Camper.birthday)), " años ",  extract('month', func.age(func.current_date(), Camper.birthday)), " meses ").label("Edad"),
                       Camper.height.label('Altura'),
                       Camper.weight.label('Peso'),
@@ -449,7 +449,7 @@ def get_camp_gnl_report(db: Session, camp_id: int):
                       catalog_swim.value.label('¿Sabe Nadar?'),
                       Camper.affliction.label('Afección'),
                       catalog_blood_type.value.label('Tipo de Sangre'),
-                      Camper.heart_problems.label('Problemas Cardíacos')
+                      Camper.heart_problems.label('Problemas Cardíacos'),
                       Camper.psicology_treatments.label('Tratamientos Psicológicos'),
                       Camper.prevent_activities.label('Actividades Preventivas'),
                       Camper.drug_allergies.label('Alergias a Medicamentos'),
