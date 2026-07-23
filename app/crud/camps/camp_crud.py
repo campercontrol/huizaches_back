@@ -537,12 +537,12 @@ def get_camp_gnl_report(db: Session, camp_id: int):
         for licensed_medicine in camper_licensed_medicine:
             camper_dict[licensed_medicine["name"]] = licensed_medicine["is_active"]
             
-        camper_dict["Comments (Parent)"] = camper_parent_comments
-        camper_dict["Comments (Staff)"] = camper_staff_comments
-        camper_dict["Comments (School)"] = camper_school_comments
-        camper_dict["Groupings"] = camper_groupings
-        camper_dict["Camper extra questions"] = camper_extra_answers
-        camper_dict["Camper extra charges"] = camper_extra_charges
+        camper_dict["Comentarios de Padres"] = camper_parent_comments
+        camper_dict["Comentarios del Personal"] = camper_staff_comments
+        camper_dict["Comentarios de la Escuela"] = camper_school_comments
+        camper_dict["Agrupaciones"] = camper_groupings
+        camper_dict["Preguntas Extra del Camper"] = camper_extra_answers
+        camper_dict["Cargos Extra del Camper"] = camper_extra_charges
         campers_data.append(camper_dict)
         
     general_report["licensed_medicines_catalog"] = licensed_medicines_catalog
