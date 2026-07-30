@@ -1,5 +1,5 @@
 from xmlrpc.client import boolean
-
+import uuid
 import shutil
 from pathlib import Path
 
@@ -29,7 +29,7 @@ async def upload_cv_staff(
     db: Session = Depends(get_db)
 ):
     try:
-        destination = Path(f"media/cv/{file.filename}")
+        destination = Path(f"media/cv/{uuid.uuid4()}-{file.filename}")
         with destination.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             path = Path(buffer.name)
