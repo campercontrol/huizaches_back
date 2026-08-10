@@ -676,7 +676,7 @@ def get_all_staff_report(db: Session):
                       Staff.staff_contact_cellphone.label("Celular de Contacto"),
                       ).select_from(Staff)
              .join(Constant, Constant.id == Staff.gender_id)
-             .join(User, Staff.login_id == User.id).limit(100)
+             .join(User, Staff.login_id == User.id)
             )
     staffs = db.execute(query).mappings().all()
     staffs_info = [dict(staff) for staff in staffs]
