@@ -285,7 +285,7 @@ def prospects_general_report(db: Session = Depends(get_db)):
     report = get_prospects_general_report(db)
     return report
     
-@staff_routes.post("/staff/report/general", tags=["Staff"])
+@staff_routes.get("/staff/report/general", tags=["Staff"])
 def staff_general_report(db: Session = Depends(get_db)):
     report = get_all_staff_report(db)
     return report
